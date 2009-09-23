@@ -1,0 +1,17 @@
+<binding>
+
+<mapping class="org.openmrs.module.atd.xmlBeans.Records" name="Records">
+<value name="Title" field="title" usage="optional"/>
+<structure field="record"/>
+</mapping>
+
+<mapping class="org.openmrs.module.atd.xmlBeans.Record" name="Record">
+<collection field="fields"/>
+</mapping>
+
+<mapping class="org.openmrs.module.atd.xmlBeans.Field" name="Field">
+<value name="id" field="id" style="attribute" />
+<value name="Value" field="value" usage="optional" />
+<value name="taborder" field="taborder" style="attribute" usage="optional" />
+</mapping>
+</binding>

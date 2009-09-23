@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!-- Beans to add to the current Application context definition -->
+  
+<beans>
+	
+	<bean id="atdUrlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <props>
+            	<prop key="/module/@MODULE_ID@/editFields.form">editFields</prop>            
+				<prop key="/module/@MODULE_ID@/editForms.form">editForms</prop>            
+				<prop key="/module/@MODULE_ID@/uploadForms.form">uploadForms</prop>
+				<prop key="/module/@MODULE_ID@/ruleBuilder.form">ruleBuilderForm</prop> 
+  				<prop key="/module/@MODULE_ID@/data.form">dataForm</prop>
+				<prop key="/module/@MODULE_ID@/deleteForms.form">deleteForms</prop>
+			</props>
+		</property>
+	</bean>
+<bean id="ruleBuilderForm" class="org.openmrs.module.atd.web.RuleBuilderFormController" lazy-init="default" autowire="default" dependency-check="default">
+<property name="commandName"><value>rule</value></property>
+<property name="commandClass">
+  <value>org.openmrs.module.atd.RuleBuilderForm</value> 
+  </property>
+<property name="formView"><value>/module/@MODULE_ID@/ruleBuilderForm</value></property>
+<property name="successView"><value>ruleBuilder.form</value></property>
+  </bean>
+  
+<bean id="dataForm" class="org.openmrs.module.atd.web.DataFormController" lazy-init="default" autowire="default" dependency-check="default">
+<property name="commandName"><value>data</value></property>
+<property name="commandClass">
+  <value>org.openmrs.module.atd.DataForm</value> 
+  </property>
+<property name="formView"> <value>/module/@MODULE_ID@/dataForm</value></property>
+<property name="successView"><value>data.form</value></property>
+  </bean>
+	
+	<bean id="uploadForms" class="org.openmrs.module.atd.web.UploadFormsController">
+		<property name="commandName"><value>UploadFormsObject</value></property>
+		<property name="formView"><value>/module/@MODULE_ID@/uploadForms</value></property>
+		<property name="successView"><value>uploadForms.form</value></property>
+	</bean>
+	<bean id="editForms" class="org.openmrs.module.atd.web.EditFormsController">
+		<property name="commandName"><value>EditFormsObject</value></property>
+		<property name="formView"><value>/module/@MODULE_ID@/editForms</value></property>
+		<property name="successView"><value>editForms.form</value></property>
+	</bean>
+	<bean id="editFields" class="org.openmrs.module.atd.web.EditFieldsController">
+		<property name="commandName"><value>EditFieldsObject</value></property>
+		<property name="formView"><value>/module/@MODULE_ID@/editFields</value></property>
+		<property name="successView"><value>editFields.form</value></property>
+	</bean>
+	
+	<bean id="deleteForms" class="@MODULE_PACKAGE@.web.DeleteFormsController">
+		<property name="commandName"><value>deleteFormsObject</value></property>
+		<property name="formView"><value>/module/@MODULE_ID@/deleteForms</value></property>
+		<property name="successView"><value>deleteForms.form</value></property>
+	</bean>
+	
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list>
+				<value>org.openmrs.module.atd.service.ATDService</value> <!-- service interface name -->
+				<bean class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+					<property name="transactionManager"><ref bean="transactionManager"/></property>
+					<property name="target">
+						<bean class="org.openmrs.module.atd.impl.ATDServiceImpl">
+							<property name="ATDDAO">
+								<bean class="org.openmrs.module.atd.db.hibernate.HibernateATDDAO">
+									<property name="sessionFactory"><ref bean="sessionFactory"/></property>	
+								</bean>
+							</property>	
+						</bean>
+					</property>
+					<property name="preInterceptors">
+						<list>
+							<ref bean="authorizationInterceptor"/>
+						</list>
+					</property>
+					<property name="transactionAttributeSource">
+						<bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="logicTeleformExportDAO" class="org.openmrs.module.atd.datasource.XMLLogicTeleformExportDAO"/>
+	<bean id="logicTeleformExportDataSource" class="org.openmrs.module.atd.datasource.TeleformExportXMLDatasource">
+		<property name="logicTeleformExportDAO"><ref bean="logicTeleformExportDAO"></ref></property>
+	</bean>
+
+	<bean parent="logicServiceTarget">
+ 		<property name="logicDataSources">
+  		<map>
+    		<entry key="xml"><ref bean="logicTeleformExportDataSource" /></entry>
+  		</map>
+ 		</property>
+	</bean> 
+</beans>

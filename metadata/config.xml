@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//OpenMRS//DTD OpenMRS Config 1.0//EN" "http://resources.openmrs.org/doctype/config-1.0.dtd">
+
+<module configVersion="1.0">
+	
+	<!-- Basic Module Properties -->
+	<id>atd</id>
+	<name>ATD</name>
+	<version>1.55.26</version>
+	<package>org.openmrs.module.@MODULE_ID@</package>
+	<author>Tammy Dugan</author>
+	<description>
+			Takes a database form and converts it into
+			an Adaptive Turnaround Document (ATD)
+	</description>
+
+	<activator>org.openmrs.module.atd.ATDActivator</activator>
+	
+	<require_version>1.0.0</require_version>
+	<require_database_version>1.0.0</require_database_version>
+	<require_modules>
+   		<require_module version="2.27.8">org.openmrs.module.dss</require_module>
+	</require_modules>
+
+	
+	<!-- /Basic Module Properties -->
+	
+	<!-- Extensions -->
+	<extension>
+		<point>org.openmrs.admin.list</point>
+		<class>org.openmrs.module.atd.extension.html.AdminList</class>
+	</extension>
+	
+	<!-- /Extensions -->
+
+	<globalProperty>
+		<property>atd.formLoadDirectory</property>
+   		<description>Directory for new teleform for definitions to load into the openmrs form tables.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.mergeTestCaseXML</property>
+		<defaultValue>false</defaultValue>
+   		<description>Flag telling whether test case form xml should be merged by teleform</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.mergeToTable</property>
+		<defaultValue>false</defaultValue>
+   		<description>Flag telling whether to write a form definition to a table or to xml.</description>
+	</globalProperty>	
+	<globalProperty>
+		<property>atd.convertTeleformToMergeXMLFile</property>
+   		<description>XSLT file that converts teleform form definition xml into teleform merge xml.
+   		There is a file called convertTeleformXML.xslt in the metadata folder of the module.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.convertMergeXMLToTableFile</property>
+   		<description>XSLT file that converts teleform merge xml into a database table with one column per tag.
+   		There is a file called mergeXMLToTable.xslt in the metadata folder of the module.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.defaultPackagePrefix</property>
+		<defaultValue>org.openmrs.module.atd.ruleLibrary</defaultValue>
+   		<description>The package prefix given to a set of precompiled rules.
+   		This package is the default package used for rule tokens.
+   		</description>
+	</globalProperty>
+		<globalProperty>
+		<property>atd.initialState</property>
+		<defaultValue>CHECKIN</defaultValue>
+   		<description>Initial state in the atd_state_mapping table for the atd process</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.finalState</property>
+		<defaultValue>FINISHED</defaultValue>
+   		<description>Final state in the atd_state_mapping table for the atd process</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.purgeXMLDatasource</property>
+		<defaultValue>1</defaultValue>
+   		<description>Tells when to purge a parsed xml file from the xml datasource.
+   		1 - Purge as soon as possible
+   		2 - Purge at the end of the session
+   		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.retireStatesPeriod</property>
+		<defaultValue>14</defaultValue>
+   		<description>Time period in days before states that are finished or unfinished are retired by a cron job</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.mergeDirectoryBatchSize</property>
+		<defaultValue>5</defaultValue>
+   		<description>Number of files that can be processed from a Teleform merge directory at a time.</description>
+	</globalProperty>
+	<!-- Internationalization -->
+	<!-- All message codes should start with moduleId.* -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<!-- /Internationalization -->
+	
+	<mappingFiles>
+	form_instance.hbm.xml
+	patient_atd.hbm.xml
+	form_attribute.hbm.xml
+	form_attribute_value.hbm.xml
+	session.hbm.xml
+    state_mapping.hbm.xml
+	state_action.hbm.xml
+	state.hbm.xml
+	patient_state.hbm.xml
+	program.hbm.xml
+	</mappingFiles>
+</module>

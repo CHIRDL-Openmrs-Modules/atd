@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqldiff PUBLIC "-//OpenMRS//DTD OpenMRS SQL Diff Config 1.0//EN" "http://resources.openmrs.org/doctype/sqldiff-1.0.dtd">
+
+<sqldiff version="1.0">
+	<help>
+		USE:
+			The diffs are ordered by datamodel version number.
+			The script can be run in a top down fashion and is
+			expected to not failor overwrite old data
+		
+		EXPECT:
+			- "use business-database-name;" was called prior to
+			   calling this script
+	</help>
+	
+   <diff>
+		<version>1.1.0</version>
+		<author>Tammy Dugan</author>
+		<date>Jan 6, 2009</date>
+		<description>
+		Initial database setup.
+		</description>
+	<sql>
+	CREATE TABLE atd_form_attribute (
+  form_attribute_id int(11) NOT NULL auto_increment,
+  name varchar(255) NOT NULL,
+  description varchar(255) default NULL,
+  PRIMARY KEY  (form_attribute_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE atd_form_attribute_value (
+  form_attribute_value_id int(11) NOT NULL auto_increment,
+  form_id int(11) NOT NULL,
+  value varchar(255) NOT NULL,
+  form_attribute_id int(11) NOT NULL,
+  PRIMARY KEY  (form_attribute_value_id),
+  KEY form_value_fk_form (form_id),
+  KEY form_value_fk_attr (form_attribute_id),
+  CONSTRAINT form_value_fk_form FOREIGN KEY (form_id) REFERENCES form (form_id),
+  CONSTRAINT form_value_fk_attr FOREIGN KEY (form_attribute_id) REFERENCES atd_form_attribute (form_attribute_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE atd_form_instance (
+  form_id int(11) NOT NULL,
+  form_instance_id int(11) NOT NULL auto_increment,
+  PRIMARY KEY  (form_id,form_instance_id)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE atd_patient_atd (
+  atd_id int(11) NOT NULL auto_increment,
+  patient_id int(11) NOT NULL,
+  form_id int(11) NOT NULL,
+  field_id int(11) NOT NULL,
+  text mediumtext,
+  rule_id int(11) NOT NULL,
+  form_instance_id int(11) NOT NULL,
+  creation_time datetime NOT NULL,
+  encounter_id int(11) NOT NULL,
+  PRIMARY KEY  (atd_id),
+  KEY pat_atd_fk_patient (patient_id),
+  KEY pat_atd_fk_form (form_id),
+  KEY pat_atd_fk_field (field_id),
+  KEY pat_atd_fk_rule (rule_id),
+  KEY pat_atd_fk_encounter (encounter_id), 
+  CONSTRAINT pat_atd_fk_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
+  CONSTRAINT pat_atd_fk_form FOREIGN KEY (form_id) REFERENCES form (form_id),
+  CONSTRAINT pat_atd_fk_field FOREIGN KEY (field_id) REFERENCES field (field_id),
+  CONSTRAINT pat_atd_fk_rule FOREIGN KEY (rule_id) REFERENCES dss_rule (rule_id),
+  CONSTRAINT pat_atd_fk_encounter FOREIGN KEY (encounter_id) REFERENCES encounter (encounter_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE atd_program (
+  program_id int(11) NOT NULL auto_increment,
+  name varchar(255) NOT NULL,
+  description varchar(255) default NULL,
+  version varchar(255) NOT NULL,
+  date_changed datetime default NULL,
+  changed_by int(11) default NULL,
+  date_created datetime default NULL,
+  creator int(11) default NULL,
+  PRIMARY KEY  (program_id),
+  KEY program_fk_creator (creator),
+  KEY program_fk_changed (changed_by),
+  CONSTRAINT program_fk_creator FOREIGN KEY (creator) REFERENCES users (user_id),
+  CONSTRAINT program_fk_changed FOREIGN KEY (changed_by) REFERENCES users (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE atd_state_action (
+  state_action_id int(11) NOT NULL auto_increment,
+  action_name varchar(255) NOT NULL,
+  action_description varchar(255) default NULL,
+  date_changed datetime default NULL,
+  changed_by int(11) default NULL,
+  date_created datetime default NULL,
+  creator int(11) default NULL,
+  PRIMARY KEY  (state_action_id),
+  KEY state_action_fk_creator (creator),
+  KEY state_action_fk_changed (changed_by),
+  CONSTRAINT state_action_fk_creator FOREIGN KEY (creator) REFERENCES users (user_id),
+  CONSTRAINT state_action_fk_changed FOREIGN KEY (changed_by) REFERENCES users (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE atd_state (
+  state_id int(11) NOT NULL auto_increment,
+  name varchar(255) NOT NULL,
+  description varchar(255) default NULL,
+  state_action_id int(11) default NULL,
+  form_id int(11) default NULL,
+  date_changed datetime default NULL,
+  changed_by int(11) default NULL,
+  date_created datetime default NULL,
+  creator int(11) default NULL,
+  PRIMARY KEY  (state_id),
+  KEY state_fk_action (state_action_id),
+  KEY state_fk_creator (creator),
+  KEY state_fk_changed (changed_by),
+  KEY state_fk_form (form_id),
+  CONSTRAINT state_fk_creator FOREIGN KEY (creator) REFERENCES users (user_id),
+  CONSTRAINT state_fk_changed FOREIGN KEY (changed_by) REFERENCES users (user_id),
+  CONSTRAINT state_fk_action FOREIGN KEY (state_action_id) REFERENCES atd_state_action (state_action_id),
+  CONSTRAINT state_fk_form FOREIGN KEY (form_id) REFERENCES form (form_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE atd_patient_state (
+  patient_state_id int(11) NOT NULL auto_increment,
+  patient_id int(11) NOT NULL,
+  state int(11) NOT NULL,
+  start_time datetime NOT NULL,
+  end_time datetime default NULL,
+  session_id int(11) NOT NULL,
+  form_instance_id int(11) default NULL,
+  form_id int(11) default NULL,
+  PRIMARY KEY  (patient_state_id),
+  KEY pat_state_fk_pat (patient_id),
+  KEY pat_state_fk_form (form_id),
+  KEY pat_state_fk_state (state),
+  CONSTRAINT pat_state_fk_form FOREIGN KEY (form_id) REFERENCES form (form_id),
+  CONSTRAINT pat_state_fk_pat FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
+  CONSTRAINT pat_state_fk_state FOREIGN KEY (state) REFERENCES atd_state (state_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+CREATE TABLE atd_session (
+  session_id int(11) NOT NULL auto_increment,
+  encounter_id int(11) default NULL,
+  PRIMARY KEY  (session_id),
+  KEY session_fk_encounter (encounter_id),
+  CONSTRAINT session_fk_encounter FOREIGN KEY (encounter_id) REFERENCES encounter (encounter_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+CREATE TABLE atd_state_mapping (
+  initial_state int(11) NOT NULL,
+  next_state int(11) NOT NULL,
+  state_mapping_id int(11) NOT NULL auto_increment,
+  date_changed datetime default NULL,
+  changed_by int(11) default NULL,
+  date_created datetime default NULL,
+  creator int(11) default NULL,
+  program_id int(11) NOT NULL,
+  PRIMARY KEY  (state_mapping_id),
+  KEY state_map_fk_initial (initial_state),
+  KEY state_map_fk_next (next_state),
+  KEY state_map_fk_program (program_id),
+  KEY state_map_fk_creator (creator),
+  KEY state_map_fk_changed (changed_by),
+  CONSTRAINT state_map_fk_initial FOREIGN KEY (initial_state) REFERENCES atd_state (state_id),
+  CONSTRAINT state_map_fk_next FOREIGN KEY (next_state) REFERENCES atd_state (state_id),
+  CONSTRAINT state_map_fk_program FOREIGN KEY (program_id) REFERENCES atd_program (program_id),
+  CONSTRAINT state_map_fk_creator FOREIGN KEY (creator) REFERENCES users (user_id),
+  CONSTRAINT state_map_fk_changed FOREIGN KEY (changed_by) REFERENCES users (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO atd_form_attribute
+   (`name`, `description`)
+VALUES
+   ('defaultMergeDirectory', 'Default directory where Teleform looks for xml to merge for this form');
+
+INSERT INTO atd_form_attribute
+   (`name`, `description`)
+VALUES
+   ('defaultExportDirectory', 'Default directory where application looks for Teleform export xml.');
+INSERT INTO atd_form_attribute
+   (`name`, `description`)
+VALUES
+   ('formInstanceIdTag', 'XML tagname that contains the form_instance_id for the form instance.');
+INSERT INTO atd_form_attribute
+   (`name`, `description`)
+VALUES
+   ('formInstanceIdTag2', 'Alternate XML tagname that contains the form_instance_id for the form instance.');
+
+ INSERT INTO atd_state_action
+   (`action_name`, `action_description`)
+VALUES
+   ('PRODUCE FORM INSTANCE', 'Creating teleform xml');
+
+INSERT INTO atd_state_action
+   (`action_name`, `action_description`)
+VALUES
+   ('PRODUCE JIT', 'Creates a Just In Time handout along with form');
+   
+   INSERT INTO scheduler_task_config
+   (`name`, `schedulable_class`, `start_time`, `start_time_pattern`, `repeat_interval`, `start_on_startup`, `started`, `created_by`, `date_created`)
+select 'TeleformMonitor', 'org.openmrs.module.atd.TeleformFileMonitor', 
+NOW(), 'MM/dd/yyyy HH:mm:ss', 1, 1, 0, 1, NOW() from 
+(select count(*) as cnt from scheduler_task_config where name='TeleformMonitor') a
+where a.cnt=0;
+
+   INSERT INTO scheduler_task_config_property
+   (`name`, `value`, `task_config_id`)
+select a.* from 
+(select 'initMethod', 'fillUnfinishedStates', max(task_config_id) from scheduler_task_config where name='TeleformMonitor')a,
+(select count(*) as cnt from scheduler_task_config_property where name='initMethod'
+and task_config_id=(select max(task_config_id) from scheduler_task_config where name='TeleformMonitor') )b
+where b.cnt=0;
+
+   INSERT INTO scheduler_task_config_property
+   (`name`, `value`, `task_config_id`)
+select a.* from 
+(select 'initClass', 'org.openmrs.module.chica.ChicaStateActionHandler',max(task_config_id) from scheduler_task_config where name='TeleformMonitor')a,
+(select count(*) as cnt from scheduler_task_config_property where name='initClass'
+and task_config_id=(select max(task_config_id) from scheduler_task_config where name='TeleformMonitor') )b
+where b.cnt=0;
+	</sql>
+   </diff>
+   <diff>
+		<version>1.1.1</version>
+		<author>Tammy Dugan</author>
+		<date>Feb 11, 2009</date>
+		<description>
+		Added a retired column to atd_patient_state.
+		</description>
+	<sql>
+	alter table atd_patient_state add column retired bit(1) NOT NULL default '\0';
+	</sql>
+	</diff>
+	   <diff>
+		<version>1.1.2</version>
+		<author>Vibha Anand</author>
+		<date>Feb 17, 2009</date>
+		<description>
+		Added a Cron job to update the retired column of atd_patient_state.
+		</description>
+	<sql>
+	INSERT INTO scheduler_task_config
+   (`name`, `schedulable_class`, `start_time`, `start_time_pattern`, `repeat_interval`, `start_on_startup`, `started`, `created_by`, `date_created`)
+select 'Cron job for retiring ATD States', 'org.openmrs.module.atd.ATDStatesCron', 
+NOW(), 'MM/dd/yyyy HH:mm:ss', 86400, 1, 0, 1, NOW() from 
+(select count(*) as cnt from scheduler_task_config where name='Cron job for retiring ATD States') a
+where a.cnt=0;
+	INSERT INTO `atd_form_attribute` (name,description) values ('imageDirectory', 'Directory containing tiff images');
+	</sql>
+	</diff>
+		   <diff>
+		<version>1.1.3</version>
+		<author>Tammy Dugan</author>
+		<date>May 20, 2009</date>
+		<description>
+		Changed TeleformMonitor task to run only once. There is a loop inside the execute
+		method of the task that repeatedly pings the merge/scan directories.
+		</description>
+	<sql>
+	update scheduler_task_config
+set
+start_time=null,
+repeat_interval=86400000
+where name='TeleformMonitor';
+	</sql>
+	</diff>
+			   <diff>
+		<version>1.1.4</version>
+		<author>Tammy Dugan</author>
+		<date>May 29, 2009</date>
+		<description>
+		Added a new form attribute for the name of the directory where pending merge files will go.
+		We need a pending directory because Teleform can't process more than around 5 files in the 
+		merge directory at a time.
+		</description>
+	<sql>
+	INSERT INTO atd_form_attribute
+   (`name`, `description`)
+VALUES
+   ('pendingMergeDirectory', 'Holds files that will be moved to the Teleform merge directory.');
+	</sql>
+	</diff>
+<diff>
+		<version>1.1.5</version>
+		<author>Tammy Dugan</author>
+		<date>June 11, 2009</date>
+		<description>
+		Update time that cron job runs to 1am
+		</description>
+	<sql>	
+	update scheduler_task_config
+set start_time='2009-06-01 01:00:00'
+where name in ('Cron job for retiring ATD States')
+</sql>
+	</diff>
+	<diff>
+		<version>1.1.6</version>
+		<author>Tammy Dugan</author>
+		<date>June 15, 2009</date>
+		<description>
+		added date_retired column to atd_patient_state
+		</description>
+	<sql>	
+	alter table atd_patient_state add date_retired datetime;
+</sql>
+	</diff>
+</sqldiff>
