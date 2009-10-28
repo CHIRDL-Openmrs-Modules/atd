@@ -18,19 +18,20 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Field;
 import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
-import org.openmrs.module.atd.hibernateBeans.PatientState;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
@@ -38,7 +39,6 @@ import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.dss.util.IOUtil;
 import org.openmrs.module.dss.util.Util;
 import org.openmrs.module.dss.util.XMLUtil;
 import org.openmrs.util.OpenmrsUtil;
@@ -92,36 +92,6 @@ public class TeleformTranslator
 		formToDatabase(newForm);
 
 		return newForm;
-	}
-
-	/**
-	 * Pulls an OpenMRS form from the database with the given formId and writes
-	 * the teleform merge xml for the form to the specified file
-	 * 
-	 * @param formId unique identifier in the database for the OpenMRS form
-	 * @param outputStream location to write teleform xml for the form 
-	 * @param patient Patient to generate the teleform xml for
-	 * @param formInstanceId unique id for the specific instance of the given form
-	 * @param dssManager manages prioritized rule evaluation for the form instance
-	 * @param encounterId id for the encounter associated with the form instance
-	 * @param baseParameters 
-	 * @param rulePackagePrefix 
-	 * @throws Exception 
-	 */
-	public void databaseFormToMergeXML(int formId, OutputStream outputStream,
-			Patient patient,int formInstanceId,DssManager dssManager,
-			Integer encounterId,Map<String,Object> baseParameters,
-			String rulePackagePrefix) throws Exception
-	{
-		Form form = databaseToForm(formId);
-		if(form == null) 
-		{
-			throw new Exception("Could not convert database form "+formId+
-					" to teleform merge xml. The form does not exist in the database.");
-		}
-		formToTeleformOutputStream(form, outputStream, patient,
-				formInstanceId,dssManager,encounterId, baseParameters,
-				rulePackagePrefix);
 	}
 
 	/**
@@ -235,11 +205,18 @@ public class TeleformTranslator
 	 * @param dssManager manages prioritized rule evaluation
 	 * @param encounterId id for the encounter that goes with this form instance
 	 */
-	private void formToTeleformOutputStream(Form form, OutputStream output,
-			Patient patient, int formInstanceId,DssManager dssManager,
+	public void formToTeleformOutputStream(FormInstance formInstance, OutputStream output,
+			Patient patient,DssManager dssManager,
 			Integer encounterId,Map<String,Object> baseParameters,
-			String rulePackagePrefix)
+			String rulePackagePrefix,
+			Integer locationTagId,Integer sessionId) throws Exception
 	{
+		Form form = databaseToForm(formInstance.getFormId());
+		if(form == null) 
+		{
+			throw new Exception("Could not convert database form "+formInstance.getFormId()+
+					" to teleform merge xml. The form does not exist in the database.");
+		}
 		if(form == null)
 		{
 			return;
@@ -264,11 +241,13 @@ public class TeleformTranslator
 		//-----------start set rule parameters
 		HashMap<String,Object> parameters = new HashMap<String,Object>();
 
-		Integer formId = form.getFormId();
-		FormInstance formInstance = new FormInstance();
-		formInstance.setFormId(formId);
-		formInstance.setFormInstanceId(formInstanceId);	
+		parameters.put("sessionId", sessionId);
 		parameters.put("formInstance", formInstance);
+		parameters.put("locationTagId", locationTagId);
+		EncounterService encounterService = Context.getEncounterService();
+		Encounter encounter = encounterService.getEncounter(encounterId);
+		Integer locationId = encounter.getLocation().getLocationId();
+		parameters.put("locationId",locationId);
 		
 		if(encounterId != null)
 		{
@@ -577,7 +556,7 @@ public class TeleformTranslator
 	 * @throws IOException
 	 */
 	public void teleformXMLToTable(String inputXML,
-			String xsltFilename, String formName, int formInstanceId)
+			String xsltFilename, String formName, Integer formInstanceId)
 			throws IOException
 	{
 		ByteArrayOutputStream transformOutput = null;

@@ -36,9 +36,10 @@ public class TeleformExportXMLDatasource implements LogicDataSource
 		return this.logicTeleformExportDAO;
 	}
 	
-	public FormInstance parse(InputStream input,Integer formInstanceId, Integer formId) throws Exception
+	public FormInstance parse(InputStream input,FormInstance formInstance, 
+			Integer locationTagId) throws Exception
 	{
-		return this.logicTeleformExportDAO.parse(input, formInstanceId, formId);
+		return this.logicTeleformExportDAO.parse(input, formInstance, locationTagId);
 	}
 	
 	public Records parse(InputStream input) throws Exception
@@ -46,14 +47,14 @@ public class TeleformExportXMLDatasource implements LogicDataSource
 		return this.logicTeleformExportDAO.parse(input);
 	}
 	
-	public HashMap<String,Field> getParsedFile(Integer formInstanceId, Integer formId)
+	public HashMap<String,Field> getParsedFile(FormInstance formInstance)
 	{
-		return this.logicTeleformExportDAO.getParsedFile(formInstanceId,formId);
+		return this.logicTeleformExportDAO.getParsedFile(formInstance);
 	}
 	
-	public void deleteParsedFile(Integer formInstanceId, Integer formId)
+	public void deleteParsedFile(FormInstance formInstance)
 	{
-		this.logicTeleformExportDAO.deleteParsedFile(formInstanceId,formId);
+		this.logicTeleformExportDAO.deleteParsedFile(formInstance);
 	}
 
 	/* (non-Javadoc)

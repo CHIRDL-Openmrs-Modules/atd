@@ -14,6 +14,9 @@
 		<property name="formId" type="java.lang.Integer" column="form_id" />
 		<property name="formAttributeId" type="java.lang.Integer" column="form_attribute_id" />
 		<property name="value" type="java.lang.String" column="value" />
+		<property name="locationTagId" type="java.lang.Integer" column="location_tag_id" />
+		<property name="locationId" type="java.lang.Integer" column="location_id" />
+		
 	</class>
 	
 </hibernate-mapping>

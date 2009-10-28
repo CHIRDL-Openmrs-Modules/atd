@@ -16,6 +16,8 @@
 		<property name="sessionId" type="java.lang.Integer" column="session_id"/>
 		<property name="formInstanceId" type="java.lang.Integer" column="form_instance_id"/>
 		<property name="formId" type="java.lang.Integer" column="form_id"/>
+		<property name="locationTagId" type="java.lang.Integer" column="location_tag_id"/>
+		<property name="locationId" type="java.lang.Integer" column="location_id"/>
 		<property name="retired" type="boolean" 
 			column="retired" length="1" not-null="true"/>
 		<property name="dateRetired" type="java.util.Date" column="date_retired"/>

@@ -6,7 +6,7 @@
 	<!-- Basic Module Properties -->
 	<id>atd</id>
 	<name>ATD</name>
-	<version>1.55.26</version>
+	<version>1.56.3</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Tammy Dugan</author>
 	<description>
@@ -64,16 +64,6 @@
    		This package is the default package used for rule tokens.
    		</description>
 	</globalProperty>
-		<globalProperty>
-		<property>atd.initialState</property>
-		<defaultValue>CHECKIN</defaultValue>
-   		<description>Initial state in the atd_state_mapping table for the atd process</description>
-	</globalProperty>
-	<globalProperty>
-		<property>atd.finalState</property>
-		<defaultValue>FINISHED</defaultValue>
-   		<description>Final state in the atd_state_mapping table for the atd process</description>
-	</globalProperty>
 	<globalProperty>
 		<property>atd.purgeXMLDatasource</property>
 		<defaultValue>1</defaultValue>
@@ -88,6 +78,16 @@
    		<description>Time period in days before states that are finished or unfinished are retired by a cron job</description>
 	</globalProperty>
 	<globalProperty>
+		<property>atd.xmlIdTagFront</property>
+		<defaultValue>ID_Barcode</defaultValue>
+   		<description>XML tagname on the front of the form that contains the formId, formInstanceId, and locationId</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.xmlIdTagBack</property>
+		<defaultValue>ID_BarcodeBack</defaultValue>
+   		<description>XML tagname on the front of the form that contains the formId, formInstanceId, and locationId</description>
+	</globalProperty>
+		<globalProperty>
 		<property>atd.mergeDirectoryBatchSize</property>
 		<defaultValue>5</defaultValue>
    		<description>Number of files that can be processed from a Teleform merge directory at a time.</description>
@@ -111,5 +111,8 @@
 	state.hbm.xml
 	patient_state.hbm.xml
 	program.hbm.xml
+	error_category.hbm.xml
+	error.hbm.xml
+	program_tag_map.hbm.xml
 	</mappingFiles>
 </module>

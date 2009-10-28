@@ -21,6 +21,7 @@ public class StateAction implements java.io.Serializable {
 	private User changedBy=null;
 	private Date dateCreated=null;
 	private User creator = null;
+	private String actionClass = null;
 
 	// Constructors
 
@@ -114,5 +115,13 @@ public class StateAction implements java.io.Serializable {
 	public void setCreator(User creator)
 	{
 		this.creator = creator;
+	}
+
+	public String getActionClass() {
+		return actionClass;
+	}
+
+	public void setActionClass(String actionClass) {
+		this.actionClass = actionClass;
 	}
 }

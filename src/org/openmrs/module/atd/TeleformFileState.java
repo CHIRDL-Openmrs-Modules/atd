@@ -6,6 +6,8 @@ package org.openmrs.module.atd;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openmrs.module.atd.hibernateBeans.FormInstance;
+
 /**
  * @author Vibha Anand
  * 
@@ -19,8 +21,7 @@ public class TeleformFileState
 	private String criteria;
 	private String filename; 	
 	private String fullFilePath;
-	private Integer formId;
-	private Integer formInstanceId;
+	private FormInstance formInstance = null;
 	
 	public TeleformFileState()
 	{
@@ -87,26 +88,6 @@ public class TeleformFileState
 	{
 		this.criteria = thisCriteria;
 	}
-
-	public int getFormInstanceId()
-	{
-		return this.formInstanceId;
-	}
-	
-	public void setFormInstanceId(int id)
-	{
-		this.formInstanceId = id;
-	}
-	
-	public int getFormId()
-	{
-		return this.formId;
-	}
-	
-	public void setFormId(int id)
-	{
-		this.formId = id;
-	}
 	
 	public Object getParameter(String paramName){
 		if(this.parameters != null){
@@ -130,5 +111,15 @@ public class TeleformFileState
 	public void setFullFilePath(String fullFilePath)
 	{
 		this.fullFilePath = fullFilePath;
+	}
+
+	public FormInstance getFormInstance()
+	{
+		return this.formInstance;
+	}
+
+	public void setFormInstance(FormInstance formInstance)
+	{
+		this.formInstance = formInstance;
 	}
 }

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
 
 
 
@@ -17,6 +16,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.ParameterHandler;
 import org.openmrs.module.atd.TeleformFileState;
+import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -43,37 +43,39 @@ public interface ATDService
 
 	public void executeSql(String sql);
 	
-	public boolean consume(InputStream customInput, int formInstanceId,
-			int formId,Patient patient, int encounterId,
+	public boolean consume(InputStream customInput, FormInstance formInstance,
+			Patient patient, int encounterId,
 			Map<String,Object> baseParameters,
 			String rulePackagePrefix,ParameterHandler parameterHandler,
-			List<FormField> fieldsToConsume
+			List<FormField> fieldsToConsume,
+			Integer locationTagId, Integer sessionId
 			)throws Exception;
 	
 	public boolean produce(Patient patient,
-			int formInstanceId, OutputStream customOutput, 
-			int formId, DssManager dssManager,Integer encounterId,
+			FormInstance formInstance, OutputStream customOutput, 
+			DssManager dssManager,Integer encounterId,
 			Map<String,Object> baseParameters,String rulePackagePrefix,
-			boolean generateJITS);
+			boolean generateJITS, Integer locationTagId,Integer sessionId);
 	
 	public boolean produce(Patient patient,
-			int formInstanceId, OutputStream customOutput, 
-			int formId, Integer encounterId,
+			FormInstance formInstance, OutputStream customOutput, 
+			Integer encounterId,
 			Map<String,Object> baseParameters,
 			String rulePackagePrefix,
-			boolean generateJITS);
+			boolean generateJITS, Integer locationTagId,Integer sessionId);
 	
-	public FormInstance addFormInstance(Integer formId);
+	public FormInstance addFormInstance(Integer formId, Integer locationId);
 	
 	public Result evaluateRule(String ruleEvalString,Patient patient,
 			Map<String, Object> baseParameters, String rulePackagePrefix);
 	
-	public void addPatientATD(int patientId, Integer formId, DssElement dssElement,
-			Integer formInstanceId, Integer encounterId) throws APIException;
+	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
+			Integer encounterId) throws APIException;
 	
-	public PatientATD getPatientATD(int formInstanceId, int fieldId, int formId);
+	public PatientATD getPatientATD(FormInstance formInstance, int fieldId);
 	
-	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName);
+	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName,
+			Integer locationTagId,Integer locationId);
 	
 	public ArrayList<TeleformFileState> fileProcessed(ArrayList<TeleformFileState> tfstates);
 
@@ -93,9 +95,7 @@ public interface ATDService
 	
 	public Session getSession(int sessionId);
 	
-	public Session getSessionByEncounter(int encounterId);
-	
-	public PatientState addPatientState(Patient patient,State initialState, int sessionId,Integer formId);
+	public PatientState addPatientState(Patient patient,State initialState, int sessionId,Integer locationTagId,Integer locationId);
 	
 	public PatientState updatePatientState(PatientState patientState);
 
@@ -104,21 +104,26 @@ public interface ATDService
 	
 	public List<PatientState> getPatientStatesWithForm(int sessionId);
 	
-	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction);
+	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction,Integer locationTagId,Integer locationId);
 	
-	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction);
+	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction,Integer locationTagId,Integer locationId);
 	
 	public PatientState getLastUnfinishedPatientState(Integer sessionId);
 
-	public List<PatientState> getLastPatientStateAllPatients(Date optionalDateRestriction, Integer programId);
+	public PatientState getLastPatientState(Integer sessionId);
+	
+	public List<PatientState> getLastPatientStateAllPatients(Date optionalDateRestriction, Integer programId,
+			String startStateName, Integer locationTagId, Integer locationId);
 	
 	public State getStateByName(String stateName);
 	
 	public Program getProgramByNameVersion(String name,String version);
 	
+	public Program getProgram(Integer programId);
+	
 	public PatientState getPatientStateByEncounterFormAction(Integer encounterId, Integer formId, String action);
 
-	public PatientState getPatientStateByFormInstanceAction(Integer formId, Integer formInstanceId,String action);
+	public PatientState getPatientStateByFormInstanceAction(FormInstance formInstance,String action);
 
 	public ArrayList<String> getExportDirectories();
 	
@@ -137,8 +142,18 @@ public interface ATDService
 	
 	public List<Session> getSessionsByEncounter(Integer encounterId);
 	
-	public List<Integer> getFormInstancesByEncounterId(String formName, Integer encounter_id);
+	public List<FormInstance> getFormInstancesByEncounterId(String formName, Integer encounterId);
 	
 	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
 			Integer stateId);
+	
+	public void saveError(ATDError error);
+	
+	public List<ATDError> getATDErrorsByLevel(String errorLevel,Integer sessionId);
+	
+	public Integer getErrorCategoryIdByName(String name);
+	
+	public Program getProgram(Integer locationTagId,Integer locationId);
+	
+	public List<FormAttributeValue> getFormAttributeValuesByValue(String value);
 	}

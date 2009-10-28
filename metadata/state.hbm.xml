@@ -17,7 +17,7 @@
 		<property name="description" type="java.lang.String" column="description"
 			  />
 			
-		<property name="formId" type="java.lang.Integer" column="form_id"/>
+		<property name="formName" type="java.lang.String" column="form_name"/>
 		
 		<many-to-one name="action" class="org.openmrs.module.atd.hibernateBeans.StateAction">
 			<column name="state_action_id" />

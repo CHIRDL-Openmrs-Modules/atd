@@ -12,7 +12,9 @@ public class FormAttributeValue implements java.io.Serializable {
 	private Integer formId = null;
 	private Integer formAttributeId = null;
 	private String value = null;
-
+	private Integer locationTagId = null;
+	private Integer locationId = null;
+	
 	// Constructors
 
 	/** default constructor */
@@ -85,4 +87,23 @@ public class FormAttributeValue implements java.io.Serializable {
 		this.value = value;
 	}
 
+	public Integer getLocationTagId()
+	{
+		return this.locationTagId;
+	}
+
+	public void setLocationTagId(Integer locationTagId)
+	{
+		this.locationTagId = locationTagId;
+	}
+
+	public Integer getLocationId()
+	{
+		return this.locationId;
+	}
+
+	public void setLocationId(Integer locationId)
+	{
+		this.locationId = locationId;
+	}
 }

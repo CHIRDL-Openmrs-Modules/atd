@@ -14,7 +14,7 @@ public class State implements java.io.Serializable {
 
 	// Fields
 	private Integer stateId=null;
-	private Integer formId=null;
+	private String formName=null;
 	private String name = null;
 	private String description = null;
 	private StateAction action = null;
@@ -37,16 +37,6 @@ public class State implements java.io.Serializable {
 	public void setStateId(Integer stateId)
 	{
 		this.stateId = stateId;
-	}
-
-	public Integer getFormId()
-	{
-		return this.formId;
-	}
-
-	public void setFormId(Integer formId)
-	{
-		this.formId = formId;
 	}
 
 	public String getName()
@@ -117,4 +107,15 @@ public class State implements java.io.Serializable {
 	{
 		this.creator = creator;
 	}
+
+	public String getFormName()
+	{
+		return this.formName;
+	}
+
+	public void setFormName(String formName)
+	{
+		this.formName = formName;
+	}
+
 }

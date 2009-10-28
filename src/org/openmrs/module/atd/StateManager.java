@@ -13,6 +13,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
+import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientState;
 import org.openmrs.module.atd.hibernateBeans.Program;
 import org.openmrs.module.atd.hibernateBeans.State;
@@ -28,9 +29,7 @@ import org.openmrs.module.dss.util.Util;
 public class StateManager
 {
 	private static Log log = LogFactory.getLog(StateManager.class);
-	
-	private static StateActionHandler stateActionHandler = null;
-	
+		
 	/**
 	 * Changes from the current state to the next state
 	 * as determined by the atd_state_mapping table
@@ -41,21 +40,25 @@ public class StateManager
 	 * @throws Exception
 	 */
 	public static PatientState changeState(Patient patient, Integer sessionId,
-			State currState, Program program,HashMap<String,Object> parameters) throws Exception
+			State currState, Program program,HashMap<String,Object> parameters,
+			Integer locationTagId,Integer locationId,StateActionHandler stateActionHandler) throws Exception
 	{
 		AdministrationService adminService = Context.getAdministrationService();
 		ATDService atdService = Context
 				.getService(ATDService.class);
 		PatientState patientState = null;
-		Integer formId = null;
-		final String FINAL_STATE = adminService.getGlobalProperty("atd.finalState");
+		//look program back up since we are crossing sessions
+		program = atdService.getProgram(program.getProgramId());
+		final State END_STATE = program.getEndState();
 
 		StateMapping currMapping = null;
 
+		final State START_STATE = program.getStartState();
+		
 		// start at the initial state or move to the next one
 		if (currState == null)
 		{
-			currState = atdService.getStateByName(adminService.getGlobalProperty("atd.initialState"));
+			currState = START_STATE;
 		} else
 		{
 			currMapping = atdService.getStateMapping(currState,program);
@@ -66,21 +69,19 @@ public class StateManager
 
 		currMapping = atdService.getStateMapping(currState,program);
 
-		formId = currState.getFormId();
-
 		patientState = atdService.addPatientState(patient, currState,
-				sessionId, formId);
+				sessionId,locationTagId,locationId);
 
 		if (currMapping != null)
 		{
 			processStateAction(currState.getAction(), patient, patientState,
-					program,parameters);
+					program,parameters,stateActionHandler);
 		} else
 		{
 			endState(patientState);
 		}
 
-		if (FINAL_STATE != null && currState.getName().equalsIgnoreCase(FINAL_STATE))
+		if (END_STATE != null && currState.getName().equalsIgnoreCase(END_STATE.getName()))
 		{
 			LogicService logicService = Context.getLogicService();
 
@@ -107,10 +108,10 @@ public class StateManager
 							.getPatientStatesWithForm(sessionId);
 					for (PatientState state : formStates)
 					{
-						Integer formInstanceId = state.getFormInstanceId();
-						formId = state.getFormId();
-						if(formInstanceId != null){
-							xmlDatasource.deleteParsedFile(formInstanceId, formId);
+						FormInstance formInstance = state.getFormInstance();
+						
+						if(formInstance != null){
+							xmlDatasource.deleteParsedFile(formInstance);
 						}
 					}
 				}
@@ -126,27 +127,29 @@ public class StateManager
 
 	private static void processStateAction(StateAction stateAction,
 			Patient patient, PatientState patientState,Program program,
-			HashMap<String,Object> parameters)
+			HashMap<String,Object> parameters,StateActionHandler stateActionHandler)
 			throws Exception
 	{
 		if (stateAction == null)
 		{
 			endState(patientState);
 			changeState(patient, patientState.getSessionId(), patientState
-					.getState(),program,parameters);
+					.getState(),program,parameters,patientState.getLocationTagId(),
+					patientState.getLocationId(),stateActionHandler);
 			return;
 		}
 		stateActionHandler.processAction(stateAction,patient,patientState,parameters);
 	}
 	
 	public static PatientState runState(Patient patient, Integer sessionId,
-			State currState,HashMap<String,Object> parameters)throws Exception
+			State currState,HashMap<String,Object> parameters,
+			Integer locationTagId,Integer locationId,
+			StateActionHandler stateActionHandler)throws Exception
 	{
 		ATDService atdService = Context.getService(ATDService.class);
-		Integer formId = currState.getFormId();
 		StateAction stateAction = currState.getAction();
 		PatientState patientState = atdService.addPatientState(patient,
-				currState, sessionId, formId);
+				currState, sessionId,locationTagId,locationId);
 
 		stateActionHandler.processAction(stateAction, patient, patientState,parameters);
 		return patientState;
@@ -161,13 +164,4 @@ public class StateManager
 							// the initial state
 	}
 
-	public static StateActionHandler getStateActionHandler()
-	{
-		return stateActionHandler;
-	}
-
-	public static void setStateActionHandler(StateActionHandler stateActionHandler)
-	{
-		StateManager.stateActionHandler = stateActionHandler;
-	}
 }

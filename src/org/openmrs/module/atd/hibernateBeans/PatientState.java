@@ -25,6 +25,8 @@ public class PatientState implements java.io.Serializable
 	private Patient patient = null;
 	private HashMap<String,Object> parameters = null;
 	private Boolean retired = false;
+	private Integer locationTagId = null;
+	private Integer locationId = null;
 	private Date dateRetired = null;
 	
 	/**
@@ -141,6 +143,15 @@ public class PatientState implements java.io.Serializable
 	{
 		return this.patientId;
 	}
+	
+	public FormInstance getFormInstance(){
+		
+		if (this.formId != null && this.formInstanceId != null)
+		{
+			return new FormInstance(this.locationId,this.formId,this.formInstanceId);
+		}
+		return null;
+	}
 	/**
 	 * @param patientId the patientId to set
 	 */
@@ -171,5 +182,27 @@ public class PatientState implements java.io.Serializable
 	public void setDateRetired(Date dateRetired)
 	{
 		this.dateRetired = dateRetired;
+	}
+	public Integer getLocationTagId()
+	{
+		return this.locationTagId;
+	}
+	public void setLocationTagId(Integer locationTagId)
+	{
+		this.locationTagId = locationTagId;
+	}
+	
+	public void setFormInstance(FormInstance formInstance){
+		this.formId = formInstance.getFormId();
+		this.formInstanceId = formInstance.getFormInstanceId();
+		this.locationId = formInstance.getLocationId();
+	}
+	public Integer getLocationId()
+	{
+		return this.locationId;
+	}
+	public void setLocationId(Integer locationId)
+	{
+		this.locationId = locationId;
 	}
 }

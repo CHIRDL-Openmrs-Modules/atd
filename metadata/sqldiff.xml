@@ -311,4 +311,108 @@ where name in ('Cron job for retiring ATD States')
 	alter table atd_patient_state add date_retired datetime;
 </sql>
 	</diff>
+		   <diff>
+		<version>1.1.7</version>
+		<author>Tammy Dugan</author>
+		<date>Oct 7, 2009</date>
+		<description>
+		Scripts needed to support multiple locations
+		</description>
+	<sql>
+		INSERT INTO `location_tag`(location_tag_id,tag,creator,date_created)
+		select 1,'Default Location Tag', '1', NOW() from 
+		(select count(*) as cnt from location_tag where location_tag_id=1) a
+		where a.cnt=0;
+	
+		alter table atd_patient_state add column location_tag_id int NOT NULL default 1;
+		alter table atd_patient_state add CONSTRAINT atd_pat_state_fk_loc_tag 
+		FOREIGN KEY (location_tag_id) REFERENCES location_tag (location_tag_id);
+		alter table atd_patient_state add column location_id int NOT NULL default 1;
+		alter table atd_patient_state add CONSTRAINT atd_pat_state_fk_loc 
+		FOREIGN KEY (location_id) REFERENCES location(location_id);
+			
+		alter table atd_patient_atd add column location_id int NOT NULL default 1;	
+		alter table atd_patient_atd add CONSTRAINT atd_pat_atd_fk_loc 
+		FOREIGN KEY (location_id) REFERENCES location (location_id);
+		
+		alter table atd_form_instance add column location_id int NOT NULL default 1;
+		alter table atd_form_instance add CONSTRAINT atd_form_inst_fk_loc 
+		FOREIGN KEY (location_id) REFERENCES location (location_id);
+		
+		alter table atd_form_attribute_value add column location_tag_id int NOT NULL default 1;
+		alter table atd_form_attribute_value add CONSTRAINT atd_form_value_fk_loc_tag 
+		FOREIGN KEY (location_tag_id) REFERENCES location_tag (location_tag_id);	
+		alter table atd_form_attribute_value add column location_id int NOT NULL default 1;
+		alter table atd_form_attribute_value add CONSTRAINT atd_form_value_fk_loc 
+		FOREIGN KEY (location_id) REFERENCES location (location_id);
+		
+		alter table atd_program add column start_state int  default NULL;
+		alter table atd_program add column end_state int  default NULL;
+		alter table atd_program add CONSTRAINT atd_program_fk_start_state 
+		FOREIGN KEY (start_state) REFERENCES atd_state (state_id);
+		alter table atd_program add CONSTRAINT atd_program_fk_end_state 
+		FOREIGN KEY (end_state) REFERENCES atd_state (state_id);
+		
+CREATE TABLE `atd_error_category` (
+  `error_category_id` int(11) NOT NULL auto_increment,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) default NULL,
+  PRIMARY KEY  (`error_category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `atd_error` (
+  `error_id` int(11) NOT NULL auto_increment,
+  `error_category_id` int(11) default NULL,
+  `level` varchar(50) default NULL,
+  `session_id` int(11) default NULL,
+  `message` varchar(255) default NULL,
+  `details` mediumtext,
+  `date_time` datetime default NULL,
+  PRIMARY KEY  (`error_id`),
+  KEY `error_category_id` (`error_category_id`),
+  CONSTRAINT `atd_error_ibfk_1` FOREIGN KEY (`error_category_id`) REFERENCES `atd_error_category` (`error_category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `atd_program_tag_map` (
+  `program_tag_map_id` int(11) NOT NULL auto_increment,
+  `program_id` int(11) NOT NULL,
+  `location_id` int(11) NOT NULL,
+  `location_tag_id` int(11) NOT NULL,
+  PRIMARY KEY  (`program_tag_map_id`),
+  KEY `atd_prog_tag_map_fk_prog` (`program_id`),
+  KEY `atd_prog_tag_map_fk_loc` (`location_id`),
+  KEY `atd_prog_tag_map_fk_tag` (`location_tag_id`),
+  CONSTRAINT `atd_prog_tag_map_fk_prog` FOREIGN KEY (`program_id`) REFERENCES `atd_program` (`program_id`),
+  CONSTRAINT `atd_prog_tag_map_fk_loc` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`),
+  CONSTRAINT `atd_prog_tag_map_fk_tag` FOREIGN KEY (`location_tag_id`) REFERENCES `location_tag` (`location_tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+update atd_patient_atd a, encounter b
+set a.location_id=b.location_id
+where a.location_id=1 and a.encounter_id=b.encounter_id;
+
+ ALTER TABLE `atd_form_instance` 
+DROP PRIMARY KEY, ADD PRIMARY KEY(`form_id`,`form_instance_id`,`location_id`);
+
+alter table atd_state_action add column action_class varchar(100); 
+
+update atd_state_action
+set action_class='org.openmrs.module.atd.action.ProduceJIT'
+where action_name='PRODUCE JIT';
+
+ rename table atd_patient_atd to atd_patient_atd_element;
+ 
+ alter table atd_error add CONSTRAINT atd_err_fk_session
+		FOREIGN KEY (session_id)  REFERENCES atd_session (session_id);
+		
+alter table atd_patient_state add CONSTRAINT atd_pat_state_fk_session
+		FOREIGN KEY (session_id)  REFERENCES atd_session (session_id);
+		
+alter table atd_state add column form_name varchar(40) default null;
+
+update atd_state a, form b
+set form_name =b.name
+where a.form_id=b.form_id; 
+	</sql>
+	</diff>	
 </sqldiff>

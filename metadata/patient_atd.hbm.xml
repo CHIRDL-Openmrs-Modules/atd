@@ -5,7 +5,7 @@
 
 <hibernate-mapping package="org.openmrs.module.atd">
 
-	<class name="org.openmrs.module.atd.hibernateBeans.PatientATD" table="atd_patient_atd">
+	<class name="org.openmrs.module.atd.hibernateBeans.PatientATD" table="atd_patient_atd_element">
 		
 		<id name="atdId" type="java.lang.Integer" column="atd_id">
 			<generator class="native" />
@@ -18,7 +18,7 @@
 		<property name="text" type="java.lang.String" column="text" />
 		<property name="creationTime" type="java.util.Date" column="creation_time" />
 		<property name="encounterId" type="java.lang.Integer" column="encounter_id" />
-		
+	    <property name="locationId" type="java.lang.Integer" column="location_id" />
 		<many-to-one name="rule" class="org.openmrs.module.dss.hibernateBeans.Rule" column="rule_id" />
 	</class>
 	

@@ -21,6 +21,8 @@ public class Program implements java.io.Serializable {
 	private User changedBy=null;
 	private Date dateCreated=null;
 	private User creator = null;
+	private State startState = null;
+	private State endState = null;
 	
 	// Constructors
 
@@ -107,5 +109,24 @@ public class Program implements java.io.Serializable {
 	{
 		this.creator = creator;
 	}
-	
+
+	public State getStartState()
+	{
+		return this.startState;
+	}
+
+	public void setStartState(State startState)
+	{
+		this.startState = startState;
+	}
+
+	public State getEndState()
+	{
+		return this.endState;
+	}
+
+	public void setEndState(State endState)
+	{
+		this.endState = endState;
+	}
 }

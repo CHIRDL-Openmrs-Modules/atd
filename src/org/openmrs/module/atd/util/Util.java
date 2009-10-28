@@ -13,10 +13,12 @@ import org.openmrs.module.atd.service.ATDService;
  */
 public class Util
 {
-	public static String getFormAttributeValue(Integer formId,String attribute)
+	public static String getFormAttributeValue(Integer formId,
+			String attribute, Integer locationTagId,Integer locationId)
 	{
 		ATDService atdService = Context.getService(ATDService.class);
-		FormAttributeValue formAttributeValue =  atdService.getFormAttributeValue(formId, attribute);
+		FormAttributeValue formAttributeValue =  atdService.getFormAttributeValue(formId, attribute,
+				locationTagId,locationId);
 		
 		if(formAttributeValue != null)
 		{

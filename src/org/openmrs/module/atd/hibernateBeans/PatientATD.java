@@ -5,7 +5,7 @@ import java.util.Date;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 
 /**
- * Holds information to store in the atd_patient_atd table
+ * Holds information to store in the atd_patient_atd_element table
  * 
  * @author Tammy Dugan
  */
@@ -21,6 +21,7 @@ public class PatientATD implements java.io.Serializable {
 	private Date creationTime = null;
 	private Rule rule = null;
 	private Integer encounterId = null;
+	private Integer locationId = null;
 	
 	// Constructors
 
@@ -164,5 +165,26 @@ public class PatientATD implements java.io.Serializable {
 	public void setEncounterId(Integer encounterId)
 	{
 		this.encounterId = encounterId;
+	}
+	
+	public void setFormInstance(FormInstance formInstance){
+		this.formId = formInstance.getFormId();
+		this.formInstanceId = formInstance.getFormInstanceId();
+		this.locationId = formInstance.getLocationId();
+	}
+	
+	public FormInstance getFormInstance(){
+		return new FormInstance(this.locationId,
+				this.formId,this.formInstanceId);
+	}
+
+	public Integer getLocationId()
+	{
+		return this.locationId;
+	}
+
+	public void setLocationId(Integer locationId)
+	{
+		this.locationId = locationId;
 	}
 }

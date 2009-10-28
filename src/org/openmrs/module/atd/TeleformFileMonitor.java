@@ -14,7 +14,6 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,9 +27,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
+import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.module.Module;
@@ -104,7 +106,16 @@ public class TeleformFileMonitor extends AbstractTask
 				processPendingStatesWithFilename(listTFstatesProcessed);
 				processTifFiles();
 				kickProcess(listTFstatesProcessed);
-				moveMergeFiles();
+				LocationService locationService = Context.getLocationService();
+				List<Location> locations = locationService.getAllLocations();
+				for(Location location:locations){
+					Set<LocationTag> tags = location.getTags();
+					if(tags != null){
+						for(LocationTag tag:tags){
+							moveMergeFiles(tag.getLocationTagId(),location.getLocationId());
+						}
+					}
+				}
 			} 
 			catch (Exception e)
 			{
@@ -189,7 +200,7 @@ public class TeleformFileMonitor extends AbstractTask
 		super.shutdown();
 	}
 	
-	private void moveMergeFiles(){
+	private void moveMergeFiles(Integer locationTagId,Integer locationId){
 		
 		ATDService atdService = Context.getService(ATDService.class);
 		FormService formService = Context.getFormService();
@@ -215,11 +226,10 @@ public class TeleformFileMonitor extends AbstractTask
 			
 		
 		for(Form form:forms){
-			Integer formId = form.getFormId();
 
 			//get the value of the pending merge directory for the form
 			FormAttributeValue pendingMergeValue = 
-				atdService.getFormAttributeValue(formId, "pendingMergeDirectory");
+				atdService.getFormAttributeValue(form.getFormId(), "pendingMergeDirectory",locationTagId,locationId);
 			
 			String pendingMergeDirectory = null;
 			
@@ -231,7 +241,7 @@ public class TeleformFileMonitor extends AbstractTask
 			
 			//get the value of the default merge directory for the form
 			FormAttributeValue defaultMergeValue = 
-				atdService.getFormAttributeValue(formId, "defaultMergeDirectory");
+				atdService.getFormAttributeValue(form.getFormId(), "defaultMergeDirectory",locationTagId,locationId);
 			
 			String defaultMergeDirectory = null;
 			
@@ -369,18 +379,14 @@ public class TeleformFileMonitor extends AbstractTask
 		}
 	}
 	
-	public synchronized static TeleformFileState addToPendingStatesWithFilename(int formId, int formInstanceId,
+	public synchronized static TeleformFileState addToPendingStatesWithFilename(FormInstance formInstance,
 			String filename)
 	{
 		TeleformFileState tfFileState = new TeleformFileState();
 		try{
 				
-			FormInstance formInstance = new FormInstance();
-			formInstance.setFormId(formId);
-			formInstance.setFormInstanceId(formInstanceId);
-			
-			
 			tfFileState.setFullFilePath(filename);
+			tfFileState.setFormInstance(formInstance);
 			pendingStatesWithFilename.put(formInstance, tfFileState);
 			
 			
@@ -394,14 +400,10 @@ public class TeleformFileMonitor extends AbstractTask
 		return tfFileState;
 	}
 	
-	public synchronized static TeleformFileState addToPendingStatesWithoutFilename(int formId, int formInstanceId)
+	public synchronized static TeleformFileState addToPendingStatesWithoutFilename(FormInstance formInstance)
 	{
 		TeleformFileState tfFileState = new TeleformFileState();
-		try{		
-			FormInstance formInstance = new FormInstance();
-			formInstance.setFormId(formId);
-			formInstance.setFormInstanceId(formInstanceId);
-					
+		try{				
 			pendingStatesWithoutFilename.put(formInstance, tfFileState);
 		}
 		catch (Exception e)
@@ -413,10 +415,14 @@ public class TeleformFileMonitor extends AbstractTask
 		return tfFileState;
 	}
 
-	public synchronized static void addToTifFileProcessing(int formId, int formInstanceId, String directoryName, String fileExt )
+	public synchronized static void addToTifFileProcessing(FormInstance formInstance, String directoryName, String fileExt )
 	{
+		if(formInstance == null){
+			log.error("FormInstance cannot be null when adding to TIF processing");
+			return;
+		}
 		try{
-			String filename = directoryName + "\\tif\\" + Integer.toString(formInstanceId) + fileExt;
+			String filename = directoryName + "\\tif\\" + Integer.toString(formInstance.getFormInstanceId()) + fileExt;
 			
 			if(!tifFileQueue.containsKey(directoryName))
 			{
@@ -439,7 +445,6 @@ public class TeleformFileMonitor extends AbstractTask
 		FormService formService = Context.getFormService();
 		ATDService atdService = Context.getService(ATDService.class);
 		ArrayList<String> exportDirectories = atdService.getExportDirectories();
-		Integer formId = null;
 		String[] fileExtensions = new String[]
 		{ ".xml" };
 
@@ -490,66 +495,85 @@ public class TeleformFileMonitor extends AbstractTask
 						}
 						continue;
 					}
-
-
-					// TODO remove this once formId parsed from file
-					// until then, get active formId with
-					// exportDirectory
-					List<State> statesWithForms = atdService
-							.getStatesByActionName("PRODUCE FORM INSTANCE");
-					for (State currState : statesWithForms)
+	
+					formInstance = xmlDatasource.parse(input,formInstance,null);
+					input.close();
+					//This is an old form with a single key (formInstanceId) barcode
+					//we need to figure out the formId, locationId, and locationTagId
+					if (formInstance == null)
 					{
-						FormAttributeValue formAttrValue = atdService
-								.getFormAttributeValue(currState.getFormId(),
-										"defaultExportDirectory");
-						if (formAttrValue.getValue().equalsIgnoreCase(
-								currExportDirectory))
+						Integer locationTagId = null;
+						List<FormAttributeValue> formAttrValues = atdService
+							.getFormAttributeValuesByValue(
+								org.openmrs.module.dss.util.IOUtil.getDirectoryName(filename));
+
+						if (formAttrValues != null&&formAttrValues.size()>0)
 						{
-							formId = currState.getFormId();
-							break;
+							FormAttributeValue value = formAttrValues.get(0);
+							formInstance = new FormInstance();
+							formInstance.setLocationId(value.getLocationId());
+							formInstance.setFormId(value.getFormId());
+							locationTagId = value.getLocationTagId();
+
+							try
+							{
+								input = new FileInputStream(filename);
+							} catch (Exception e)
+							{
+								if (!e.getMessage().contains(
+												"The process cannot access the file because it is being used by another process"))
+								{
+									log.error(Util.getStackTrace(e));
+								}
+								continue;
+							}
+							formInstance = xmlDatasource.parse(input,
+									formInstance, locationTagId);
+							input.close();
+
+							// we need to figure out the correct formId now
+							// that we have
+							// the formInstanceId
+							for (FormAttributeValue formAttrValue : formAttrValues)
+							{
+								FormInstance lookupFormInstance = new FormInstance(
+										formAttrValue.getLocationId(),
+										formAttrValue.getFormId(), formInstance
+												.getFormInstanceId());
+								PatientState patientState = atdService
+										.getPatientStateByFormInstanceAction(
+												lookupFormInstance,
+												"PRODUCE FORM INSTANCE");
+								if (patientState != null)
+								{
+									formInstance = new FormInstance(
+											patientState.getLocationId(),
+											patientState.getFormId(),
+											patientState.getFormInstanceId());
+									break;
+								}
+							}
 						}
 					}
-					formInstance = xmlDatasource.parse(input, null, formId);
-					input.close();
+					
+
 					if (formInstance == null)
 					{
 						log.error("Error processing filename: " + filename+". No form instance id.");
 						//unparseableFiles.add(filename);
 					}else{
-						
-						//TODO this is a hack to get around the fact that we aren't sure of the
-						//form_id for the scanned form					
+									
 						TeleformFileState tfFileState = pendingStatesWithoutFilename.get(formInstance);
-						
-						if (tfFileState == null)
-						{
-							String formName = formService.getForm(formId)
-									.getName();
-							
-							List<Form> forms = formService.getForms(formName,
-									null, null, true, null, null, null);
 
-							for (Form form : forms)
-							{
-								FormInstance lookupKey = new FormInstance();
-								lookupKey.setFormId(form.getFormId());
-								lookupKey.setFormInstanceId(formInstance.getFormInstanceId());
-								tfFileState = pendingStatesWithoutFilename.get(lookupKey);
-								if(tfFileState != null){
-									break;
-								}
-							}
-						}
-						
-						Integer formInstanceId = formInstance.getFormInstanceId();
 						if(tfFileState != null){
 							// rename the consumed file by changing extension to .20
 							// rename here so TeleformFileMonitor doesn't process it
 							// more than once
-							String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstanceId+".20";
+							String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstance.toString()+".20";
 							
 							IOUtil.renameFile(filename, newFilename);
 							tfFileState.setFullFilePath(newFilename);
+							tfFileState.setFormInstance(formInstance);
 							pendingStatesWithoutFilename.remove(formInstance);
 							listTFstatesProcessed.add(tfFileState);
 						}else{
@@ -561,27 +585,10 @@ public class TeleformFileMonitor extends AbstractTask
 							//get the session that goes with this formInstanceId
 							PatientState patientState = atdService
 								.getPatientStateByFormInstanceAction(
-									formId, formInstanceId, action);
+									formInstance, action);
 					
-							String formName = formService.getForm(formId).getName();
-							if(patientState == null){
-								List<Form> forms = formService.getForms(formName, null, null,
-				                           true, null,null, null);
-								
-								for(Form form: forms){
-									formId = form.getFormId();
-									patientState = atdService
-										.getPatientStateByFormInstanceAction(
-												formId, formInstanceId, action);
-									if(patientState != null){
-										break;
-									}
-								}
-								
-								if(patientState == null){
-								continue;
-								}
-							}
+							String formName = formService.getForm(formInstance.getFormId()).getName();
+							
 							Integer sessionId = patientState.getSessionId();
 							//see if consume exists for the session
 							//if so, then it is a rescan
@@ -599,16 +606,17 @@ public class TeleformFileMonitor extends AbstractTask
 									action = "PRODUCE FORM INSTANCE";
 									patientState = atdService
 											.getPatientStateByFormInstanceAction(
-													formId, formInstanceId, action);
+													formInstance, action);
 									try
 									{
 										patientState = atdService.addPatientState(
 												patientState.getPatient(), currState,
-												patientState.getSessionId(), formId);
-										patientState.setFormInstanceId(formInstanceId);
+												patientState.getSessionId(),
+												patientState.getLocationTagId(),
+												patientState.getLocationId());
 										patientState = atdService.updatePatientState(patientState);
 										tfFileState = new TeleformFileState();
-										String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstanceId+"_rescan.20";
+										String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstance.toString()+"_rescan.20";
 										
 										File newFile = new File(newFilename);
 										if(newFile.exists()){
@@ -616,13 +624,14 @@ public class TeleformFileMonitor extends AbstractTask
 										}
 										IOUtil.renameFile(filename, newFilename);
 										tfFileState.setFullFilePath(newFilename);
+										tfFileState.setFormInstance(formInstance);
 										tfFileState.addParameter("patientState",
 												patientState);
 										listTFstatesProcessed.add(tfFileState);
 									} catch (Exception e)
 									{
 										log.error("RESCAN for formInstanceId: "
-												+ formInstanceId + " failed.");
+												+ formInstance.getFormInstanceId() + " failed.");
 										log.error(Util.getStackTrace(e));
 									}
 								}

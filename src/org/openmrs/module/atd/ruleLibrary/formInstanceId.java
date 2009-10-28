@@ -85,8 +85,13 @@ public class formInstanceId implements Rule
 			FormInstance formInstance = (FormInstance) parameters.get("formInstance");
 			if (formInstance != null)
 			{
-
-				return new Result(String.valueOf(formInstance.getFormInstanceId()));
+				Integer formInstanceId = formInstance.getFormInstanceId();
+				Integer formId = formInstance.getFormId();
+				Integer locationId = formInstance.getLocationId();
+				String idString=String.valueOf(locationId)+"-";
+				idString+=String.valueOf(formId)+"-";
+				idString+=String.valueOf(formInstanceId);
+				return new Result(idString);
 			}
 		}
 		return Result.emptyResult();

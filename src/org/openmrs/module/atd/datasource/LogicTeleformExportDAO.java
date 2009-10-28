@@ -30,8 +30,8 @@ public interface LogicTeleformExportDAO {
 
     public List<XMLResult> getXMLResults(Cohort who, LogicCriteria logicCriteria);
 
-	public FormInstance parse(InputStream input,Integer formInstanceId, Integer formId);
+	public FormInstance parse(InputStream input,FormInstance formInstance,Integer locationTagId);
     public Records parse(InputStream input);  
-    public HashMap<String,Field> getParsedFile(Integer formInstanceId, Integer formId);
-	public void deleteParsedFile(Integer formInstanceId, Integer formId);
+    public HashMap<String,Field> getParsedFile(FormInstance formInstance);
+	public void deleteParsedFile(FormInstance formInstance);
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+
+<hibernate-mapping package="org.openmrs.module.atd" auto-import="false">
+	<class name="org.openmrs.module.atd.hibernateBeans.ProgramTagMap" table="atd_program_tag_map">
+
+		<id name="programTagMapId" type="java.lang.Integer" column="program_tag_map_id">
+			<generator class="native" />
+		</id>
+
+		<property name="programId" type="java.lang.Integer" column="program_id"  />
+		<property name="locationId" type="java.lang.Integer" column="location_id"  />
+		<property name="locationTagId" type="java.lang.Integer" column="location_tag_id"  />
+	
+		<many-to-one name="program" class="org.openmrs.module.atd.hibernateBeans.Program" column="program_id" insert="false" update="false"/>
+		
+	</class>	
+</hibernate-mapping>

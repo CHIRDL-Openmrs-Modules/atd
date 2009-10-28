@@ -11,11 +11,18 @@ public class FormInstance implements java.io.Serializable {
 	// Fields
 	private Integer formInstanceId = null;
 	private Integer formId = null;
+	private Integer locationId = null;
 
 	// Constructors
 
 	/** default constructor */
 	public FormInstance() {
+	}
+	
+	public FormInstance(Integer locationId,Integer formId,Integer formInstanceId){
+		this.locationId = locationId;
+		this.formId = formId;
+		this.formInstanceId = formInstanceId;
 	}
 	
 	/**
@@ -67,7 +74,9 @@ public class FormInstance implements java.io.Serializable {
 		{
 			if (this.formId.equals(formInstance.getFormId()))
 			{
-				return true;
+				if(this.locationId.equals(formInstance.getLocationId())){
+					return true;
+				}
 			}
 		}
 		return false;
@@ -78,6 +87,8 @@ public class FormInstance implements java.io.Serializable {
 	{
 		Integer formInstanceHashValue = this.formInstanceId;
 		Integer formHashValue = this.formId;
+		Integer locationHashValue = this.locationId;
+		
 		int hash = 7;
 		
 		if(this.formInstanceId == null)
@@ -90,8 +101,32 @@ public class FormInstance implements java.io.Serializable {
 			formHashValue = 0;
 		}
 		
+		if(this.locationId == null)
+		{
+			locationHashValue = 0;
+		}
+		
 		hash = 31 * hash + formInstanceHashValue;
 		hash = 31 * hash + formHashValue;
+		hash = 31 * hash + locationHashValue;
 		return hash;
 	}
+
+	public Integer getLocationId()
+	{
+		return this.locationId;
+	}
+
+	public void setLocationId(Integer locationId)
+	{
+		this.locationId = locationId;
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.locationId+"_"+this.formId+"_"+this.formInstanceId;
+	}
+	
+	
 }

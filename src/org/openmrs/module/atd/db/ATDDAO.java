@@ -3,9 +3,8 @@ package org.openmrs.module.atd.db;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.openmrs.Patient;
+import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -41,23 +40,22 @@ public interface ATDDAO {
 	 * @param formInstance new form instance to add
 	 * @return FormInstance newly added form instance
 	 */
-	public FormInstance addFormInstance(Integer formId);
+	public FormInstance addFormInstance(Integer formId, Integer locationId);
 	
 	/**
-	 * Adds a new row to atd_patient_atd
+	 * Adds a new row to atd_patient_atd_element
 	 * @param patientATD new patientATD to add
 	 */
 	public PatientATD addPatientATD(PatientATD patientATD);
 	
 	/**
-	 * Looks up a row in the atd_patient_atd table by form_id, form_instance_id,
+	 * Looks up a row in the atd_patient_atd_element table by form_id, form_instance_id,
 	 * and field_id
-	 * @param formInstanceId unique id for the specific instance of an openmrs form
 	 * @param fieldId unique id for the field on the openmrs form
 	 * @param formId unique id for an openmrs form
-	 * @return PatientATD row from the atd_patient_atd table
+	 * @return PatientATD row from the atd_patient_atd_element table
 	 */
-	public PatientATD getPatientATD(int formInstanceId, int fieldId, int formId);
+	public PatientATD getPatientATD(FormInstance formInstance, int fieldId);
 
 	/**
 	 * Returns the value of a form attribute from the atd_form_attribute_value table
@@ -65,7 +63,7 @@ public interface ATDDAO {
 	 * @param formAttributeName name of the form attribute
 	 * @return FormAttributeValue value of the attribute for the given form
 	 */
-	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName);
+	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName,Integer locationTagId, Integer locationId);
 	
 	/**
 	 * Get state by name
@@ -75,15 +73,13 @@ public interface ATDDAO {
 	 */
 	public StateMapping getStateMapping(State initialState,Program program);
 	
-	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction);
+	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction,Integer locationTagId,Integer locationId);
 	
 	public Session addSession(Session session);
 	
 	public Session updateSession(Session session);
 	
 	public Session getSession(int sessionId);
-	
-	public Session getSessionByEncounter(int encounterId);
 	
 	public PatientState addUpdatePatientState(PatientState patientState);
 	
@@ -94,20 +90,24 @@ public interface ATDDAO {
 	
 	public StateAction getStateActionByName(String action);
 	
-	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction);
+	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction, Integer locationTagId, Integer locationId);
 
 	public PatientState getLastUnfinishedPatientState(Integer sessionId);
 
+	public PatientState getLastPatientState(Integer sessionId);
+	
 	public List<PatientState> getLastPatientStateAllPatients(
-			Date optionalDateRestriction,Integer programId);
+			Date optionalDateRestriction,Integer programId,String startStateName, Integer locationTagId, Integer locationId);
 	
 	public State getStateByName(String stateName);
 	
 	public Program getProgramByNameVersion(String name,String version);
 	
+	public Program getProgram(Integer programId);
+
 	public PatientState getPatientStateByEncounterFormAction(Integer encounterId, Integer formId, String action);
 	
-	public PatientState getPatientStateByFormInstanceAction(Integer formId, Integer formInstanceId,String action);
+	public PatientState getPatientStateByFormInstanceAction(FormInstance formInstance,String action);
 
 	public ArrayList<String> getExportDirectories();
 	
@@ -126,8 +126,18 @@ public interface ATDDAO {
 	
 	public List<Session> getSessionsByEncounter(int encounterId);
 	
-	public List<Integer> getFormInstancesByEncounterId(String formName, Integer encounter_id);
+	public List<FormInstance> getFormInstancesByEncounterId(String formName, Integer encounterId);
 		
 	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
 			Integer stateId);
+	
+	public void saveError(ATDError error);
+	
+	public List<ATDError> getATDErrorsByLevel(String errorLevel,Integer sessionId);
+
+	public Integer getErrorCategoryIdByName(String name);
+	
+	public Program getProgram(Integer locationTagId,Integer locationId);
+	
+	public List<FormAttributeValue> getFormAttributeValuesByValue(String value);
 }

@@ -12,28 +12,31 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Condition;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
 import org.openmrs.module.atd.ParameterHandler;
+import org.openmrs.module.atd.action.ProcessStateAction;
+import org.openmrs.module.atd.action.ProduceJIT;
 import org.openmrs.module.atd.StateManager;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.db.ATDDAO;
+import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -41,6 +44,7 @@ import org.openmrs.module.atd.hibernateBeans.PatientState;
 import org.openmrs.module.atd.hibernateBeans.Program;
 import org.openmrs.module.atd.hibernateBeans.Session;
 import org.openmrs.module.atd.hibernateBeans.State;
+import org.openmrs.module.atd.hibernateBeans.StateAction;
 import org.openmrs.module.atd.hibernateBeans.StateMapping;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Field;
@@ -94,23 +98,32 @@ public class ATDServiceImpl implements ATDService
 		this.dao = dao;
 	}
 	
-	public boolean consume(InputStream customInput, int formInstanceId,
-			int formId,Patient patient, int encounterId,
+	public boolean consume(InputStream customInput, 
+			FormInstance formInstance,
+			Patient patient, int encounterId,
 			Map<String, Object> baseParameters,
-			String rulePackagePrefix,ParameterHandler parameterHandler,
-			List<FormField> fieldsToConsume
+			String rulePackagePrefix,
+			ParameterHandler parameterHandler,
+			List<FormField> fieldsToConsume,
+			Integer locationTagId, Integer sessionId
 			)
 	{
 		ATDService atdService = 
 			Context.getService(ATDService.class);
 		TeleformTranslator translator = new TeleformTranslator();
 		FormService formService = Context.getFormService();
-		Form databaseForm = formService.getForm(formId);
-		FormInstance formInstance = null;
+		Form databaseForm = null;
+		if(formInstance != null){
+			 databaseForm = formService.getForm(formInstance.getFormId());
+		}
 		if(databaseForm == null)
 		{
-			this.log.error("Could not consume teleform export xml because form "+formId+
-					" does not exist in the database");
+			String errMessage = "Could not consume teleform export xml because form ";
+			if(formInstance != null){
+				errMessage+=formInstance.getFormId();
+			}
+			errMessage+=" does not exist in the database";
+			log.error(errMessage);
 			return false;
 		}
 		
@@ -122,9 +135,7 @@ public class ATDServiceImpl implements ATDService
 		try
 		{
 			formInstance = xmlDatasource.parse(customInput,
-					 formInstanceId,formId);
-			formInstanceId = formInstance.getFormInstanceId();
-			formId = formInstance.getFormId();
+					 formInstance,locationTagId);
 		} catch (Exception e)
 		{
 			this.log.error("Error parsing file to be consumed");
@@ -132,7 +143,7 @@ public class ATDServiceImpl implements ATDService
 			this.log.error(Util.getStackTrace(e));
 			return false;
 		}
-		HashMap<String,Field> fieldMap = xmlDatasource.getParsedFile(formInstanceId,formId);
+		HashMap<String,Field> fieldMap = xmlDatasource.getParsedFile(formInstance);
 		
 		LinkedHashMap<FormField,String> formFieldToValue =
 			new LinkedHashMap<FormField,String>();
@@ -191,8 +202,8 @@ public class ATDServiceImpl implements ATDService
 					ruleName = null;//no rule to execute unless patientATD finds one	
 				}
 				PatientATD patientATD = 
-					atdService.getPatientATD(formInstanceId, 
-							parentField.getField().getFieldId(),formId);
+					atdService.getPatientATD(formInstance, 
+							parentField.getField().getFieldId());
 				
 				if(patientATD != null)
 				{
@@ -236,7 +247,13 @@ public class ATDServiceImpl implements ATDService
 			}
 			
 			//------------start set rule parameters
+			parameters.put("sessionId", sessionId);
 			parameters.put("formInstance", formInstance);
+			parameters.put("locationTagId",locationTagId);
+			EncounterService encounterService = Context.getEncounterService();
+			Encounter encounter = encounterService.getEncounter(encounterId);
+			Integer locationId = encounter.getLocation().getLocationId();
+			parameters.put("locationId", locationId);
 			parameters.put("mode", mode);
 			parameters.put("encounterId", encounterId);
 			if(rule != null)
@@ -288,8 +305,8 @@ public class ATDServiceImpl implements ATDService
 					parentRuleName = null;//no rule to execute unless patientATD finds one	
 				}
 				PatientATD patientATD = 
-					atdService.getPatientATD(formInstanceId, 
-							parentField.getField().getFieldId(),formId);
+					atdService.getPatientATD(formInstance, 
+							parentField.getField().getFieldId());
 				
 				if(patientATD != null)
 				{
@@ -355,41 +372,44 @@ public class ATDServiceImpl implements ATDService
 		return true;
 	}
 	
-	public boolean produce(Patient patient, int formInstanceId,
-			OutputStream customOutput, int formId, Integer encounterId,
-			boolean generateJITS)
+	public boolean produce(Patient patient, FormInstance formInstance,
+			OutputStream customOutput, Integer encounterId,
+			boolean generateJITS, Integer locationTagId,Integer sessionId)
 			throws Exception
 	{
-		return this.produce(patient,formInstanceId,customOutput,formId,encounterId,null,null,
-				generateJITS);
+		return this.produce(patient,formInstance,customOutput,encounterId,null,null,
+				generateJITS,locationTagId,sessionId);
 	}
 
-	public boolean produce(Patient patient, int formInstanceId,
-			OutputStream customOutput, int formId, DssManager dssManager,
-			Integer encounterId, boolean generateJITS) throws Exception
+	public boolean produce(Patient patient, FormInstance formInstance,
+			OutputStream customOutput, DssManager dssManager,
+			Integer encounterId, boolean generateJITS,Integer locationTagId,
+			Integer sessionId) throws Exception
 	{
-		return this.produce(patient, formInstanceId, customOutput, 
-				formId, dssManager, encounterId, null,null,generateJITS);
+		return this.produce(patient, formInstance, customOutput, 
+				dssManager, encounterId, null,null,generateJITS,
+				locationTagId,sessionId);
 	}
 	
 	public boolean produce(Patient patient,
-			int formInstanceId, OutputStream customOutput, 
-			int formId, Integer encounterId,
+			FormInstance formInstance, OutputStream customOutput, 
+			Integer encounterId,
 			Map<String,Object> baseParameters,
 			String rulePackagePrefix,
-			boolean generateJITS)
+			boolean generateJITS,Integer locationTagId,
+			Integer sessionId)
 	{
 		DssManager dssManager = new DssManager(patient);
-		return this.produce(patient, formInstanceId, customOutput,
-				formId, dssManager, encounterId,baseParameters,
-				rulePackagePrefix, generateJITS);
+		return this.produce(patient, formInstance, customOutput,
+				dssManager, encounterId,baseParameters,
+				rulePackagePrefix, generateJITS,locationTagId,sessionId);
 	}
 	
 	public boolean produce(Patient patient,
-			int formInstanceId, OutputStream customOutput, 
-			int formId, DssManager dssManager,Integer encounterId,
+			FormInstance formInstance, OutputStream customOutput, 
+			DssManager dssManager,Integer encounterId,
 			Map<String,Object> baseParameters,String rulePackagePrefix,
-			boolean generateJITS)
+			boolean generateJITS, Integer locationTagId,Integer sessionId)
 	{
 		AdministrationService adminService = Context.getAdministrationService();
 		boolean mergeToTable=false;
@@ -406,9 +426,9 @@ public class ATDServiceImpl implements ATDService
 		{
 			try
 			{
-				this.createMergeXML(customOutput, patient,formInstanceId,
-						formId,dssManager,encounterId,baseParameters,
-						rulePackagePrefix);
+				this.createMergeXML(customOutput, patient,formInstance,
+						dssManager,encounterId,baseParameters,
+						rulePackagePrefix,locationTagId,sessionId);
 			} catch (Exception e)
 			{
 				this.log.error("Error creating merge xml");
@@ -423,9 +443,9 @@ public class ATDServiceImpl implements ATDService
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			try
 			{
-				this.createMergeXML(output, patient,formInstanceId,
-						formId,dssManager,encounterId,baseParameters,
-						rulePackagePrefix);
+				this.createMergeXML(output, patient,formInstance,
+						dssManager,encounterId,baseParameters,
+						rulePackagePrefix,locationTagId,sessionId);
 			} catch (Exception e)
 			{
 				this.log.error("Error creating merge xml");
@@ -433,18 +453,18 @@ public class ATDServiceImpl implements ATDService
 				this.log.error(Util.getStackTrace(e));
 				return false;
 			}
-			String formname = formService.getForm(formId).getName();
-			this.createMergeTable(output.toString(),
-					formInstanceId, formname);
+			if(formInstance != null){
+				String formname = formService.getForm(formInstance.getFormId()).getName();
+				this.createMergeTable(output.toString(),
+					formInstance.getFormInstanceId(), formname);
+			}
 		}
-		// print the JITs
+		// print the JITs here so they are created right after the form is produced
 		if (generateJITS)
 		{
-			if (baseParameters != null)
-			{
-				Integer sessionId = (Integer) baseParameters.get("sessionId");
-				if (sessionId != null)
+			if (sessionId != null)
 				{
+					//Look for all unfinished JIT states for this session
 					boolean moreJITs = true;
 					while (moreJITs)
 					{
@@ -454,54 +474,56 @@ public class ATDServiceImpl implements ATDService
 								&& lastUnfinishedState.getState().getAction()
 										.getActionName().equals("PRODUCE JIT"))
 						{
-							Integer JITFormId = lastUnfinishedState.getFormId();
-							writeJIT(JITFormId, encounterId, patient,
-									lastUnfinishedState);
+							ProcessStateAction processStateAction = null;
+							
+							try
+							{
+								StateAction stateAction = lastUnfinishedState.getState().getAction();
+								if (stateAction != null)
+								{
+									String stateActionClass = stateAction
+										.getActionClass();
+									if (stateActionClass != null)
+									{
+										Class classInstatiation = Class
+											.forName(stateActionClass);
+
+										// class the initialization method is in
+										processStateAction = (ProcessStateAction) classInstatiation
+											.newInstance();
+									}
+								}
+							} catch (Exception e)
+							{
+								log.error(e.getMessage());
+								log.error(org.openmrs.module.dss.util.Util.getStackTrace(e));
+							}
+							try
+							{
+								if(processStateAction != null){
+									processStateAction.processAction(
+										lastUnfinishedState.getState().getAction(),
+										patient, lastUnfinishedState, null);
+								}
+							} catch (Exception e)
+							{
+								log.error("", e);
+							}
+							
 						} else
 						{
 							moreJITs = false;
 						}
 					}
 				}
-			}
 		}
-		this.saveDssElementsToDatabase(patient,formInstanceId,
-				formId,dssManager,encounterId);
+		this.saveDssElementsToDatabase(patient,formInstance,
+				dssManager,encounterId);
 		return true;
-	}
-	private void writeJIT(Integer formId,Integer encounterId,
-			Patient patient,PatientState patientState){
-		ATDService atdService = Context.getService(ATDService.class);
-
-		try
-		{
-			Integer formInstanceId = atdService.addFormInstance(formId)
-					.getFormInstanceId();
-			String mergeDirectory = IOUtil
-					.formatDirectoryName(org.openmrs.module.atd.util.Util
-							.getFormAttributeValue(formId, "pendingMergeDirectory"));
-			String mergeFilename = mergeDirectory + formInstanceId + ".xml";
-			FileOutputStream output = new FileOutputStream(mergeFilename);
-			HashMap<String, Object> baseParameters = new HashMap<String, Object>();
-			baseParameters.put("sessionId", patientState.getSessionId());
-			atdService.produce(patient, formInstanceId, output, formId,
-					encounterId, baseParameters, null,false);
-			output.flush();
-			output.close();
-			StateManager.endState(patientState);
-		} catch (Exception e)
-		{
-			State currState = atdService.getStateByName("ErrorState");
-			atdService.addPatientState(patient,
-					currState, patientState.getSessionId(), null);
-			this.log.error("Error writing JIT for formID: "+formId);
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
-		}
 	}
 	
 	private void saveDssElementsToDatabase(Patient patient,
-			Integer formInstanceId,Integer formId, DssManager dssManager,
+			FormInstance formInstance, DssManager dssManager,
 			Integer encounterId)
 	{
 		Integer patientId = patient.getPatientId();
@@ -524,26 +546,30 @@ public class ATDServiceImpl implements ATDService
 			for (int i=0,pos=0; i < dssElements.size(); i++,pos++)
 			{
 				DssElement currDssElement = dssElements.get(i);
-				atdService.addPatientATD(patientId, formId,
-						currDssElement, formInstanceId, encounterId);
+				atdService.addPatientATD(patientId, formInstance,
+						currDssElement,encounterId);
 			}
 		}
 	}
 	
 	private int createMergeXML(OutputStream output, 
-			Patient patient, int formInstanceId, int formId, 
+			Patient patient, FormInstance formInstance, 
 			DssManager dssManager,Integer encounterId,
-			Map<String,Object> baseParameters,String rulePackagePrefix) throws Exception 
+			Map<String,Object> baseParameters,
+			String rulePackagePrefix,Integer locationTagId,
+			Integer sessionId
+			) throws Exception 
 	{
 		TeleformTranslator translator = new TeleformTranslator();
-		translator.databaseFormToMergeXML(formId, output,
-				patient,formInstanceId,dssManager,encounterId,
-				baseParameters,rulePackagePrefix);
-		return formId;
+		translator.formToTeleformOutputStream(formInstance, output,
+				patient,dssManager,encounterId,
+				baseParameters,rulePackagePrefix,
+				locationTagId,sessionId);
+		return formInstance.getFormId();
 	}
 	
 	private void createMergeTable(String inputXML, 
-			int formInstanceId, String formname)
+			Integer formInstanceId, String formname)
 	{
 		AdministrationService adminService = Context.getAdministrationService();
 		String xsltFilename = 
@@ -582,9 +608,8 @@ public class ATDServiceImpl implements ATDService
 		getATDDAO().executeSql(sql);
 	}
 	
-	public FormInstance addFormInstance(Integer formId){
-		
-		return getATDDAO().addFormInstance(formId);
+	public FormInstance addFormInstance(Integer formId,Integer locationId){
+		return getATDDAO().addFormInstance(formId,locationId);
 	}
 
 	public Result evaluateRule(String ruleEvalString,Patient patient,
@@ -667,14 +692,13 @@ public class ATDServiceImpl implements ATDService
 		return null;
 	}
 	
-	public void addPatientATD(int patientId, Integer formId, DssElement dssElement,
-			Integer formInstanceId, Integer encounterId) throws APIException
+	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
+			Integer encounterId) throws APIException
 	{
 		PatientATD patientATD = new PatientATD();
 		patientATD.setCreationTime(new java.util.Date());
 		patientATD.setFieldId((Integer) dssElement.getParameter("fieldId"));
-		patientATD.setFormId(formId);
-		patientATD.setFormInstanceId(formInstanceId);
+		patientATD.setFormInstance(formInstance);
 		patientATD.setPatientId(patientId);
 		patientATD.setEncounterId(encounterId);
 		Rule rule = new Rule();
@@ -696,14 +720,15 @@ public class ATDServiceImpl implements ATDService
 		getATDDAO().addPatientATD(patientATD);
 	}
 	
-	public PatientATD getPatientATD(int formInstanceId, int fieldId, int formId)
+	public PatientATD getPatientATD(FormInstance formInstance, int fieldId)
 	{
-		return getATDDAO().getPatientATD(formInstanceId,fieldId, formId);
+		return getATDDAO().getPatientATD(formInstance,fieldId);
 	}
 	
-	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName)
+	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName,
+			Integer locationTagId,Integer locationId)
 	{
-		return getATDDAO().getFormAttributeValue(formId,formAttributeName);
+		return getATDDAO().getFormAttributeValue(formId,formAttributeName,locationTagId,locationId);
 	}
 	
 	/**
@@ -727,26 +752,22 @@ public class ATDServiceImpl implements ATDService
 	{
 		return getATDDAO().getSession(sessionId);
 	}
-	
-	public Session getSessionByEncounter(int encounterId)
-	{
-		return getATDDAO().getSessionByEncounter(encounterId);
-	}
-	
+		
 	public Session updateSession(Session session) {
 		
 		return getATDDAO().updateSession(session);
 	}
 	
 	public PatientState addPatientState(Patient patient,State initialState,
-			int sessionId, Integer formId)
+			int sessionId,Integer locationTagId,Integer locationId)
 	{
 		PatientState patientState = new PatientState();
 		patientState.setStartTime(new java.util.Date());
 		patientState.setPatient(patient);
 		patientState.setState(initialState);
 		patientState.setSessionId(sessionId);
-		patientState.setFormId(formId);
+		patientState.setLocationId(locationId);
+		patientState.setLocationTagId(locationTagId);
 		return getATDDAO().addUpdatePatientState(patientState);
 	}
 	
@@ -766,20 +787,27 @@ public class ATDServiceImpl implements ATDService
 				sessionId, patientStateId,action);
 	}
 	
-	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction)
+	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction,
+			Integer locationTagId,Integer locationId)
 	{
-		return getATDDAO().getUnfinishedPatientStatesAllPatients(optionalDateRestriction);
+		return getATDDAO().getUnfinishedPatientStatesAllPatients(optionalDateRestriction,locationTagId,locationId);
 	}
 	
-	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction){
-		return getATDDAO().getUnfinishedPatientStateByStateName(state,optionalDateRestriction);
+	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction,
+			Integer locationTagId, Integer locationId){
+		return getATDDAO().getUnfinishedPatientStateByStateName(state,optionalDateRestriction,locationTagId,locationId);
 	}
 	public PatientState getLastUnfinishedPatientState(Integer sessionId){
 		return getATDDAO().getLastUnfinishedPatientState(sessionId);
 	}
 	
-	public List<PatientState> getLastPatientStateAllPatients(Date optionalDateRestriction, Integer programId){
-		return getATDDAO().getLastPatientStateAllPatients(optionalDateRestriction, programId);
+	public PatientState getLastPatientState(Integer sessionId){
+		return getATDDAO().getLastPatientState(sessionId);
+	}
+	
+	public List<PatientState> getLastPatientStateAllPatients(Date optionalDateRestriction, 
+			Integer programId,String startStateName,Integer locationTagId, Integer locationId){
+		return getATDDAO().getLastPatientStateAllPatients(optionalDateRestriction, programId,startStateName, locationTagId,locationId);
 	}
 	public State getStateByName(String stateName){
 		return getATDDAO().getStateByName(stateName);
@@ -789,12 +817,17 @@ public class ATDServiceImpl implements ATDService
 		return getATDDAO().getProgramByNameVersion(name, version);
 	}
 	
+	public Program getProgram(Integer programId){
+		return getATDDAO().getProgram(programId);
+	}
+	
 	public PatientState getPatientStateByEncounterFormAction(Integer encounterId, Integer formId, String action){
 		return getATDDAO().getPatientStateByEncounterFormAction(encounterId, formId, action);
 	}
 	
-	public PatientState getPatientStateByFormInstanceAction(Integer formId, Integer formInstanceId,String action){
-		return getATDDAO().getPatientStateByFormInstanceAction(formId, formInstanceId, action);
+	public PatientState getPatientStateByFormInstanceAction(FormInstance formInstance,String action){
+
+		return getATDDAO().getPatientStateByFormInstanceAction(formInstance, action);
 	}
 	public ArrayList<String> getExportDirectories(){
 		return getATDDAO().getExportDirectories();
@@ -828,12 +861,32 @@ public class ATDServiceImpl implements ATDService
 		return getATDDAO().getSessionsByEncounter(encounterId);
 	}
 	
-	public List<Integer> getFormInstancesByEncounterId(String formName, Integer encounter_id){
-		return getATDDAO().getFormInstancesByEncounterId(formName, encounter_id);
+	public List<FormInstance> getFormInstancesByEncounterId(String formName, Integer encounterId){
+		return getATDDAO().getFormInstancesByEncounterId(formName, encounterId);
 	}
 
 	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
 			Integer stateId){
 		return getATDDAO().getPatientStateByEncounterState(encounterId,stateId);
+	}
+	
+	public void saveError(ATDError error){
+		getATDDAO().saveError(error);
+	}
+	
+	public List<ATDError> getATDErrorsByLevel(String errorLevel,Integer sessionId){
+		return getATDDAO().getATDErrorsByLevel(errorLevel, sessionId);
+	}
+	
+	public Integer getErrorCategoryIdByName(String name){
+		return getATDDAO().getErrorCategoryIdByName(name);
+	}
+	
+	public Program getProgram(Integer locationTagId,Integer locationId){
+		return getATDDAO().getProgram(locationTagId, locationId);
+	}
+
+	public List<FormAttributeValue> getFormAttributeValuesByValue(String value){
+		return getATDDAO().getFormAttributeValuesByValue(value);
 	}
 }

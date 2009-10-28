@@ -20,6 +20,8 @@
 
 		<property name="dateCreated" type="java.util.Date"
 			column="date_created" />
+			
+		<property name="actionClass" type="java.lang.String" column="action_class"/>
 
 		<many-to-one name="creator" class="org.openmrs.User"  />
 	</class>

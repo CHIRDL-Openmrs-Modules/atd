@@ -16,6 +16,9 @@
 				<property name="dateChanged" type="java.util.Date"
 			column="date_changed" length="19" />
 
+		<many-to-one name="startState" class="org.openmrs.module.atd.hibernateBeans.State" column="start_state"/>
+		<many-to-one name="endState" class="org.openmrs.module.atd.hibernateBeans.State" column="end_state"/>
+
 		<many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
 
 		<property name="dateCreated" type="java.util.Date"
