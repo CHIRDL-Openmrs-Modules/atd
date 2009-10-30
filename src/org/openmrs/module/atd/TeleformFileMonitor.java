@@ -531,6 +531,10 @@ public class TeleformFileMonitor extends AbstractTask
 									formInstance, locationTagId);
 							input.close();
 
+							if(formInstance == null){
+								continue;
+							}
+							
 							// we need to figure out the correct formId now
 							// that we have
 							// the formInstanceId
@@ -557,11 +561,7 @@ public class TeleformFileMonitor extends AbstractTask
 					}
 					
 
-					if (formInstance == null)
-					{
-						log.error("Error processing filename: " + filename+". No form instance id.");
-						//unparseableFiles.add(filename);
-					}else{
+					if (formInstance != null){
 									
 						TeleformFileState tfFileState = pendingStatesWithoutFilename.get(formInstance);
 
