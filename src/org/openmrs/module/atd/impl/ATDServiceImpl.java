@@ -52,8 +52,8 @@ import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.dss.util.IOUtil;
-import org.openmrs.module.dss.util.Util;
+import org.openmrs.module.chirdlutil.util.IOUtil;
+import org.openmrs.module.chirdlutil.util.Util;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -496,7 +496,7 @@ public class ATDServiceImpl implements ATDService
 							} catch (Exception e)
 							{
 								log.error(e.getMessage());
-								log.error(org.openmrs.module.dss.util.Util.getStackTrace(e));
+								log.error(org.openmrs.module.chirdlutil.util.Util.getStackTrace(e));
 							}
 							try
 							{

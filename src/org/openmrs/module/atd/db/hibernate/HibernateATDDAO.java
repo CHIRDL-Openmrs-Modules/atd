@@ -34,7 +34,7 @@ import org.openmrs.module.atd.hibernateBeans.StateMapping;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.dss.util.Util;
+import org.openmrs.module.chirdlutil.util.Util;
 
 /**
  * Hibernate implementations of ATD database methods.

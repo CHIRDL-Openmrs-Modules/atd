@@ -43,8 +43,9 @@ import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientState;
 import org.openmrs.module.atd.hibernateBeans.State;
 import org.openmrs.module.atd.service.ATDService;
-import org.openmrs.module.dss.util.IOUtil;
-import org.openmrs.module.dss.util.Util;
+import org.openmrs.module.chirdlutil.util.IOUtil;
+import org.openmrs.module.chirdlutil.util.Util;
+
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.openmrs.util.OpenmrsClassLoader;
@@ -505,7 +506,7 @@ public class TeleformFileMonitor extends AbstractTask
 						Integer locationTagId = null;
 						List<FormAttributeValue> formAttrValues = atdService
 							.getFormAttributeValuesByValue(
-								org.openmrs.module.dss.util.IOUtil.getDirectoryName(filename));
+								org.openmrs.module.chirdlutil.util.IOUtil.getDirectoryName(filename));
 
 						if (formAttrValues != null&&formAttrValues.size()>0)
 						{

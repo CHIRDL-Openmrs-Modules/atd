@@ -39,8 +39,8 @@ import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.dss.util.Util;
-import org.openmrs.module.dss.util.XMLUtil;
+import org.openmrs.module.chirdlutil.util.Util;
+import org.openmrs.module.chirdlutil.util.XMLUtil;
 import org.openmrs.util.OpenmrsUtil;
 
 /**

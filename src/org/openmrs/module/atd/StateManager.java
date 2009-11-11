@@ -20,7 +20,7 @@ import org.openmrs.module.atd.hibernateBeans.State;
 import org.openmrs.module.atd.hibernateBeans.StateAction;
 import org.openmrs.module.atd.hibernateBeans.StateMapping;
 import org.openmrs.module.atd.service.ATDService;
-import org.openmrs.module.dss.util.Util;
+import org.openmrs.module.chirdlutil.util.Util;
 
 /**
  * @author Tammy Dugan

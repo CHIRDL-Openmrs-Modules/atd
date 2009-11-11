@@ -13,7 +13,7 @@ import org.openmrs.Form;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.TeleformTranslator;
-import org.openmrs.module.dss.util.IOUtil;
+import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 
 public class UploadFormsController extends SimpleFormController

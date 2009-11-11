@@ -24,8 +24,8 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.Records;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
-import org.openmrs.module.dss.util.Util;
-import org.openmrs.module.dss.util.XMLUtil;
+import org.openmrs.module.chirdlutil.util.Util;
+import org.openmrs.module.chirdlutil.util.XMLUtil;
 
 /**
  * Implementation of LogicTeleformExportDAO
