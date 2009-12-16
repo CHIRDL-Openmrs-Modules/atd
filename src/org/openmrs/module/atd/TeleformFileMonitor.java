@@ -73,6 +73,8 @@ public class TeleformFileMonitor extends AbstractTask
 	private static Date lastMoveMergeFiles;
 	private static Date nextLatestMoveMergeFiles;
 	private static Boolean TFAMP_Alert = false;
+	private static Boolean ignorePWSs = false;
+	private static ArrayList<TeleformFileState> pwsStatesToProcess = new ArrayList<TeleformFileState>();
 	
 	@Override
 	public void initialize(TaskDefinition config)
@@ -102,11 +104,17 @@ public class TeleformFileMonitor extends AbstractTask
 					authenticate();
 				
 				ArrayList<TeleformFileState> listTFstatesProcessed = new ArrayList<TeleformFileState>();
-				
+				ignorePWSs = false;
 				processPendingStatesWithoutFilename(listTFstatesProcessed);
 				processPendingStatesWithFilename(listTFstatesProcessed);
 				processTifFiles();
 				kickProcess(listTFstatesProcessed);
+				if(!ignorePWSs&&pwsStatesToProcess.size()>0){
+					TeleformFileState tfFileState = pwsStatesToProcess.remove(0);
+					ArrayList<TeleformFileState> pwsFileStates = new ArrayList<TeleformFileState>();
+					pwsFileStates.add(tfFileState);
+					kickProcess(pwsFileStates);
+				}
 				LocationService locationService = Context.getLocationService();
 				List<Location> locations = locationService.getAllLocations();
 				for(Location location:locations){
@@ -573,10 +581,28 @@ public class TeleformFileMonitor extends AbstractTask
 							String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstance.toString()+".20";
 							
 							IOUtil.renameFile(filename, newFilename);
+							
+							//if file rename fails, don't continue processing otherwise
+							//the file will be processed more than once
+							File newFile = new File(newFilename);
+							if(!newFile.exists()){
+								continue;
+							}
+							    
 							tfFileState.setFullFilePath(newFilename);
 							tfFileState.setFormInstance(formInstance);
 							pendingStatesWithoutFilename.remove(formInstance);
-							listTFstatesProcessed.add(tfFileState);
+							PatientState patientState = (PatientState) tfFileState.getParameter("patientState");
+							String stateName = patientState.getState().getName();
+							if (stateName.equalsIgnoreCase("PWS_wait_to_scan") || 
+									stateName.equalsIgnoreCase("PWS_process")
+							        || stateName.equalsIgnoreCase("PWS_rescan")) {
+								pwsStatesToProcess.add(tfFileState);
+							}else{
+								ignorePWSs = true;
+								listTFstatesProcessed.add(tfFileState);
+							}
+							
 						}else{
 							//This means we have found a .xml file that is not in pending processing.
 							//This is most likely a rescan. We need to see if a scan already exists
@@ -624,11 +650,24 @@ public class TeleformFileMonitor extends AbstractTask
 											IOUtil.deleteFile(newFilename);
 										}
 										IOUtil.renameFile(filename, newFilename);
+										//if file rename fails, don't continue processing otherwise
+										//the file will be processed more than once
+										newFile = new File(newFilename);
+										if(!newFile.exists()){
+											continue;
+										}
 										tfFileState.setFullFilePath(newFilename);
 										tfFileState.setFormInstance(formInstance);
 										tfFileState.addParameter("patientState",
 												patientState);
-										listTFstatesProcessed.add(tfFileState);
+										if (stateName.equalsIgnoreCase("PWS_wait_to_scan") || 
+												stateName.equalsIgnoreCase("PWS_process")
+										        || stateName.equalsIgnoreCase("PWS_rescan")) {
+											pwsStatesToProcess.add(tfFileState);
+										}else{
+											ignorePWSs = true;
+											listTFstatesProcessed.add(tfFileState);
+										}
 									} catch (Exception e)
 									{
 										log.error("RESCAN for formInstanceId: "
