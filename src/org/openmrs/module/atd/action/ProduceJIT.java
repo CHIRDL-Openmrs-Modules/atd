@@ -33,7 +33,6 @@ public class ProduceJIT implements ProcessStateAction
 	 */
 	public void processAction(StateAction stateAction, Patient patient,
 			PatientState patientState, HashMap<String, Object> parameters)
-			throws Exception
 	{
 		Integer formId = patientState.getFormId();
 		if (formId != null)

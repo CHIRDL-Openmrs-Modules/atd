@@ -209,16 +209,14 @@ public class TeleformTranslator
 			Patient patient,DssManager dssManager,
 			Integer encounterId,Map<String,Object> baseParameters,
 			String rulePackagePrefix,
-			Integer locationTagId,Integer sessionId) throws Exception
+			Integer locationTagId,Integer sessionId)
 	{
 		Form form = databaseToForm(formInstance.getFormId());
 		if(form == null) 
 		{
-			throw new Exception("Could not convert database form "+formInstance.getFormId()+
+			log.error("Could not convert database form "+formInstance.getFormId()+
 					" to teleform merge xml. The form does not exist in the database.");
-		}
-		if(form == null)
-		{
+
 			return;
 		}
 		String resultString = null;
@@ -486,10 +484,9 @@ public class TeleformTranslator
 	 * @param formName name of form to create
 	 * @param formVersion version of form to create
 	 * @return Form OpenMRS form
-	 * @throws Exception 
 	 */
 	private Form teleformInputStreamToForm(InputStream input, String formName,
-			String formVersion) throws Exception
+			String formVersion)
 	{
 		Form form = new Form(); // make a new empty form
 		form.setVersion(formVersion);

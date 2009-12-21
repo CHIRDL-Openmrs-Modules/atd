@@ -37,12 +37,12 @@ public class TeleformExportXMLDatasource implements LogicDataSource
 	}
 	
 	public FormInstance parse(InputStream input,FormInstance formInstance, 
-			Integer locationTagId) throws Exception
+			Integer locationTagId)
 	{
 		return this.logicTeleformExportDAO.parse(input, formInstance, locationTagId);
 	}
 	
-	public Records parse(InputStream input) throws Exception
+	public Records parse(InputStream input)
 	{
 		return this.logicTeleformExportDAO.parse(input);
 	}

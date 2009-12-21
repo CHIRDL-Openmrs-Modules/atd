@@ -37,11 +37,10 @@ public class StateManager
 	 * @param sessionId current atd session for the Patient
 	 * @param currState current state of the atd process
 	 * @return
-	 * @throws Exception
 	 */
 	public static PatientState changeState(Patient patient, Integer sessionId,
 			State currState, Program program,HashMap<String,Object> parameters,
-			Integer locationTagId,Integer locationId,StateActionHandler stateActionHandler) throws Exception
+			Integer locationTagId,Integer locationId,StateActionHandler stateActionHandler)
 	{
 		AdministrationService adminService = Context.getAdministrationService();
 		ATDService atdService = Context
@@ -128,7 +127,6 @@ public class StateManager
 	private static void processStateAction(StateAction stateAction,
 			Patient patient, PatientState patientState,Program program,
 			HashMap<String,Object> parameters,StateActionHandler stateActionHandler)
-			throws Exception
 	{
 		if (stateAction == null)
 		{
@@ -144,7 +142,7 @@ public class StateManager
 	public static PatientState runState(Patient patient, Integer sessionId,
 			State currState,HashMap<String,Object> parameters,
 			Integer locationTagId,Integer locationId,
-			StateActionHandler stateActionHandler)throws Exception
+			StateActionHandler stateActionHandler)
 	{
 		ATDService atdService = Context.getService(ATDService.class);
 		StateAction stateAction = currState.getAction();

@@ -63,7 +63,6 @@
 	<classpathentry kind="lib" path="lib-common/openmrs-api-1.5.0.10396-dev.jar"/>
 	<classpathentry kind="lib" path="lib-common/tests-openmrs-api-1.5.0.10396-dev.jar"/>
 	<classpathentry kind="lib" path="lib-common/web-openmrs-api-1.5.0.10396-dev.jar"/>
-	<classpathentry kind="lib" path="lib-common/dss-2.27.10.jar"/>
 	<classpathentry kind="lib" path="lib-common/chirdlutil-1.0.5.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/bcel.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/jibx-schema.jar"/>
@@ -84,5 +83,6 @@
 	<classpathentry kind="lib" path="lib-common/jibx/wstx-asl.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xmlpull_1_1_4.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xpp3.jar"/>
+	<classpathentry kind="lib" path="lib-common/dss-2.27.11.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

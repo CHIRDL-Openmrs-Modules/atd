@@ -16,8 +16,8 @@ import org.openmrs.module.atd.hibernateBeans.StateAction;
 public interface ProcessStateAction
 {
 	public void processAction(StateAction stateAction, Patient patient,
-			PatientState patientState,HashMap<String,Object> parameters) throws Exception;
+			PatientState patientState,HashMap<String,Object> parameters);
 
 	public void changeState(PatientState patientState,
-			HashMap<String,Object> parameters) throws Exception;
+			HashMap<String,Object> parameters);
 }

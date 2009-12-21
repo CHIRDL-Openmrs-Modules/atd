@@ -375,7 +375,6 @@ public class ATDServiceImpl implements ATDService
 	public boolean produce(Patient patient, FormInstance formInstance,
 			OutputStream customOutput, Integer encounterId,
 			boolean generateJITS, Integer locationTagId,Integer sessionId)
-			throws Exception
 	{
 		return this.produce(patient,formInstance,customOutput,encounterId,null,null,
 				generateJITS,locationTagId,sessionId);
@@ -384,7 +383,7 @@ public class ATDServiceImpl implements ATDService
 	public boolean produce(Patient patient, FormInstance formInstance,
 			OutputStream customOutput, DssManager dssManager,
 			Integer encounterId, boolean generateJITS,Integer locationTagId,
-			Integer sessionId) throws Exception
+			Integer sessionId)
 	{
 		return this.produce(patient, formInstance, customOutput, 
 				dssManager, encounterId, null,null,generateJITS,
@@ -558,7 +557,7 @@ public class ATDServiceImpl implements ATDService
 			Map<String,Object> baseParameters,
 			String rulePackagePrefix,Integer locationTagId,
 			Integer sessionId
-			) throws Exception 
+			)
 	{
 		TeleformTranslator translator = new TeleformTranslator();
 		translator.formToTeleformOutputStream(formInstance, output,

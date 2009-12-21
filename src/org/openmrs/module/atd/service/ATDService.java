@@ -49,7 +49,7 @@ public interface ATDService
 			String rulePackagePrefix,ParameterHandler parameterHandler,
 			List<FormField> fieldsToConsume,
 			Integer locationTagId, Integer sessionId
-			)throws Exception;
+			);
 	
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
