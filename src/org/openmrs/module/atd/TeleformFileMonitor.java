@@ -614,6 +614,7 @@ public class TeleformFileMonitor extends AbstractTask
 								.getPatientStateByFormInstanceAction(
 									formInstance, action);
 					
+							if(patientState != null){
 							String formName = formService.getForm(formInstance.getFormId()).getName();
 							
 							Integer sessionId = patientState.getSessionId();
@@ -677,7 +678,7 @@ public class TeleformFileMonitor extends AbstractTask
 								}
 							}
 					}
-					
+					}
 				} catch (Exception e)
 				{
 					log.error("Error processing filename: " + filename);
