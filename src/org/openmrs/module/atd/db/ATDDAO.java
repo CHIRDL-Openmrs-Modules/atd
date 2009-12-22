@@ -126,7 +126,7 @@ public interface ATDDAO {
 	
 	public List<Session> getSessionsByEncounter(int encounterId);
 	
-	public List<FormInstance> getFormInstancesByEncounterId(String formName, Integer encounterId);
+	public List<PatientState> getPatientStatesWithFormInstances(String formName, Integer encounterId);
 		
 	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
 			Integer stateId);

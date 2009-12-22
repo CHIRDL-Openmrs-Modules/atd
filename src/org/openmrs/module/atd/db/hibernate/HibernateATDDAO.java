@@ -1001,20 +1001,20 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 	
-	public List<FormInstance> getFormInstancesByEncounterId(String formName, Integer encounterId){
+	public List<PatientState> getPatientStatesWithFormInstances(String formName, Integer encounterId){
 		
 		String formRestriction = null;
 		if (formName != null)
 		{
 			formRestriction = " and form_id in (select form_id from form where name=? )";
 		} 
-		String sql = "select distinct form_instance_id,form_id,location_id from atd_patient_state atdps " 
+		String sql = "select atdps.* from atd_patient_state atdps " 
 			+ " where session_id in (select session_id  from atd_session where encounter_id=? ) "
 			+ formRestriction + " and form_instance_id is not null order by end_time desc" ;
 		SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
 		qry.setInteger(0, encounterId);
 		qry.setString(1, formName);
-		qry.addEntity(FormInstance.class);
+		qry.addEntity(PatientState.class);
 		return qry.list();
 	}
 

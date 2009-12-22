@@ -860,8 +860,8 @@ public class ATDServiceImpl implements ATDService
 		return getATDDAO().getSessionsByEncounter(encounterId);
 	}
 	
-	public List<FormInstance> getFormInstancesByEncounterId(String formName, Integer encounterId){
-		return getATDDAO().getFormInstancesByEncounterId(formName, encounterId);
+	public List<PatientState> getPatientStatesWithFormInstances(String formName, Integer encounterId){
+		return getATDDAO().getPatientStatesWithFormInstances(formName, encounterId);
 	}
 
 	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,

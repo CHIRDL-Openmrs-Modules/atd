@@ -142,7 +142,7 @@ public interface ATDService
 	
 	public List<Session> getSessionsByEncounter(Integer encounterId);
 	
-	public List<FormInstance> getFormInstancesByEncounterId(String formName, Integer encounterId);
+	public List<PatientState> getPatientStatesWithFormInstances(String formName, Integer encounterId);
 	
 	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
 			Integer stateId);
