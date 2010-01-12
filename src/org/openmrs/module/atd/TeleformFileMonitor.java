@@ -341,7 +341,10 @@ public class TeleformFileMonitor extends AbstractTask
 							// that it will get picked up on the next time
 							// around
 							log.error("merge file: " + tgtFile.getPath()
-									+ " is truncated.");
+									+ " is truncated. File will be deleted.");
+							//delete the truncated xml so it won't break the
+							//Teleform merger
+							IOUtil.deleteFile(targetFilename);
 						} else
 						{
 							IOUtil.renameFile(sourceFilename,
