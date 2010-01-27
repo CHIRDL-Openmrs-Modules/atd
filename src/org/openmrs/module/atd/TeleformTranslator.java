@@ -211,6 +211,8 @@ public class TeleformTranslator
 			String rulePackagePrefix,
 			Integer locationTagId,Integer sessionId)
 	{
+		long totalTime = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 		Form form = databaseToForm(formInstance.getFormId());
 		if(form == null) 
 		{
@@ -266,8 +268,10 @@ public class TeleformTranslator
 		List<FormField> formFields = form.getOrderedFormFields();//get all fields for the form
 		
 		FormService formService = Context.getFormService();
-		
+		startTime = System.currentTimeMillis();
 		//iterate through all the form fields
+		long totalPopulateDssElementTime = 0;
+		long totalEvaluateRule = 0;
 		for(FormField currFormField:formFields)
 		{
 			fieldToResult.put(currFormField, null);//initially map field with no result
@@ -320,9 +324,11 @@ public class TeleformTranslator
 				
 				//fill in the dss elements for this type
 				//(this will only get executed once even though it is called for each field)
+				long startTime1 = System.currentTimeMillis();
 				dssManager.populateDssElements(
 						ruleType, false,parameters,
 						defaultPackagePrefix);
+				totalPopulateDssElementTime+=System.currentTimeMillis()-startTime1;
 				//get the result for this field
 				Result result = processDssElements(dssManager, dssMergeCounter,
 						currField.getFieldId(), 
@@ -345,12 +351,23 @@ public class TeleformTranslator
 				} else
 				{
 					//produce other rule based fields
+					long startTime1 = System.currentTimeMillis();
 					Result result = atdService.evaluateRule(defaultValue,
 							patient,parameters,rulePackagePrefix);
+					totalEvaluateRule+=System.currentTimeMillis()-startTime1;
 					fieldToResult.put(currFormField, result);
 				}
 			}
 		}
+		
+		System.out.println("formToTeleformOutputStream: total totalEvaluateRule: "+
+			totalEvaluateRule);
+		System.out.println("formToTeleformOutputStream: total totalPopulateDssElementTime: "+
+			totalPopulateDssElementTime);
+
+		System.out.println("formToTeleformOutputStream: time iterate through form fields: "+
+			(System.currentTimeMillis()-startTime));
+		startTime = System.currentTimeMillis();
 		
 		LinkedHashMap<String,String> fieldNameResult = new LinkedHashMap<String,String>();
 		
@@ -409,19 +426,24 @@ public class TeleformTranslator
 			fieldNameResult.put(fieldName, resultString);
 		}
 		
+		startTime = System.currentTimeMillis();
+		
 		//Process rules with null priority that have @ value in write action
 		//These rules directly write results to a specific field
 		DssService dssService = Context.getService(DssService.class);
 		List<Rule> nonPriorRules = dssService.getNonPrioritizedRules(form.getName());
 		
 		parameters.put("concept", null);
+		long totalRunRule = 0;
 		for (Rule currRule : nonPriorRules)
 		{
 			if (currRule.checkAgeRestrictions(patient))
 			{
 				currRule.setParameters(parameters);
+				long startTime1 = System.currentTimeMillis();
 				Result result = dssService.runRule(patient, currRule,
 						defaultPackagePrefix, rulePackagePrefix);
+				totalRunRule+=(System.currentTimeMillis()-startTime1);
 				for (Result currResult : result)
 				{
 					resultString = currResult.toString();
@@ -437,6 +459,10 @@ public class TeleformTranslator
 				}
 			}
 		}
+		System.out.println("formToTeleformOutputStream: total run rule: "+totalRunRule);
+		System.out.println("formToTeleformOutputStream: non prioritized fields: "+
+		(System.currentTimeMillis()-startTime));
+		startTime = System.currentTimeMillis();
 		
 		//create xml
 		Record record = new Record();

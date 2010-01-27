@@ -108,6 +108,8 @@ public class ATDServiceImpl implements ATDService
 			Integer locationTagId, Integer sessionId
 			)
 	{
+		long startTime = System.currentTimeMillis();
+		long totalTime = System.currentTimeMillis();
 		ATDService atdService = 
 			Context.getService(ATDService.class);
 		TeleformTranslator translator = new TeleformTranslator();
@@ -152,6 +154,8 @@ public class ATDServiceImpl implements ATDService
 			fieldsToConsume = databaseForm.getOrderedFormFields();
 		}
 		
+		startTime = System.currentTimeMillis();
+		
 		//map form field definition from database
 		//to result for that field in the xml that is being consumed
 		for (FormField currField : fieldsToConsume)
@@ -171,6 +175,8 @@ public class ATDServiceImpl implements ATDService
 				}
 			}
 		}
+
+		startTime = System.currentTimeMillis();
 						
 		String mode = "CONSUME";
 		
@@ -281,6 +287,8 @@ public class ATDServiceImpl implements ATDService
 			}
 			//----------end set rule parameters
 		}
+
+		startTime = System.currentTimeMillis();
 		
 		//add child fields as parameters to parent field rules
 		HashMap<String,Integer> childIndex = new HashMap<String,Integer>();
@@ -349,6 +357,8 @@ public class ATDServiceImpl implements ATDService
 				}
 			}
 		}
+
+		startTime = System.currentTimeMillis();
 		
 		//run all the consume rules
 		for(LinkedHashMap<String, Rule> rulesToRun: 
@@ -410,6 +420,9 @@ public class ATDServiceImpl implements ATDService
 			Map<String,Object> baseParameters,String rulePackagePrefix,
 			boolean generateJITS, Integer locationTagId,Integer sessionId)
 	{
+		long totalTime = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
+		
 		AdministrationService adminService = Context.getAdministrationService();
 		boolean mergeToTable=false;
 		try
@@ -458,6 +471,8 @@ public class ATDServiceImpl implements ATDService
 					formInstance.getFormInstanceId(), formname);
 			}
 		}
+		
+		startTime = System.currentTimeMillis();
 		// print the JITs here so they are created right after the form is produced
 		if (generateJITS)
 		{
@@ -516,6 +531,8 @@ public class ATDServiceImpl implements ATDService
 					}
 				}
 		}
+
+		startTime = System.currentTimeMillis();
 		this.saveDssElementsToDatabase(patient,formInstance,
 				dssManager,encounterId);
 		return true;
