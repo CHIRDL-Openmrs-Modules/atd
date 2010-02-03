@@ -23,10 +23,12 @@ import org.openmrs.Field;
 import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
@@ -248,7 +250,13 @@ public class TeleformTranslator
 		Encounter encounter = encounterService.getEncounter(encounterId);
 		Integer locationId = encounter.getLocation().getLocationId();
 		parameters.put("locationId",locationId);
-		
+		LocationService locationService = Context.getLocationService();
+		Location location = locationService.getLocation(locationId);
+		String locationName = null;
+		if(location != null){
+			locationName = location.getName();
+		}
+		parameters.put("location", locationName);
 		if(encounterId != null)
 		{
 			parameters.put("encounterId", encounterId);

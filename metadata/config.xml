@@ -6,7 +6,7 @@
 	<!-- Basic Module Properties -->
 	<id>atd</id>
 	<name>ATD</name>
-	<version>1.56.10</version>
+	<version>1.56.11</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Tammy Dugan</author>
 	<description>
