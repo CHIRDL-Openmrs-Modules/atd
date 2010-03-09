@@ -490,12 +490,11 @@ public class HibernateATDDAO implements ATDDAO
 				{
 					String sql = "select * from atd_patient_state where session_id in "+
 					"(select session_id from atd_session where encounter_id=?) and "+
-					"state=? and retired=? order by start_time desc, end_time desc";
+					"state=? order by start_time desc, end_time desc";
 					SQLQuery qry = this.sessionFactory.getCurrentSession()
 							.createSQLQuery(sql);
 					qry.setInteger(0, encounterId);
 					qry.setInteger(1, stateId);
-					qry.setBoolean(2, false);
 					qry.addEntity(PatientState.class);
 
 					return qry.list();
