@@ -34,4 +34,5 @@ public interface LogicTeleformExportDAO {
     public Records parse(InputStream input);  
     public HashMap<String,Field> getParsedFile(FormInstance formInstance);
 	public void deleteParsedFile(FormInstance formInstance);
+	public void clearParsedFiles() ;
 }

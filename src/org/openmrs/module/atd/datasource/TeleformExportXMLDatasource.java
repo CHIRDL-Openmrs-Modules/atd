@@ -56,6 +56,11 @@ public class TeleformExportXMLDatasource implements LogicDataSource
 	{
 		this.logicTeleformExportDAO.deleteParsedFile(formInstance);
 	}
+	
+	public void clearParsedFile()
+	{
+	    this.logicTeleformExportDAO.clearParsedFiles();
+	}
 
 	/* (non-Javadoc)
 	 * @see org.openmrs.logic.datasource.LogicDataSource#getDefaultTTL()

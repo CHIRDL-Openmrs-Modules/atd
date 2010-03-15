@@ -426,4 +426,13 @@ public class XMLLogicTeleformExportDAO implements LogicTeleformExportDAO
 		return xmlResults;
 	}
 
+	
+	public void clearParsedFiles() {
+	    if(parsedFiles != null && !parsedFiles.isEmpty()) {
+	        log.info("Before clearing parsedFile, No. of elements" + parsedFiles.size());
+	        parsedFiles.clear();
+	        log.info("After clearing parsedFile, No. of elements" + parsedFiles.size());
+	    }
+	}
+	
 }

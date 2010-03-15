@@ -75,7 +75,10 @@ public class ATDStatesCron extends AbstractTask
 			
 			ss.shutdownTask(teleformTaskDefinition); //stop the TeleformMonitor task to prevent data corruption
 			atdService.updatePatientStates(thresholdDate);  // retires states
+			// Clear the cached data
+			atdService.cleanCache();
 			ss.scheduleTask(teleformTaskDefinition); //start the TeleformMonitor task after the states are retired
+			
 			
 			log.info("ATD States were retired last on: " + this.lastRunDate.toString());
 			
