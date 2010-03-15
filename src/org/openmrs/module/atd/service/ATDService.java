@@ -156,4 +156,6 @@ public interface ATDService
 	public Program getProgram(Integer locationTagId,Integer locationId);
 	
 	public List<FormAttributeValue> getFormAttributeValuesByValue(String value);
+	
+	public void cleanCache();
 	}

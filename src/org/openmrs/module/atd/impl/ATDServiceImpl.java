@@ -379,7 +379,7 @@ public class ATDServiceImpl implements ATDService
 				Map<String, Object> parameters = 
 					rule.getParameters();
 					
-				if(baseParameters != null)
+				if(baseParameters != null);
 				{
 					parameters.putAll(baseParameters);
 				}
@@ -914,4 +914,12 @@ public class ATDServiceImpl implements ATDService
 	public List<FormAttributeValue> getFormAttributeValuesByValue(String value){
 		return getATDDAO().getFormAttributeValuesByValue(value);
 	}
+
+    @Override
+    public void cleanCache() {
+        log.info("Clear the cache if any");
+        // parsedFile belongs to ATD, deal in there
+        ((TeleformExportXMLDatasource) Context.getLogicService().getLogicDataSource("xml")).clearParsedFile();
+        
+    }
 }
