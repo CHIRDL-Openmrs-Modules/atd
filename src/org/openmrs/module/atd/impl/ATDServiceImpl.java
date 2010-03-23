@@ -915,7 +915,6 @@ public class ATDServiceImpl implements ATDService
 		return getATDDAO().getFormAttributeValuesByValue(value);
 	}
 
-    @Override
     public void cleanCache() {
         log.info("Clear the cache if any");
         // parsedFile belongs to ATD, deal in there
