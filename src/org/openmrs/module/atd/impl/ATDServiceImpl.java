@@ -379,7 +379,7 @@ public class ATDServiceImpl implements ATDService
 				Map<String, Object> parameters = 
 					rule.getParameters();
 					
-				if(baseParameters != null);
+				if(baseParameters != null)
 				{
 					parameters.putAll(baseParameters);
 				}
