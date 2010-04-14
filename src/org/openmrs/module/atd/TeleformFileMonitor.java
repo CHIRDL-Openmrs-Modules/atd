@@ -544,12 +544,11 @@ public class TeleformFileMonitor extends AbstractTask
 							input.close();
 
 							if(formInstance == null){
-							    String nFilename = null;
-							    
-							    if( (nFilename = Context.getAdministrationService().getGlobalProperty("chirdlutil.archiveDirectory")) == null)
-							        throw new Exception("chirdlutil.archiveDirectory is NOT defined");
-							    nFilename = nFilename + File.separator  + filename.substring(filename.lastIndexOf(File.separator)+1) + "." + (new Date()).getTime();
-							    org.openmrs.module.chirdlutil.util.IOUtil.renameFile(filename, nFilename);
+							    // Strictly Stick to what was asked in the Chica's Ticket #216 (the request in the ticket was just updated today),
+							    // with the addition of the extra backward slashs around 'bad scans' to make it compilable.   
+							    IOUtil.copyFile(filename,currExportDirectory+"\\bad scans\\"+ IOUtil.getFilenameWithoutExtension(filename)+".xml"); 
+							    IOUtil.deleteFile(filename); 
+
 								continue;
 							}
 							
