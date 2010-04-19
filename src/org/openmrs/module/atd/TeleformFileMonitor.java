@@ -544,11 +544,17 @@ public class TeleformFileMonitor extends AbstractTask
 							input.close();
 
 							if(formInstance == null){
-							    // Strictly Stick to what was asked in the Chica's Ticket #216 (the request in the ticket was just updated today),
-							    // with the addition of the extra backward slashs around 'bad scans' to make it compilable.   
-							    IOUtil.copyFile(filename,currExportDirectory+"\\bad scans\\"+ IOUtil.getFilenameWithoutExtension(filename)+".xml"); 
-							    IOUtil.deleteFile(filename); 
-
+							    try {
+	                                // Strictly Stick to what was asked in the Chica's Ticket #216 (the request in the ticket was just updated today),
+	                                // with the addition of the extra backward slashs around 'bad scans' to make it compilable.   
+	                                IOUtil.copyFile(filename,currExportDirectory+"\\bad scans\\"
+	                                        + IOUtil.getFilenameWithoutExtension(filename) + ".xml");
+	                                IOUtil.deleteFile(filename);
+                                }
+                                catch (Exception e) {
+									log.error("Could not copy " + filename + " to " + currExportDirectory + "\\bad scans\\"
+									        + IOUtil.getFilenameWithoutExtension(filename) + ".xml");
+                                }
 								continue;
 							}
 							
