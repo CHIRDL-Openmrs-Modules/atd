@@ -25,6 +25,8 @@ import org.openmrs.module.chirdlutil.util.Util;
 /**
  * @author Tammy Dugan
  * 
+ * Do NOT synchronize these methods. I tried it and it
+ * caused deadlocks. tmdugan 4/28/10
  */
 public class StateManager
 {

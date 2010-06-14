@@ -1,7 +1,6 @@
 package org.openmrs.module.atd.impl;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -32,9 +31,6 @@ import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
 import org.openmrs.module.atd.ParameterHandler;
-import org.openmrs.module.atd.action.ProcessStateAction;
-import org.openmrs.module.atd.action.ProduceJIT;
-import org.openmrs.module.atd.StateManager;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.db.ATDDAO;
@@ -54,16 +50,13 @@ import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ATD related service implementations
  * 
  * @author Tammy Dugan
  */
-@Transactional
 public class ATDServiceImpl implements ATDService
 {
 	private Log log = LogFactory.getLog(this.getClass());
@@ -393,19 +386,19 @@ public class ATDServiceImpl implements ATDService
 	
 	public boolean produce(Patient patient, FormInstance formInstance,
 			OutputStream customOutput, Integer encounterId,
-			boolean generateJITS, Integer locationTagId,Integer sessionId)
+			Integer locationTagId,Integer sessionId,State produceState)
 	{
 		return this.produce(patient,formInstance,customOutput,encounterId,null,null,
-				generateJITS,locationTagId,sessionId);
+				locationTagId,sessionId);
 	}
 
 	public boolean produce(Patient patient, FormInstance formInstance,
 			OutputStream customOutput, DssManager dssManager,
-			Integer encounterId, boolean generateJITS,Integer locationTagId,
+			Integer encounterId, Integer locationTagId,
 			Integer sessionId)
 	{
 		return this.produce(patient, formInstance, customOutput, 
-				dssManager, encounterId, null,null,generateJITS,
+				dssManager, encounterId, null,null,
 				locationTagId,sessionId);
 	}
 	
@@ -414,20 +407,20 @@ public class ATDServiceImpl implements ATDService
 			Integer encounterId,
 			Map<String,Object> baseParameters,
 			String rulePackagePrefix,
-			boolean generateJITS,Integer locationTagId,
+			Integer locationTagId,
 			Integer sessionId)
 	{
 		DssManager dssManager = new DssManager(patient);
 		return this.produce(patient, formInstance, customOutput,
 				dssManager, encounterId,baseParameters,
-				rulePackagePrefix, generateJITS,locationTagId,sessionId);
+				rulePackagePrefix, locationTagId,sessionId);
 	}
 	
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
 			DssManager dssManager,Integer encounterId,
 			Map<String,Object> baseParameters,String rulePackagePrefix,
-			boolean generateJITS, Integer locationTagId,Integer sessionId)
+			 Integer locationTagId,Integer sessionId)
 	{
 		long totalTime = System.currentTimeMillis();
 		long startTime = System.currentTimeMillis();
@@ -482,65 +475,6 @@ public class ATDServiceImpl implements ATDService
 		}
 		
 		startTime = System.currentTimeMillis();
-		// print the JITs here so they are created right after the form is produced
-		if (generateJITS)
-		{
-			if (sessionId != null)
-				{
-					//Look for all unfinished JIT states for this session
-					boolean moreJITs = true;
-					while (moreJITs)
-					{
-						PatientState lastUnfinishedState = getLastUnfinishedPatientState(sessionId);
-						if (lastUnfinishedState != null
-								&& lastUnfinishedState.getState().getAction() != null
-								&& lastUnfinishedState.getState().getAction()
-										.getActionName().equals("PRODUCE JIT"))
-						{
-							ProcessStateAction processStateAction = null;
-							
-							try
-							{
-								StateAction stateAction = lastUnfinishedState.getState().getAction();
-								if (stateAction != null)
-								{
-									String stateActionClass = stateAction
-										.getActionClass();
-									if (stateActionClass != null)
-									{
-										Class classInstatiation = Class
-											.forName(stateActionClass);
-
-										// class the initialization method is in
-										processStateAction = (ProcessStateAction) classInstatiation
-											.newInstance();
-									}
-								}
-							} catch (Exception e)
-							{
-								log.error(e.getMessage());
-								log.error(org.openmrs.module.chirdlutil.util.Util.getStackTrace(e));
-							}
-							try
-							{
-								if(processStateAction != null){
-									processStateAction.processAction(
-										lastUnfinishedState.getState().getAction(),
-										patient, lastUnfinishedState, null);
-								}
-							} catch (Exception e)
-							{
-								log.error("", e);
-							}
-							
-						} else
-						{
-							moreJITs = false;
-						}
-					}
-				}
-		}
-
 		startTime = System.currentTimeMillis();
 		this.saveDssElementsToDatabase(patient,formInstance,
 				dssManager,encounterId);
@@ -914,11 +848,21 @@ public class ATDServiceImpl implements ATDService
 	public List<FormAttributeValue> getFormAttributeValuesByValue(String value){
 		return getATDDAO().getFormAttributeValuesByValue(value);
 	}
-
+	
+	public List<PatientState> getUnfinishedPatientStateByStateSession(
+		String stateName,Integer sessionId){
+		return getATDDAO().getUnfinishedPatientStateByStateSession(stateName, sessionId);
+	}
+	
     public void cleanCache() {
         log.info("Clear the cache if any");
         // parsedFile belongs to ATD, deal in there
         ((TeleformExportXMLDatasource) Context.getLogicService().getLogicDataSource("xml")).clearParsedFile();
         
     }
+    
+	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state) {
+		return getATDDAO().getPatientStateByFormInstanceState(formInstance, state);
+	}
+
 }

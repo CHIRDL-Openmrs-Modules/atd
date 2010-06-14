@@ -27,12 +27,14 @@ import org.openmrs.module.atd.hibernateBeans.State;
 import org.openmrs.module.atd.hibernateBeans.StateMapping;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ATD related services
  * 
  * @author Tammy Dugan
  */
+@Transactional
 public interface ATDService
 {
 	
@@ -55,14 +57,14 @@ public interface ATDService
 			FormInstance formInstance, OutputStream customOutput, 
 			DssManager dssManager,Integer encounterId,
 			Map<String,Object> baseParameters,String rulePackagePrefix,
-			boolean generateJITS, Integer locationTagId,Integer sessionId);
+			Integer locationTagId,Integer sessionId);
 	
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
 			Integer encounterId,
 			Map<String,Object> baseParameters,
 			String rulePackagePrefix,
-			boolean generateJITS, Integer locationTagId,Integer sessionId);
+			Integer locationTagId,Integer sessionId);
 	
 	public FormInstance addFormInstance(Integer formId, Integer locationId);
 	
@@ -156,6 +158,11 @@ public interface ATDService
 	public Program getProgram(Integer locationTagId,Integer locationId);
 	
 	public List<FormAttributeValue> getFormAttributeValuesByValue(String value);
-	
+		
 	public void cleanCache();
-	}
+	
+	public List<PatientState> getUnfinishedPatientStateByStateSession(
+		String stateName,Integer sessionId);
+	
+	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state);
+}

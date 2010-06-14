@@ -487,13 +487,19 @@ public class TeleformTranslator
 		try
 		{
 			XMLUtil.serializeXML(records, output);
-			output.flush();
-			output.close();
 			
 		} catch (Exception e)
 		{
 			this.log.error(e.getMessage());
 			this.log.error(Util.getStackTrace(e));
+		}finally{
+			try {
+	            output.flush();
+	            output.close();
+            }
+            catch (IOException e) {
+	            log.error("Error generated", e);
+            }
 		}
 	}
 	

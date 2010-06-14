@@ -140,4 +140,9 @@ public interface ATDDAO {
 	public Program getProgram(Integer locationTagId,Integer locationId);
 	
 	public List<FormAttributeValue> getFormAttributeValuesByValue(String value);
+	
+	public List<PatientState> getUnfinishedPatientStateByStateSession(
+		String stateName,Integer sessionId);
+	
+	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state);
 }

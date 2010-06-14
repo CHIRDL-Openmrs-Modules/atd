@@ -635,14 +635,29 @@ public class TeleformFileMonitor extends AbstractTask
 							//see if consume exists for the session
 							//if so, then it is a rescan
 							
-							String stateName = formName+"_process";
+							String stateName = null;
+							
+							//if a form name is not configured assume JIT
+							if(patientState.getState().getFormName() != null){
+								stateName = formName+"_process";
+							}else
+							{
+								stateName = "JIT_process";
+							}
+							
 							State state = atdService.getStateByName(stateName);
 							List<PatientState> patientStates = atdService.
 									getPatientStateBySessionState(sessionId, state.getStateId());
 							
 							if (patientStates!=null&&patientStates.size()>0)
-							{	
-									stateName = formName + "_rescan";
+							{		
+									//assume JIT if no form name is configured
+									if(patientState.getState().getFormName() != null){
+										stateName = formName+"_rescan";
+									}else
+									{
+										stateName = "JIT_rescan";
+									}
 									State currState = atdService
 											.getStateByName(stateName);
 									action = "PRODUCE FORM INSTANCE";
@@ -656,7 +671,6 @@ public class TeleformFileMonitor extends AbstractTask
 												patientState.getSessionId(),
 												patientState.getLocationTagId(),
 												patientState.getLocationId());
-										patientState = atdService.updatePatientState(patientState);
 										tfFileState = new TeleformFileState();
 										String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstance.toString()+"_rescan.20";
 										

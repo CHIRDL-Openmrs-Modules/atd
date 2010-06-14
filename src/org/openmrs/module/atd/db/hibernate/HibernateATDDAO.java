@@ -15,6 +15,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
+import org.hibernate.Transaction;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
@@ -107,79 +109,138 @@ public class HibernateATDDAO implements ATDDAO
 			this.log.error(Util.getStackTrace(e));
 		}
 	}
-
-	public FormInstance addFormInstance(Integer formId,
-			Integer locationId)
-	{
-		try
-		{
+	
+	private Integer insertFormInstance(Integer formId, Integer locationId) {
+		try {
 			FormService formService = Context.getFormService();
 			Form form = formService.getForm(formId);
 			String formName = form.getName();
 			// This is a work around since I couldn't get hibernate to create
 			// a two column auto-generated key
-			Connection con = this.sessionFactory.getCurrentSession()
-					.connection();
+			StatelessSession session = this.sessionFactory.openStatelessSession();
+			Transaction tx = session.beginTransaction();
+			Connection con = session.connection();
 			int rowsInserted = 0;
 			String sql = "insert into atd_form_instance(form_instance_id,form_id,location_id) "
-					+ " select max(form_instance_id),?,? from (select form_instance_id from  ("+
-					" select max(form_instance_id)+1 as form_instance_id,location_id "+
-					" from atd_form_instance where location_id=? and form_id in "+
-					" (select form_id from form where name=?) group by location_id)a"+
-					" union select 1 from dual)a";
-			try
-			{
-				PreparedStatement stmt = con.prepareStatement(sql);
-				stmt.setInt(1,formId);
+			        + " select max(form_instance_id),?,? from (select form_instance_id from  ("
+			        + " select max(form_instance_id)+1 as form_instance_id,location_id "
+			        + " from atd_form_instance where location_id=? and form_id in "
+			        + " (select form_id from form where name=?) group by location_id)a" + " union select 1 from dual)a";
+			PreparedStatement stmt = null;
+			try {
+				stmt = con.prepareStatement(sql);
+				stmt.setInt(1, formId);
 				stmt.setInt(2, locationId);
 				stmt.setInt(3, locationId);
 				stmt.setString(4, formName);
 				
 				rowsInserted = stmt.executeUpdate();
-				stmt.close();
-				con.commit();
-			} catch (Exception e)
-			{
+			}
+			catch (Exception e) {
 				this.log.error(e.getMessage());
 				this.log.error(Util.getStackTrace(e));
+			}finally{
+				try {
+	                if(stmt != null){
+	                	stmt.close();
+	                }
+	                if(tx != null){
+	                	tx.commit();
+	                }
+	                if(session != null){
+	                	session.close();
+	                }
+                }
+                catch (Exception e) {
+	                log.error("Error generated", e);
+                }
 			}
+			
+			return rowsInserted;
+			
+		}
+		catch (Exception e) {
+			log.error(Util.getStackTrace(e));
+		}
+		return 0;
+	}
 
-			if (rowsInserted > 0)
-			{
-				sql = "select max(form_instance_id) as form_instance_id,"+
-				"? as form_id,location_id from atd_form_instance where location_id=? "+
-				"and form_id in (select form_id from form where name=?) "+
-				"group by location_id";
-				SQLQuery qry = this.sessionFactory.getCurrentSession()
-						.createSQLQuery(sql);
-				qry.setInteger(0, formId);
-				qry.setInteger(1, locationId);
-				qry.setString(2, formName);
-				qry.addEntity(FormInstance.class);
 
-				List<FormInstance> list = qry.list();
+	public FormInstance addFormInstance(Integer formId, Integer locationId) {
+		PreparedStatement stmt = null;
+		Transaction tx = null;
+		StatelessSession session = null;
+		try {
+			Integer rowsInserted = insertFormInstance(formId, locationId);
+			
+			if (rowsInserted > 0) {
+				FormService formService = Context.getFormService();
+				Form form = formService.getForm(formId);
+				String formName = form.getName();
+				session = this.sessionFactory.openStatelessSession();
+				tx = session.beginTransaction();
+				Connection con = session.connection();
+				String sql = "select max(form_instance_id) as form_instance_id,"
+				        + "? as form_id,location_id from atd_form_instance where location_id=? "
+				        + "and form_id in (select form_id from form where name=?) " + "group by location_id";
+			
 
-				if (list != null && list.size() > 0)
-				{
-					return list.get(0);
+				stmt = con.prepareStatement(sql);
+				stmt.setInt(1, formId);
+				stmt.setInt(2, locationId);
+				stmt.setString(3, formName);
+				
+				ResultSet rs = stmt.executeQuery();
+				if(rs.next()){
+					Integer formInstanceId = rs.getInt(1);
+					formId = rs.getInt(2);
+					locationId = rs.getInt(3);
+					FormInstance formInstance = new FormInstance(locationId,formId,formInstanceId);
+					return formInstance;
 				}
 			}
-
-		} catch (Exception e)
-		{
+			
+		}
+		catch (Exception e) {
 			log.error(Util.getStackTrace(e));
+		}finally{
+			try {
+                if(stmt != null){
+                	stmt.close();
+                }
+                if(tx != null){
+                	tx.commit();
+                }
+                if(session != null){
+                	session.close();
+                }
+            }
+            catch (Exception e) {
+                log.error("Error generated", e);
+            }
 		}
 		return null;
 	}
 
-	public PatientATD addPatientATD(PatientATD patientATD)
-	{
-		try
-		{
-			this.sessionFactory.getCurrentSession().save(patientATD);
-		} catch (Exception e)
-		{
-			log.error(Util.getStackTrace(e));
+	public PatientATD addPatientATD(PatientATD patientATD) {
+		StatelessSession sess = this.sessionFactory.openStatelessSession();
+		Transaction tx = null;
+		try {
+			tx = sess.beginTransaction();
+			
+			sess.insert(patientATD);
+			
+			tx.commit();
+		}
+		catch (Exception e) {
+			if (tx != null)
+				tx.rollback();
+			log.error("", e);
+		}
+		finally {
+			if(sess != null){
+				sess.close();
+			}
 		}
 		return patientATD;
 	}
@@ -453,16 +514,35 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
-	public PatientState addUpdatePatientState(PatientState patientState)
-	{
-		try
-		{
-			return (PatientState) this.sessionFactory.getCurrentSession().merge(patientState);
-		} catch (Exception e)
-		{
-			log.error(Util.getStackTrace(e));
+	public PatientState addUpdatePatientState(PatientState patientState) {
+		StatelessSession sess = this.sessionFactory.openStatelessSession();
+		Transaction tx = null;
+		try {
+			tx = sess.beginTransaction();
+
+			//if there is no patient state id, that means this
+			//is a new state that needs to be inserted
+			//otherwise update
+			if(patientState.getPatientStateId() == null){
+				sess.insert(patientState);
+			}else{
+				sess.update(patientState);
+			}
+			
+			tx.commit();
 		}
-		return null;
+		catch (Exception e) {
+			if (tx != null)
+				tx.rollback();
+			log.error("", e);
+		}
+		finally {
+			if(sess != null){
+				sess.close();
+			}
+		}
+		
+		return patientState;
 	}
 
 	public StateAction getStateActionByName(String action)
@@ -482,29 +562,34 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 	
-	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
-			Integer stateId)
-			{
-
-				try
-				{
-					String sql = "select * from atd_patient_state where session_id in "+
-					"(select session_id from atd_session where encounter_id=?) and "+
-					"state=? order by start_time desc, end_time desc";
-					SQLQuery qry = this.sessionFactory.getCurrentSession()
-							.createSQLQuery(sql);
-					qry.setInteger(0, encounterId);
-					qry.setInteger(1, stateId);
-					qry.addEntity(PatientState.class);
-
-					return qry.list();
-
-				} catch (Exception e)
-				{
-					log.error(Util.getStackTrace(e));
-				}
-				return null;
+	public List<PatientState> getPatientStateByEncounterState(Integer encounterId, Integer stateId) {
+		StatelessSession sess = this.sessionFactory.openStatelessSession();
+		Transaction tx = null;
+		try {
+			tx = sess.beginTransaction();
+			String sql = "select * from atd_patient_state where session_id in "
+			        + "(select session_id from atd_session where encounter_id=?) and "
+			        + "state=? order by start_time desc, end_time desc";
+			SQLQuery qry = sess.createSQLQuery(sql);
+			qry.setInteger(0, encounterId);
+			qry.setInteger(1, stateId);
+			qry.addEntity(PatientState.class);
+			
+			return qry.list();
+			
+		}
+		catch (Exception e) {
+			if (tx != null)
+				tx.rollback();
+			log.error("", e);
+		}
+		finally {
+			if (sess != null) {
+				sess.close();
 			}
+		}
+		return null;
+	}
 
 	public List<PatientState> getPatientStateBySessionState(Integer sessionId,
 			Integer stateId)
@@ -602,6 +687,40 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return null;
 	}
+	
+	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state) {
+		StatelessSession sess = this.sessionFactory.openStatelessSession();
+		Transaction tx = null;
+		try {
+			tx = sess.beginTransaction();
+			
+			Integer stateId = state.getStateId();
+			// limit to states for the session that match the form id
+			String sql = "select * from atd_patient_state where form_instance_id=? "
+			        + "and form_id=? and location_id=? and retired=? and state=? "
+			        + "order by start_time desc, end_time desc";
+			SQLQuery qry = sess.createSQLQuery(sql);
+			qry.setInteger(0, formInstance.getFormInstanceId());
+			qry.setInteger(1, formInstance.getFormId());
+			qry.setInteger(2, formInstance.getLocationId());
+			qry.setBoolean(3, false);
+			qry.setInteger(4, stateId);
+			qry.addEntity(PatientState.class);
+			
+			return qry.list();
+		}
+		catch (Exception e) {
+			if (tx != null)
+				tx.rollback();
+			log.error("", e);
+		}
+		finally {
+			if(sess != null){
+				sess.close();
+			}
+		}
+		return null;
+	}
 
 	public List<PatientState> getUnfinishedPatientStateByStateName(
 			String stateName, Date optionalDateRestriction, 
@@ -637,6 +756,31 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return null;
 	}
+	
+	public List<PatientState> getUnfinishedPatientStateByStateSession(
+		String stateName,Integer sessionId)
+{
+	try
+	{
+		State state = this.getStateByName(stateName);
+		
+		String sql = "select * from atd_patient_state where state in "
+				+ "(?) and end_time is null and retired=? and session_id=? "
+				+ " order by start_time desc";
+		SQLQuery qry = this.sessionFactory.getCurrentSession()
+				.createSQLQuery(sql);
+		qry.setInteger(0, state.getStateId());
+		qry.setBoolean(1,false);
+		qry.setInteger(2,sessionId);
+		qry.addEntity(PatientState.class);
+
+		return qry.list();
+	} catch (Exception e)
+	{
+		log.error(Util.getStackTrace(e));
+	}
+	return null;
+}
 
 	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction, 
 			Integer locationTagId, Integer locationId)
