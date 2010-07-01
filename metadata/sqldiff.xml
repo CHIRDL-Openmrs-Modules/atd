@@ -62,7 +62,7 @@ CREATE TABLE atd_patient_atd (
   KEY pat_atd_fk_field (field_id),
   KEY pat_atd_fk_rule (rule_id),
   KEY pat_atd_fk_encounter (encounter_id), 
-  KEY `pat_atd_idx_field` (`form_id`,`field_id`,`form_instance_id`,`location_id`),
+  KEY `pat_atd_idx_field` (`form_id`,`field_id`,`form_instance_id`),
   CONSTRAINT pat_atd_fk_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
   CONSTRAINT pat_atd_fk_form FOREIGN KEY (form_id) REFERENCES form (form_id),
   CONSTRAINT pat_atd_fk_field FOREIGN KEY (field_id) REFERENCES field (field_id),
