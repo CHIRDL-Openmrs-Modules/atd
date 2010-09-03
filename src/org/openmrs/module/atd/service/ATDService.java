@@ -165,4 +165,11 @@ public interface ATDService
 		String stateName,Integer sessionId);
 	
 	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state);
+	
+	public List<PatientState> getPatientStatesByFormInstance(FormInstance formInstance, boolean isRetired);
+	
+	public void unretireStatesBySessionId(Integer sessionId);
+
+	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired);
+
 }

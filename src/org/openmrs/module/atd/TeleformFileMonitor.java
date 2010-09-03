@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
+import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
@@ -42,6 +44,7 @@ import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientState;
 import org.openmrs.module.atd.hibernateBeans.State;
+import org.openmrs.module.atd.hibernateBeans.StateAction;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
@@ -618,94 +621,124 @@ public class TeleformFileMonitor extends AbstractTask
 							}
 							
 						}else{
-							//This means we have found a .xml file that is not in pending processing.
-							//This is most likely a rescan. We need to see if a scan already exists
-							//for the session that has this formInstance
-							String action = "PRODUCE FORM INSTANCE";
 							
-							//get the session that goes with this formInstanceId
-							PatientState patientState = atdService
-								.getPatientStateByFormInstanceAction(
-									formInstance, action);
-					
-							if(patientState != null){
-							String formName = formService.getForm(formInstance.getFormId()).getName();
+							//see if it is retired 
+							List<PatientState> states = atdService.getPatientStatesByFormInstance(formInstance,true);
 							
-							Integer sessionId = patientState.getSessionId();
-							//see if consume exists for the session
-							//if so, then it is a rescan
-							
-							String stateName = null;
-							
-							//if a form name is not configured assume JIT
-							if(patientState.getState().getFormName() != null){
-								stateName = formName+"_process";
-							}else
-							{
-								stateName = "JIT_process";
-							}
-							
-							State state = atdService.getStateByName(stateName);
-							List<PatientState> patientStates = atdService.
-									getPatientStateBySessionState(sessionId, state.getStateId());
-							
-							if (patientStates!=null&&patientStates.size()>0)
-							{		
-									//assume JIT if no form name is configured
-									if(patientState.getState().getFormName() != null){
-										stateName = formName+"_rescan";
-									}else
-									{
-										stateName = "JIT_rescan";
+							if (states != null && states.size() > 0) {
+								PatientState firstState = states.get(0);
+								atdService.unretireStatesBySessionId(firstState.getSessionId());
+								states = 
+									atdService.getPatientStatesBySession(firstState.getSessionId(), false);
+								
+								for (PatientState formInstState : states) {
+									
+									//only process unfinished states for this sessionId
+									if(formInstState.getEndTime() != null){
+										continue;
 									}
-									State currState = atdService
-											.getStateByName(stateName);
-									action = "PRODUCE FORM INSTANCE";
-									patientState = atdService
-											.getPatientStateByFormInstanceAction(
-													formInstance, action);
-									try
-									{
-										patientState = atdService.addPatientState(
-												patientState.getPatient(), currState,
-												patientState.getSessionId(),
-												patientState.getLocationTagId(),
-												patientState.getLocationId());
-										tfFileState = new TeleformFileState();
-										String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstance.toString()+"_rescan.20";
-										
-										File newFile = new File(newFilename);
-										if(newFile.exists()){
-											IOUtil.deleteFile(newFilename);
+									
+									StateAction stateAction = formInstState.getState().getAction();
+									Patient patient = formInstState.getPatient();
+									
+									try {
+										if (stateAction != null
+										        && (stateAction.getActionName().equalsIgnoreCase("CONSUME FORM INSTANCE"))) {
+											TeleformFileState teleformFileState = TeleformFileMonitor
+											        .addToPendingStatesWithoutFilename(formInstState.getFormInstance());
+											teleformFileState.addParameter("patientState", formInstState);
 										}
-										IOUtil.renameFile(filename, newFilename);
-										//if file rename fails, don't continue processing otherwise
-										//the file will be processed more than once
-										newFile = new File(newFilename);
-										if(!newFile.exists()){
-											continue;
+										HashMap<String, Object> parameters = new HashMap<String, Object>();
+										parameters.put("formInstance", formInstState.getFormInstance());
+										BaseStateActionHandler handler = BaseStateActionHandler.getInstance();
+										handler.processAction(stateAction, patient, formInstState, parameters);
+									}
+									catch (Exception e) {
+										log.error(e.getMessage());
+										log.error(org.openmrs.module.chirdlutil.util.Util.getStackTrace(e));
+									}
+								}
+							} else {
+								
+								//This means we have found a .xml file that is not in pending processing.
+								//This is most likely a rescan. We need to see if a scan already exists
+								//for the session that has this formInstance
+								String action = "PRODUCE FORM INSTANCE";
+								
+								//get the session that goes with this formInstanceId
+								PatientState patientState = atdService.getPatientStateByFormInstanceAction(formInstance,
+								    action);
+								
+								if (patientState != null) {
+									String formName = formService.getForm(formInstance.getFormId()).getName();
+									
+									Integer sessionId = patientState.getSessionId();
+									//see if consume exists for the session
+									//if so, then it is a rescan
+									
+									String stateName = null;
+									
+									//if a form name is not configured assume JIT
+									if (patientState.getState().getFormName() != null) {
+										stateName = formName + "_process";
+									} else {
+										stateName = "JIT_process";
+									}
+									
+									State state = atdService.getStateByName(stateName);
+									List<PatientState> patientStates = atdService.getPatientStateBySessionState(sessionId,
+									    state.getStateId());
+									
+									if (patientStates != null && patientStates.size() > 0) {
+										//assume JIT if no form name is configured
+										if (patientState.getState().getFormName() != null) {
+											stateName = formName + "_rescan";
+										} else {
+											stateName = "JIT_rescan";
 										}
-										tfFileState.setFullFilePath(newFilename);
-										tfFileState.setFormInstance(formInstance);
-										tfFileState.addParameter("patientState",
-												patientState);
-										if (stateName.equalsIgnoreCase("PWS_wait_to_scan") || 
-												stateName.equalsIgnoreCase("PWS_process")
-										        || stateName.equalsIgnoreCase("PWS_rescan")) {
-											pwsStatesToProcess.add(tfFileState);
-										}else{
-											ignorePWSs = true;
-											listTFstatesProcessed.add(tfFileState);
+										State currState = atdService.getStateByName(stateName);
+										action = "PRODUCE FORM INSTANCE";
+										patientState = atdService.getPatientStateByFormInstanceAction(formInstance, action);
+										try {
+											patientState = atdService.addPatientState(patientState.getPatient(), currState,
+											    patientState.getSessionId(), patientState.getLocationTagId(), patientState
+											            .getLocationId());
+											tfFileState = new TeleformFileState();
+											String newFilename = IOUtil.getDirectoryName(filename) + "/"
+											        + formInstance.toString() + "_rescan.20";
+											
+											File newFile = new File(newFilename);
+											if (newFile.exists()) {
+												IOUtil.deleteFile(newFilename);
+											}
+											IOUtil.renameFile(filename, newFilename);
+											//if file rename fails, don't continue processing otherwise
+											//the file will be processed more than once
+											newFile = new File(newFilename);
+											if (!newFile.exists()) {
+												continue;
+											}
+											tfFileState.setFullFilePath(newFilename);
+											tfFileState.setFormInstance(formInstance);
+											tfFileState.addParameter("patientState", patientState);
+											if (stateName.equalsIgnoreCase("PWS_wait_to_scan")
+											        || stateName.equalsIgnoreCase("PWS_process")
+											        || stateName.equalsIgnoreCase("PWS_rescan")) {
+												pwsStatesToProcess.add(tfFileState);
+											} else {
+												ignorePWSs = true;
+												listTFstatesProcessed.add(tfFileState);
+											}
 										}
-									} catch (Exception e)
-									{
-										log.error("RESCAN for formInstanceId: "
-												+ formInstance.getFormInstanceId() + " failed.");
-										log.error(Util.getStackTrace(e));
+										catch (Exception e) {
+											log.error("RESCAN for formInstanceId: " + formInstance.getFormInstanceId()
+											        + " failed.");
+											log.error(Util.getStackTrace(e));
+										}
 									}
 								}
 							}
-					}
+						}
 					}
 				} catch (Exception e)
 				{

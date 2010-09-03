@@ -145,4 +145,9 @@ public interface ATDDAO {
 		String stateName,Integer sessionId);
 	
 	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state);
+	
+	public List<PatientState> getPatientStatesByFormInstance(FormInstance formInstance, boolean isRetired);
+
+	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired);
+
 }

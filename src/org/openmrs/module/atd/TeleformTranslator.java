@@ -240,35 +240,15 @@ public class TeleformTranslator
 		LinkedHashMap<FormField,Object> fieldToResult = 
 			new LinkedHashMap<FormField,Object>();
 		
-		//-----------start set rule parameters
-		HashMap<String,Object> parameters = new HashMap<String,Object>();
-
-		parameters.put("sessionId", sessionId);
-		parameters.put("formInstance", formInstance);
-		parameters.put("locationTagId", locationTagId);
 		EncounterService encounterService = Context.getEncounterService();
 		Encounter encounter = encounterService.getEncounter(encounterId);
 		Integer locationId = encounter.getLocation().getLocationId();
-		parameters.put("locationId",locationId);
 		LocationService locationService = Context.getLocationService();
 		Location location = locationService.getLocation(locationId);
 		String locationName = null;
 		if(location != null){
 			locationName = location.getName();
 		}
-		parameters.put("location", locationName);
-		if(encounterId != null)
-		{
-			parameters.put("encounterId", encounterId);
-		}
-		
-		parameters.put("mode", mode);
-		
-		if(baseParameters != null)
-		{
-			parameters.putAll(baseParameters);
-		}
-		//-----------end set rule parameters
 		
 		HashMap<String,Integer> dssMergeCounters = 
 			new HashMap<String,Integer>();
@@ -282,6 +262,28 @@ public class TeleformTranslator
 		long totalEvaluateRule = 0;
 		for(FormField currFormField:formFields)
 		{
+			//-----------start set rule parameters
+			HashMap<String,Object> parameters = new HashMap<String,Object>();
+
+			parameters.put("sessionId", sessionId);
+			parameters.put("formInstance", formInstance);
+			parameters.put("locationTagId", locationTagId);
+			parameters.put("locationId",locationId);
+			parameters.put("location", locationName);
+			if(encounterId != null)
+			{
+				parameters.put("encounterId", encounterId);
+			}
+			
+			parameters.put("mode", mode);
+			
+			if(baseParameters != null)
+			{
+				parameters.putAll(baseParameters);
+			}
+			//-----------end set rule parameters
+
+
 			fieldToResult.put(currFormField, null);//initially map field with no result
 			
 			Field currField = currFormField.getField();
@@ -441,10 +443,25 @@ public class TeleformTranslator
 		DssService dssService = Context.getService(DssService.class);
 		List<Rule> nonPriorRules = dssService.getNonPrioritizedRules(form.getName());
 		
-		parameters.put("concept", null);
 		long totalRunRule = 0;
 		for (Rule currRule : nonPriorRules)
 		{
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("sessionId", sessionId);
+			parameters.put("formInstance", formInstance);
+			parameters.put("locationTagId", locationTagId);
+			parameters.put("locationId", locationId);
+			parameters.put("location", locationName);
+			if(encounterId != null)
+			{
+				parameters.put("encounterId", encounterId);
+			}
+			parameters.put("mode", mode);
+			if(baseParameters != null)
+			{
+				parameters.putAll(baseParameters);
+			}
+
 			if (currRule.checkAgeRestrictions(patient))
 			{
 				currRule.setParameters(parameters);

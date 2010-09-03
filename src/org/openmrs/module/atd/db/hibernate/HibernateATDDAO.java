@@ -613,6 +613,27 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return null;
 	}
+	
+	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired)
+	{
+
+	try
+	{
+		String sql = "select * from atd_patient_state where session_id=? and retired=? order by start_time desc, end_time desc";
+		SQLQuery qry = this.sessionFactory.getCurrentSession()
+				.createSQLQuery(sql);
+		qry.setInteger(0, sessionId);
+		qry.setBoolean(1, isRetired);
+		qry.addEntity(PatientState.class);
+
+		return qry.list();
+
+	} catch (Exception e)
+	{
+		log.error(Util.getStackTrace(e));
+	}
+	return null;
+}
 
 	
 	public PatientState getPatientStateByEncounterFormAction(Integer encounterId,
@@ -650,6 +671,28 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return null;
 	}
+	
+	public List<PatientState> getPatientStatesByFormInstance(FormInstance formInstance, boolean isRetired) {
+		
+		try {
+			// limit to states for the session that match the form id
+			String sql = "select * from atd_patient_state where form_instance_id=? "
+			        + "and form_id=? and location_id=? and retired=? " 
+			        + "order by start_time desc, end_time desc";
+			SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+			qry.setInteger(0, formInstance.getFormInstanceId());
+			qry.setInteger(1, formInstance.getFormId());
+			qry.setInteger(2, formInstance.getLocationId());
+			qry.setBoolean(3, isRetired);
+			qry.addEntity(PatientState.class);
+			
+			return qry.list();
+		}
+		catch (Exception e) {
+			log.error(Util.getStackTrace(e));
+		}
+		return null;
+	}
 
 	public PatientState getPatientStateByFormInstanceAction(FormInstance formInstance,
 			 String action)
@@ -658,18 +701,7 @@ public class HibernateATDDAO implements ATDDAO
 		try
 		{
 			// limit to states for the session that match the form id
-			String sql = "select * from atd_patient_state where form_instance_id=? "+
-				"and form_id=? and location_id=? and retired=? "+
-				"order by start_time desc, end_time desc";
-			SQLQuery qry = this.sessionFactory.getCurrentSession()
-					.createSQLQuery(sql);
-			qry.setInteger(0, formInstance.getFormInstanceId());
-			qry.setInteger(1,formInstance.getFormId());
-			qry.setInteger(2, formInstance.getLocationId());
-			qry.setBoolean(3, false);
-			qry.addEntity(PatientState.class);
-
-			List<PatientState> states = qry.list();
+			List<PatientState> states = getPatientStatesByFormInstance(formInstance,false);
 
 			// return the most recent state with the given action
 			for (PatientState state : states)

@@ -864,5 +864,24 @@ public class ATDServiceImpl implements ATDService
 	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state) {
 		return getATDDAO().getPatientStateByFormInstanceState(formInstance, state);
 	}
+	public List<PatientState> getPatientStatesByFormInstance(FormInstance formInstance, boolean isRetired) {
+		return getATDDAO().getPatientStatesByFormInstance(formInstance, isRetired);
+	}
+	
+	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired){
+		return getATDDAO().getPatientStatesBySession(sessionId, isRetired);
+	}
+
+	
+	public void unretireStatesBySessionId(Integer sessionId){
+		List<PatientState> patientStates = 
+			this.getPatientStatesBySession(sessionId,true);
+		
+		for(PatientState patientState:patientStates){
+			patientState.setRetired(false);
+			patientState.setDateRetired(null);
+			this.updatePatientState(patientState);
+		}
+	}
 
 }
