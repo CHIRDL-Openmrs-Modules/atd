@@ -1178,17 +1178,23 @@ public class HibernateATDDAO implements ATDDAO
 	
 	public List<PatientState> getPatientStatesWithFormInstances(String formName, Integer encounterId){
 		
-		String formRestriction = null;
-		if (formName != null)
-		{
-			formRestriction = " and form_id in (select form_id from form where name=? )";
-		} 
-		String sql = "select atdps.* from atd_patient_state atdps " 
-			+ " where session_id in (select session_id  from atd_session where encounter_id=? ) "
-			+ formRestriction + " and form_instance_id is not null order by end_time desc" ;
-		SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
-		qry.setInteger(0, encounterId);
-		qry.setString(1, formName);
+		SQLQuery qry = null;
+		
+		if (formName != null) {
+			String sql = "select a.* from atd_patient_state a " + "inner join atd_session b on a.session_id=b.session_id "
+			        + "inner join form c on a.form_id=c.form_id where " + "b.encounter_id=? and c.name=? and "
+			        + "form_instance_id is not null order by end_time desc";
+			qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+			qry.setInteger(0, encounterId);
+			qry.setString(1, formName);
+		} else {
+			String sql = "select a.* from atd_patient_state a " + "inner join atd_session b on a.session_id=b.session_id "
+			        + "where b.encounter_id=? and "
+			        + "form_instance_id is not null order by end_time desc";
+			qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+			qry.setInteger(0, encounterId);
+		}
+		
 		qry.addEntity(PatientState.class);
 		return qry.list();
 	}
