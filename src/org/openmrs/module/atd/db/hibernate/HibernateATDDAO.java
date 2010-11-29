@@ -567,9 +567,9 @@ public class HibernateATDDAO implements ATDDAO
 		Transaction tx = null;
 		try {
 			tx = sess.beginTransaction();
-			String sql = "select * from atd_patient_state where session_id in "
-			        + "(select session_id from atd_session where encounter_id=?) and "
-			        + "state=? order by start_time desc, end_time desc";
+			String sql = "select a.* from atd_patient_state a inner join atd_session b on a.session_id=b.session_id "
+			        + " where b.encounter_id=? and "
+			        + "a.state=? order by start_time desc, end_time desc";
 			SQLQuery qry = sess.createSQLQuery(sql);
 			qry.setInteger(0, encounterId);
 			qry.setInteger(1, stateId);
@@ -643,9 +643,9 @@ public class HibernateATDDAO implements ATDDAO
 		try
 		{
 			// limit to states for the session that match the form id
-			String sql = "select * from atd_patient_state where session_id in "+
-						"(select session_id from atd_session where encounter_id=?) "+
-						"and form_id=? and retired=? order by start_time desc, end_time desc";
+			String sql = "select a.* from atd_patient_state a inner join atd_session b on a.session_id=b.session_id "+
+						" where b.encounter_id=? "+
+						"and a.form_id=? and a.retired=? order by start_time desc, end_time desc";
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
 			qry.setInteger(0, encounterId);
