@@ -80,9 +80,21 @@ public class roundTwoPlace implements Rule
 	public Result eval(LogicContext context, Patient patient,
 			Map<String, Object> parameters) throws LogicException
 	{
-		if (parameters != null && parameters.get("param0") != null)
+		if (parameters != null)
 		{
-			Result ruleResult = (Result) parameters.get("param0");
+			Result ruleResult = null;
+			if (parameters.get("param0") != null) {
+				ruleResult = (Result) parameters.get("param0");
+				
+			} else {
+				if (parameters.get("param1") != null) {
+					if(parameters.get("param1") instanceof Result){
+						ruleResult = (Result) parameters.get("param1");
+					}else{
+						ruleResult = new Result(Double.valueOf(parameters.get("param1").toString()));
+					}
+				}
+			}
 			if (ruleResult != null)
 			{
 				Double value = ruleResult.toNumber();
