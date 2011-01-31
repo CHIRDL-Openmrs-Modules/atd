@@ -41,6 +41,8 @@ import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
+import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
 import org.openmrs.util.OpenmrsUtil;
@@ -335,6 +337,33 @@ public class TeleformTranslator
 				//fill in the dss elements for this type
 				//(this will only get executed once even though it is called for each field)
 				long startTime1 = System.currentTimeMillis();
+				
+				//We need to set the max number of prioritized elements to generate
+				if (dssManager.getMaxDssElementsByType(ruleType) == 0) {
+					ChirdlUtilService chirdlUtilService = Context.getService(ChirdlUtilService.class);
+					LocationTagAttributeValue locTagAttrValue = chirdlUtilService.getLocationTagAttributeValue(
+					    locationTagId, ruleType, locationId);
+					
+					Integer formId = null;
+					
+					if (locTagAttrValue != null) {
+						String value = locTagAttrValue.getValue();
+						if (value != null) {
+							try {
+								formId = Integer.parseInt(value);
+							}
+							catch (Exception e) {}
+						}
+					}
+					String propertyValue = org.openmrs.module.atd.util.Util.getFormAttributeValue(formId, "numPrompts",
+					    locationTagId, locationId);
+					
+					try {
+						int maxDssElements = Integer.parseInt(propertyValue);
+						dssManager.setMaxDssElementsByType(ruleType, maxDssElements);
+					}
+					catch (NumberFormatException e) {}
+				}
 				dssManager.populateDssElements(
 						ruleType, false,parameters,
 						defaultPackagePrefix);
