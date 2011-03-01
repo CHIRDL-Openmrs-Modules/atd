@@ -32,6 +32,7 @@ public class AdminList extends AdministrationSectionExt {
 		map.put("module/atd/uploadForms.form", "atd.uploadForms");
 		map.put("module/atd/editForms.form", "Edit Forms");
 		map.put("module/atd/deleteForms.form", "Delete Forms");
+		map.put("module/atd/createForm.form", "Create Form");
 		map.put("module/atd/ruleBuilder.form", "Meaghan's Rule Builder");
 		return map;
 	}

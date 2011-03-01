@@ -150,4 +150,12 @@ public interface ATDDAO {
 
 	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired);
 
+	public void copyFormMetadata(Integer fromFormId, Integer toFormId);
+	
+	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
+	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 
+	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
+	                                   Integer copyPrinterConfigFormId);
+	
+	public void purgeFormAttributeValues(Integer formId);
 }

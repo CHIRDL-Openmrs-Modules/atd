@@ -11,6 +11,9 @@ import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
+import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 
@@ -37,10 +40,12 @@ public class DeleteFormsController extends SimpleFormController
 	{
 		Map<String, Object> map = new HashMap<String, Object>();
 		FormService formService = Context.getFormService();
+		ATDService atdService = Context.getService(ATDService.class);
 		String[] formsToDelete = request.getParameterValues("FormsToDelete");
 
 		if (formsToDelete != null)
 		{
+			ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
 			for (String currFormIdString : formsToDelete)
 			{
 				Integer currFormId = null;
@@ -50,6 +55,9 @@ public class DeleteFormsController extends SimpleFormController
 					currFormId = Integer.parseInt(currFormIdString);
 					Form currForm = formService.getForm(currFormId);
 					
+					//delete the form attribute values
+					atdService.purgeFormAttributeValues(currFormId);
+					
 					//delete the form
 					formService.purgeForm(currForm);
 					
@@ -58,6 +66,10 @@ public class DeleteFormsController extends SimpleFormController
 					{
 						formService.purgeField(currFormField.getField());
 					}
+					
+					// delete from Chirdl Util tables
+					LocationTagAttribute attr = chirdlService.getLocationTagAttribute(currForm.getName());
+					chirdlService.deleteLocationTagAttribute(attr);
 				} catch (Exception e)
 				{
 					this.log.error(e.getMessage());

@@ -29,10 +29,10 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
 import org.openmrs.module.atd.ParameterHandler;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.TeleformTranslator;
+import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
 import org.openmrs.module.atd.db.ATDDAO;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
@@ -42,15 +42,14 @@ import org.openmrs.module.atd.hibernateBeans.PatientState;
 import org.openmrs.module.atd.hibernateBeans.Program;
 import org.openmrs.module.atd.hibernateBeans.Session;
 import org.openmrs.module.atd.hibernateBeans.State;
-import org.openmrs.module.atd.hibernateBeans.StateAction;
 import org.openmrs.module.atd.hibernateBeans.StateMapping;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Field;
+import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.chirdlutil.util.Util;
 
 /**
  * ATD related service implementations
@@ -884,4 +883,22 @@ public class ATDServiceImpl implements ATDService
 		}
 	}
 
+	@Override
+    public void copyFormMetadata(Integer fromFormId, Integer toFormId) {
+	    getATDDAO().copyFormMetadata(fromFormId, toFormId);
+    }
+
+	@Override
+    public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
+                                       String defaultDriveLetter, String serverName, boolean scannableForm, 
+                                       boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
+                                       Integer copyPrinterConfigFormId) {
+	    getATDDAO().setupInitialFormValues(formId, formName, locationNames, defaultDriveLetter, serverName, scannableForm,
+	    	scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
+    }
+
+	@Override
+	public void purgeFormAttributeValues(Integer formId) {
+		getATDDAO().purgeFormAttributeValues(formId);
+	}
 }

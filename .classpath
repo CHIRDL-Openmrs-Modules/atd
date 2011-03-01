@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="web/src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="lib" path="dist"/>
 	<classpathentry kind="lib" path="metadata"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib-common/antlr/antlr_2.7.6.jar"/>
@@ -60,7 +59,7 @@
 	<classpathentry kind="lib" path="lib-common/junit/dbunit-2.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/junit/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib-common/junit/junit-4.4.jar"/>
-	<classpathentry kind="lib" path="lib-common/openmrs-api-1.5.0.10396-dev.jar"/>
+	<classpathentry kind="lib" path="lib-common/openmrs-api-1.5.0.10396-dev.jar" sourcepath="/openmrs-chirdl_1.5.x"/>
 	<classpathentry kind="lib" path="lib-common/tests-openmrs-api-1.5.0.10396-dev.jar"/>
 	<classpathentry kind="lib" path="lib-common/web-openmrs-api-1.5.0.10396-dev.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/bcel.jar"/>
@@ -82,7 +81,7 @@
 	<classpathentry kind="lib" path="lib-common/jibx/wstx-asl.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xmlpull_1_1_4.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xpp3.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutil-1.0.11.jar"/>
 	<classpathentry kind="lib" path="lib-common/dss-2.27.12.jar"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutil-1.0.16.jar" sourcepath="/chirdlutil"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

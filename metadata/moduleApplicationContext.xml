@@ -14,6 +14,10 @@
 				<prop key="/module/@MODULE_ID@/ruleBuilder.form">ruleBuilderForm</prop> 
   				<prop key="/module/@MODULE_ID@/data.form">dataForm</prop>
 				<prop key="/module/@MODULE_ID@/deleteForms.form">deleteForms</prop>
+				<prop key="/module/@MODULE_ID@/createForm.form">createForm</prop>
+				<prop key="/module/@MODULE_ID@/popFormFields.form">popFormFields</prop>
+				<prop key="/module/@MODULE_ID@/configForm.form">configForm</prop>
+				<prop key="/module/@MODULE_ID@/mlmForm.form">mlmForm</prop>
 			</props>
 		</property>
 	</bean>
@@ -56,6 +60,30 @@
 		<property name="formView"><value>/module/@MODULE_ID@/deleteForms</value></property>
 		<property name="successView"><value>deleteForms.form</value></property>
 	</bean>
+	
+	<bean id="createForm" class="@MODULE_PACKAGE@.web.CreateFormController">
+        <property name="commandName"><value>createFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/createForm</value></property>
+        <property name="successView"><value>popFormFields.form</value></property>
+    </bean>
+    
+    <bean id="popFormFields" class="@MODULE_PACKAGE@.web.PopulateFormFieldsController">
+        <property name="commandName"><value>popFormFieldsObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/popFormFields</value></property>
+        <property name="successView"><value>configForm.form</value></property>
+    </bean>  
+    
+    <bean id="configForm" class="@MODULE_PACKAGE@.web.ConfigFormController">
+        <property name="commandName"><value>configFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configForm</value></property>
+        <property name="successView"><value>mlmForm.form</value></property>
+    </bean> 
+    
+    <bean id="mlmForm" class="@MODULE_PACKAGE@.web.MLMFormController">
+        <property name="commandName"><value>mlmFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/mlmForm</value></property>
+        <property name="successView"><value>createForm.form</value></property>
+    </bean>
 	
 	<bean parent="serviceContext">
 		<property name="moduleService">

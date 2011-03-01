@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,9 +35,9 @@ import org.openmrs.module.atd.hibernateBeans.State;
 import org.openmrs.module.atd.hibernateBeans.StateAction;
 import org.openmrs.module.atd.hibernateBeans.StateMapping;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.chirdlutil.util.Util;
 
 /**
  * Hibernate implementations of ATD database methods.
@@ -1273,5 +1274,560 @@ public class HibernateATDDAO implements ATDDAO
 			this.log.error(Util.getStackTrace(e));
 		}
 		return null;
+	}
+
+	@Override
+    public void copyFormMetadata(Integer fromFormId, Integer toFormId) {
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		PreparedStatement ps3 = null;
+		PreparedStatement ps4 = null;
+		// copy concept, default_value, and field_type to the new form
+		String step1 = "update field f1 "
+			+ "join (select * from field where field_id in (select field_id from form_field where form_id = ?)) f2 "
+			+ "on f1.name=f2.name "
+			+ "set f1.concept_id=f2.concept_id, f1.default_value=f2.default_value, f1.field_type=f2.field_type "
+			+ "where f1.field_id in (select field_id from form_field where form_id = ?)";
+		// copy field_number to the new form
+		String step2 = "update form_field f1, "
+			+ "(select b.name,a.* from (select * from form_field where form_id = ?) a "
+					+ "inner join field b "
+					+ "on a.field_id=b.field_id "
+					+ ") f2, "
+					+ "(select b.name,a.* from (select * from form_field where form_id = ?) a "
+					+ "inner join field b "
+					+ "on a.field_id=b.field_id "
+					+ ") f3 "
+					+ "set f1.field_number=f2.field_number "
+					+ "where  f1.form_field_id=f3.form_field_id and f2.name=f3.name";
+		// copy parent_field mapping to the new form
+		String step3 = "update form_field f1, "
+			+ "(select b.name as parent_name,child_name from "
+			+ "(select child_name,b.field_id as parent_field_id from "
+			+ "(select b.name as child_name,a.child_field_id,a.parent_form_field from "
+			+ "(select field_id as child_field_id, parent_form_field from form_field where form_id = ?) a "
+			+ "inner join field b on a.child_field_id = b.field_id) a "
+			+ "inner join form_field b "
+			+ "on a.parent_form_field=b.form_field_id) a "
+			+ "inner join field b "
+			+ "on a.parent_field_id=b.field_id "
+			+ ")f2, "
+			+ "(select a.form_field_id,b.name from( "
+			+ "select form_field_id,field_id from form_field where form_id = ?) a "
+			+ "inner join field b on a.field_id =b.field_id "
+			+ ")f3, "
+			+ "(select a.form_field_id,b.name from( "
+			+ "select form_field_id,field_id from form_field where form_id = ?) a "
+			+ "inner join field b on a.field_id =b.field_id) "
+			+ "f4 "
+			+ "set f1.parent_form_field=f3.form_field_id "
+			+ "where f2.parent_name=f3.name and f4.name=f2.child_name and f1.form_field_id=f4.form_field_id";
+		// add rows in atd_form_attribute_value for new form 
+		String step4 = "insert into atd_form_attribute_value(form_id,value,form_attribute_id,location_tag_id,location_id) "
+			+ "select b.form_id,value,form_attribute_id,location_tag_id,location_id from atd_form_attribute_value a,(select "
+			+ "form_id from form where form_id = ?) b "
+					+ "where a.form_id = ?";
+		try {
+			ps1 = con.prepareStatement(step1);
+			ps1.setInt(1, fromFormId);
+			ps1.setInt(2, toFormId);
+			ps1.executeUpdate();
+			
+			ps2 = con.prepareStatement(step2);
+			ps2.setInt(1, fromFormId);
+			ps2.setInt(2, toFormId);
+			ps2.executeUpdate();
+			
+			ps3 = con.prepareStatement(step3);
+			ps3.setInt(1, fromFormId);
+			ps3.setInt(2, toFormId);
+			ps3.setInt(3, toFormId);
+			ps3.executeUpdate();
+			
+			ps4 = con.prepareStatement(step4);
+			ps4.setInt(1, toFormId);
+			ps4.setInt(2, fromFormId);
+			ps4.executeUpdate();
+		} catch (Exception e) {
+			try {
+	            con.rollback();
+            }
+            catch (SQLException e1) {
+	            log.error("Error rolling back connection", e1);
+            }
+		} finally {
+			if (ps1 != null) {
+				try {
+	                ps1.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps2 != null) {
+				try {
+	                ps2.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps3 != null) {
+				try {
+	                ps3.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps4 != null) {
+				try {
+	                ps4.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (con != null) {
+				try {
+	                con.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing connection", e);
+                }
+			}
+			
+		}
+    }
+	
+	@Override
+	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
+	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 
+	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
+	                                   Integer copyPrinterConfigFormId) {
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		
+		String merge = defaultDriveLetter + ":\\chica\\merge\\";
+		String pending = defaultDriveLetter + ":\\chica\\merge\\";
+		String formNameDrive = "\\" + formName;
+		String step1 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),concat(?,c.name,?),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='defaultMergeDirectory' and a.retired=0 and d.location_id=c.location_id and (";
+
+		int i = 0;
+		String locationStr = "";
+	    while (i < locationNames.size()) {
+	    	if (i == 0) {
+	    		locationStr += "c.name = ?";
+	    	} else {
+	    		locationStr += " or c.name = ?";
+	    	}
+	    	i++;
+	    }
+					
+		step1 += locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String step2 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),concat(?,c.name,?),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='pendingMergeDirectory' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+
+
+		try {
+			i = 1;
+			ps1 = con.prepareStatement(step1);
+			ps1.setString(i++, merge);
+			ps1.setString(i++, formNameDrive);
+			ps1.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps1.setString(i++, locationName);
+			}
+			ps1.executeUpdate();
+			
+			i = 1;
+			ps2 = con.prepareStatement(step2);
+			ps2.setString(i++, pending);
+			ps2.setString(i++, formNameDrive + "\\Pending");
+			ps2.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps2.setString(i++, locationName);
+			}
+			ps2.executeUpdate();
+			if (scannableForm) {
+				setupScannableFormValues(con, formId, formName, locationNames, defaultDriveLetter, serverName);
+			}
+			
+			if (scorableForm) {
+				setupScorableFormValues(con, formId, locationNames, scoreConfigLoc);
+			}
+			
+			if (numPrioritizedFields > 0) {
+				setupPrioritizedFormValues(con, formId, numPrioritizedFields, locationNames);
+			}
+			
+			copyPrinterConfiguration(con, copyPrinterConfigFormId, formId, locationNames);
+		} catch (Exception e) {
+			try {
+	            con.rollback();
+            }
+            catch (SQLException e1) {
+	            log.error("Error rolling back connection", e1);
+            }
+		} finally {
+			if (ps1 != null) {
+				try {
+	                ps1.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps2 != null) {
+				try {
+	                ps2.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (con != null) {
+				try {
+	                con.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing connection", e);
+                }
+			}
+			
+		}
+	}
+	
+	@Override
+	public void purgeFormAttributeValues(Integer formId) {
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		PreparedStatement ps = null;
+		String sql = "delete from atd_form_attribute_value where form_id = ?";
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, formId);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			log.error("Error deleting form attribute values", e);
+		} finally {
+			if (ps != null) {
+				try {
+	                ps.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (con != null) {
+				try {
+	                con.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing connection", e);
+                }
+			}
+		}
+	}
+	
+	private void setupScannableFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
+		                                  String defaultDriveLetter, String serverName) throws Exception {
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		PreparedStatement ps3 = null;
+		PreparedStatement ps4 = null;
+		
+		String scan = defaultDriveLetter + ":\\chica\\scan\\";
+		String images = "\\\\" + serverName + "\\images\\";
+		String formNameDrive = "\\" + formName;
+		String step1 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),concat(?,c.name,?),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='defaultExportDirectory' and a.retired=0 and d.location_id=c.location_id and (";
+
+		int i = 0;
+		String locationStr = "";
+	    while (i < locationNames.size()) {
+	    	if (i == 0) {
+	    		locationStr += "c.name = ?";
+	    	} else {
+	    		locationStr += " or c.name = ?";
+	    	}
+	    	i++;
+	    }
+					
+		step1 += locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String step2 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),concat(?,c.name,?),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='imageDirectory' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String step3 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),'MRNBarCode',max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d, location c "
+			+ "where a.form_id=? and b.name='medRecNumberTag' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String step4 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),'MRNBarCodeBack',max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d, location c "
+			+ "where a.form_id=? and b.name='medRecNumberTag2' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+
+
+		try {
+			i = 1;
+			ps1 = con.prepareStatement(step1);
+			ps1.setString(i++, scan);
+			ps1.setString(i++, formNameDrive + "_SCAN");
+			ps1.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps1.setString(i++, locationName);
+			}
+			ps1.executeUpdate();
+			
+			i = 1;
+			ps2 = con.prepareStatement(step2);
+			ps2.setString(i++, images);
+			ps2.setString(i++, formNameDrive);
+			ps2.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps2.setString(i++, locationName);
+			}
+			ps2.executeUpdate();
+			
+			i = 1;
+			ps3 = con.prepareStatement(step3);
+			ps3.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps3.setString(i++, locationName);
+			}
+			ps3.executeUpdate();
+			
+			i = 1;
+			ps4 = con.prepareStatement(step4);
+			ps4.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps4.setString(i++, locationName);
+			}
+			ps4.executeUpdate();
+		} finally {
+			if (ps1 != null) {
+				try {
+	                ps1.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps2 != null) {
+				try {
+	                ps2.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps3 != null) {
+				try {
+	                ps3.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps4 != null) {
+				try {
+	                ps4.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+		}
+	}
+	
+	private void setupScorableFormValues(Connection con, Integer formId, List<String> locationNames, 
+		                                  String scoreConfigLoc) throws Exception {
+		PreparedStatement ps = null;
+		String locationStr = "";
+		int i = 0;
+	    while (i < locationNames.size()) {
+	    	if (i == 0) {
+	    		locationStr += "c.name = ?";
+	    	} else {
+	    		locationStr += " or c.name = ?";
+	    	}
+	    	i++;
+	    }
+	    
+		String sql = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),?,max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='scorableFormConfigFile' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		try {
+			i = 1;
+			ps = con.prepareStatement(sql);
+			ps.setString(i++, scoreConfigLoc);
+			ps.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps.setString(i++, locationName);
+			}
+			ps.executeUpdate();
+		} finally {
+			if (ps != null) {
+				ps.close();
+			}
+		}
+	}
+	
+	private void setupPrioritizedFormValues(Connection con, Integer formId, Integer numPrioritizedFields, 
+	                                        List<String> locationNames) throws Exception {
+		PreparedStatement ps = null;
+		String locationStr = "";
+		int i = 0;
+	    while (i < locationNames.size()) {
+	    	if (i == 0) {
+	    		locationStr += "c.name = ?";
+	    	} else {
+	    		locationStr += " or c.name = ?";
+	    	}
+	    	i++;
+	    }
+	    
+		String sql = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),?,max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='numPrompts' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		try {
+			i = 1;
+			ps = con.prepareStatement(sql);
+			ps.setString(i++, String.valueOf(numPrioritizedFields));
+			ps.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps.setString(i++, locationName);
+			}
+			ps.executeUpdate();
+		} finally {
+			if (ps != null) {
+				ps.close();
+			}
+		}
+	}
+	
+	private void copyPrinterConfiguration(Connection con, Integer fromFormId, Integer toFormId, List<String> locationNames) 
+	throws Exception {		
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		PreparedStatement ps3 = null;
+		String locationStr = "";
+		int i = 0;
+	    while (i < locationNames.size()) {
+	    	if (i == 0) {
+	    		locationStr += "c.name = ?";
+	    	} else {
+	    		locationStr += " or c.name = ?";
+	    	}
+	    	i++;
+	    }
+	    
+		String sql1 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),(select x.value from atd_form_attribute_value x, atd_form_attribute y "
+					+ "where x.location_id=d.location_id and x.location_tag_id=d.location_tag_id and x.form_id=? and "
+					+ "y.name='defaultPrinter' and y.form_attribute_id = x.form_attribute_id),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='defaultPrinter' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String sql2 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),(select x.value from atd_form_attribute_value x, atd_form_attribute y "
+					+ "where x.location_id=d.location_id and x.location_tag_id=d.location_tag_id and x.form_id=? and "
+					+ "y.name='alternatePrinter' and y.form_attribute_id = x.form_attribute_id),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='alternatePrinter' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String sql3 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),(select x.value from atd_form_attribute_value x, atd_form_attribute y "
+					+ "where x.location_id=d.location_id and x.location_tag_id=d.location_tag_id and x.form_id=? and "
+					+ "y.name='useAlternatePrinter' and y.form_attribute_id = x.form_attribute_id),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='useAlternatePrinter' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		try {
+			i = 1;
+			ps1 = con.prepareStatement(sql1);
+			ps1.setInt(i++, fromFormId);
+			ps1.setInt(i++, toFormId);
+			for (String locationName : locationNames) {
+				ps1.setString(i++, locationName);
+			}
+			ps1.executeUpdate();
+			
+			i = 1;
+			ps2 = con.prepareStatement(sql2);
+			ps2.setInt(i++, fromFormId);
+			ps2.setInt(i++, toFormId);
+			for (String locationName : locationNames) {
+				ps2.setString(i++, locationName);
+			}
+			ps2.executeUpdate();
+			
+			i = 1;
+			ps3 = con.prepareStatement(sql3);
+			ps3.setInt(i++, fromFormId);
+			ps3.setInt(i++, toFormId);
+			for (String locationName : locationNames) {
+				ps3.setString(i++, locationName);
+			}
+			ps3.executeUpdate();
+		} finally {
+			if (ps1 != null) {
+				ps1.close();
+			}
+			if (ps2 != null) {
+				ps2.close();
+			}
+			if (ps3 != null) {
+				ps3.close();
+			}
+		}
 	}
 }
