@@ -1478,6 +1478,7 @@ public class HibernateATDDAO implements ATDDAO
 		} catch (Exception e) {
 			try {
 	            con.rollback();
+	            log.error("Error setting up form attribute values", e);
             }
             catch (SQLException e1) {
 	            log.error("Error rolling back connection", e1);
