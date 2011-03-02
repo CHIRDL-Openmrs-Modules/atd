@@ -115,7 +115,6 @@ public class CreateFormController extends SimpleFormController {
 			
 			// Load the XML file
 			form = translator.templateXMLToDatabaseForm(formName, file.getAbsolutePath());
-			
 		}
 		finally {
 			if (in != null) {
@@ -125,10 +124,6 @@ public class CreateFormController extends SimpleFormController {
 			if (out != null) {
 				out.close();
 			}
-		}
-		
-		if (file.exists()) {
-			file.delete();
 		}
 		
 		return form;
