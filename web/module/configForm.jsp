@@ -11,8 +11,11 @@
             <tr style="padding: 5px">
                <td style="padding: 0px 0px 10px 0px">Locations:</td>
                <td colspan="3" style="padding: 0px 0px 10px 0px">
-                   <c:forEach items="${locations}" var="location">
+                   <c:forEach items="${locations}" var="location" varStatus="status">
                     <c:set var="locChecked" value="location_${location}"/>
+                    <c:if test="${status.count != 1}">
+                        <br/>
+                    </c:if>
                     <c:choose>
                         <c:when test="${param[locChecked] != null }">
                             <input type="checkbox" name="<c:out value="location_${location}"/>" checked="true"/><c:out value="${location}"/>&nbsp
