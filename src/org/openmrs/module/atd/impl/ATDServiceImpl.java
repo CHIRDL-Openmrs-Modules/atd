@@ -883,12 +883,10 @@ public class ATDServiceImpl implements ATDService
 		}
 	}
 
-	@Override
     public void copyFormMetadata(Integer fromFormId, Integer toFormId) {
 	    getATDDAO().copyFormMetadata(fromFormId, toFormId);
     }
 
-	@Override
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
                                        String defaultDriveLetter, String serverName, boolean scannableForm, 
                                        boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
@@ -897,7 +895,6 @@ public class ATDServiceImpl implements ATDService
 	    	scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
     }
 
-	@Override
 	public void purgeFormAttributeValues(Integer formId) {
 		getATDDAO().purgeFormAttributeValues(formId);
 	}

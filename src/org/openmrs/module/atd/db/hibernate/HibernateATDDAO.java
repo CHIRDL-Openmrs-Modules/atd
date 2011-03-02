@@ -1276,7 +1276,6 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
-	@Override
     public void copyFormMetadata(Integer fromFormId, Integer toFormId) {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps1 = null;
@@ -1401,7 +1400,6 @@ public class HibernateATDDAO implements ATDDAO
 		}
     }
 	
-	@Override
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 
 	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
@@ -1511,8 +1509,7 @@ public class HibernateATDDAO implements ATDDAO
 			
 		}
 	}
-	
-	@Override
+
 	public void purgeFormAttributeValues(Integer formId) {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps = null;
