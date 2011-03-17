@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp" %>
     
 <%@ include file="/WEB-INF/template/header.jsp" %>
+<openmrs:require allPrivileges="View Encounters, View Patients, View Concept Classes" otherwise="/login.htm" redirect="/module/atd/replaceForm.form" />
 <link href="${pageContext.request.contextPath}/moduleResources/atd/atd.css" type="text/css" rel="stylesheet" />
 <p><h3>Replace Form:</h3></p>
 <form name="input" action="replaceForm.form" method="post" enctype="multipart/form-data">

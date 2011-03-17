@@ -24,6 +24,7 @@
 				<prop key="/module/@MODULE_ID@/updateForm.form">updateForm</prop>
 				<prop key="/module/@MODULE_ID@/replaceFormFields.form">replaceFormFields</prop>
 				<prop key="/module/@MODULE_ID@/replaceRetireForm.form">replaceRetireForm</prop>
+				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
 			</props>
 		</property>
 	</bean>
@@ -58,13 +59,13 @@
 	<bean id="editFields" class="org.openmrs.module.atd.web.EditFieldsController">
 		<property name="commandName"><value>EditFieldsObject</value></property>
 		<property name="formView"><value>/module/@MODULE_ID@/editFields</value></property>
-		<property name="successView"><value>editFields.form</value></property>
+		<property name="successView"><value>configurationManager.form</value></property>
 	</bean>
 	
 	<bean id="deleteForms" class="@MODULE_PACKAGE@.web.DeleteFormsController">
 		<property name="commandName"><value>deleteFormsObject</value></property>
 		<property name="formView"><value>/module/@MODULE_ID@/deleteForms</value></property>
-		<property name="successView"><value>deleteForms.form</value></property>
+		<property name="successView"><value>configurationManager.form</value></property>
 	</bean>
 	
 	<bean id="createForm" class="@MODULE_PACKAGE@.web.CreateFormController">
@@ -88,7 +89,7 @@
     <bean id="mlmForm" class="@MODULE_PACKAGE@.web.MLMFormController">
         <property name="commandName"><value>mlmFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/mlmForm</value></property>
-        <property name="successView"><value>createForm.form</value></property>
+        <property name="successView"><value>configurationManager.form</value></property>
     </bean>
     
     <bean id="printerFormSelectionForm" class="@MODULE_PACKAGE@.web.PrinterFormSelectionFormController">
@@ -100,7 +101,7 @@
     <bean id="printerLocationForm" class="@MODULE_PACKAGE@.web.PrinterLocationFormController">
         <property name="commandName"><value>printerLocationFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/printerLocationForm</value></property>
-        <property name="successView"><value>printerFormSelectionForm.form</value></property>
+        <property name="successView"><value>configurationManager.form</value></property>
     </bean>
     <bean id="replaceForm" class="@MODULE_PACKAGE@.web.ReplaceFormController">
         <property name="commandName"><value>replaceFormObject</value></property>
@@ -115,12 +116,17 @@
     <bean id="replaceRetireForm" class="@MODULE_PACKAGE@.web.ReplaceRetireFormController">
         <property name="commandName"><value>replaceRetireFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/replaceRetireForm</value></property>
-        <property name="successView"><value>replaceForm.form</value></property>
+        <property name="successView"><value>configurationManager.form</value></property>
     </bean>
     <bean id="updateForm" class="@MODULE_PACKAGE@.web.UpdateFormController">
         <property name="commandName"><value>updateFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/updateForm</value></property>
         <property name="successView"><value>updateFieldsForm.form</value></property>
+    </bean>
+    <bean id="configurationManager" class="@MODULE_PACKAGE@.web.ConfigurationManagerController">
+        <property name="commandName"><value>configurationManagerObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
+        <property name="successView"><value>configurationManager.form.form</value></property>
     </bean>
 	
 	<bean parent="serviceContext">
