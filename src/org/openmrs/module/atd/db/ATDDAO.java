@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
@@ -158,4 +159,10 @@ public interface ATDDAO {
 	                                   Integer copyPrinterConfigFormId);
 	
 	public void purgeFormAttributeValues(Integer formId);
+	
+	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId);
+	
+	public void savePrinterConfigurations(FormPrinterConfig printerConfig);
+	
+	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId);
 }

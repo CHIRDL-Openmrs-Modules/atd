@@ -14,6 +14,7 @@ import org.openmrs.FormField;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.logic.result.Result;
+import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.ParameterHandler;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
@@ -180,5 +181,11 @@ public interface ATDService
 	                                   Integer copyPrinterConfigFormId);
 	
 	public void purgeFormAttributeValues(Integer formId);
+	
+	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId);
+	
+	public void savePrinterConfigurations(FormPrinterConfig printerConfig);
+	
+	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId);
 
 }

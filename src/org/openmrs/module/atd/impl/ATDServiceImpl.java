@@ -29,6 +29,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
+import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.ParameterHandler;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.TeleformTranslator;
@@ -898,4 +899,16 @@ public class ATDServiceImpl implements ATDService
 	public void purgeFormAttributeValues(Integer formId) {
 		getATDDAO().purgeFormAttributeValues(formId);
 	}
+
+    public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) {
+	    return getATDDAO().getPrinterConfigurations(formId, locationId);
+    }
+    
+    public void savePrinterConfigurations(FormPrinterConfig printerConfig) {
+    	getATDDAO().savePrinterConfigurations(printerConfig);
+    }
+
+    public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) {
+	    getATDDAO().copyFormAttributeValues(fromFormId, toFormId);
+    }
 }

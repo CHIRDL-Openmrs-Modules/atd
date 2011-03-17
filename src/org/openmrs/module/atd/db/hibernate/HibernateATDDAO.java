@@ -19,8 +19,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.openmrs.Form;
+import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.api.FormService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.FormPrinterConfig;
+import org.openmrs.module.atd.LocationTagPrinterConfig;
 import org.openmrs.module.atd.db.ATDDAO;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.atd.hibernateBeans.FormAttribute;
@@ -329,40 +334,34 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return null;
 	}
-
-	public FormAttributeValue getFormAttributeValue(Integer formId,
-			String formAttributeName, Integer locationTagId, Integer locationId)
-	{
-		try
-		{
-			FormAttribute formAttribute = this
-					.getFormAttributeByName(formAttributeName);
-
-			if (formAttribute != null)
-			{
+	
+	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName, Integer locationTagId,
+	                                                Integer locationId) {
+		try {
+			FormAttribute formAttribute = this.getFormAttributeByName(formAttributeName);
+			
+			if (formAttribute != null) {
 				Integer formAttributeId = formAttribute.getFormAttributeId();
-
-				String sql = "select * from atd_form_attribute_value where form_id=? "+
-							"and form_attribute_id=? and location_tag_id=? and location_id=?";
-				SQLQuery qry = this.sessionFactory.getCurrentSession()
-						.createSQLQuery(sql);
-
+				
+				String sql = "select * from atd_form_attribute_value where form_id=? "
+				        + "and form_attribute_id=? and location_tag_id=? and location_id=?";
+				SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+				
 				qry.setInteger(0, formId);
 				qry.setInteger(1, formAttributeId);
 				qry.setInteger(2, locationTagId);
 				qry.setInteger(3, locationId);
 				qry.addEntity(FormAttributeValue.class);
-
+				
 				List<FormAttributeValue> list = qry.list();
-
-				if (list != null && list.size() > 0)
-				{
+				
+				if (list != null && list.size() > 0) {
 					return list.get(0);
 				}
-
+				
 			}
-		} catch (Exception e)
-		{
+		}
+		catch (Exception e) {
 			log.error(Util.getStackTrace(e));
 		}
 		return null;
@@ -1247,6 +1246,15 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 	
+	public void saveFormAttributeValue(FormAttributeValue value) {
+		try {
+			sessionFactory.getCurrentSession().saveOrUpdate(value);
+		}
+		catch (Exception e) {
+			log.error("Error saving form attribute value", e);
+		}
+	}
+	
 	public Integer getErrorCategoryIdByName(String name)
 	{
 		try
@@ -1520,6 +1528,124 @@ public class HibernateATDDAO implements ATDDAO
 			ps.executeUpdate();
 		} catch (Exception e) {
 			log.error("Error deleting form attribute values", e);
+		} finally {
+			if (ps != null) {
+				try {
+	                ps.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (con != null) {
+				try {
+	                con.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing connection", e);
+                }
+			}
+		}
+	}
+	
+	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) {
+		FormPrinterConfig printerConfig = new FormPrinterConfig(formId);
+		try {
+			LocationService locService = Context.getLocationService();
+			Location location = locService.getLocation(locationId);
+			List<LocationTagPrinterConfig> tagConfigs = new ArrayList<LocationTagPrinterConfig>();
+			FormAttribute defaultPrinterAttr = getFormAttributeByName("defaultPrinter");
+			FormAttribute alternatePrinterAttr = getFormAttributeByName("alternatePrinter");
+			FormAttribute useAlternatePrinterAttr = getFormAttributeByName("useAlternatePrinter");
+			
+			for (LocationTag locTag : location.getTags()) {
+				LocationTagPrinterConfig locTagPrinterConfig = new LocationTagPrinterConfig(locTag.getTag(), 
+					locTag.getLocationTagId());
+				FormAttributeValue defaultPrinterVal = getFormAttributeValue(formId, "defaultPrinter", 
+					locTag.getLocationTagId(), locationId);
+				FormAttributeValue altPrinterVal = getFormAttributeValue(formId, "alternatePrinter", 
+					locTag.getLocationTagId(), locationId);
+				FormAttributeValue useAltPrinterVal = getFormAttributeValue(formId, "useAlternatePrinter", 
+					locTag.getLocationTagId(), locationId);
+				
+				if (defaultPrinterVal != null) {
+					locTagPrinterConfig.setDefaultPrinter(defaultPrinterVal);
+				} else {
+					FormAttributeValue newVal = new FormAttributeValue();
+					newVal.setFormAttributeId(defaultPrinterAttr.getFormAttributeId());
+					newVal.setFormId(formId);
+					newVal.setLocationId(locationId);
+					newVal.setLocationTagId(locTag.getLocationTagId());
+					newVal.setValue("");
+					locTagPrinterConfig.setDefaultPrinter(newVal);
+				}
+				
+				if (altPrinterVal != null) {
+					locTagPrinterConfig.setAlternatePrinter(altPrinterVal);
+				} else {
+					FormAttributeValue newVal = new FormAttributeValue();
+					newVal.setFormAttributeId(alternatePrinterAttr.getFormAttributeId());
+					newVal.setFormId(formId);
+					newVal.setLocationId(locationId);
+					newVal.setLocationTagId(locTag.getLocationTagId());
+					newVal.setValue("");
+					locTagPrinterConfig.setAlternatePrinter(newVal);
+				}
+				
+				if (useAltPrinterVal != null) {
+					locTagPrinterConfig.setUseAlternatePrinter(useAltPrinterVal);
+				} else {
+					FormAttributeValue newVal = new FormAttributeValue();
+					newVal.setFormAttributeId(useAlternatePrinterAttr.getFormAttributeId());
+					newVal.setFormId(formId);
+					newVal.setLocationId(locationId);
+					newVal.setLocationTagId(locTag.getLocationTagId());
+					newVal.setValue("");
+					locTagPrinterConfig.setUseAlternatePrinter(newVal);
+				}
+				
+				tagConfigs.add(locTagPrinterConfig);
+			}
+			
+			printerConfig.setLocationTagPrinterConfigs(tagConfigs);
+		}
+		catch (Exception e) {
+			log.error("Error retrieving printer configurations", e);
+		}
+		
+		return printerConfig;
+	}
+	
+	public void savePrinterConfigurations(FormPrinterConfig printerConfig) {
+		try {
+			List<LocationTagPrinterConfig> configs = printerConfig.getLocationTagPrinterConfigs();
+			for (LocationTagPrinterConfig config : configs) {
+				FormAttributeValue defaultPrinter = config.getDefaultPrinter();
+				FormAttributeValue alternatePrinter = config.getAlternatePrinter();
+				FormAttributeValue useAlternatePrinter = config.getUseAlternatePrinter();
+				saveFormAttributeValue(defaultPrinter);
+				saveFormAttributeValue(alternatePrinter);
+				saveFormAttributeValue(useAlternatePrinter);
+			}
+		}
+		catch (Exception e) {
+			log.error("Error saving printer configurations", e);
+		}
+	}
+	
+	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) {
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		PreparedStatement ps = null;
+		String sql = "insert into atd_form_attribute_value(form_id,value,form_attribute_id,location_tag_id,location_id) "
+			+ "select ?, b.value, b.form_attribute_id, b.location_tag_id, b.location_id "
+			+ "from atd_form_attribute_value b where b.form_id = ?";
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, toFormId);
+			ps.setInt(2, fromFormId);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			log.error("Error copying form attribute values", e);
 		} finally {
 			if (ps != null) {
 				try {

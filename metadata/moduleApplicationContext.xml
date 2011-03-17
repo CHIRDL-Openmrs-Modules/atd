@@ -18,6 +18,12 @@
 				<prop key="/module/@MODULE_ID@/popFormFields.form">popFormFields</prop>
 				<prop key="/module/@MODULE_ID@/configForm.form">configForm</prop>
 				<prop key="/module/@MODULE_ID@/mlmForm.form">mlmForm</prop>
+				<prop key="/module/@MODULE_ID@/printerFormSelectionForm.form">printerFormSelectionForm</prop>
+				<prop key="/module/@MODULE_ID@/printerLocationForm.form">printerLocationForm</prop>
+				<prop key="/module/@MODULE_ID@/replaceForm.form">replaceForm</prop>
+				<prop key="/module/@MODULE_ID@/updateForm.form">updateForm</prop>
+				<prop key="/module/@MODULE_ID@/replaceFormFields.form">replaceFormFields</prop>
+				<prop key="/module/@MODULE_ID@/replaceRetireForm.form">replaceRetireForm</prop>
 			</props>
 		</property>
 	</bean>
@@ -83,6 +89,38 @@
         <property name="commandName"><value>mlmFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/mlmForm</value></property>
         <property name="successView"><value>createForm.form</value></property>
+    </bean>
+    
+    <bean id="printerFormSelectionForm" class="@MODULE_PACKAGE@.web.PrinterFormSelectionFormController">
+        <property name="commandName"><value>printerFormSelectionFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/printerFormSelectionForm</value></property>
+        <property name="successView"><value>printerLocationForm.form</value></property>
+    </bean>
+    
+    <bean id="printerLocationForm" class="@MODULE_PACKAGE@.web.PrinterLocationFormController">
+        <property name="commandName"><value>printerLocationFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/printerLocationForm</value></property>
+        <property name="successView"><value>printerFormSelectionForm.form</value></property>
+    </bean>
+    <bean id="replaceForm" class="@MODULE_PACKAGE@.web.ReplaceFormController">
+        <property name="commandName"><value>replaceFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/replaceForm</value></property>
+        <property name="successView"><value>replaceFormFields.form</value></property>
+    </bean>
+    <bean id="replaceFormFields" class="@MODULE_PACKAGE@.web.ReplaceFormFieldsController">
+        <property name="commandName"><value>replaceFormFieldsObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/replaceFormFields</value></property>
+        <property name="successView"><value>replaceRetireForm.form</value></property>
+    </bean>
+    <bean id="replaceRetireForm" class="@MODULE_PACKAGE@.web.ReplaceRetireFormController">
+        <property name="commandName"><value>replaceRetireFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/replaceRetireForm</value></property>
+        <property name="successView"><value>replaceForm.form</value></property>
+    </bean>
+    <bean id="updateForm" class="@MODULE_PACKAGE@.web.UpdateFormController">
+        <property name="commandName"><value>updateFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/updateForm</value></property>
+        <property name="successView"><value>updateFieldsForm.form</value></property>
     </bean>
 	
 	<bean parent="serviceContext">
