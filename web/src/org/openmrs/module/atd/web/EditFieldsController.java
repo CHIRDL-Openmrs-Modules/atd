@@ -188,7 +188,7 @@ public class EditFieldsController extends SimpleFormController
 		}
 	
 		String view = getSuccessView();
-		return new ModelAndView(
-				new RedirectView(view+"?formToEdit=" +formIdString));	}
+		return new ModelAndView(new RedirectView(view));	
+	}
 
 }

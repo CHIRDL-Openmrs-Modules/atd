@@ -16,10 +16,14 @@ eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=1,scrollbars=1,lo
 }
 // End -->
 </script>
+<p><h3>Edit Form Fields:</h3></p>
 <form method="post" action="editFields.form">
-<p>Fields for form ${form.name}: <input type="submit" value="Update"></p>
+<p>Fields for form ${form.name}: </p>
 <input type="hidden" name="processFields" value="true"/>
 <input type="hidden" name="formToEdit" value="${form.formId}"/>
+<table>
+<tr>
+<td>
 <table border="1px">
 <tr>
 <td style="align:center"><b>Field Name</b></td>
@@ -77,6 +81,23 @@ value="${formField2.formFieldId}">${formField2.field.name}</option>
 </td>
 </tr>
 </c:forEach>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<table width="100%">
+   <tr>
+       <td style="padding: 10px 0px 0px 0px">
+        <hr size="3" color="black" />
+        </td>
+    </tr>
+    <tr>
+        <td align="right"><input type="submit" value="Finish"></td>
+    </tr>
+</table>
+</td>
+</tr>
 </table>
 </form>
       

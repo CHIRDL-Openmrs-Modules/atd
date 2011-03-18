@@ -7,36 +7,39 @@
 // Nannette Thacker http://www.shiningstar.net
 function confirmSubmit()
 {
-var agree=confirm("Are you sure you want to delete the selected forms?");
-if (agree)
-	return true ;
-else
-	return false ;
+    var agree=confirm("Are you sure you want to delete the selected forms?");
+    if (agree)
+    	   return true ;
+    else
+    	   return false ;
 }
 // -->
 </script>
 
-<c:forEach items="${formsToDelete}" var="currFormToDelete">
-Deleting form: ${currFormToDelete}<br><br>
-</c:forEach>
-
 <p><b>Delete the following forms:</b></p>
-<form name="input" action="deleteForms.form" method="get">
-<table>
-<tr style="padding: 5px">
-<td>Please highlight the forms to delete:</td>
-<td><input type="Submit" name="Delete" value="Delete"
-onClick="return confirmSubmit()"></td>
-</tr>
-<tr style="padding: 5px">
-<td colspan="2" style="text-align:right">
-<select name="FormsToDelete" multiple>
-<c:forEach items="${forms}" var="form">
-<option value="${form.formId}">${form.name} (id: ${form.formId})</option>
-</c:forEach>
-</select>
-</td>
-</tr>
-</table>
+<form name="input" action="deleteForms.form" method="post">
+    <table>
+        <tr style="padding: 5px">
+            <td>Please highlight the forms to delete:</td>
+        </tr>
+        <tr style="padding: 5px">
+            <td style="text-align:right; padding: 0px 0px 10px 0px">
+                <select name="FormsToDelete" multiple>
+                    <c:forEach items="${forms}" var="form">
+                        <option value="${form.formId}">${form.name} (id: ${form.formId})</option>
+                    </c:forEach>
+                </select>
+            </td>
+        </tr>
+        <tr style="padding: 5px">
+            <td align="center"><hr size="3" color="black"/></td>
+        </tr>
+        <tr style="padding: 5px">
+           <td align="right">
+               <input type="reset" name="Clear" value="Clear">
+               <input type="Submit" name="Finish" value="Finish">
+           </td>
+        </tr>
+    </table>
 </form>
 <%@ include file="/WEB-INF/template/footer.jsp" %>
