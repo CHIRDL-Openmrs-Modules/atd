@@ -24,6 +24,7 @@
 				<prop key="/module/@MODULE_ID@/updateForm.form">updateForm</prop>
 				<prop key="/module/@MODULE_ID@/replaceFormFields.form">replaceFormFields</prop>
 				<prop key="/module/@MODULE_ID@/replaceRetireForm.form">replaceRetireForm</prop>
+				<prop key="/module/@MODULE_ID@/clinicPrinterConfigForm.form">clinicPrinterConfigForm</prop>
 				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
 			</props>
 		</property>
@@ -123,10 +124,15 @@
         <property name="formView"><value>/module/@MODULE_ID@/updateForm</value></property>
         <property name="successView"><value>updateFieldsForm.form</value></property>
     </bean>
+    <bean id="clinicPrinterConfigForm" class="@MODULE_PACKAGE@.web.ClinicPrinterConfigFormController">
+        <property name="commandName"><value>clinicPrinterConfigFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/clinicPrinterConfigForm</value></property>
+        <property name="successView"><value>configurationManager.form</value></property>
+    </bean>
     <bean id="configurationManager" class="@MODULE_PACKAGE@.web.ConfigurationManagerController">
         <property name="commandName"><value>configurationManagerObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
-        <property name="successView"><value>configurationManager.form.form</value></property>
+        <property name="successView"><value>configurationManager.form</value></property>
     </bean>
 	
 	<bean parent="serviceContext">

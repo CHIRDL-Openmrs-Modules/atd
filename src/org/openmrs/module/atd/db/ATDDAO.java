@@ -165,4 +165,6 @@ public interface ATDDAO {
 	public void savePrinterConfigurations(FormPrinterConfig printerConfig);
 	
 	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId);
+	
+	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters);
 }

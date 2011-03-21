@@ -31,6 +31,9 @@
                 <td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/printerFormSelectionForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/printerConfigButton.gif"/></a>
                 </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/clinicPrinterConfigForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/clinicPrinterConfigButton.gif"/></a>
+                </td>
             </tr>
         </table></center>
     </body>

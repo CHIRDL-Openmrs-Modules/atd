@@ -911,4 +911,8 @@ public class ATDServiceImpl implements ATDService
     public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) {
 	    getATDDAO().copyFormAttributeValues(fromFormId, toFormId);
     }
+    
+    public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) {
+    	getATDDAO().setClinicUseAlternatePrinters(locationIds, useAltPrinters);
+    }
 }

@@ -1666,6 +1666,32 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
+	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) {
+		FormAttribute formAttribute = this.getFormAttributeByName("useAlternatePrinter");
+		if (formAttribute != null) {
+			for (Integer locationId : locationIds) {
+				Integer formAttributeId = formAttribute.getFormAttributeId();
+				
+				String sql = "select * from atd_form_attribute_value where "
+				        + "form_attribute_id=? and location_id=?";
+				SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+				
+				qry.setInteger(0, formAttributeId);
+				qry.setInteger(1, locationId);
+				qry.addEntity(FormAttributeValue.class);
+				
+				List<FormAttributeValue> list = qry.list();
+				
+				if (list != null && list.size() > 0) {
+					for (FormAttributeValue fav : list) {
+						fav.setValue(useAltPrinters.toString());
+						saveFormAttributeValue(fav);
+					}
+				}
+			}
+		}
+	}
+	
 	private void setupScannableFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
 		                                  String defaultDriveLetter, String serverName) throws Exception {
 		PreparedStatement ps1 = null;
