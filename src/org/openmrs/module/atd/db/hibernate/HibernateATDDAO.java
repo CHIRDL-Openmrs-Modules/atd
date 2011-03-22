@@ -24,6 +24,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.DAOException;
 import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.LocationTagPrinterConfig;
 import org.openmrs.module.atd.db.ATDDAO;
@@ -1247,12 +1248,7 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	public void saveFormAttributeValue(FormAttributeValue value) {
-		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(value);
-		}
-		catch (Exception e) {
-			log.error("Error saving form attribute value", e);
-		}
+		sessionFactory.getCurrentSession().saveOrUpdate(value);
 	}
 	
 	public Integer getErrorCategoryIdByName(String name)
@@ -1284,7 +1280,7 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
-    public void copyFormMetadata(Integer fromFormId, Integer toFormId) {
+    public void copyFormMetadata(Integer fromFormId, Integer toFormId) throws DAOException {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
@@ -1363,6 +1359,7 @@ public class HibernateATDDAO implements ATDDAO
             catch (SQLException e1) {
 	            log.error("Error rolling back connection", e1);
             }
+            throw new DAOException(e);
 		} finally {
 			if (ps1 != null) {
 				try {
@@ -1411,7 +1408,7 @@ public class HibernateATDDAO implements ATDDAO
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 
 	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
-	                                   Integer copyPrinterConfigFormId) {
+	                                   Integer copyPrinterConfigFormId) throws DAOException {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
@@ -1489,6 +1486,7 @@ public class HibernateATDDAO implements ATDDAO
             catch (SQLException e1) {
 	            log.error("Error rolling back connection", e1);
             }
+            throw new DAOException(e);
 		} finally {
 			if (ps1 != null) {
 				try {
@@ -1518,7 +1516,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 
-	public void purgeFormAttributeValues(Integer formId) {
+	public void purgeFormAttributeValues(Integer formId) throws DAOException {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps = null;
 		String sql = "delete from atd_form_attribute_value where form_id = ?";
@@ -1528,6 +1526,7 @@ public class HibernateATDDAO implements ATDDAO
 			ps.executeUpdate();
 		} catch (Exception e) {
 			log.error("Error deleting form attribute values", e);
+			throw new DAOException(e);
 		} finally {
 			if (ps != null) {
 				try {
@@ -1548,7 +1547,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
-	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) {
+	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws DAOException {
 		FormPrinterConfig printerConfig = new FormPrinterConfig(formId);
 		try {
 			LocationService locService = Context.getLocationService();
@@ -1611,12 +1610,13 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		catch (Exception e) {
 			log.error("Error retrieving printer configurations", e);
+			throw new DAOException(e);
 		}
 		
 		return printerConfig;
 	}
 	
-	public void savePrinterConfigurations(FormPrinterConfig printerConfig) {
+	public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws DAOException {
 		try {
 			List<LocationTagPrinterConfig> configs = printerConfig.getLocationTagPrinterConfigs();
 			for (LocationTagPrinterConfig config : configs) {
@@ -1630,10 +1630,11 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		catch (Exception e) {
 			log.error("Error saving printer configurations", e);
+			throw new DAOException(e);
 		}
 	}
 	
-	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) {
+	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws DAOException {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps = null;
 		String sql = "insert into atd_form_attribute_value(form_id,value,form_attribute_id,location_tag_id,location_id) "
@@ -1646,6 +1647,7 @@ public class HibernateATDDAO implements ATDDAO
 			ps.executeUpdate();
 		} catch (Exception e) {
 			log.error("Error copying form attribute values", e);
+			throw new DAOException(e);
 		} finally {
 			if (ps != null) {
 				try {
@@ -1666,34 +1668,72 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
-	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) {
+	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws DAOException {
 		FormAttribute formAttribute = this.getFormAttributeByName("useAlternatePrinter");
 		if (formAttribute != null) {
-			for (Integer locationId : locationIds) {
+			try {
+				for (Integer locationId : locationIds) {
+					Integer formAttributeId = formAttribute.getFormAttributeId();
+					
+					String sql = "select * from atd_form_attribute_value where "
+					        + "form_attribute_id=? and location_id=?";
+					SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+					
+					qry.setInteger(0, formAttributeId);
+					qry.setInteger(1, locationId);
+					qry.addEntity(FormAttributeValue.class);
+					
+					List<FormAttributeValue> list = qry.list();
+					
+					if (list != null && list.size() > 0) {
+						for (FormAttributeValue fav : list) {
+							fav.setValue(useAltPrinters.toString());
+							saveFormAttributeValue(fav);
+						}
+					}
+				}
+			} 
+			catch (Exception e) {
+				log.error("Error updating alternate printers", e);
+				throw new DAOException(e);
+			}
+		}
+	}
+	
+	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws DAOException {
+		Boolean enabled = Boolean.FALSE;
+		try {
+			FormAttribute formAttribute = this.getFormAttributeByName("defaultPrinter");	
+			if (formAttribute != null) {
 				Integer formAttributeId = formAttribute.getFormAttributeId();
 				
-				String sql = "select * from atd_form_attribute_value where "
-				        + "form_attribute_id=? and location_id=?";
+				String sql = "select * from atd_form_attribute_value where form_id=? "
+				        + "and form_attribute_id=? and location_id=?";
 				SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
 				
-				qry.setInteger(0, formAttributeId);
-				qry.setInteger(1, locationId);
+				qry.setInteger(0, formId);
+				qry.setInteger(1, formAttributeId);
+				qry.setInteger(2, locationId);
 				qry.addEntity(FormAttributeValue.class);
 				
 				List<FormAttributeValue> list = qry.list();
 				
 				if (list != null && list.size() > 0) {
-					for (FormAttributeValue fav : list) {
-						fav.setValue(useAltPrinters.toString());
-						saveFormAttributeValue(fav);
-					}
+					enabled = Boolean.TRUE;
 				}
+				
 			}
 		}
+		catch (Exception e) {
+			log.error("Error checking to see if form " + formId + " is enabled in clinic " + locationId, e);
+			throw new DAOException(e);
+		}
+		
+		return enabled;
 	}
 	
 	private void setupScannableFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
-		                                  String defaultDriveLetter, String serverName) throws Exception {
+		                                  String defaultDriveLetter, String serverName) throws SQLException {
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		PreparedStatement ps3 = null;
@@ -1820,7 +1860,7 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	private void setupScorableFormValues(Connection con, Integer formId, List<String> locationNames, 
-		                                  String scoreConfigLoc) throws Exception {
+		                                  String scoreConfigLoc) throws SQLException {
 		PreparedStatement ps = null;
 		String locationStr = "";
 		int i = 0;
@@ -1858,7 +1898,7 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	private void setupPrioritizedFormValues(Connection con, Integer formId, Integer numPrioritizedFields, 
-	                                        List<String> locationNames) throws Exception {
+	                                        List<String> locationNames) throws SQLException {
 		PreparedStatement ps = null;
 		String locationStr = "";
 		int i = 0;
@@ -1896,7 +1936,7 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	private void copyPrinterConfiguration(Connection con, Integer fromFormId, Integer toFormId, List<String> locationNames) 
-	throws Exception {		
+	throws SQLException {		
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		PreparedStatement ps3 = null;

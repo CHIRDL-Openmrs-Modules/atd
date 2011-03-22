@@ -25,6 +25,8 @@
 				<prop key="/module/@MODULE_ID@/replaceFormFields.form">replaceFormFields</prop>
 				<prop key="/module/@MODULE_ID@/replaceRetireForm.form">replaceRetireForm</prop>
 				<prop key="/module/@MODULE_ID@/clinicPrinterConfigForm.form">clinicPrinterConfigForm</prop>
+				<prop key="/module/@MODULE_ID@/enableForm.form">enableForm</prop>
+				<prop key="/module/@MODULE_ID@/enableLocationsForm.form">enableLocationsForm</prop>
 				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
 			</props>
 		</property>
@@ -127,6 +129,16 @@
     <bean id="clinicPrinterConfigForm" class="@MODULE_PACKAGE@.web.ClinicPrinterConfigFormController">
         <property name="commandName"><value>clinicPrinterConfigFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/clinicPrinterConfigForm</value></property>
+        <property name="successView"><value>configurationManager.form</value></property>
+    </bean>
+    <bean id="enableForm" class="@MODULE_PACKAGE@.web.EnableFormController">
+        <property name="commandName"><value>enableFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/enableForm</value></property>
+        <property name="successView"><value>enableLocationsForm.form</value></property>
+    </bean>
+    <bean id="enableLocationsForm" class="@MODULE_PACKAGE@.web.EnableLocationsFormController">
+        <property name="commandName"><value>enableLocationsFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/enableLocationsForm</value></property>
         <property name="successView"><value>configurationManager.form</value></property>
     </bean>
     <bean id="configurationManager" class="@MODULE_PACKAGE@.web.ConfigurationManagerController">

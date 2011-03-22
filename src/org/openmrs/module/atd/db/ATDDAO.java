@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.openmrs.api.db.DAOException;
 import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
@@ -151,20 +152,22 @@ public interface ATDDAO {
 
 	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired);
 
-	public void copyFormMetadata(Integer fromFormId, Integer toFormId);
+	public void copyFormMetadata(Integer fromFormId, Integer toFormId) throws DAOException;
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 
 	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
-	                                   Integer copyPrinterConfigFormId);
+	                                   Integer copyPrinterConfigFormId) throws DAOException;
 	
-	public void purgeFormAttributeValues(Integer formId);
+	public void purgeFormAttributeValues(Integer formId) throws DAOException;
 	
-	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId);
+	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws DAOException;
 	
-	public void savePrinterConfigurations(FormPrinterConfig printerConfig);
+	public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws DAOException;
 	
-	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId);
+	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws DAOException;
 	
-	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters);
+	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws DAOException;
+	
+	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws DAOException;
 }

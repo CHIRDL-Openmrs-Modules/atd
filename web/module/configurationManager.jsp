@@ -12,6 +12,9 @@
                 <td colspan="3" align="center"><hr size="3" color="black"/></td>
             </tr>
             <tr style="padding: 5px">
+                <td colspan="3" align="center"><h3>Form Configuration</h3></td>
+            </tr>
+            <tr style="padding: 5px">
                 <td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/createForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/createFormButton.gif"/></a>
                 </td>
@@ -28,6 +31,16 @@
                 <td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/editForms.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/editFormFieldsButton.gif"/></a>
                 </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/enableForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/enableFormButton.gif"/></a>
+                </td>
+            </tr>
+        </table></center>
+        <br/>
+        <br/>
+        <center><h3>Printer Configuration</h3></center>
+        <center><table>
+            <tr style="padding: 5px">
                 <td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/printerFormSelectionForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/printerConfigButton.gif"/></a>
                 </td>

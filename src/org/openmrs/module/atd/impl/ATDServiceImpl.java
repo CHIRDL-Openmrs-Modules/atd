@@ -896,23 +896,27 @@ public class ATDServiceImpl implements ATDService
 	    	scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
     }
 
-	public void purgeFormAttributeValues(Integer formId) {
+	public void purgeFormAttributeValues(Integer formId) throws APIException {
 		getATDDAO().purgeFormAttributeValues(formId);
 	}
 
-    public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) {
+    public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws APIException {
 	    return getATDDAO().getPrinterConfigurations(formId, locationId);
     }
     
-    public void savePrinterConfigurations(FormPrinterConfig printerConfig) {
+    public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws APIException {
     	getATDDAO().savePrinterConfigurations(printerConfig);
     }
 
-    public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) {
+    public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws APIException {
 	    getATDDAO().copyFormAttributeValues(fromFormId, toFormId);
     }
     
-    public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) {
+    public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws APIException {
     	getATDDAO().setClinicUseAlternatePrinters(locationIds, useAltPrinters);
+    }
+    
+    public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException {
+    	return getATDDAO().isFormEnabledAtClinic(formId, locationId);
     }
 }

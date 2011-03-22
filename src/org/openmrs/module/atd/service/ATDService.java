@@ -173,21 +173,23 @@ public interface ATDService
 
 	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired);
 	
-	public void copyFormMetadata(Integer fromFormId, Integer toFormId);
+	public void copyFormMetadata(Integer fromFormId, Integer toFormId) throws APIException;
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 
 	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
-	                                   Integer copyPrinterConfigFormId);
+	                                   Integer copyPrinterConfigFormId) throws APIException;
 	
-	public void purgeFormAttributeValues(Integer formId);
+	public void purgeFormAttributeValues(Integer formId) throws APIException;
 	
-	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId);
+	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws APIException;
 	
-	public void savePrinterConfigurations(FormPrinterConfig printerConfig);
+	public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws APIException;
 	
-	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId);
+	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws APIException;
 	
-	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters);
+	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws APIException;
+	
+	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException;
 
 }

@@ -16,7 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Field;
+import org.openmrs.FieldType;
 import org.openmrs.Form;
+import org.openmrs.FormField;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.AdministrationService;
@@ -34,24 +37,59 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class ConfigFormController extends SimpleFormController
-{
+public class EnableLocationsFormController extends SimpleFormController {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
-
-	/*
-	 * (non-Javadoc)
-	 * 
+	
+	/* (non-Javadoc)
 	 * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
 	 */
 	@Override
 	protected Object formBackingObject(HttpServletRequest request)
-			throws Exception
-	{
+			throws Exception {
 		return "testing";
 	}
-	
+
+	@Override
+	protected Map referenceData(HttpServletRequest request) throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		LocationService locService = Context.getLocationService();
+		ATDService atdService = Context.getService(ATDService.class);
+		String formIdString = request.getParameter("formToEdit");
+		Integer formId = Integer.parseInt(formIdString);
+		List<Location> locations = locService.getAllLocations(false);
+		List<String> locNames = new ArrayList<String>();
+		List<String> checkedLocations = new ArrayList<String>();
+		for (Location location : locations) {
+			String name = location.getName();
+			Boolean checked = atdService.isFormEnabledAtClinic(formId, location.getLocationId());			
+			locNames.add(name);
+			if (checked == Boolean.TRUE) {
+				checkedLocations.add("true");
+			} else {
+				checkedLocations.add("false");
+			}
+		}
+		
+		map.put("locations", locNames);
+		map.put("checkedLocations", checkedLocations);
+
+		FormService formService = Context.getFormService();
+		try {
+			Form formToEdit = formService.getForm(formId);
+			map.put("formName", formToEdit.getName());
+			map.put("formId", formId);
+		} 
+		catch (Exception e) {
+			log.error("Error retrieving form", e);
+			map.put("failedLoad", true);
+		}
+		
+		return map;
+	}
+
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, 
 	                                             BindException errors) throws Exception {
@@ -61,30 +99,36 @@ public class ConfigFormController extends SimpleFormController
 		map.put("printerCopy", printerCopy);
 		String view = getFormView();
 		
+		String formIdStr = request.getParameter("formId");
+		map.put("formId", formIdStr);
+        Integer formId = Integer.parseInt(formIdStr);
+		
 		// Check to see if the user checked any locations
 		LocationService locService = Context.getLocationService();
+		ATDService atdService = Context.getService(ATDService.class);
 		List<Location> locations = locService.getAllLocations(false);
 		boolean found = false;
 		List<String> locNames = new ArrayList<String>();
 		List<String> selectedLocations = new ArrayList<String>();
+		List<String> checkedLocations = new ArrayList<String>();
 		for (Location location : locations) {
 			String name = location.getName();
 			locNames.add(name);
 			Object foundLoc = request.getParameterValues("location_" + name);
+			Boolean checked = atdService.isFormEnabledAtClinic(formId, location.getLocationId());			
+			if (checked == Boolean.TRUE) {
+				checkedLocations.add("true");
+			} else {
+				checkedLocations.add("false");
+			}
 			if (foundLoc != null) {
 				found = true;
 				selectedLocations.add(name);
-				map.put("checked_" + name, "true");
-			} else {
-				map.put("checked_" + name, "false");
 			}
 		}
 		
 		map.put("locations", locNames);
-		
-		String formIdStr = request.getParameter("formId");
-		map.put("formId", formIdStr);
-        Integer formId = Integer.parseInt(formIdStr);
+		map.put("checkedLocations", checkedLocations);
 		
 		boolean scannableForm = false;
 		String scanChoice = request.getParameter("scannableForm");
@@ -122,12 +166,11 @@ public class ConfigFormController extends SimpleFormController
 		}
         
         // Copy form configuration
-        ATDService atdService = Context.getService(ATDService.class);
         String formIdToCopy = request.getParameter("formToCopy");
-        if (formIdToCopy != null && !"No Selection".equalsIgnoreCase(formIdToCopy)) {
-        	atdService.copyFormMetadata(Integer.parseInt(formIdToCopy), formId);
-        } else {
-        	try {
+    	try {
+            if (formIdToCopy != null && !"No Selection".equalsIgnoreCase(formIdToCopy)) {
+            	atdService.copyFormMetadata(Integer.parseInt(formIdToCopy), formId);
+            } else {
 	        	String serverName = adminService.getGlobalProperty("atd.serverName");
 	        	String scoreConfigFile = null;
 	        	if (request instanceof MultipartHttpServletRequest && scorableForm) {
@@ -143,32 +186,31 @@ public class ConfigFormController extends SimpleFormController
 	                }
 	            }
 	        	
-	        	Integer numPrioritizedFields = 0;
-	        	String pFieldString = request.getParameter("numPrioritizedFields");
-	        	if (pFieldString != null && pFieldString.trim().length() > 0) {
-	        		numPrioritizedFields = Integer.parseInt(pFieldString);
-	        	}
-	        	
 	        	FormService formService = Context.getFormService();
+	        	Integer numPrioritizedFields = getPrioritizedFieldCount(formService, formId);
 	        	Form printerCopyForm = formService.getForm(printerCopy);
 	        	atdService.setupInitialFormValues(formId, formName, selectedLocations, driveLetter, 
 	        		serverName, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
 	        		printerCopyForm.getFormId());
-        	}
-        	catch (Exception e) {
-        		log.error("Error saving form changes", e);
-                map.put("failedScoringFileUpload", true);
-    			// delete the directories
-    			deleteDirectories(formName, locNames, scannableForm);
-    			return new ModelAndView(view, map);
             }
+    	}
+    	catch (Exception e) {
+    		log.error("Error saving form changes", e);
+            map.put("failedSaveChanges", true);
+			// delete the directories
+			deleteDirectories(formName, locNames, scannableForm);
+			return new ModelAndView(view, map);
         }
         
         try {
         	ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
-        	LocationTagAttribute locTagAttr = new LocationTagAttribute();
-        	locTagAttr.setName(formName);
-        	locTagAttr = chirdlService.saveLocationTagAttribute(locTagAttr);
+        	LocationTagAttribute locTagAttr = chirdlService.getLocationTagAttribute(formName);
+        	if (locTagAttr == null) {
+        		locTagAttr = new LocationTagAttribute();
+	        	locTagAttr.setName(formName);
+	        	locTagAttr = chirdlService.saveLocationTagAttribute(locTagAttr);
+        	}
+        	
         	for (String locName : selectedLocations) {
         		Location loc = locService.getLocation(locName);
         		Set<LocationTag> tags = loc.getTags();
@@ -194,35 +236,7 @@ public class ConfigFormController extends SimpleFormController
         }
 		
 		view = getSuccessView();
-		return new ModelAndView(
-			new RedirectView(view), map);
-	}
-
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception
-	{
-		Map<String, Object> map = new HashMap<String, Object>();
-		LocationService locService = Context.getLocationService();
-		List<Location> locations = locService.getAllLocations(false);
-		List<String> locNames = new ArrayList<String>();
-		for (Location location : locations) {
-			boolean checkLocation = false;
-			String name = location.getName();
-			String checked = request.getParameter("checked_" + name);
-			if (checked != null && "true".equalsIgnoreCase(checked)) {
-				checkLocation = true;
-			}
-			
-			locNames.add(name);
-			map.put("checked_" + name, checkLocation);
-		}
-		
-		map.put("locations", locNames);
-		map.put("formName", request.getParameter("formName"));
-		map.put("formId", request.getParameter("formId"));
-		map.put("createWizard", checkParameter(request, "createWizard"));
-		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
-		return map;
+		return new ModelAndView(new RedirectView(view), map);
 	}
 	
 	private void createDirectories(String formName, List<String> locations, boolean scannableForm, String driveLetter) 
@@ -322,13 +336,20 @@ public class ConfigFormController extends SimpleFormController
 		return file.getAbsolutePath();
 	}
 	
-	private boolean checkParameter(HttpServletRequest request, String parameterName) {
-		boolean positive = false;
-		String parameter = request.getParameter(parameterName);
-		if ("true".equalsIgnoreCase(parameter)) {
-			positive = true;
+	private Integer getPrioritizedFieldCount(FormService formService, Integer formId) {
+		Form form = formService.getForm(formId);
+		List<FormField> formFields = form.getOrderedFormFields();
+		Integer numPrioritizedFields = 0;
+		for (FormField currFormField : formFields) {
+			Field field = currFormField.getField();
+			if (field != null) {
+				FieldType fieldType = field.getFieldType();
+				if (fieldType != null && fieldType.getFieldTypeId() == 8) {
+					numPrioritizedFields++;
+				}
+			}
 		}
-		
-		return positive;
+    	
+    	return numPrioritizedFields;
 	}
 }
