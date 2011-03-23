@@ -3,6 +3,18 @@
 <%@ include file="/WEB-INF/template/header.jsp" %>
 <openmrs:require allPrivileges="View Encounters, View Patients, View Concept Classes" otherwise="/login.htm" redirect="/module/atd/replaceForm.form" />
 <link href="${pageContext.request.contextPath}/moduleResources/atd/atd.css" type="text/css" rel="stylesheet" />
+<script LANGUAGE="JavaScript">
+    <!--
+    // Nannette Thacker http://www.shiningstar.net
+    function confirmCancel()
+    {
+        var agree=confirm("Are you sure you want to stop form replace?");
+        if (agree) {
+               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+        }
+    }
+    // -->
+</script>
 <p><h3>Replace Form:</h3></p>
 <form name="input" action="replaceForm.form" method="post" enctype="multipart/form-data">
     <table>
@@ -61,9 +73,12 @@
             <td colspan="2" align="center"><hr size="3" color="black"/></td>
         </tr>
         <tr style="padding: 5px">
-           <td colspan="2" align="right">
-               <input type="reset" name="Clear" value="Clear">
-               <input type="Submit" name="Next" value="Next">
+           <td align="left">
+               <input type="reset" name="Clear" value="Clear" style="width:70px">
+           </td>
+           <td align="right">
+               <input type="Submit" name="Next" value="Next" style="width:70px">&nbsp;
+               <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel()" style="width:70px">
            </td>
         </tr>
     </table>

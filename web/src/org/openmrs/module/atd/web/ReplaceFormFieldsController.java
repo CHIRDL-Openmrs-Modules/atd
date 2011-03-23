@@ -20,6 +20,7 @@ import org.openmrs.FormField;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -77,89 +78,93 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 	                                BindException errors) throws Exception {
 		long timeInMilliseconds = 0;
 		FormService formService = Context.getFormService();
-		ConceptService conceptService = Context.getConceptService();
 		String formIdString = request.getParameter("formId");
+		int formId = Integer.parseInt(formIdString);
+		String cancel = request.getParameter("cancelProcess");
+		if ("true".equalsIgnoreCase(cancel)) {
+			ConfigManagerUtil.deleteForm(formId);
+			return new ModelAndView(new RedirectView("configurationManager.form"));
+		}
+		
+		ConceptService conceptService = Context.getConceptService();
 		String replaceFormIdString = request.getParameter("replaceFormId");
-		if (formIdString != null) {
-			try {
-				int formId = Integer.parseInt(formIdString);
-				Form formToEdit = formService.getForm(formId);
-				List<FormField> formFields = formToEdit.getOrderedFormFields();
+		try {
+			Form formToEdit = formService.getForm(formId);
+			List<FormField> formFields = formToEdit.getOrderedFormFields();
+			
+			for (FormField currFormField : formFields) {
+				Field currField = currFormField.getField();
+				Integer fieldId = currField.getFieldId();
+				String name = request.getParameter("name_" + fieldId);
+				String fieldTypeId = request.getParameter("fieldType_" + fieldId);
+				String conceptName = request.getParameter("concept_" + fieldId);
+				String defaultValue = request.getParameter("defaultValue_" + fieldId);
+				String fieldNumber = request.getParameter("fieldNumber_" + fieldId);
+				String parentFieldId = request.getParameter("parent_" + fieldId);
 				
-				for (FormField currFormField : formFields) {
-					Field currField = currFormField.getField();
-					Integer fieldId = currField.getFieldId();
-					String name = request.getParameter("name_" + fieldId);
-					String fieldTypeId = request.getParameter("fieldType_" + fieldId);
-					String conceptName = request.getParameter("concept_" + fieldId);
-					String defaultValue = request.getParameter("defaultValue_" + fieldId);
-					String fieldNumber = request.getParameter("fieldNumber_" + fieldId);
-					String parentFieldId = request.getParameter("parent_" + fieldId);
-					
-					if (name != null && name.length() > 0) {
-						currField.setName(name);
-					}
-					try {
-						if (fieldTypeId != null && fieldTypeId.length() > 0) {
-							FieldType fieldType = formService.getFieldType(Integer.parseInt(fieldTypeId));
-							currField.setFieldType(fieldType);
-						} else {
-							currField.setFieldType(null);
-						}
-					}
-					catch (Exception e1) {
-						this.log.error(e1.getMessage());
-						this.log.error(Util.getStackTrace(e1));
-					}
-					try {
-						if (conceptName != null && conceptName.length() > 0) {
-							Concept concept = conceptService.getConcept(conceptName);
-							currField.setConcept(concept);
-						} else {
-							currField.setConcept(null);
-						}
-					}
-					catch (Exception e) {
-						this.log.error(e.getMessage());
-						this.log.error(Util.getStackTrace(e));
-					}
-					if (defaultValue != null && defaultValue.length() > 0) {
-						currField.setDefaultValue(defaultValue);
-					} else {
-						currField.setDefaultValue(null);
-					}
-					try {
-						if (fieldNumber != null && fieldNumber.length() > 0) {
-							currFormField.setFieldNumber(Integer.parseInt(fieldNumber));
-						}
-					}
-					catch (Exception e) {
-						this.log.error(e.getMessage());
-						this.log.error(Util.getStackTrace(e));
-					}
-					
-					try {
-						if (parentFieldId != null && parentFieldId.length() > 0) {
-							FormField parentField = formService.getFormField(Integer.parseInt(parentFieldId));
-							currFormField.setParent(parentField);
-						} else {
-							currFormField.setParent(null);
-						}
-					}
-					catch (Exception e) {
-						this.log.error(e.getMessage());
-						this.log.error(Util.getStackTrace(e));
-					}
-					long startTime = System.currentTimeMillis();
-					formService.saveFormField(currFormField);
-					formService.saveField(currField);
-					timeInMilliseconds += (System.currentTimeMillis() - startTime);
+				if (name != null && name.length() > 0) {
+					currField.setName(name);
 				}
+				try {
+					if (fieldTypeId != null && fieldTypeId.length() > 0) {
+						FieldType fieldType = formService.getFieldType(Integer.parseInt(fieldTypeId));
+						currField.setFieldType(fieldType);
+					} else {
+						currField.setFieldType(null);
+					}
+				}
+				catch (Exception e1) {
+					this.log.error(e1.getMessage());
+					this.log.error(Util.getStackTrace(e1));
+				}
+				try {
+					if (conceptName != null && conceptName.length() > 0) {
+						Concept concept = conceptService.getConcept(conceptName);
+						currField.setConcept(concept);
+					} else {
+						currField.setConcept(null);
+					}
+				}
+				catch (Exception e) {
+					this.log.error(e.getMessage());
+					this.log.error(Util.getStackTrace(e));
+				}
+				if (defaultValue != null && defaultValue.length() > 0) {
+					currField.setDefaultValue(defaultValue);
+				} else {
+					currField.setDefaultValue(null);
+				}
+				try {
+					if (fieldNumber != null && fieldNumber.length() > 0) {
+						currFormField.setFieldNumber(Integer.parseInt(fieldNumber));
+					}
+				}
+				catch (Exception e) {
+					this.log.error(e.getMessage());
+					this.log.error(Util.getStackTrace(e));
+				}
+				
+				try {
+					if (parentFieldId != null && parentFieldId.length() > 0) {
+						FormField parentField = formService.getFormField(Integer.parseInt(parentFieldId));
+						currFormField.setParent(parentField);
+					} else {
+						currFormField.setParent(null);
+					}
+				}
+				catch (Exception e) {
+					this.log.error(e.getMessage());
+					this.log.error(Util.getStackTrace(e));
+				}
+				long startTime = System.currentTimeMillis();
+				formService.saveFormField(currFormField);
+				formService.saveField(currField);
+				timeInMilliseconds += (System.currentTimeMillis() - startTime);
 			}
-			catch (Exception e) {
-				this.log.error(e.getMessage());
-				this.log.error(Util.getStackTrace(e));
-			}
+		}
+		catch (Exception e) {
+			this.log.error(e.getMessage());
+			this.log.error(Util.getStackTrace(e));
 		}
 		
 		String view = getSuccessView();

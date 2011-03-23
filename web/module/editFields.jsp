@@ -4,16 +4,24 @@
 <link href="${pageContext.request.contextPath}/moduleResources/atd/atd.css" type="text/css" rel="stylesheet" />
 
 <SCRIPT LANGUAGE="JavaScript">
-<!-- Idea by:  Nic Wolfe -->
-<!-- This script and many more are available free online at -->
-<!-- The JavaScript Source!! http://javascript.internet.com -->
-
-<!-- Begin
-function popUp(URL) {
-day = new Date();
-id = day.getTime();
-eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=1,scrollbars=1,location=0,statusbar=1,menubar=1,resizable=1,width=300,height=300');");
-}
+	<!-- Idea by:  Nic Wolfe -->
+	<!-- This script and many more are available free online at -->
+	<!-- The JavaScript Source!! http://javascript.internet.com -->
+	
+	<!-- Begin
+	function popUp(URL) {
+		day = new Date();
+		id = day.getTime();
+		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=1,scrollbars=1,location=0,statusbar=1,menubar=1,resizable=1,width=300,height=300');");
+	}
+	
+	function confirmCancel()
+    {
+        var agree=confirm("Are you sure you want to stop editing form fields?");
+        if (agree) {
+               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+        }
+    }
 // End -->
 </script>
 <p><h3>Edit Form Fields:</h3></p>
@@ -90,10 +98,13 @@ value="${formField2.formFieldId}">${formField2.field.name}</option>
    <tr>
        <td style="padding: 10px 0px 0px 0px">
         <hr size="3" color="black" />
-        </td>
+       </td>
     </tr>
     <tr>
-        <td align="right"><input type="submit" value="Finish"></td>
+        <td align="right">
+            <input type="submit" value="Finish" style="width:70px">&nbsp;
+            <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel()" style="width:70px">
+        </td>
     </tr>
 </table>
 </td>

@@ -5,25 +5,32 @@
 	href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
 	type="text/css" rel="stylesheet" />
 
-<SCRIPT LANGUAGE="JavaScript"> Idea by:  Nic Wolfe -->
-<!-- This script and many more are available free online at -->
-<!-- The JavaScript Source!! http://javascript.internet.com -->
-
-<!-- Begin
-function popUp(URL) {
-day = new Date();
-id = day.getTime();
-eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=1,scrollbars=1,location=0,statusbar=1,menubar=1,resizable=1,width=300,height=300');");
-}
+<SCRIPT LANGUAGE="JavaScript"> <!-- Idea by:  Nic Wolfe -->
+	<!-- This script and many more are available free online at -->
+	<!-- The JavaScript Source!! http://javascript.internet.com -->
+	
+	//<!-- Begin
+	function popUp(URL) {
+		day = new Date();
+		id = day.getTime();
+		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=1,scrollbars=1,location=0,statusbar=1,menubar=1,resizable=1,width=300,height=300');");
+    }
+	
+	function confirmCancel() {
+        var agree=confirm("Are you sure you want to stop form creation?");
+        if (agree) {
+               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+               var cancel = document.getElementById('cancelProcess');
+               cancel.value = 'true';
+               document.getElementById('input').submit();
+        }
+    }
 // End </script>
 <p>
 <h3>Populate Form Fields:</h3>
 </p>
-<form method="post" action="popFormFields.form">
-<p>Fields for form ${form.name}: <c:if
-	test="${createWizard != 'true'}">
-	<input type="submit" value="Update">
-</c:if></p>
+<form id="input" method="post" action="popFormFields.form">
+<p>Fields for form ${form.name}: </p>
 <input type="hidden" name="processFields" value="true" /> <input
 	type="hidden" name="formToEdit" value="${form.formId}" />
 <table>
@@ -87,29 +94,25 @@ selected
 	</tr>
 	<tr>
 	    <td>
-		    <c:choose>
-		        <c:when test="${createWizard == 'true'}">
-		            <input type="hidden" name="createWizard" value="true" />
-		            <table width="100%">
-		                <tr>
-		                    <td style="padding: 10px 0px 0px 0px">
-		                    <hr size="3" color="black" />
-		                    </td>
-		                </tr>
-		                <tr>
-		                    <td align="right"><input type="submit" value="Next"></td>
-		                </tr>
-		            </table>
-		        </c:when>
-		        <c:otherwise>
-		            <input type="hidden" name="createWizard" value="false" />
-		        </c:otherwise>
-	        </c:choose>
+            <table width="100%">
+                <tr>
+                    <td style="padding: 10px 0px 0px 0px">
+                        <hr size="3" color="black" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <input type="submit" value="Next" style="width:70px">&nbsp;
+                        <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel()" style="width:70px">
+                    </td>
+                </tr>
+            </table>
 	    </td>
 	</tr>
 </table>
 <input type="hidden" name="formId" value="${formId}" /> 
-<input type="hidden" name="formName" value="${formName}" /> 
+<input type="hidden" name="formName" value="${formName}" />
+<input type="hidden" id="cancelProcess" name="cancelProcess" value="false" />
 </form>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

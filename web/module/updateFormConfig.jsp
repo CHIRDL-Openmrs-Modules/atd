@@ -135,14 +135,6 @@
         <input type="hidden" name="formId" value="${formId}"/>
         <input type="hidden" name="formName" value="${formName}"/>
         <c:choose>
-            <c:when test="${createWizard == 'true'}">
-                <input type="hidden" name="createWizard" value="true"/>
-            </c:when>
-            <c:otherwise>
-                <input type="hidden" name="createWizard" value="false"/>
-            </c:otherwise>
-        </c:choose>
-        <c:choose>
             <c:when test="${numPrioritizedFields != null}">
                 <input type="hidden" name="numPrioritizedFields" value="${numPrioritizedFields}"/>
             </c:when>

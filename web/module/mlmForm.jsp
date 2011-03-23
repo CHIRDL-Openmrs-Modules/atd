@@ -19,7 +19,7 @@
             </tr>
             <tr style="padding: 5px">
                <td colspan="3" align="right">
-                   <input type="Submit" name="Next" value="Finish">
+                   <input type="Submit" name="Next" value="Finish" style="width:70px">
                </td>
             </tr>
         </table>

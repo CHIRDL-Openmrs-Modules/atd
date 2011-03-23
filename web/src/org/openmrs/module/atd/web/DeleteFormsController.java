@@ -8,13 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Form;
-import org.openmrs.FormField;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.service.ATDService;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
+import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -53,13 +49,10 @@ public class DeleteFormsController extends SimpleFormController
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, 
 	                                             BindException errors) throws Exception 
 	{
-		FormService formService = Context.getFormService();
-		ATDService atdService = Context.getService(ATDService.class);
 		String[] formsToDelete = request.getParameterValues("FormsToDelete");
 
 		if (formsToDelete != null)
 		{
-			ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
 			for (String currFormIdString : formsToDelete)
 			{
 				Integer currFormId = null;
@@ -67,23 +60,7 @@ public class DeleteFormsController extends SimpleFormController
 				try
 				{
 					currFormId = Integer.parseInt(currFormIdString);
-					Form currForm = formService.getForm(currFormId);
-					
-					//delete the form attribute values
-					atdService.purgeFormAttributeValues(currFormId);
-					
-					//delete the form
-					formService.purgeForm(currForm);
-					
-					//delete the orphaned fields
-					for(FormField currFormField: currForm.getFormFields())
-					{
-						formService.purgeField(currFormField.getField());
-					}
-					
-					// delete from Chirdl Util tables
-					LocationTagAttribute attr = chirdlService.getLocationTagAttribute(currForm.getName());
-					chirdlService.deleteLocationTagAttribute(attr);
+					ConfigManagerUtil.deleteForm(currFormId);
 				} catch (Exception e)
 				{
 					this.log.error(e.getMessage());

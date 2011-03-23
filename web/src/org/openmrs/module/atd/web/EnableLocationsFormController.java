@@ -1,9 +1,5 @@
 package org.openmrs.module.atd.web;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +23,7 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
@@ -158,7 +155,7 @@ public class EnableLocationsFormController extends SimpleFormController {
 		String driveLetter = adminService.getGlobalProperty("atd.driveLetter");
 		try {	
 			// Create the directories.
-			createDirectories(formName, selectedLocations, scannableForm, driveLetter);
+			ConfigManagerUtil.createFormDirectories(formName, selectedLocations, scannableForm, driveLetter);
 		} catch (Exception e) {			
 			log.error("Error creating directories", e);
 			map.put("failedCreateDirectories", true);
@@ -177,11 +174,11 @@ public class EnableLocationsFormController extends SimpleFormController {
 	                MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest)request;
 	                MultipartFile xmlFile = multipartRequest.getFile("scoringFile");
 	                if (xmlFile != null && !xmlFile.isEmpty()) {
-	                	scoreConfigFile = loadScoringConfigFile(xmlFile, formName);
+	                	scoreConfigFile = ConfigManagerUtil.loadFormScoringConfigFile(xmlFile, formName);
 	                } else {
 	                	map.put("missingScoringFile", true);
 	                	// delete the directories
-	        			deleteDirectories(formName, locNames, scannableForm);
+	                	ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
 	        			return new ModelAndView(view, map);
 	                }
 	            }
@@ -198,12 +195,13 @@ public class EnableLocationsFormController extends SimpleFormController {
     		log.error("Error saving form changes", e);
             map.put("failedSaveChanges", true);
 			// delete the directories
-			deleteDirectories(formName, locNames, scannableForm);
+            ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
 			return new ModelAndView(view, map);
         }
         
+    	List<LocationTagAttributeValue> addedTags = new ArrayList<LocationTagAttributeValue>();
+    	ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
         try {
-        	ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
         	LocationTagAttribute locTagAttr = chirdlService.getLocationTagAttribute(formName);
         	if (locTagAttr == null) {
         		locTagAttr = new LocationTagAttribute();
@@ -223,117 +221,26 @@ public class EnableLocationsFormController extends SimpleFormController {
         			attrVal.setLocationTagId(tag.getLocationTagId());
         			attrVal.setValue(String.valueOf(formId));
         			chirdlService.saveLocationTagAttributeValue(attrVal);
+        			addedTags.add(attrVal);
         		}
         	}
         } catch (Exception e) {
         	log.error("Error while creating data for the Chirdl location tag tables", e);
         	map.put("failedChirdlUpdate", true);
         	// delete the directories
-			deleteDirectories(formName, locNames, scannableForm);
+        	ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
 			// remove attribute values
 			atdService.purgeFormAttributeValues(formId);
+			// remove chirdl util attr vals
+			for (LocationTagAttributeValue val : addedTags) {
+				chirdlService.deleteLocationTagAttributeValue(val);
+			}
+			
 			return new ModelAndView(view, map);
         }
 		
 		view = getSuccessView();
 		return new ModelAndView(new RedirectView(view), map);
-	}
-	
-	private void createDirectories(String formName, List<String> locations, boolean scannableForm, String driveLetter) 
-	throws Exception {
-		if (driveLetter == null) {
-			throw new Exception("atd.driveLetter not specified.");
-		}
-		
-		for (String locName : locations) {
-			// Create the merge directory
-			File mergeDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "merge" + 
-				File.separator + locName + File.separator + formName + File.separator + "Pending");
-			mergeDir.mkdirs();
-			
-			if (scannableForm) {
-				// Create the scan directory
-				File scanDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "scan" + 
-					File.separator + locName + File.separator + formName + "_SCAN");
-				scanDir.mkdirs();
-				
-				// Create the images directory
-				File imageDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "images" + 
-					File.separator + locName + File.separator + formName);
-				imageDir.mkdirs();
-			}
-		}
-	}
-	
-	private void deleteDirectories(String formName, List<String> locations, boolean scannableForm) throws Exception {
-		AdministrationService adminService = Context.getAdministrationService();
-		String driveLetter = adminService.getGlobalProperty("atd.driveLetter");
-		
-		for (String locName : locations) {
-			// Create the merge directory
-			File mergePendingDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "merge" + 
-				File.separator + locName + File.separator + formName + File.separator + "Pending");
-			File mergeDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "merge" + 
-				File.separator + locName + File.separator + formName);
-			if (mergePendingDir.exists()) {
-				mergePendingDir.delete();
-			}
-			
-			if (mergeDir.exists()) {
-				mergeDir.delete();
-			}
-			
-			if (scannableForm) {
-				// Create the scan directory
-				File scanDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "scan" + 
-					File.separator + locName + File.separator + formName + "_SCAN");
-				if (scanDir.exists()) {
-					scanDir.delete();
-				}
-				
-				// Create the images directory
-				File imageDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "images" + 
-					File.separator + locName + File.separator + formName);
-				if (imageDir.exists()) {
-					imageDir.delete();
-				}
-			}
-		}
-	}
-	
-	private String loadScoringConfigFile(MultipartFile xmlFile, String formName) throws Exception {
-		AdministrationService adminService = Context.getAdministrationService();
-		String driveLetter = adminService.getGlobalProperty("atd.driveLetter");
-		String xmlLoadDir = driveLetter + ":\\chica\\config\\" + formName + " scoring config";
-		File loadDir = new File(xmlLoadDir);
-		loadDir.mkdirs();
-		String fileName = formName + "_scoring_config.xml";
-		
-		// Place the file in the forms to load directory
-		InputStream in = xmlFile.getInputStream();
-		File file = new File(loadDir, fileName);
-		if (file.exists()) {
-			file.delete();
-		}
-		
-		OutputStream out = new FileOutputStream(file);
-		int nextChar;
-		try {
-			while ((nextChar = in.read()) != -1) {
-				out.write(nextChar);
-			}
-			
-		} finally {
-			if (in != null) {
-				in.close();
-			}
-			
-			if (out != null) {
-				out.close();
-			}
-		}
-		
-		return file.getAbsolutePath();
 	}
 	
 	private Integer getPrioritizedFieldCount(FormService formService, Integer formId) {

@@ -16,6 +16,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
@@ -59,16 +60,22 @@ public class ReplaceRetireFormController extends SimpleFormController {
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, 
 	                                             BindException errors) throws Exception {
 		String view = getSuccessView();
+		String newFormIdStr = request.getParameter("newFormId");
+		Integer newFormId = Integer.parseInt(newFormIdStr);
+		String cancel = request.getParameter("cancelProcess");
+		if ("true".equalsIgnoreCase(cancel)) {
+			ConfigManagerUtil.deleteForm(newFormId);
+			return new ModelAndView(new RedirectView("configurationManager.form"));
+		}
+		
 		String retireForm = request.getParameter("retireForm");
 		if ("Yes".equalsIgnoreCase(retireForm)) {
+			FormService formService = Context.getFormService();
 			String formIdStr = request.getParameter("formId");
 			Integer formId = Integer.parseInt(formIdStr);
-			FormService formService = Context.getFormService();
 			Form form = formService.getForm(formId);
 			String formName = form.getName();
 			formService.retireForm(form, "Form replaced with a new version.");
-			String newFormIdStr = request.getParameter("newFormId");
-			Integer newFormId = Integer.parseInt(newFormIdStr);
 			Form newForm = formService.getForm(newFormId);
 			newForm.setName(formName);
 			formService.saveForm(newForm);

@@ -4,16 +4,28 @@
 <link
     href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
     type="text/css" rel="stylesheet" />
+<script LANGUAGE="JavaScript">
+    <!--
+    // Nannette Thacker http://www.shiningstar.net
+    function confirmCancel()
+    {
+        var agree=confirm("Are you sure you want to stop form printer configuration?");
+        if (agree) {
+               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+        }
+    }
+    // -->
+</script>
 <html>
     <body>
         <h3>Form Printer Configuration</h3>
-        <h4>Form: <c:out value="${formName}"/></h4>
-        <h4>Location: <c:out value="${locationName}"/></h4>
+        Form: <c:out value="${formName}"/><br/>
+        Location: <c:out value="${locationName}"/>
         <form name="input" action="printerLocationForm.form" method="post">
         <table>
             <c:forEach items="${printerConfig.locationTagPrinterConfigs}" var="printerTag" varStatus="status">
 	            <tr>
-	               <td>
+	               <td colspan="2">
 	                   <c:if test="${status.count != 1}">
 	                       <br/><br/>
 	                   </c:if>
@@ -49,12 +61,15 @@
 	            </tr>
             </c:forEach>
             <tr style="padding: 5px">
-                <td colspan="3" align="center"><hr size="3" color="black"/></td>
+                <td colspan="2" align="center"><hr size="3" color="black"/></td>
             </tr>
             <tr style="padding: 5px">
-               <td colspan="3" align="right">
-                   <input type="reset" name="Clear" value="Clear">
-                   <input type="Submit" name="Finish" value="Finish">
+               <td align="left">
+                   <input type="reset" name="Clear" value="Clear" style="width:70px">
+               </td>
+               <td align="right">
+                   <input type="Submit" name="Finish" value="Finish" style="width:70px">&nbsp;
+                   <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel()" style="width:70px">
                </td>
             </tr>
         </table>

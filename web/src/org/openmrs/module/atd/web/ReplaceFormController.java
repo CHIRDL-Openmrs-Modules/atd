@@ -1,9 +1,5 @@
 package org.openmrs.module.atd.web;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,11 +14,10 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Field;
 import org.openmrs.Form;
 import org.openmrs.FormField;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -74,7 +69,7 @@ public class ReplaceFormController extends SimpleFormController {
 				MultipartFile xmlFile = multipartRequest.getFile("xmlFile");
 				if (xmlFile != null && !xmlFile.isEmpty()) {
 					String formName = replaceForm.getName() + "_replace_" + System.currentTimeMillis();
-					newForm = loadXmlFile(xmlFile, formName);
+					newForm = ConfigManagerUtil.loadTeleformXmlFile(xmlFile, formName);
 				} else {
 					map.put("missingFile", true);
 					map.put("forms", formService.getAllForms(false));
@@ -100,8 +95,7 @@ public class ReplaceFormController extends SimpleFormController {
 			map.put("failedFieldCopy", true);
 			map.put("forms", formService.getAllForms(false));
 			map.put("selectedForm", replaceFormIdStr);
-			atdService.purgeFormAttributeValues(newForm.getFormId());
-			formService.purgeForm(newForm);
+			ConfigManagerUtil.deleteForm(newForm.getFormId());
 			return new ModelAndView(view, map);
 		}
 		
@@ -113,51 +107,14 @@ public class ReplaceFormController extends SimpleFormController {
 			map.put("failedAttrValCopy", true);
 			map.put("forms", formService.getAllForms(false));
 			map.put("selectedForm", replaceFormIdStr);
-			atdService.purgeFormAttributeValues(newForm.getFormId());
-			formService.purgeForm(newForm);
+			ConfigManagerUtil.deleteForm(newForm.getFormId());
 			return new ModelAndView(view, map);
 		}
 		
 		view = getSuccessView();
 		map.put("formId", newForm.getFormId());
-		map.put("createWizard", true);
 		map.put("replaceFormId", replaceFormIdStr);
 		return new ModelAndView(new RedirectView(view), map);
-	}
-	
-	private Form loadXmlFile(MultipartFile xmlFile, String formName) throws Exception {
-		Form form = null;
-		AdministrationService adminService = Context.getAdministrationService();
-		TeleformTranslator translator = new TeleformTranslator();
-		String formLoadDir = adminService.getGlobalProperty("atd.formLoadDirectory");
-		// Place the file in the forms to load directory
-		InputStream in = xmlFile.getInputStream();
-		File file = new File(formLoadDir, formName + ".xml");
-		if (file.exists()) {
-			file.delete();
-		}
-		
-		OutputStream out = new FileOutputStream(file);
-		int nextChar;
-		try {
-			while ((nextChar = in.read()) != -1) {
-				out.write(nextChar);
-			}
-			
-			// Load the XML file
-			form = translator.templateXMLToDatabaseForm(formName, file.getAbsolutePath());
-		}
-		finally {
-			if (in != null) {
-				in.close();
-			}
-			
-			if (out != null) {
-				out.close();
-			}
-		}
-		
-		return form;
 	}
 	
 	private void copyFormFields(FormService formService, Form form, Form copiedForm) throws Exception {

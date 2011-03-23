@@ -4,6 +4,18 @@
 <link
     href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
     type="text/css" rel="stylesheet" />
+<script LANGUAGE="JavaScript">
+    <!--
+    // Nannette Thacker http://www.shiningstar.net
+    function confirmCancel()
+    {
+        var agree=confirm("Are you sure you want to stop enabling a form at other clinics?");
+        if (agree) {
+               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+        }
+    }
+    // -->
+</script>
 <html>
     <body>
         <p><h3>Enable Form at Clinics:</h3></p>
@@ -146,9 +158,12 @@
                     <td colspan="2" align="center"><hr size="3" color="black"/></td>
                 </tr>
                 <tr style="padding: 5px">
-                   <td colspan="2" align="right">
-                       <input type="reset" name="Clear" value="Clear">
-                       <input type="Submit" name="Finish" value="Finish">
+                   <td align="left">
+                       <input type="reset" name="Clear" value="Clear" style="width:70px">
+                   </td>
+                   <td align="right">
+                       <input type="Submit" name="Finish" value="Finish" style="width:70px">&nbsp;
+                       <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel()" style="width:70px">
                    </td>
                 </tr>
             </table>

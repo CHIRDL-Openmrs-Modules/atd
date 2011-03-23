@@ -5,21 +5,31 @@
     href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
     type="text/css" rel="stylesheet" />
 
-<SCRIPT LANGUAGE="JavaScript"> Idea by:  Nic Wolfe -->
-<!-- This script and many more are available free online at -->
-<!-- The JavaScript Source!! http://javascript.internet.com -->
-
-<!-- Begin
-function popUp(URL) {
-    day = new Date();
-    id = day.getTime();
-    eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=1,scrollbars=1,location=0,statusbar=1,menubar=1,resizable=1,width=300,height=300');");
-}
+<SCRIPT LANGUAGE="JavaScript"> <!-- Idea by:  Nic Wolfe -->
+	<!-- This script and many more are available free online at -->
+	<!-- The JavaScript Source!! http://javascript.internet.com -->
+	
+	<!-- Begin
+	function popUp(URL) {
+	    day = new Date();
+	    id = day.getTime();
+	    eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=1,scrollbars=1,location=0,statusbar=1,menubar=1,resizable=1,width=300,height=300');");
+	}
+	
+	function confirmCancel() {
+        var agree=confirm("Are you sure you want to stop form replace?");
+        if (agree) {
+               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+               var cancel = document.getElementById('cancelProcess');
+               cancel.value = 'true';
+               document.getElementById('input').submit();
+        }
+    }
 // End </script>
 <p>
 <h3>Populate Form Fields:</h3>
 </p>
-<form method="post" action="replaceFormFields.form">
+<form id="input" method="post" action="replaceFormFields.form">
 <input type="hidden" name="processFields" value="true" /> <input
     type="hidden" name="formToEdit" value="${form.formId}" />
 <p><font color="red"><b>*</b></font> Indicates a field not found in the form being replaced.</p>
@@ -97,7 +107,10 @@ function popUp(URL) {
 	                </td>
 	            </tr>
 	            <tr>
-	                <td align="right"><input type="submit" value="Next"></td>
+	                <td align="right">
+	                   <input type="submit" value="Next" style="width:70px">&nbsp;
+	                   <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel()" style="width:70px">
+	                </td>
 	            </tr>
 	        </table>
         </td>
@@ -105,6 +118,7 @@ function popUp(URL) {
 </table>
 <input type="hidden" name="formId" value="${form.formId}" />
 <input type="hidden" name="replaceFormId" value="${replaceFormId}" />
+<input type="hidden" id="cancelProcess" name="cancelProcess" value="false" />
 </form>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

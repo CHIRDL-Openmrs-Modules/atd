@@ -1,9 +1,5 @@
 package org.openmrs.module.atd.web;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,10 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.TeleformTranslator;
+import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -75,7 +70,7 @@ public class CreateFormController extends SimpleFormController {
 				MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 				MultipartFile xmlFile = multipartRequest.getFile("xmlFile");
 				if (xmlFile != null && !xmlFile.isEmpty()) {
-					newForm = loadXmlFile(xmlFile, formName);
+					newForm = ConfigManagerUtil.loadTeleformXmlFile(xmlFile, formName);
 				} else {
 					map.put("missingFile", true);
 					return new ModelAndView(view, map);
@@ -90,42 +85,6 @@ public class CreateFormController extends SimpleFormController {
 		
 		view = getSuccessView();
 		map.put("formId", newForm.getFormId());
-		map.put("createWizard", true);
 		return new ModelAndView(new RedirectView(view), map);
-	}
-	
-	private Form loadXmlFile(MultipartFile xmlFile, String formName) throws Exception {
-		Form form = null;
-		AdministrationService adminService = Context.getAdministrationService();
-		TeleformTranslator translator = new TeleformTranslator();
-		String formLoadDir = adminService.getGlobalProperty("atd.formLoadDirectory");
-		// Place the file in the forms to load directory
-		InputStream in = xmlFile.getInputStream();
-		File file = new File(formLoadDir, formName + ".xml");
-		if (file.exists()) {
-			file.delete();
-		}
-		
-		OutputStream out = new FileOutputStream(file);
-		int nextChar;
-		try {
-			while ((nextChar = in.read()) != -1) {
-				out.write(nextChar);
-			}
-			
-			// Load the XML file
-			form = translator.templateXMLToDatabaseForm(formName, file.getAbsolutePath());
-		}
-		finally {
-			if (in != null) {
-				in.close();
-			}
-			
-			if (out != null) {
-				out.close();
-			}
-		}
-		
-		return form;
 	}
 }
