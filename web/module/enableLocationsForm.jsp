@@ -11,7 +11,7 @@
     {
         var agree=confirm("Are you sure you want to stop enabling a form at other clinics?");
         if (agree) {
-               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+               window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
         }
     }
     // -->

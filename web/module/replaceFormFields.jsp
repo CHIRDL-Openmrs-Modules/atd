@@ -19,7 +19,7 @@
 	function confirmCancel() {
         var agree=confirm("Are you sure you want to stop form replace?");
         if (agree) {
-               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+               window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
                var cancel = document.getElementById('cancelProcess');
                cancel.value = 'true';
                document.getElementById('input').submit();

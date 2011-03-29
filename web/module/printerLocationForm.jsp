@@ -11,7 +11,7 @@
     {
         var agree=confirm("Are you sure you want to stop form printer configuration?");
         if (agree) {
-               window.location.href('${pageContext.request.contextPath}/module/atd/configurationManager.form')
+               window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
         }
     }
     // -->
