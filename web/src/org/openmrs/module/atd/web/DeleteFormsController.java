@@ -11,6 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -61,6 +63,9 @@ public class DeleteFormsController extends SimpleFormController
 				{
 					currFormId = Integer.parseInt(currFormIdString);
 					ConfigManagerUtil.deleteForm(currFormId);
+					LoggingUtil.logEvent(null, currFormId, null, LoggingConstants.EVENT_DELETE_FORM, 
+						Context.getAuthenticatedUser().getUserId(), 
+						"Form Deleted.  Class: " + DeleteFormsController.class.getCanonicalName());
 				} catch (Exception e)
 				{
 					this.log.error(e.getMessage());

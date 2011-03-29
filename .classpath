@@ -82,6 +82,6 @@
 	<classpathentry kind="lib" path="lib-common/jibx/xmlpull_1_1_4.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xpp3.jar"/>
 	<classpathentry kind="lib" path="lib-common/dss-2.27.12.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutil-1.0.16.jar" sourcepath="/chirdlutil"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutil-1.0.17.jar" sourcepath="/chirdlutil"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

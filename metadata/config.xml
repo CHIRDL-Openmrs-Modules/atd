@@ -6,7 +6,7 @@
 	<!-- Basic Module Properties -->
 	<id>atd</id>
 	<name>ATD</name>
-	<version>1.61.11</version>
+	<version>1.61.12</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Tammy Dugan</author>
 	<description>
@@ -20,7 +20,7 @@
 	<require_database_version>1.0.0</require_database_version>
 	<require_modules>
    		<require_module version="2.27.12">org.openmrs.module.dss</require_module>
-		<require_module version="1.0.16">org.openmrs.module.chirdlutil</require_module>
+		<require_module version="1.0.17">org.openmrs.module.chirdlutil</require_module>
 	</require_modules>
 	
 	<!-- /Basic Module Properties -->

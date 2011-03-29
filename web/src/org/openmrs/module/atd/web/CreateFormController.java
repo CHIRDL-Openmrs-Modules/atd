@@ -12,6 +12,8 @@ import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -71,6 +73,9 @@ public class CreateFormController extends SimpleFormController {
 				MultipartFile xmlFile = multipartRequest.getFile("xmlFile");
 				if (xmlFile != null && !xmlFile.isEmpty()) {
 					newForm = ConfigManagerUtil.loadTeleformXmlFile(xmlFile, formName);
+					LoggingUtil.logEvent(null, newForm.getFormId(), null, LoggingConstants.EVENT_CREATE_FORM, 
+						Context.getUserContext().getAuthenticatedUser().getUserId(), 
+						"New Form Created.  Class: " + CreateFormController.class.getCanonicalName());
 				} else {
 					map.put("missingFile", true);
 					return new ModelAndView(view, map);

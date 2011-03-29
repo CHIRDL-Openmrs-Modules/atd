@@ -18,6 +18,8 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -158,6 +160,10 @@ public class PopulateFormFieldsController extends SimpleFormController {
 				formService.saveField(currField);
 				timeInMilliseconds += (System.currentTimeMillis() - startTime);
 			}
+			
+			LoggingUtil.logEvent(null, formId, null, LoggingConstants.EVENT_MODIFY_FORM_FIELDS, 
+				Context.getUserContext().getAuthenticatedUser().getUserId(), 
+				"Form fields modified.  Class: " + PopulateFormFieldsController.class.getCanonicalName());
 		}
 		catch (Exception e) {
 			this.log.error(e.getMessage());

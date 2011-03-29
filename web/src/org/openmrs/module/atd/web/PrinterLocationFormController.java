@@ -17,6 +17,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.LocationTagPrinterConfig;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
@@ -84,6 +86,9 @@ public class PrinterLocationFormController extends SimpleFormController {
 		}
 	
 		atdService.savePrinterConfigurations(printerConfig);
+		LoggingUtil.logEvent(locationId, formId, null, LoggingConstants.EVENT_FORM_PRINTER_CHANGE, 
+			Context.getUserContext().getAuthenticatedUser().getUserId(), 
+			"Form printer configuration changed.  Class: " + PrinterLocationFormController.class.getCanonicalName());
 		return new ModelAndView(new RedirectView(getSuccessView()));
 	}
 }

@@ -26,6 +26,8 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
@@ -223,6 +225,10 @@ public class EnableLocationsFormController extends SimpleFormController {
         			chirdlService.saveLocationTagAttributeValue(attrVal);
         			addedTags.add(attrVal);
         		}
+        		
+        		LoggingUtil.logEvent(loc.getLocationId(), formId, null, LoggingConstants.EVENT_MODIFY_FORM_PROPERTIES, 
+        			Context.getUserContext().getAuthenticatedUser().getUserId(), 
+        			"Form configuration modified.  Class: " + EnableLocationsFormController.class.getCanonicalName());
         	}
         } catch (Exception e) {
         	log.error("Error while creating data for the Chirdl location tag tables", e);

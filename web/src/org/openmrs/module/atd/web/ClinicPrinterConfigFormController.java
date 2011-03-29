@@ -12,6 +12,8 @@ import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
@@ -80,6 +82,12 @@ public class ClinicPrinterConfigFormController extends SimpleFormController {
 			map.put("failedUpdate", true);
 			map.put("locations", locNames);
 			return new ModelAndView(view, map);
+		}
+		
+		for (Integer locationId : selectedLocations) {
+			LoggingUtil.logEvent(locationId, null, null, LoggingConstants.EVENT_MODIFY_CLINIC_PRINTER_CONFIG, 
+				Context.getUserContext().getAuthenticatedUser().getUserId(), 
+				"Clinic printer configuration modified.  Class: " + ClinicPrinterConfigFormController.class.getCanonicalName());
 		}
 		
 		view = getSuccessView();

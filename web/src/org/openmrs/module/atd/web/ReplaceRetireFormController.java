@@ -19,6 +19,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
 import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -62,6 +64,8 @@ public class ReplaceRetireFormController extends SimpleFormController {
 		String view = getSuccessView();
 		String newFormIdStr = request.getParameter("newFormId");
 		Integer newFormId = Integer.parseInt(newFormIdStr);
+		String formIdStr = request.getParameter("formId");
+		Integer formId = Integer.parseInt(formIdStr);
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {
 			ConfigManagerUtil.deleteForm(newFormId);
@@ -71,8 +75,6 @@ public class ReplaceRetireFormController extends SimpleFormController {
 		String retireForm = request.getParameter("retireForm");
 		if ("Yes".equalsIgnoreCase(retireForm)) {
 			FormService formService = Context.getFormService();
-			String formIdStr = request.getParameter("formId");
-			Integer formId = Integer.parseInt(formIdStr);
 			Form form = formService.getForm(formId);
 			String formName = form.getName();
 			formService.retireForm(form, "Form replaced with a new version.");
@@ -80,7 +82,15 @@ public class ReplaceRetireFormController extends SimpleFormController {
 			newForm.setName(formName);
 			formService.saveForm(newForm);
 			updateChirdlData(form, newForm);
+			LoggingUtil.logEvent(null, formId, null, LoggingConstants.EVENT_RETIRE_FORM, 
+				Context.getUserContext().getAuthenticatedUser().getUserId(), 
+				"Form retired.  Class: " + ReplaceRetireFormController.class.getCanonicalName());
 		}
+		
+		LoggingUtil.logEvent(null, newFormId, null, LoggingConstants.EVENT_REPLACE_FORM, 
+			Context.getUserContext().getAuthenticatedUser().getUserId(), 
+			"Form replaced.  Old form: " + formId + " New form: " + newFormId + "  Class: " + 
+			ReplaceRetireFormController.class.getCanonicalName());
 		
 		return new ModelAndView(new RedirectView(view));
 	}
