@@ -2,9 +2,12 @@ package org.openmrs.module.atd.web.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.openmrs.Form;
 import org.openmrs.FormField;
@@ -20,38 +23,31 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ConfigManagerUtil {
 
-	public static Form loadTeleformXmlFile(MultipartFile xmlFile, String formName) throws Exception {
+	public static Form loadTeleformFile(MultipartFile multipartFile, String formName) throws Exception {
 		Form form = null;
 		AdministrationService adminService = Context.getAdministrationService();
 		TeleformTranslator translator = new TeleformTranslator();
 		String formLoadDir = adminService.getGlobalProperty("atd.formLoadDirectory");
+		String filename = multipartFile.getOriginalFilename();
+		int index = filename.lastIndexOf(".");
+		String extension = filename.substring(index + 1, filename.length());
 		// Place the file in the forms to load directory
-		InputStream in = xmlFile.getInputStream();
 		File file = new File(formLoadDir, formName + ".xml");
 		if (file.exists()) {
 			file.delete();
 		}
 		
-		OutputStream out = new FileOutputStream(file);
-		int nextChar;
-		try {
-			while ((nextChar = in.read()) != -1) {
-				out.write(nextChar);
-			}
-			
-			// Load the XML file
-			form = translator.templateXMLToDatabaseForm(formName, file.getAbsolutePath());
-		}
-		finally {
-			if (in != null) {
-				in.close();
-			}
-			
-			if (out != null) {
-				out.close();
-			}
+		if (extension.equalsIgnoreCase("xml")) {
+			multipartFile.transferTo(file);
+		} else if (extension.equalsIgnoreCase("fxf") || extension.equalsIgnoreCase("zip") ||
+				extension.equalsIgnoreCase("jar")) {
+			loadZippedFormFile(adminService, multipartFile, file);
+		} else {
+			throw new IllegalArgumentException("Unknown file type");
 		}
 		
+		// Load the XML file
+		form = translator.templateXMLToDatabaseForm(formName, file.getAbsolutePath());
 		return form;
 	}
 	
@@ -173,6 +169,40 @@ public class ConfigManagerUtil {
 			LocationTagAttribute attr = chirdlService.getLocationTagAttribute(form.getName());
 			if (attr != null) {
 				chirdlService.deleteLocationTagAttribute(attr);
+			}
+		}
+	}
+	
+	private static void loadZippedFormFile(AdministrationService adminService, MultipartFile multipartFile, File outFile) 
+	throws IOException {
+		File tempFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), ".zip");
+		OutputStream outStream = null;
+		InputStream inStream = null;
+		try {
+			multipartFile.transferTo(tempFile);
+			ZipFile zipFile = new ZipFile(tempFile);
+			String formFilename = adminService.getGlobalProperty("atd.TeleformFormFileName");
+			ZipEntry entry = zipFile.getEntry(formFilename);
+			if (entry == null) {
+				throw new IOException("No " + formFilename + " file found in: " + multipartFile.getOriginalFilename());
+			}
+			
+			inStream = zipFile.getInputStream(entry);
+			outStream = new FileOutputStream(outFile);
+			byte buf[]=new byte[1024];
+		    int len;
+		    while((len = inStream.read(buf)) > 0) {
+		    	outStream.write(buf,0,len);
+		    }
+		} finally {
+			if (tempFile != null && tempFile.exists()) {
+				tempFile.delete();
+			}
+			if (outStream != null) {
+				outStream.close();
+			}
+			if (inStream != null) {
+				inStream.close();
 			}
 		}
 	}

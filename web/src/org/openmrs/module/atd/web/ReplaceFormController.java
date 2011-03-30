@@ -65,13 +65,31 @@ public class ReplaceFormController extends SimpleFormController {
 		Integer replaceFormId = Integer.parseInt(replaceFormIdStr);
 		Form replaceForm = formService.getForm(replaceFormId);
 		try {
-			// Load the Teleform XML file.
+			// Load the Teleform file.
 			if (request instanceof MultipartHttpServletRequest) {
 				MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-				MultipartFile xmlFile = multipartRequest.getFile("xmlFile");
-				if (xmlFile != null && !xmlFile.isEmpty()) {
+				MultipartFile dataFile = multipartRequest.getFile("dataFile");
+				if (dataFile != null && !dataFile.isEmpty()) {
+					String filename = dataFile.getOriginalFilename();
+					int index = filename.lastIndexOf(".");
+					if (index < 0) {
+						map.put("incorrectExtension", true);
+						map.put("forms", formService.getAllForms(false));
+						map.put("selectedForm", replaceFormIdStr);
+						return new ModelAndView(view, map);
+					}
+					
+					String extension = filename.substring(index + 1, filename.length());
+					if (!extension.equalsIgnoreCase("xml") && !extension.equalsIgnoreCase("fxf") && 
+							!extension.equalsIgnoreCase("zip") && !extension.equalsIgnoreCase("jar")) {
+						map.put("incorrectExtension", true);
+						map.put("forms", formService.getAllForms(false));
+						map.put("selectedForm", replaceFormIdStr);
+						return new ModelAndView(view, map);
+					}
+					
 					String formName = replaceForm.getName() + "_replace_" + System.currentTimeMillis();
-					newForm = ConfigManagerUtil.loadTeleformXmlFile(xmlFile, formName);
+					newForm = ConfigManagerUtil.loadTeleformFile(dataFile, formName);
 					LoggingUtil.logEvent(null, newForm.getFormId(), null, LoggingConstants.EVENT_CREATE_FORM, 
 						Context.getUserContext().getAuthenticatedUser().getUserId(), 
 						"Form created.  Class: " + ReplaceFormController.class.getCanonicalName());
@@ -84,7 +102,7 @@ public class ReplaceFormController extends SimpleFormController {
 			}
 		}
 		catch (Exception e) {
-			log.error("Error while getting xmlFile from request", e);
+			log.error("Error while processing uploaded file from request", e);
 			map.put("failedFileUpload", true);
 			map.put("forms", formService.getAllForms(false));
 			map.put("selectedForm", replaceFormIdStr);

@@ -6,7 +6,7 @@
 	<!-- Basic Module Properties -->
 	<id>atd</id>
 	<name>ATD</name>
-	<version>1.61.13</version>
+	<version>1.61.14</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Tammy Dugan</author>
 	<description>
@@ -100,6 +100,11 @@
     <globalProperty>
         <property>atd.serverName</property>
         <description>Drive letter used to access data.</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.TeleformFormFileName</property>
+        <defaultValue>Form.XML</defaultValue>
+        <description>The name of the form XML document found in the Teleform fxf file.</description>
     </globalProperty>
 	<!-- Internationalization -->
 	<!-- All message codes should start with moduleId.* -->

@@ -56,22 +56,29 @@
 		        </tr>
 		    </c:if>
 		    <tr style="padding: 5px">
-		        <td style="padding: 0px 0px 10px 0px">Teleform XML file:</td>
+		        <td style="padding: 0px 0px 10px 0px">Teleform file:</td>
 		        <td style="padding: 0px 0px 10px 0px">
-		            <input type=file name="xmlFile" accept="text/xml" value="${xmlFile}">
+		            <input type=file name="dataFile" value="${dataFile}">
 		        </td>         
 		    </tr>
 		    <c:if test="${failedFileUpload == 'true'}">
 			    <tr style="padding: 5px">
 				    <td colspan="3" style="padding: 0px 0px 10px 0px">
-				        <font color="red">Error uploading XML file.  Check server log for details!</font>
+				        <font color="red">Error uploading data file.  Check server log for details!</font>
 				    </td>
 			    </tr>
 		    </c:if>
 		    <c:if test="${missingFile == 'true'}">
                 <tr style="padding: 5px">
                     <td colspan="3" style="padding: 0px 0px 10px 0px">
-                        <font color="red">Please specify an XML file.</font>
+                        <font color="red">Please specify a file.</font>
+                    </td>
+                </tr>
+            </c:if>
+            <c:if test="${incorrectExtension == 'true'}">
+                <tr style="padding: 5px">
+                    <td colspan="3" style="padding: 0px 0px 10px 0px">
+                        <font color="red">Incorrect file extension found.  Only .xml, .fxf, .zip, and .jar are allowed.</font>
                     </td>
                 </tr>
             </c:if>
