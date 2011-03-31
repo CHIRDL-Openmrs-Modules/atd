@@ -90,8 +90,9 @@ public class ClinicPrinterConfigFormController extends SimpleFormController {
 				"Clinic printer configuration modified.  Class: " + ClinicPrinterConfigFormController.class.getCanonicalName());
 		}
 		
+		map.put("application", "Clinic Printer Configuration");
 		view = getSuccessView();
-		return new ModelAndView(new RedirectView(view));
+		return new ModelAndView(new RedirectView(view), map);
 	}
 	
 	@Override

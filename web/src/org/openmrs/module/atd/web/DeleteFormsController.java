@@ -74,6 +74,8 @@ public class DeleteFormsController extends SimpleFormController
 			}
 		}
 		
-		return new ModelAndView(new RedirectView(getSuccessView()));
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("application", "Delete Forms");
+		return new ModelAndView(new RedirectView(getSuccessView()), map);
 	}
 }

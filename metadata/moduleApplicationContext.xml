@@ -28,6 +28,7 @@
 				<prop key="/module/@MODULE_ID@/enableForm.form">enableForm</prop>
 				<prop key="/module/@MODULE_ID@/enableLocationsForm.form">enableLocationsForm</prop>
 				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
+				<prop key="/module/@MODULE_ID@/configurationManagerSuccess.form">configurationManagerSuccess</prop>
 			</props>
 		</property>
 	</bean>
@@ -62,13 +63,13 @@
 	<bean id="editFields" class="org.openmrs.module.atd.web.EditFieldsController">
 		<property name="commandName"><value>EditFieldsObject</value></property>
 		<property name="formView"><value>/module/@MODULE_ID@/editFields</value></property>
-		<property name="successView"><value>configurationManager.form</value></property>
+		<property name="successView"><value>configurationManagerSuccess.form</value></property>
 	</bean>
 	
 	<bean id="deleteForms" class="@MODULE_PACKAGE@.web.DeleteFormsController">
 		<property name="commandName"><value>deleteFormsObject</value></property>
 		<property name="formView"><value>/module/@MODULE_ID@/deleteForms</value></property>
-		<property name="successView"><value>configurationManager.form</value></property>
+		<property name="successView"><value>configurationManagerSuccess.form</value></property>
 	</bean>
 	
 	<bean id="createForm" class="@MODULE_PACKAGE@.web.CreateFormController">
@@ -92,7 +93,7 @@
     <bean id="mlmForm" class="@MODULE_PACKAGE@.web.MLMFormController">
         <property name="commandName"><value>mlmFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/mlmForm</value></property>
-        <property name="successView"><value>configurationManager.form</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     
     <bean id="printerFormSelectionForm" class="@MODULE_PACKAGE@.web.PrinterFormSelectionFormController">
@@ -104,7 +105,7 @@
     <bean id="printerLocationForm" class="@MODULE_PACKAGE@.web.PrinterLocationFormController">
         <property name="commandName"><value>printerLocationFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/printerLocationForm</value></property>
-        <property name="successView"><value>configurationManager.form</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     <bean id="replaceForm" class="@MODULE_PACKAGE@.web.ReplaceFormController">
         <property name="commandName"><value>replaceFormObject</value></property>
@@ -119,7 +120,7 @@
     <bean id="replaceRetireForm" class="@MODULE_PACKAGE@.web.ReplaceRetireFormController">
         <property name="commandName"><value>replaceRetireFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/replaceRetireForm</value></property>
-        <property name="successView"><value>configurationManager.form</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     <bean id="updateForm" class="@MODULE_PACKAGE@.web.UpdateFormController">
         <property name="commandName"><value>updateFormObject</value></property>
@@ -129,7 +130,7 @@
     <bean id="clinicPrinterConfigForm" class="@MODULE_PACKAGE@.web.ClinicPrinterConfigFormController">
         <property name="commandName"><value>clinicPrinterConfigFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/clinicPrinterConfigForm</value></property>
-        <property name="successView"><value>configurationManager.form</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     <bean id="enableForm" class="@MODULE_PACKAGE@.web.EnableFormController">
         <property name="commandName"><value>enableFormObject</value></property>
@@ -139,11 +140,16 @@
     <bean id="enableLocationsForm" class="@MODULE_PACKAGE@.web.EnableLocationsFormController">
         <property name="commandName"><value>enableLocationsFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/enableLocationsForm</value></property>
-        <property name="successView"><value>configurationManager.form</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     <bean id="configurationManager" class="@MODULE_PACKAGE@.web.ConfigurationManagerController">
         <property name="commandName"><value>configurationManagerObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
+        <property name="successView"><value>configurationManager.form</value></property>
+    </bean>
+    <bean id="configurationManagerSuccess" class="@MODULE_PACKAGE@.web.ConfigManagerSuccessController">
+        <property name="commandName"><value>configurationManagerSuccessObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configurationManagerSuccess</value></property>
         <property name="successView"><value>configurationManager.form</value></property>
     </bean>
 	

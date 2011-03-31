@@ -245,6 +245,7 @@ public class EnableLocationsFormController extends SimpleFormController {
 			return new ModelAndView(view, map);
         }
 		
+		map.put("application", "Enable Form at Clinics");
 		view = getSuccessView();
 		return new ModelAndView(new RedirectView(view), map);
 	}

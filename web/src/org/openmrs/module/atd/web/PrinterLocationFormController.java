@@ -89,6 +89,8 @@ public class PrinterLocationFormController extends SimpleFormController {
 		LoggingUtil.logEvent(locationId, formId, null, LoggingConstants.EVENT_FORM_PRINTER_CHANGE, 
 			Context.getUserContext().getAuthenticatedUser().getUserId(), 
 			"Form printer configuration changed.  Class: " + PrinterLocationFormController.class.getCanonicalName());
-		return new ModelAndView(new RedirectView(getSuccessView()));
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("application", "Form Printer Configuration");
+		return new ModelAndView(new RedirectView(getSuccessView()), map);
 	}
 }

@@ -193,8 +193,10 @@ public class EditFieldsController extends SimpleFormController
 			}
 		}
 	
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("application", "Edit Form Fields");
 		String view = getSuccessView();
-		return new ModelAndView(new RedirectView(view));	
+		return new ModelAndView(new RedirectView(view), map);	
 	}
 
 }

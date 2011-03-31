@@ -92,7 +92,9 @@ public class ReplaceRetireFormController extends SimpleFormController {
 			"Form replaced.  Old form: " + formId + " New form: " + newFormId + "  Class: " + 
 			ReplaceRetireFormController.class.getCanonicalName());
 		
-		return new ModelAndView(new RedirectView(view));
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("application", "Replace Form");
+		return new ModelAndView(new RedirectView(view), map);
 	}
 	
 	private void updateChirdlData(Form form, Form newForm) throws Exception {
