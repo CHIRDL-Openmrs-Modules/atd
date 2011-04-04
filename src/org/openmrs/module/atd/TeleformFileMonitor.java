@@ -72,9 +72,6 @@ public class TeleformFileMonitor extends AbstractTask
 	private final static Lock aopLock = new ReentrantLock();
 	private final static Condition goTFStates = aopLock.newCondition();
 	private static Boolean statesBeingProcessedByAOP = false;
-	private static Date lastMoveMergeFiles;
-	private static Date nextLatestMoveMergeFiles;
-	private static Boolean TFAMP_Alert = false;
 	private static Boolean ignorePWSs = false;
 	private static ArrayList<TeleformFileState> pwsStatesToProcess = new ArrayList<TeleformFileState>();
 	
@@ -117,16 +114,7 @@ public class TeleformFileMonitor extends AbstractTask
 					pwsFileStates.add(tfFileState);
 					kickProcess(pwsFileStates);
 				}
-				LocationService locationService = Context.getLocationService();
-				List<Location> locations = locationService.getAllLocations();
-				for(Location location:locations){
-					Set<LocationTag> tags = location.getTags();
-					if(tags != null){
-						for(LocationTag tag:tags){
-							moveMergeFiles(tag.getLocationTagId(),location.getLocationId());
-						}
-					}
-				}
+
 			} 
 			catch (Exception e)
 			{
@@ -136,6 +124,12 @@ public class TeleformFileMonitor extends AbstractTask
 			{
 				Context.closeSession();			
 			}
+			try {
+	            Thread.sleep(100);//check every tenth second
+            }
+            catch (InterruptedException e) {
+	            log.error("Error generated", e);
+            }
 		}
 	}
 	
@@ -211,188 +205,6 @@ public class TeleformFileMonitor extends AbstractTask
 		super.shutdown();
 	}
 	
-	private void moveMergeFiles(Integer locationTagId,Integer locationId){
-		
-		ATDService atdService = Context.getService(ATDService.class);
-		FormService formService = Context.getFormService();
-		List<Form> forms = formService.getForms(null,null,null,false,null,null,null);
-		AdministrationService adminService = Context.getAdministrationService();
-		
-		//look at a global property for the batch size of merge files that
-		//Teleform is able to process
-		Integer numFilesToMove = null;
-		
-		try
-		{
-			numFilesToMove = Integer.parseInt(adminService.getGlobalProperty("atd.mergeDirectoryBatchSize"));
-		} catch (NumberFormatException e)
-		{
-		}
-		
-		if(numFilesToMove==null){
-			return;
-		}
-		
-		
-			
-		
-		for(Form form:forms){
-
-			//get the value of the pending merge directory for the form
-			FormAttributeValue pendingMergeValue = 
-				atdService.getFormAttributeValue(form.getFormId(), "pendingMergeDirectory",locationTagId,locationId);
-			
-			String pendingMergeDirectory = null;
-			
-			if(pendingMergeValue != null){
-				pendingMergeDirectory = pendingMergeValue.getValue();
-			}else{
-				continue;
-			}
-			
-			//get the value of the default merge directory for the form
-			FormAttributeValue defaultMergeValue = 
-				atdService.getFormAttributeValue(form.getFormId(), "defaultMergeDirectory",locationTagId,locationId);
-			
-			String defaultMergeDirectory = null;
-			
-			if(defaultMergeValue != null){
-				defaultMergeDirectory = defaultMergeValue.getValue();
-			}else{
-				continue;
-			}
-			
-			//see how many xml files are in the default merge directory for the form
-			String[] fileExtensions = new String[]
-			{ ".xml" };
-			File[] files = IOUtil.getFilesInDirectory(defaultMergeDirectory,
-					fileExtensions);
-			
-			Integer numFiles = 0;
-			
-			if(files != null){
-				numFiles = files.length;
-			}
-			
-			files = IOUtil.getFilesInDirectory(
-					pendingMergeDirectory, fileExtensions);
-			
-			if(files == null){
-				continue;
-			}
-			
-			//move files from the pending merge directory to the default merge directory
-			//until the batch size number of files are in the default merge directory
-			int i = 0;
-			for (i = 0; numFiles <= numFilesToMove && i < files.length; numFiles++,i++)
-			{
-				File fileToMove = files[i];
-				if(fileToMove.length() == 0){
-					continue;
-				}
-				String sourceFilename = fileToMove.getPath();
-				String targetFilename = defaultMergeDirectory+"/"+
-					IOUtil.getFilenameWithoutExtension(sourceFilename)+".20";
-				try
-				{
-					//copy the file to .20 extension so Teleform doesn't
-					//pick up the file before it is done writing
-					IOUtil.copyFile(sourceFilename, targetFilename, true);
-					//rename the file to .xml so teleform will see it
-					IOUtil.renameFile(targetFilename, defaultMergeDirectory+"/"+
-							IOUtil.getFilenameWithoutExtension(targetFilename)+".xml");
-					
-					File srcFile = new File(sourceFilename);
-					File tgtFile = new File(targetFilename);
-					
-					//check if the file exists under the following file extensions
-					targetFilename = defaultMergeDirectory
-							+ "/" + IOUtil.getFilenameWithoutExtension(sourceFilename)
-							+ ".20";
-					
-					tgtFile = new File(targetFilename);
-					
-					if(!tgtFile.exists()){
-					
-						targetFilename = defaultMergeDirectory
-							+ "/" + IOUtil.getFilenameWithoutExtension(sourceFilename)
-							+ ".22";
-						tgtFile = new File(targetFilename);
-						if(!tgtFile.exists()){
-							targetFilename = defaultMergeDirectory
-							+ "/" + IOUtil.getFilenameWithoutExtension(sourceFilename)
-								+ ".xml";
-							tgtFile = new File(targetFilename);
-							if(!tgtFile.exists()){
-								targetFilename = defaultMergeDirectory
-								+ "/" + IOUtil.getFilenameWithoutExtension(sourceFilename)
-								+ ".19";
-								tgtFile = new File(targetFilename);
-							}
-						}
-					}
-					
-					//if the source file is bigger than 
-					//the target file, the copy was truncated so
-					//don't mark it as copied
-					if (tgtFile.exists())
-					{
-						if (srcFile.length() > tgtFile.length())
-						{
-							// don't rename the pendingMergeDirectory file so
-							// that it will get picked up on the next time
-							// around
-							log.error("merge file: " + tgtFile.getPath()
-									+ " is truncated. File will be deleted.");
-							//delete the truncated xml so it won't break the
-							//Teleform merger
-							IOUtil.deleteFile(targetFilename);
-						} else
-						{
-							IOUtil.renameFile(sourceFilename,
-							pendingMergeDirectory+"/"+
-							IOUtil.getFilenameWithoutExtension(sourceFilename)+".copy");
-
-						}
-					}
-				} catch (Exception e)
-				{
-					log.error("File copy exception in TF monitor task:" + e.toString());
-					continue;
-				}
-				
-			}
-			if(i == 0 && lastMoveMergeFiles != null && nextLatestMoveMergeFiles != null) // and there are files to move for any form but 
-																						//we did not move any for this form
-			{
-					Calendar now = GregorianCalendar.getInstance();
-					if(now.getTime().after(nextLatestMoveMergeFiles))
-					{
-						// Log error and alert some problem with TF Merger
-						if (!TFAMP_Alert)	//already alerted
-						{
-							TFAMP_Alert = true;
-							log.error("TF AutoMerger NOT RUNNING IT SEEMS!!! ");
-						}
-					}
-			}
-			else if(lastMoveMergeFiles == null || i > 0) // First time or we moved some files
-			{
-				Calendar today = GregorianCalendar.getInstance();
-				lastMoveMergeFiles = today.getTime();
-				Calendar threshold = GregorianCalendar.getInstance();
-				threshold.add(GregorianCalendar.MINUTE,5);   
-				nextLatestMoveMergeFiles = threshold.getTime();
-				if(TFAMP_Alert)
-				{
-					TFAMP_Alert = false;
-					log.error("TF AutoMerger Issue Rectified IT SEEMS!!! ");
-				}
-			}
-			
-		}
-	}
-	
 	public synchronized static TeleformFileState addToPendingStatesWithFilename(FormInstance formInstance,
 			String filename)
 	{
@@ -458,7 +270,7 @@ public class TeleformFileMonitor extends AbstractTask
 	{
 		FormService formService = Context.getFormService();
 		ATDService atdService = Context.getService(ATDService.class);
-		ArrayList<String> exportDirectories = atdService.getExportDirectories();
+		ArrayList<String> exportDirectories = atdService.getFormAttributesByName("defaultExportDirectory");
 		String[] fileExtensions = new String[]
 		{ ".xml" };
 

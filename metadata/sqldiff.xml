@@ -417,4 +417,20 @@ set form_name =b.name
 where a.form_id=b.form_id; 
 	</sql>
 	</diff>	
+	<diff>
+		<version>1.1.8</version>
+		<author>Tammy Dugan</author>
+		<date>Mar 30, 2011</date>
+		<description>
+		Separate out move merge files into a separate scheduled task.
+		</description>
+	<sql>
+		INSERT INTO scheduler_task_config
+   (`name`, `schedulable_class`,  `repeat_interval`, `start_on_startup`,  `created_by`, `date_created`)
+select 'MoveMergeFiles', 'org.openmrs.module.atd.MoveMergeFiles', 
+ 86400000, 1, 1, NOW() from 
+(select count(*) as cnt from scheduler_task_config where name='MoveMergeFiles') a
+where a.cnt=0;
+	</sql>
+	</diff>	
 </sqldiff>

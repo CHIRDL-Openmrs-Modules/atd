@@ -1023,15 +1023,16 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
-	public ArrayList<String> getExportDirectories()
+	public ArrayList<String> getFormAttributesByName(String attributeName)
 	{
 		try
 		{
 			String sql = "select distinct value from atd_form_attribute_value where form_attribute_id in "
-					+ "(select form_attribute_id from atd_form_attribute where name='defaultExportDirectory')";
+					+ "(select form_attribute_id from atd_form_attribute where name=?)";
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
 			qry.addScalar("value");
+			qry.setString(0, attributeName);
 			List<String> list = qry.list();
 
 			ArrayList<String> exportDirectories = new ArrayList<String>();
