@@ -85,7 +85,13 @@ public class streetAddress implements Rule
 		
 		if(address != null)
 		{
-			return new Result(Util.toProperCase(address.getAddress1()));
+			String address1 = address.getAddress1();
+			String address2 = address.getAddress2();
+			
+			if(address1!=null&&address2!=null&&!address1.endsWith(address2)){
+				address1+="  "+address2;
+			}
+			return new Result(Util.toProperCase(address1));
 		}
 		return Result.emptyResult();
 	}
