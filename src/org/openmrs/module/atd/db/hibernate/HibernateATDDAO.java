@@ -1286,12 +1286,32 @@ public class HibernateATDDAO implements ATDDAO
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		// copy concept, default_value, and field_type to the new form
-		String step1 = "update field f1, field f2, (select field_id from form_field where form_id = ?) f3, "
-			+ "(select field_id from form_field ff1 inner join form frm using (form_id) where frm.retired = 0) f4 "
+		String step1 = "update field f1, "
+			+ "(select b.name,b.default_value,b.concept_id,b.field_type from "
+			+ "(select b.name,max(form_id) as form_id from "
+			+ "(select name, max(count) as count from "
+			+ "(select a.name,a.default_value,max(form_id) as form_id,count(*) as count from "
+			+ "(select b.name,default_value,c.form_id from form_field a inner join field b on a.field_id = b.field_id "
+			+ "inner join form c on a.form_id = c.form_id "
+			+ "where c.form_id not in (?) and c.retired = 0)a "
+			+ "group by a.name,a.default_value)a "
+			+ "group by name) a "
+			+ "inner join "
+			+ "(select a.name,a.default_value,max(form_id) as form_id,count(*) as count from "
+			+ "(select b.name,default_value,c.form_id from form_field a inner join field b on a.field_id = b.field_id "
+			+ "inner join form c on a.form_id = c.form_id "
+			+ "where c.form_id not in (?) and c.retired = 0)a "
+			+ "group by a.name,a.default_value)b "
+			+ "on a.name=b.name and a.count=b.count "
+			+ "group by b.name) a "
+			+ "inner join "
+			+ "(select a.name,default_value,concept_id,field_type,c.form_id from field a inner join form_field b on a.field_id=b.field_id "
+			+ "inner join form c on b.form_id = c.form_id where c.retired = 0)b "
+			+ "on a.name=b.name and a.form_id=b.form_id) f2, "
+			+ "form_field f3 "
 			+ "set f1.concept_id=f2.concept_id, f1.default_value=f2.default_value, f1.field_type=f2.field_type "
-			+ "where f1.name=f2.name and f1.field_id in (f3.field_id) "
-			+ "and f2.field_id not in (f3.field_id) "
-			+ "and f2.field_id in (f4.field_id)";
+			+ "where f1.name=f2.name and "
+			+ "f1.field_id=f3.field_id and f3.form_id=?";
 
 		// copy parent_field mapping to the new form
 		String step2 = "update form_field a, ("
@@ -1311,6 +1331,8 @@ public class HibernateATDDAO implements ATDDAO
 		try {
 			ps1 = con.prepareStatement(step1);
 			ps1.setInt(1, formId);
+			ps1.setInt(2, formId);
+			ps1.setInt(3, formId);
 			ps1.executeUpdate();
 			
 			ps2 = con.prepareStatement(step2);
@@ -1365,17 +1387,36 @@ public class HibernateATDDAO implements ATDDAO
 			+ "set a.parent_form_field=b.parent_form_field "
 			+ "where a.form_field_id=b.form_field_id";
 
-		// copy concept, default_value, and field_type to the new form
-		String step2 = "update field f1, field f2, (select field_id from form_field where form_id = ?) f3, "
-			+ "(select field_id from form_field ff1 inner join form frm using (form_id) where frm.retired = 0) f4 "
+		// copy concept, default_value, and field_type to the new form		
+		String step2 = "update field f1, "
+			+ "(select b.name,b.default_value,b.concept_id,b.field_type from "
+			+ "(select b.name,max(form_id) as form_id from "
+			+ "(select name, max(count) as count from "
+			+ "(select a.name,a.default_value,max(form_id) as form_id,count(*) as count from "
+			+ "(select b.name,default_value,c.form_id from form_field a inner join field b on a.field_id = b.field_id "
+			+ "inner join form c on a.form_id = c.form_id "
+			+ "where c.form_id not in (?) and c.retired = 0)a "
+			+ "group by a.name,a.default_value)a "
+			+ "group by name) a "
+			+ "inner join "
+			+ "(select a.name,a.default_value,max(form_id) as form_id,count(*) as count from "
+			+ "(select b.name,default_value,c.form_id from form_field a inner join field b on a.field_id = b.field_id "
+			+ "inner join form c on a.form_id = c.form_id "
+			+ "where c.form_id not in (?) and c.retired = 0)a "
+			+ "group by a.name,a.default_value)b "
+			+ "on a.name=b.name and a.count=b.count "
+			+ "group by b.name) a "
+			+ "inner join "
+			+ "(select a.name,default_value,concept_id,field_type,c.form_id from field a inner join form_field b on a.field_id=b.field_id "
+			+ "inner join form c on b.form_id = c.form_id where c.retired = 0)b "
+			+ "on a.name=b.name and a.form_id=b.form_id) f2, "
+			+ "form_field f3 "
 			+ "set f1.concept_id=f2.concept_id, f1.default_value=f2.default_value, f1.field_type=f2.field_type "
-			+ "where f1.concept_id is null "
+			+ "where f1.name=f2.name "
+			+ "and f1.concept_id is null "
 			+ "and f1.default_value is null "
 			+ "and f1.field_type is null "
-			+ "and f1.name=f2.name "
-			+ "and f1.field_id in (f3.field_id) "
-			+ "and f2.field_id not in (f3.field_id) "
-			+ "and f2.field_id in (f4.field_id)";
+		    + "and f1.field_id=f3.field_id and f3.form_id=?";
 
 		try {
 			ps1 = con.prepareStatement(step1);
@@ -1385,6 +1426,8 @@ public class HibernateATDDAO implements ATDDAO
 			
 			ps2 = con.prepareStatement(step2);
 			ps2.setInt(1, formId);
+			ps2.setInt(2, formId);
+			ps2.setInt(3, formId);
 			ps2.executeUpdate();
 			
 			con.commit();
