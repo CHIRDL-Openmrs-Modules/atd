@@ -24,9 +24,9 @@
                 <select name="formToReplace">
                     <c:forEach items="${forms}" var="form">
                         <c:choose>
-                            <c:if test="${form.formId == selectedForm}">
+                            <c:when test="${form.formId == selectedForm}">
                                 <option value="${form.formId}" selected>${form.name} (${form.formId})</option>
-                            </c:if>
+                            </c:when>
                             <c:otherwise>
                                 <option value="${form.formId}">${form.name} (${form.formId})</option>
                             </c:otherwise>
@@ -67,6 +67,13 @@
                 <td colspan="2" style="padding: 0px 0px 10px 0px">
                     <font color="red">Failed copying form fields.  Check server log for details!</font>
                 </td>
+            </tr>
+        </c:if>
+        <c:if test="${failedPopulate == 'true'}">
+            <tr style="padding: 5px">
+              <td colspan="2" style="padding: 0px 0px 10px 0px">
+                   <font color="red">Error pre-populating form field data.  Please check the server logs for more details!</font>
+              </td>
             </tr>
         </c:if>
         <c:if test="${failedAttrValCopy == 'true'}">

@@ -884,8 +884,12 @@ public class ATDServiceImpl implements ATDService
 		}
 	}
 
-    public void copyFormMetadata(Integer fromFormId, Integer toFormId) {
-	    getATDDAO().copyFormMetadata(fromFormId, toFormId);
+    public void prePopulateNewFormFields(Integer formId) {
+	    getATDDAO().prePopulateNewFormFields(formId);
+    }
+    
+    public void populateEmtptyFormFields(Integer formId) throws APIException {
+	    getATDDAO().populateEmtptyFormFields(formId);
     }
 
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 

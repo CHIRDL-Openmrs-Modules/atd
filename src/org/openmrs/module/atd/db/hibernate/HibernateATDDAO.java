@@ -1281,78 +1281,43 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
-    public void copyFormMetadata(Integer fromFormId, Integer toFormId) throws DAOException {
+    public void prePopulateNewFormFields(Integer formId) throws DAOException {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
-		PreparedStatement ps3 = null;
-		PreparedStatement ps4 = null;
 		// copy concept, default_value, and field_type to the new form
-		String step1 = "update field f1 "
-			+ "join (select * from field where field_id in (select field_id from form_field where form_id = ?)) f2 "
-			+ "on f1.name=f2.name "
+		String step1 = "update field f1, field f2, (select field_id from form_field where form_id = ?) f3, "
+			+ "(select field_id from form_field ff1 inner join form frm using (form_id) where frm.retired = 0) f4 "
 			+ "set f1.concept_id=f2.concept_id, f1.default_value=f2.default_value, f1.field_type=f2.field_type "
-			+ "where f1.field_id in (select field_id from form_field where form_id = ?)";
-		// copy field_number to the new form
-		String step2 = "update form_field f1, "
-			+ "(select b.name,a.* from (select * from form_field where form_id = ?) a "
-					+ "inner join field b "
-					+ "on a.field_id=b.field_id "
-					+ ") f2, "
-					+ "(select b.name,a.* from (select * from form_field where form_id = ?) a "
-					+ "inner join field b "
-					+ "on a.field_id=b.field_id "
-					+ ") f3 "
-					+ "set f1.field_number=f2.field_number "
-					+ "where  f1.form_field_id=f3.form_field_id and f2.name=f3.name";
+			+ "where f1.name=f2.name and f1.field_id in (f3.field_id) "
+			+ "and f2.field_id not in (f3.field_id) "
+			+ "and f2.field_id in (f4.field_id)";
+
 		// copy parent_field mapping to the new form
-		String step3 = "update form_field f1, "
-			+ "(select b.name as parent_name,child_name from "
-			+ "(select child_name,b.field_id as parent_field_id from "
-			+ "(select b.name as child_name,a.child_field_id,a.parent_form_field from "
-			+ "(select field_id as child_field_id, parent_form_field from form_field where form_id = ?) a "
-			+ "inner join field b on a.child_field_id = b.field_id) a "
-			+ "inner join form_field b "
-			+ "on a.parent_form_field=b.form_field_id) a "
-			+ "inner join field b "
-			+ "on a.parent_field_id=b.field_id "
-			+ ")f2, "
-			+ "(select a.form_field_id,b.name from( "
-			+ "select form_field_id,field_id from form_field where form_id = ?) a "
-			+ "inner join field b on a.field_id =b.field_id "
-			+ ")f3, "
-			+ "(select a.form_field_id,b.name from( "
-			+ "select form_field_id,field_id from form_field where form_id = ?) a "
-			+ "inner join field b on a.field_id =b.field_id) "
-			+ "f4 "
-			+ "set f1.parent_form_field=f3.form_field_id "
-			+ "where f2.parent_name=f3.name and f4.name=f2.child_name and f1.form_field_id=f4.form_field_id";
-		// add rows in atd_form_attribute_value for new form 
-		String step4 = "insert into atd_form_attribute_value(form_id,value,form_attribute_id,location_tag_id,location_id) "
-			+ "select b.form_id,value,form_attribute_id,location_tag_id,location_id from atd_form_attribute_value a,(select "
-			+ "form_id from form where form_id = ?) b "
-					+ "where a.form_id = ?";
+		String step2 = "update form_field a, ("
+			+ "select b.form_field_id as parent_form_field,b.name as parent_form_field_name,c.form_field_id,c.name as field_name from "
+			+ "(select distinct b.name as field_name,c.name as parent_field_name from form_field a "
+			+ "inner join field b on a.field_id=b.field_id "
+			+ "inner join field c on a.parent_form_field=c.field_id "
+			+ "inner join form d on a.form_id=d.form_id "
+			+ "where parent_form_field is not null and d.retired = 0) a "
+			+ "inner join (select a.*,form_field_id from field a inner join form_field b on a.field_id=b.field_id where form_id=?) b "
+			+ "on a.parent_field_name=b.name "
+			+ "inner join (select a.*,form_field_id from field a inner join form_field b on a.field_id=b.field_id where form_id=?) c "
+			+ "on a.field_name=c.name order by b.name,c.name) b "
+			+ "set a.parent_form_field=b.parent_form_field "
+			+ "where a.form_field_id=b.form_field_id";
+
 		try {
 			ps1 = con.prepareStatement(step1);
-			ps1.setInt(1, fromFormId);
-			ps1.setInt(2, toFormId);
+			ps1.setInt(1, formId);
 			ps1.executeUpdate();
 			
 			ps2 = con.prepareStatement(step2);
-			ps2.setInt(1, fromFormId);
-			ps2.setInt(2, toFormId);
+			ps2.setInt(1, formId);
+			ps2.setInt(2, formId);
 			ps2.executeUpdate();
-			
-			ps3 = con.prepareStatement(step3);
-			ps3.setInt(1, fromFormId);
-			ps3.setInt(2, toFormId);
-			ps3.setInt(3, toFormId);
-			ps3.executeUpdate();
-			
-			ps4 = con.prepareStatement(step4);
-			ps4.setInt(1, toFormId);
-			ps4.setInt(2, fromFormId);
-			ps4.executeUpdate();
+			con.commit();
 		} catch (Exception e) {
 			try {
 	            con.rollback();
@@ -1372,37 +1337,82 @@ public class HibernateATDDAO implements ATDDAO
 			}
 			if (ps2 != null) {
 				try {
-	                ps2.close();
+					ps2.close();
                 }
                 catch (SQLException e) {
 	                log.error("Error closing prepared statement", e);
                 }
 			}
-			if (ps3 != null) {
-				try {
-	                ps3.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing prepared statement", e);
-                }
-			}
-			if (ps4 != null) {
-				try {
-	                ps4.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing prepared statement", e);
-                }
-			}
-			if (con != null) {
-				try {
-	                con.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing connection", e);
-                }
-			}
+		}
+    }
+    
+    public void populateEmtptyFormFields(Integer formId) throws DAOException {
+    	Connection con = this.sessionFactory.getCurrentSession().connection();
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		// copy parent_field mapping to the new form
+		String step1 = "update form_field a, ("
+			+ "select b.form_field_id as parent_form_field,b.name as parent_form_field_name,c.form_field_id,c.name as field_name from "
+			+ "(select distinct b.name as field_name,c.name as parent_field_name from form_field a "
+			+ "inner join field b on a.field_id=b.field_id "
+			+ "inner join field c on a.parent_form_field=c.field_id "
+			+ "inner join form d on a.form_id=d.form_id "
+			+ "where parent_form_field is not null and d.retired = 0) a "
+			+ "inner join (select a.*,form_field_id from field a inner join form_field b on a.field_id=b.field_id where form_id=?) b "
+			+ "on a.parent_field_name=b.name "
+			+ "inner join (select a.*,form_field_id from field a inner join form_field b on a.field_id=b.field_id where form_id=? and a.field_type is null and concept_id is null and default_value is null) c "
+			+ "on a.field_name=c.name order by b.name,c.name) b "
+			+ "set a.parent_form_field=b.parent_form_field "
+			+ "where a.form_field_id=b.form_field_id";
+
+		// copy concept, default_value, and field_type to the new form
+		String step2 = "update field f1, field f2, (select field_id from form_field where form_id = ?) f3, "
+			+ "(select field_id from form_field ff1 inner join form frm using (form_id) where frm.retired = 0) f4 "
+			+ "set f1.concept_id=f2.concept_id, f1.default_value=f2.default_value, f1.field_type=f2.field_type "
+			+ "where f1.concept_id is null "
+			+ "and f1.default_value is null "
+			+ "and f1.field_type is null "
+			+ "and f1.name=f2.name "
+			+ "and f1.field_id in (f3.field_id) "
+			+ "and f2.field_id not in (f3.field_id) "
+			+ "and f2.field_id in (f4.field_id)";
+
+		try {
+			ps1 = con.prepareStatement(step1);
+			ps1.setInt(1, formId);
+			ps1.setInt(2, formId);
+			ps1.executeUpdate();
 			
+			ps2 = con.prepareStatement(step2);
+			ps2.setInt(1, formId);
+			ps2.executeUpdate();
+			
+			con.commit();
+		} catch (Exception e) {
+			try {
+	            con.rollback();
+            }
+            catch (SQLException e1) {
+	            log.error("Error rolling back connection", e1);
+            }
+            throw new DAOException(e);
+		} finally {
+			if (ps1 != null) {
+				try {
+	                ps1.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps2 != null) {
+				try {
+					ps2.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
 		}
     }
 	
@@ -1479,6 +1489,7 @@ public class HibernateATDDAO implements ATDDAO
 			}
 			
 			copyPrinterConfiguration(con, copyPrinterConfigFormId, formId, locationNames);
+			con.commit();
 		} catch (Exception e) {
 			try {
 	            con.rollback();
@@ -1505,14 +1516,6 @@ public class HibernateATDDAO implements ATDDAO
 	                log.error("Error closing prepared statement", e);
                 }
 			}
-			if (con != null) {
-				try {
-	                con.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing connection", e);
-                }
-			}
 			
 		}
 	}
@@ -1525,6 +1528,7 @@ public class HibernateATDDAO implements ATDDAO
 			ps = con.prepareStatement(sql);
 			ps.setInt(1, formId);
 			ps.executeUpdate();
+			con.commit();
 		} catch (Exception e) {
 			log.error("Error deleting form attribute values", e);
 			throw new DAOException(e);
@@ -1535,14 +1539,6 @@ public class HibernateATDDAO implements ATDDAO
                 }
                 catch (SQLException e) {
 	                log.error("Error closing prepared statement", e);
-                }
-			}
-			if (con != null) {
-				try {
-	                con.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing connection", e);
                 }
 			}
 		}
@@ -1646,6 +1642,7 @@ public class HibernateATDDAO implements ATDDAO
 			ps.setInt(1, toFormId);
 			ps.setInt(2, fromFormId);
 			ps.executeUpdate();
+			con.commit();
 		} catch (Exception e) {
 			log.error("Error copying form attribute values", e);
 			throw new DAOException(e);
@@ -1656,14 +1653,6 @@ public class HibernateATDDAO implements ATDDAO
                 }
                 catch (SQLException e) {
 	                log.error("Error closing prepared statement", e);
-                }
-			}
-			if (con != null) {
-				try {
-	                con.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing connection", e);
                 }
 			}
 		}

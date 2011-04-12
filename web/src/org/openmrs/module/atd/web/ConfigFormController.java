@@ -127,44 +127,39 @@ public class ConfigFormController extends SimpleFormController
         
         // Copy form configuration
         ATDService atdService = Context.getService(ATDService.class);
-        String formIdToCopy = request.getParameter("formToCopy");
-        if (formIdToCopy != null && !"No Selection".equalsIgnoreCase(formIdToCopy)) {
-        	atdService.copyFormMetadata(Integer.parseInt(formIdToCopy), formId);
-        } else {
-        	try {
-	        	String serverName = adminService.getGlobalProperty("atd.serverName");
-	        	String scoreConfigFile = null;
-	        	if (request instanceof MultipartHttpServletRequest && scorableForm) {
-	                MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest)request;
-	                MultipartFile xmlFile = multipartRequest.getFile("scoringFile");
-	                if (xmlFile != null && !xmlFile.isEmpty()) {
-	                	scoreConfigFile = ConfigManagerUtil.loadFormScoringConfigFile(xmlFile, formName);
-	                } else {
-	                	map.put("missingScoringFile", true);
-	                	// delete the directories
-	                	ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
-	        			return new ModelAndView(view, map);
-	                }
-	            }
-	        	
-	        	Integer numPrioritizedFields = 0;
-	        	String pFieldString = request.getParameter("numPrioritizedFields");
-	        	if (pFieldString != null && pFieldString.trim().length() > 0) {
-	        		numPrioritizedFields = Integer.parseInt(pFieldString);
-	        	}
-	        	
-	        	Form printerCopyForm = formService.getForm(printerCopy);
-	        	atdService.setupInitialFormValues(formId, formName, selectedLocations, driveLetter, 
-	        		serverName, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
-	        		printerCopyForm.getFormId());
-        	}
-        	catch (Exception e) {
-        		log.error("Error saving form changes", e);
-                map.put("failedScoringFileUpload", true);
-    			// delete the directories
-                ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
-    			return new ModelAndView(view, map);
+    	try {
+        	String serverName = adminService.getGlobalProperty("atd.serverName");
+        	String scoreConfigFile = null;
+        	if (request instanceof MultipartHttpServletRequest && scorableForm) {
+                MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest)request;
+                MultipartFile xmlFile = multipartRequest.getFile("scoringFile");
+                if (xmlFile != null && !xmlFile.isEmpty()) {
+                	scoreConfigFile = ConfigManagerUtil.loadFormScoringConfigFile(xmlFile, formName);
+                } else {
+                	map.put("missingScoringFile", true);
+                	// delete the directories
+                	ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
+        			return new ModelAndView(view, map);
+                }
             }
+        	
+        	Integer numPrioritizedFields = 0;
+        	String pFieldString = request.getParameter("numPrioritizedFields");
+        	if (pFieldString != null && pFieldString.trim().length() > 0) {
+        		numPrioritizedFields = Integer.parseInt(pFieldString);
+        	}
+        	
+        	Form printerCopyForm = formService.getForm(printerCopy);
+        	atdService.setupInitialFormValues(formId, formName, selectedLocations, driveLetter, 
+        		serverName, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
+        		printerCopyForm.getFormId());
+    	}
+    	catch (Exception e) {
+    		log.error("Error saving form changes", e);
+            map.put("failedScoringFileUpload", true);
+			// delete the directories
+            ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
+			return new ModelAndView(view, map);
         }
         
         try {
@@ -206,8 +201,7 @@ public class ConfigFormController extends SimpleFormController
 	}
 
 	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception
-	{
+	protected Map referenceData(HttpServletRequest request) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		LocationService locService = Context.getLocationService();
 		List<Location> locations = locService.getAllLocations(false);

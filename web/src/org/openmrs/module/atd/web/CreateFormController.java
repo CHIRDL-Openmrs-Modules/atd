@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
@@ -37,6 +38,14 @@ public class CreateFormController extends SimpleFormController {
 	}
 	
 	@Override
+	protected Map referenceData(HttpServletRequest request) throws Exception{
+		Map<String, Object> map = new HashMap<String, Object>();
+		FormService formService = Context.getFormService();
+		map.put("forms", formService.getAllForms(false));
+		return map;
+	}
+	
+	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object,
 	                                             BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -44,10 +53,10 @@ public class CreateFormController extends SimpleFormController {
 		String view = getFormView();
 		FormService formService = Context.getFormService();
 		
-		
 		// Check to see if form name was specified.
 		if (formName == null || formName.trim().length() == 0) {
 			map.put("missingName", true);
+			map.put("forms", formService.getAllForms(false));
 			return new ModelAndView(view, map);
 		}
 		
@@ -55,6 +64,7 @@ public class CreateFormController extends SimpleFormController {
 		// Make sure there are no spaces in the form name.
 		if (formName.indexOf(" ") >= 0) {
 			map.put("spacesInName", true);
+			map.put("forms", formService.getAllForms(false));
 			return new ModelAndView(view, map);
 		}
 		
@@ -62,6 +72,7 @@ public class CreateFormController extends SimpleFormController {
 		Form form = formService.getForm(formName);
 		if (form != null) {
 			map.put("duplicateName", true);
+			map.put("forms", formService.getAllForms(false));
 			return new ModelAndView(view, map);
 		}
 		
@@ -76,6 +87,7 @@ public class CreateFormController extends SimpleFormController {
 					int index = filename.lastIndexOf(".");
 					if (index < 0) {
 						map.put("incorrectExtension", true);
+						map.put("forms", formService.getAllForms(false));
 						return new ModelAndView(view, map);
 					}
 					
@@ -83,6 +95,7 @@ public class CreateFormController extends SimpleFormController {
 					if (!extension.equalsIgnoreCase("xml") && !extension.equalsIgnoreCase("fxf") && 
 							!extension.equalsIgnoreCase("zip") && !extension.equalsIgnoreCase("jar")) {
 						map.put("incorrectExtension", true);
+						map.put("forms", formService.getAllForms(false));
 						return new ModelAndView(view, map);
 					}
 					newForm = ConfigManagerUtil.loadTeleformFile(dataFile, formName);
@@ -91,6 +104,7 @@ public class CreateFormController extends SimpleFormController {
 						"New Form Created.  Class: " + CreateFormController.class.getCanonicalName());
 				} else {
 					map.put("missingFile", true);
+					map.put("forms", formService.getAllForms(false));
 					return new ModelAndView(view, map);
 				}
 			}
@@ -98,6 +112,18 @@ public class CreateFormController extends SimpleFormController {
 		catch (Exception e) {
 			log.error("Error while processing uploaded file from request", e);
 			map.put("failedFileUpload", true);
+			map.put("forms", formService.getAllForms(false));
+			return new ModelAndView(view, map);
+		}
+		
+		try {
+			ATDService atdService = Context.getService(ATDService.class);
+			atdService.prePopulateNewFormFields(newForm.getFormId());
+		} catch (Exception e) {
+			log.error("Error pre-populating form fields", e);
+			formService.purgeForm(newForm);
+			map.put("failedPopulate", true);
+			map.put("forms", formService.getAllForms(false));
 			return new ModelAndView(view, map);
 		}
 		

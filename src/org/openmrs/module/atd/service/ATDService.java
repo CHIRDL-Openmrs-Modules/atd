@@ -173,7 +173,21 @@ public interface ATDService
 
 	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired);
 	
-	public void copyFormMetadata(Integer fromFormId, Integer toFormId) throws APIException;
+	/**
+	 * Populates all form fields in a form with data found in form fields from other forms.
+	 * 
+	 * @param formId The form ID for the form to have its fields auto-populated.
+	 * @throws APIException
+	 */
+	public void prePopulateNewFormFields(Integer formId) throws APIException;
+	
+	/**
+	 * Populates fields in a form having no current metadata with data found in form fields from other forms.
+	 * 
+	 * @param formId The form ID for the form to have its empty fields auto-populated.
+	 * @throws APIException
+	 */
+	public void populateEmtptyFormFields(Integer formId) throws APIException;
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 

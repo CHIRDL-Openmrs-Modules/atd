@@ -31,6 +31,7 @@
 </p>
 <form id="input" method="post" action="popFormFields.form">
 <p>Fields for form ${form.name}: </p>
+<p><font color="red"><b>Caution</b></font>: Data for the fields below are pre-populated by the Configuration Manager for convenience.  Please verify all data is correct before proceeding.</p>
 <input type="hidden" name="processFields" value="true" /> <input
 	type="hidden" name="formToEdit" value="${form.formId}" />
 <table>

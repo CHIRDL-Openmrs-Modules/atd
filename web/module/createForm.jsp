@@ -58,7 +58,7 @@
 		    <tr style="padding: 5px">
 		        <td style="padding: 0px 0px 10px 0px">Teleform file:</td>
 		        <td style="padding: 0px 0px 10px 0px">
-		            <input type=file name="dataFile" value="${dataFile}">
+		            <input type="file" name="dataFile" value="${dataFile}">
 		        </td>         
 		    </tr>
 		    <c:if test="${failedFileUpload == 'true'}">
@@ -80,6 +80,13 @@
                     <td colspan="3" style="padding: 0px 0px 10px 0px">
                         <font color="red">Incorrect file extension found.  Only .xml, .fxf, .zip, and .jar are allowed.</font>
                     </td>
+                </tr>
+            </c:if>
+            <c:if test="${failedPopulate == 'true'}">
+                <tr style="padding: 5px">
+                  <td colspan="2" style="padding: 0px 0px 10px 0px">
+                       <font color="red">Error pre-populating form field data!  Please check the server logs for more details.</font>
+                  </td>
                 </tr>
             </c:if>
 		    <tr style="padding: 5px">
