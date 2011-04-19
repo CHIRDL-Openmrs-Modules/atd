@@ -51,26 +51,26 @@ public class ConfigManagerUtil {
 		return form;
 	}
 	
-	public static void createFormDirectories(String formName, List<String> locations, boolean scannableForm, String driveLetter) 
-	throws Exception {
-		if (driveLetter == null) {
-			throw new Exception("atd.driveLetter not specified.");
+	public static void createFormDirectories(String formName, List<String> locations, boolean scannableForm, 
+	                                         String installationDirectory) throws Exception {
+		if (installationDirectory == null) {
+			throw new Exception("atd.installationDirectory not specified.");
 		}
 		
 		for (String locName : locations) {
 			// Create the merge directory
-			File mergeDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "merge" + 
+			File mergeDir = new File(installationDirectory + File.separator + "merge" + 
 				File.separator + locName + File.separator + formName + File.separator + "Pending");
 			mergeDir.mkdirs();
 			
 			if (scannableForm) {
 				// Create the scan directory
-				File scanDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "scan" + 
+				File scanDir = new File(installationDirectory + File.separator + "scan" + 
 					File.separator + locName + File.separator + formName + "_SCAN");
 				scanDir.mkdirs();
 				
 				// Create the images directory
-				File imageDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "images" + 
+				File imageDir = new File(installationDirectory + File.separator + "images" + 
 					File.separator + locName + File.separator + formName);
 				imageDir.mkdirs();
 			}
@@ -79,13 +79,13 @@ public class ConfigManagerUtil {
 	
 	public static void deleteFormDirectories(String formName, List<String> locations, boolean scannableForm) throws Exception {
 		AdministrationService adminService = Context.getAdministrationService();
-		String driveLetter = adminService.getGlobalProperty("atd.driveLetter");
+		String installationDirectory = adminService.getGlobalProperty("atd.installationDirectory");
 		
 		for (String locName : locations) {
 			// Create the merge directory
-			File mergePendingDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "merge" + 
+			File mergePendingDir = new File(installationDirectory + File.separator + "merge" + 
 				File.separator + locName + File.separator + formName + File.separator + "Pending");
-			File mergeDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "merge" + 
+			File mergeDir = new File(installationDirectory + File.separator + "merge" + 
 				File.separator + locName + File.separator + formName);
 			if (mergePendingDir.exists()) {
 				mergePendingDir.delete();
@@ -97,14 +97,14 @@ public class ConfigManagerUtil {
 			
 			if (scannableForm) {
 				// Create the scan directory
-				File scanDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "scan" + 
+				File scanDir = new File(installationDirectory + File.separator + "scan" + 
 					File.separator + locName + File.separator + formName + "_SCAN");
 				if (scanDir.exists()) {
 					scanDir.delete();
 				}
 				
 				// Create the images directory
-				File imageDir = new File(driveLetter + ":" + File.separator + "chica" + File.separator + "images" + 
+				File imageDir = new File(installationDirectory + File.separator + "images" + 
 					File.separator + locName + File.separator + formName);
 				if (imageDir.exists()) {
 					imageDir.delete();
@@ -115,8 +115,8 @@ public class ConfigManagerUtil {
 	
 	public static String loadFormScoringConfigFile(MultipartFile xmlFile, String formName) throws Exception {
 		AdministrationService adminService = Context.getAdministrationService();
-		String driveLetter = adminService.getGlobalProperty("atd.driveLetter");
-		String xmlLoadDir = driveLetter + ":\\chica\\config\\" + formName + " scoring config";
+		String installationDirectory = adminService.getGlobalProperty("atd.installationDirectory");
+		String xmlLoadDir = installationDirectory + "\\config\\" + formName + " scoring config";
 		File loadDir = new File(xmlLoadDir);
 		loadDir.mkdirs();
 		String fileName = formName + "_scoring_config.xml";

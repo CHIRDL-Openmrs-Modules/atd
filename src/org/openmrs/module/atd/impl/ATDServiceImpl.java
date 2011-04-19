@@ -893,10 +893,10 @@ public class ATDServiceImpl implements ATDService
     }
 
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-                                       String defaultDriveLetter, String serverName, boolean scannableForm, 
+                                       String installationDirectory, String serverName, boolean scannableForm, 
                                        boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
                                        Integer copyPrinterConfigFormId) {
-	    getATDDAO().setupInitialFormValues(formId, formName, locationNames, defaultDriveLetter, serverName, scannableForm,
+	    getATDDAO().setupInitialFormValues(formId, formName, locationNames, installationDirectory, serverName, scannableForm,
 	    	scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
     }
 

@@ -1460,15 +1460,15 @@ public class HibernateATDDAO implements ATDDAO
     }
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-	                                   String defaultDriveLetter, String serverName, boolean scannableForm, 
+	                                   String installationDirectory, String serverName, boolean scannableForm, 
 	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
 	                                   Integer copyPrinterConfigFormId) throws DAOException {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		
-		String merge = defaultDriveLetter + ":\\chica\\merge\\";
-		String pending = defaultDriveLetter + ":\\chica\\merge\\";
+		String merge = installationDirectory + "\\merge\\";
+		String pending = installationDirectory + "\\merge\\";
 		String formNameDrive = "\\" + formName;
 		String step1 = "INSERT INTO atd_form_attribute_value "
 			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
@@ -1520,7 +1520,7 @@ public class HibernateATDDAO implements ATDDAO
 			}
 			ps2.executeUpdate();
 			if (scannableForm) {
-				setupScannableFormValues(con, formId, formName, locationNames, defaultDriveLetter, serverName);
+				setupScannableFormValues(con, formId, formName, locationNames, installationDirectory, serverName);
 			}
 			
 			if (scorableForm) {
@@ -1766,13 +1766,13 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	private void setupScannableFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
-		                                  String defaultDriveLetter, String serverName) throws SQLException {
+		                                  String installationDirectory, String serverName) throws SQLException {
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		PreparedStatement ps3 = null;
 		PreparedStatement ps4 = null;
 		
-		String scan = defaultDriveLetter + ":\\chica\\scan\\";
+		String scan = installationDirectory + "\\scan\\";
 		String images = "\\\\" + serverName + "\\images\\";
 		String formNameDrive = "\\" + formName;
 		String step1 = "INSERT INTO atd_form_attribute_value "

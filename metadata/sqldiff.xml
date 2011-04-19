@@ -433,4 +433,15 @@ select 'MoveMergeFiles', 'org.openmrs.module.atd.MoveMergeFiles',
 where a.cnt=0;
 	</sql>
 	</diff>	
+	<diff>
+        <version>1.1.9</version>
+        <author>Steve McKee</author>
+        <date>April 19, 2011</date>
+        <description>
+        Remove the ATD drive letter global property.
+        </description>
+    <sql>
+    delete from global_property where property='atd.driveLetter';
+    </sql>
+    </diff> 
 </sqldiff>

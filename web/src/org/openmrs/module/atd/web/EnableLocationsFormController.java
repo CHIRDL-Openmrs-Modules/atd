@@ -154,10 +154,10 @@ public class EnableLocationsFormController extends SimpleFormController {
 		}
 		
 		AdministrationService adminService = Context.getAdministrationService();
-		String driveLetter = adminService.getGlobalProperty("atd.driveLetter");
+		String installationDirectory = adminService.getGlobalProperty("atd.installationDirectory");
 		try {	
 			// Create the directories.
-			ConfigManagerUtil.createFormDirectories(formName, selectedLocations, scannableForm, driveLetter);
+			ConfigManagerUtil.createFormDirectories(formName, selectedLocations, scannableForm, installationDirectory);
 		} catch (Exception e) {			
 			log.error("Error creating directories", e);
 			map.put("failedCreateDirectories", true);
@@ -183,7 +183,7 @@ public class EnableLocationsFormController extends SimpleFormController {
         	FormService formService = Context.getFormService();
         	Integer numPrioritizedFields = getPrioritizedFieldCount(formService, formId);
         	Form printerCopyForm = formService.getForm(printerCopy);
-        	atdService.setupInitialFormValues(formId, formName, selectedLocations, driveLetter, 
+        	atdService.setupInitialFormValues(formId, formName, selectedLocations, installationDirectory, 
         		serverName, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
         		printerCopyForm.getFormId());
     	}

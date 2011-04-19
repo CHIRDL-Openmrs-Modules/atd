@@ -49,7 +49,6 @@
 	<classpathentry kind="lib" path="lib-common/hl7api/hapi-0.5.jar"/>
 	<classpathentry kind="lib" path="lib-common/jakarta-log4j/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="lib-common/simple/simple-xml-1.6.1-mod.jar"/>
-	<classpathentry kind="lib" path="/dss/dist"/>
 	<classpathentry kind="lib" path="lib-common/spring-framework/spring-2.5.1.jar"/>
 	<classpathentry kind="lib" path="lib-common/spring-framework/spring-test.jar"/>
 	<classpathentry kind="lib" path="lib-common/spring-framework/spring-webmvc.jar"/>

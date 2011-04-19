@@ -6,7 +6,7 @@
 	<!-- Basic Module Properties -->
 	<id>atd</id>
 	<name>ATD</name>
-	<version>1.61.19</version>
+	<version>1.61.20</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Tammy Dugan</author>
 	<description>
@@ -93,13 +93,13 @@
    		<description>Number of files that can be processed from a Teleform merge directory at a time.</description>
 	</globalProperty>
     <globalProperty>
-        <property>atd.driveLetter</property>
-        <defaultValue>C</defaultValue>
-        <description>Drive letter used to access data.</description>
+        <property>atd.installationDirectory</property>
+        <defaultValue>C:\chica</defaultValue>
+        <description>Installation directory.</description>
     </globalProperty>
     <globalProperty>
         <property>atd.serverName</property>
-        <description>Drive letter used to access data.</description>
+        <description>Name of the server hosting the application.</description>
     </globalProperty>
     <globalProperty>
         <property>atd.TeleformFormFileName</property>
