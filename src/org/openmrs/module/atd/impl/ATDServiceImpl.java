@@ -788,8 +788,13 @@ public class ATDServiceImpl implements ATDService
 
 		return getATDDAO().getPatientStateByFormInstanceAction(formInstance, action);
 	}
-	public ArrayList<String> getFormAttributesByName(String attributeName){
+	
+	public List<FormAttributeValue> getFormAttributesByName(String attributeName){
 		return getATDDAO().getFormAttributesByName(attributeName);
+	}
+	
+	public ArrayList<String> getFormAttributesByNameAsString(String attributeName){
+		return getATDDAO().getFormAttributesByNameAsString(attributeName);
 	}
 	
 	public List<State> getStatesByActionName(String actionName){

@@ -128,7 +128,9 @@ public interface ATDService
 
 	public PatientState getPatientStateByFormInstanceAction(FormInstance formInstance,String action);
 
-	public ArrayList<String> getFormAttributesByName(String attributeName);
+	public List<FormAttributeValue> getFormAttributesByName(String attributeName);
+	
+	public ArrayList<String> getFormAttributesByNameAsString(String attributeName);
 	
 	public List<State> getStatesByActionName(String actionName);
 	

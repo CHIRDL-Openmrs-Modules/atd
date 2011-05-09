@@ -270,7 +270,7 @@ public class TeleformFileMonitor extends AbstractTask
 	{
 		FormService formService = Context.getFormService();
 		ATDService atdService = Context.getService(ATDService.class);
-		ArrayList<String> exportDirectories = atdService.getFormAttributesByName("defaultExportDirectory");
+		ArrayList<String> exportDirectories = atdService.getFormAttributesByNameAsString("defaultExportDirectory");
 		String[] fileExtensions = new String[]
 		{ ".xml" };
 

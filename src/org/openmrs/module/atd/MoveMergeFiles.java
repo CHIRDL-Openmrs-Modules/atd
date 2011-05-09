@@ -102,7 +102,7 @@ public class MoveMergeFiles extends AbstractTask {
 			return;
 		}
 		
-		ArrayList<String> pendingDirectories = atdService.getFormAttributesByName("pendingMergeDirectory");
+		ArrayList<String> pendingDirectories = atdService.getFormAttributesByNameAsString("pendingMergeDirectory");
 		
 		for (String pendingDirectory : pendingDirectories) {
 			

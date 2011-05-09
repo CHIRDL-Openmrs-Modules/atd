@@ -1023,7 +1023,26 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
-	public ArrayList<String> getFormAttributesByName(String attributeName)
+	public List<FormAttributeValue> getFormAttributesByName(String attributeName)
+	{
+		try
+		{
+			String sql = "select * from atd_form_attribute_value where form_attribute_id in "
+					+ "(select form_attribute_id from atd_form_attribute where name=?)";
+			SQLQuery qry = this.sessionFactory.getCurrentSession()
+					.createSQLQuery(sql);
+			qry.addEntity(FormAttributeValue.class);
+			qry.setString(0, attributeName);
+			return qry.list();
+
+		} catch (Exception e)
+		{
+			log.error(Util.getStackTrace(e));
+		}
+		return null;
+	}
+	
+	public ArrayList<String> getFormAttributesByNameAsString(String attributeName)
 	{
 		try
 		{
