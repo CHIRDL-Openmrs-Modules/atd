@@ -51,8 +51,8 @@ public class ConfigManagerUtil {
 		return form;
 	}
 	
-	public static void createFormDirectories(String formName, List<String> locations, boolean scannableForm, 
-	                                         String installationDirectory) throws Exception {
+	public static void createFormDirectories(String formName, List<String> locations, boolean faxableForm, 
+	                                         boolean scannableForm, String installationDirectory) throws Exception {
 		if (installationDirectory == null) {
 			throw new Exception("atd.installationDirectory not specified.");
 		}
@@ -73,11 +73,22 @@ public class ConfigManagerUtil {
 				File imageDir = new File(installationDirectory + File.separator + "images" + 
 					File.separator + locName + File.separator + formName);
 				imageDir.mkdirs();
+			} else if (faxableForm) {
+				// Create the scan directory
+				File scanDir = new File(installationDirectory + File.separator + "scan" + 
+					File.separator + "Fax" + File.separator + formName + "_SCAN");
+				scanDir.mkdirs();
+				
+				// Create the images directory
+				File imageDir = new File(installationDirectory + File.separator + "images" + 
+					File.separator + "Fax" + File.separator + formName);
+				imageDir.mkdirs();
 			}
 		}
 	}
 	
-	public static void deleteFormDirectories(String formName, List<String> locations, boolean scannableForm) throws Exception {
+	public static void deleteFormDirectories(String formName, List<String> locations, boolean faxableForm, 
+	                                         boolean scannableForm) throws Exception {
 		AdministrationService adminService = Context.getAdministrationService();
 		String installationDirectory = adminService.getGlobalProperty("atd.installationDirectory");
 		
@@ -96,16 +107,30 @@ public class ConfigManagerUtil {
 			}
 			
 			if (scannableForm) {
-				// Create the scan directory
+				// Delete the scan directory
 				File scanDir = new File(installationDirectory + File.separator + "scan" + 
 					File.separator + locName + File.separator + formName + "_SCAN");
 				if (scanDir.exists()) {
 					scanDir.delete();
 				}
 				
-				// Create the images directory
+				// Delete the images directory
 				File imageDir = new File(installationDirectory + File.separator + "images" + 
 					File.separator + locName + File.separator + formName);
+				if (imageDir.exists()) {
+					imageDir.delete();
+				}
+			} else if (faxableForm) {
+				// Delete the scan directory
+				File scanDir = new File(installationDirectory + File.separator + "scan" + 
+					File.separator + "Fax" + File.separator + formName + "_SCAN");
+				if (scanDir.exists()) {
+					scanDir.delete();
+				}
+				
+				// Delete the images directory
+				File imageDir = new File(installationDirectory + File.separator + "images" + 
+					File.separator + "Fax" + File.separator + formName);
 				if (imageDir.exists()) {
 					imageDir.delete();
 				}

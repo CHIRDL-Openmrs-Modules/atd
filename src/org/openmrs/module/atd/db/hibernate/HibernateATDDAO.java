@@ -290,7 +290,7 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
-	private FormAttribute getFormAttributeByName(String formAttributeName)
+	public FormAttribute getFormAttributeByName(String formAttributeName) throws DAOException 
 	{
 		try
 		{
@@ -309,6 +309,7 @@ public class HibernateATDDAO implements ATDDAO
 		} catch (Exception e)
 		{
 			log.error(Util.getStackTrace(e));
+			throw new DAOException(e);
 		}
 		return null;
 	}
@@ -1267,8 +1268,12 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 	
-	public void saveFormAttributeValue(FormAttributeValue value) {
-		sessionFactory.getCurrentSession().saveOrUpdate(value);
+	public void saveFormAttributeValue(FormAttributeValue value) throws DAOException{
+		try {
+			sessionFactory.getCurrentSession().saveOrUpdate(value);
+		} catch (Exception e ) {
+			throw new DAOException (e);
+		}
 	}
 	
 	public Integer getErrorCategoryIdByName(String name)
@@ -1479,9 +1484,9 @@ public class HibernateATDDAO implements ATDDAO
     }
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-	                                   String installationDirectory, String serverName, boolean scannableForm, 
-	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
-	                                   Integer copyPrinterConfigFormId) throws DAOException {
+	                                   String installationDirectory, String serverName, boolean faxableForm, 
+	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
+	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException {
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
@@ -1540,6 +1545,8 @@ public class HibernateATDDAO implements ATDDAO
 			ps2.executeUpdate();
 			if (scannableForm) {
 				setupScannableFormValues(con, formId, formName, locationNames, installationDirectory, serverName);
+			} else if (faxableForm) {
+				setupFaxableFormValues(con, formId, formName, locationNames, installationDirectory, serverName);
 			}
 			
 			if (scorableForm) {
@@ -1817,6 +1824,133 @@ public class HibernateATDDAO implements ATDDAO
 		String step2 = "INSERT INTO atd_form_attribute_value "
 			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
 			+ "select max(form_id),concat(?,c.name,?),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='imageDirectory' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String step3 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),'MRNBarCode',max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d, location c "
+			+ "where a.form_id=? and b.name='medRecNumberTag' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String step4 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),'MRNBarCodeBack',max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d, location c "
+			+ "where a.form_id=? and b.name='medRecNumberTag2' and a.retired=0 and d.location_id=c.location_id and ("
+			+ locationStr + ") group by d.location_tag_id,d.location_id";
+
+
+		try {
+			i = 1;
+			ps1 = con.prepareStatement(step1);
+			ps1.setString(i++, scan);
+			ps1.setString(i++, formNameDrive + "_SCAN");
+			ps1.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps1.setString(i++, locationName);
+			}
+			ps1.executeUpdate();
+			
+			i = 1;
+			ps2 = con.prepareStatement(step2);
+			ps2.setString(i++, images);
+			ps2.setString(i++, formNameDrive);
+			ps2.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps2.setString(i++, locationName);
+			}
+			ps2.executeUpdate();
+			
+			i = 1;
+			ps3 = con.prepareStatement(step3);
+			ps3.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps3.setString(i++, locationName);
+			}
+			ps3.executeUpdate();
+			
+			i = 1;
+			ps4 = con.prepareStatement(step4);
+			ps4.setInt(i++, formId);
+			for (String locationName : locationNames) {
+				ps4.setString(i++, locationName);
+			}
+			ps4.executeUpdate();
+		} finally {
+			if (ps1 != null) {
+				try {
+	                ps1.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps2 != null) {
+				try {
+	                ps2.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps3 != null) {
+				try {
+	                ps3.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+			if (ps4 != null) {
+				try {
+	                ps4.close();
+                }
+                catch (SQLException e) {
+	                log.error("Error closing prepared statement", e);
+                }
+			}
+		}
+	}
+	
+	private void setupFaxableFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
+		                                  String installationDirectory, String serverName) throws SQLException {
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		PreparedStatement ps3 = null;
+		PreparedStatement ps4 = null;
+		
+		String scan = installationDirectory + "\\scan\\";
+		String images = "\\\\" + serverName + "\\images\\";
+		String formNameDrive = "\\" + formName;
+		String step1 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),concat(?,'Fax',?),max(form_attribute_id), "
+			+ "d.location_tag_id,d.location_id "
+			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
+			+ "and b.name='defaultExportDirectory' and a.retired=0 and d.location_id=c.location_id and (";
+
+		int i = 0;
+		String locationStr = "";
+	    while (i < locationNames.size()) {
+	    	if (i == 0) {
+	    		locationStr += "c.name = ?";
+	    	} else {
+	    		locationStr += " or c.name = ?";
+	    	}
+	    	i++;
+	    }
+					
+		step1 += locationStr + ") group by d.location_tag_id,d.location_id";
+		
+		String step2 = "INSERT INTO atd_form_attribute_value "
+			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
+			+ "select max(form_id),concat(?,'Fax',?),max(form_attribute_id), "
 			+ "d.location_tag_id,d.location_id "
 			+ "from form a, atd_form_attribute b, location_tag_map d ,location c where a.form_id=? "
 			+ "and b.name='imageDirectory' and a.retired=0 and d.location_id=c.location_id and ("

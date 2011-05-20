@@ -90,6 +90,16 @@ public class ConfigFormController extends SimpleFormController
 		map.put("locations", locNames);
 		map.put("formId", formIdStr);
 		
+		boolean faxableForm = false;
+		String faxChoice = request.getParameter("faxableForm");
+		if (faxChoice != null) {
+			if ("Yes".equalsIgnoreCase(faxChoice)) {
+				faxableForm = true;
+			}
+		}
+		
+		map.put("faxableForm", faxableForm);
+		
 		boolean scannableForm = false;
 		String scanChoice = request.getParameter("scannableForm");
 		if (scanChoice != null) {
@@ -99,6 +109,7 @@ public class ConfigFormController extends SimpleFormController
 		}
 		
 		map.put("scannableForm", scannableForm);
+		
 		boolean scorableForm = false;
 		String scoreChoice = request.getParameter("scorableForm");
 		if (scoreChoice != null) {
@@ -118,7 +129,8 @@ public class ConfigFormController extends SimpleFormController
 		String installationDirectory = adminService.getGlobalProperty("atd.installationDirectory");
 		try {	
 			// Create the directories.
-			ConfigManagerUtil.createFormDirectories(formName, selectedLocations, scannableForm, installationDirectory);
+			ConfigManagerUtil.createFormDirectories(formName, selectedLocations, faxableForm, scannableForm, 
+				installationDirectory);
 		} catch (Exception e) {			
 			log.error("Error creating directories", e);
 			map.put("failedCreateDirectories", true);
@@ -138,7 +150,7 @@ public class ConfigFormController extends SimpleFormController
                 } else {
                 	map.put("missingScoringFile", true);
                 	// delete the directories
-                	ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
+                	ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
         			return new ModelAndView(view, map);
                 }
             }
@@ -151,14 +163,14 @@ public class ConfigFormController extends SimpleFormController
         	
         	Form printerCopyForm = formService.getForm(printerCopy);
         	atdService.setupInitialFormValues(formId, formName, selectedLocations, installationDirectory, 
-        		serverName, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
+        		serverName, faxableForm, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
         		printerCopyForm.getFormId());
     	}
     	catch (Exception e) {
     		log.error("Error saving form changes", e);
             map.put("failedScoringFileUpload", true);
 			// delete the directories
-            ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
+            ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
 			return new ModelAndView(view, map);
         }
         
@@ -189,7 +201,7 @@ public class ConfigFormController extends SimpleFormController
         	log.error("Error while creating data for the Chirdl location tag tables", e);
         	map.put("failedChirdlUpdate", true);
         	// delete the directories
-        	ConfigManagerUtil.deleteFormDirectories(formName, locNames, scannableForm);
+        	ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
 			// remove attribute values
 			atdService.purgeFormAttributeValues(formId);
 			return new ModelAndView(view, map);

@@ -34,6 +34,9 @@
                 <td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/enableForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/enableFormButton.gif"/></a>
                 </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/faxableForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/faxableFormButton.gif"/></a>
+                </td>
             </tr>
         </table></center>
         <br/>

@@ -7,8 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-
-
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Patient;
@@ -18,6 +16,7 @@ import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.ParameterHandler;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
+import org.openmrs.module.atd.hibernateBeans.FormAttribute;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -192,9 +191,9 @@ public interface ATDService
 	public void populateEmtptyFormFields(Integer formId) throws APIException;
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-	                                   String installationDirectory, String serverName, boolean scannableForm, 
-	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
-	                                   Integer copyPrinterConfigFormId) throws APIException;
+	                                   String installationDirectory, String serverName, boolean faxableForm, 
+	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
+	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws APIException;
 	
 	public void purgeFormAttributeValues(Integer formId) throws APIException;
 	
@@ -207,5 +206,8 @@ public interface ATDService
 	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws APIException;
 	
 	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException;
+	
+	public void saveFormAttributeValue(FormAttributeValue value) throws APIException;
 
+	public FormAttribute getFormAttributeByName(String formAttributeName) throws APIException;
 }

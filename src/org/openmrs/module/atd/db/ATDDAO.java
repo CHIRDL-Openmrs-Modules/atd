@@ -7,6 +7,7 @@ import java.util.List;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
+import org.openmrs.module.atd.hibernateBeans.FormAttribute;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -171,9 +172,9 @@ public interface ATDDAO {
 	public void populateEmtptyFormFields(Integer formId) throws DAOException;
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-	                                   String installationDirectory, String serverName, boolean scannableForm, 
-	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
-	                                   Integer copyPrinterConfigFormId) throws DAOException;
+	                                   String installationDirectory, String serverName, boolean faxableForm, 
+	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
+	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException;
 	
 	public void purgeFormAttributeValues(Integer formId) throws DAOException;
 	
@@ -186,4 +187,8 @@ public interface ATDDAO {
 	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws DAOException;
 	
 	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws DAOException;
+	
+	public void saveFormAttributeValue(FormAttributeValue value) throws DAOException;
+	
+	public FormAttribute getFormAttributeByName(String formAttributeName) throws DAOException;
 }

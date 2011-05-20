@@ -52,17 +52,32 @@
 	                     </td>
 	                </tr>
 	            </c:if>
+	            <tr style="padding: 5px">
+	               <td style="padding: 0px 0px 10px 0px">Faxable form:</td>
+	               <td style="padding: 0px 0px 10px 0px">
+	                   <c:choose>
+	                       <c:when test="${faxableForm == 'true'}">
+	                           <input type="radio" id="faxYes" name="faxableForm" value="Yes" checked onclick="input.scanNo.checked = true"> Yes&nbsp
+	                           <input type="radio" id="faxNo" name="faxableForm" value="No"> No
+	                       </c:when>
+	                       <c:otherwise>
+	                           <input type="radio" id="faxYes" name="faxableForm" value="Yes" onclick="input.scanNo.checked = true"> Yes&nbsp
+	                           <input type="radio" id="faxNo" name="faxableForm" value="No" checked> No
+	                       </c:otherwise>
+	                   </c:choose>
+	               </td>
+	            </tr>
                 <tr style="padding: 5px">
 	               <td style="padding: 0px 0px 10px 0px">Scannable form:</td>
 	               <td style="padding: 0px 0px 10px 0px">
 	                   <c:choose>
 	                       <c:when test="${scannableForm == 'true'}">
-	                           <input type="radio" name="scannableForm" value="Yes" checked> Yes&nbsp
-	                           <input type="radio" name="scannableForm" value="No"> No
+	                           <input type="radio" id="scanYes" name="scannableForm" value="Yes" checked onclick="input.faxNo.checked = true"> Yes&nbsp
+	                           <input type="radio" id="scanNo" name="scannableForm" value="No"> No
 	                       </c:when>
 	                       <c:otherwise>
-	                           <input type="radio" name="scannableForm" value="Yes"> Yes&nbsp
-	                           <input type="radio" name="scannableForm" value="No" checked> No
+	                           <input type="radio" id="scanYes" name="scannableForm" value="Yes" onclick="input.faxNo.checked = true"> Yes&nbsp
+	                           <input type="radio" id="scanNo" name="scannableForm" value="No" checked> No
 	                       </c:otherwise>
 	                   </c:choose>
 	               </td>

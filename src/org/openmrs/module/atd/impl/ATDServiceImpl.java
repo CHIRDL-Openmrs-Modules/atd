@@ -36,6 +36,7 @@ import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
 import org.openmrs.module.atd.db.ATDDAO;
 import org.openmrs.module.atd.hibernateBeans.ATDError;
+import org.openmrs.module.atd.hibernateBeans.FormAttribute;
 import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -898,11 +899,11 @@ public class ATDServiceImpl implements ATDService
     }
 
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-                                       String installationDirectory, String serverName, boolean scannableForm, 
-                                       boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields,
-                                       Integer copyPrinterConfigFormId) {
-	    getATDDAO().setupInitialFormValues(formId, formName, locationNames, installationDirectory, serverName, scannableForm,
-	    	scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
+                                       String installationDirectory, String serverName, boolean faxableForm, 
+                                       boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
+                                       Integer numPrioritizedFields, Integer copyPrinterConfigFormId) {
+	    getATDDAO().setupInitialFormValues(formId, formName, locationNames, installationDirectory, serverName, faxableForm, 
+	    	scannableForm, scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
     }
 
 	public void purgeFormAttributeValues(Integer formId) throws APIException {
@@ -927,5 +928,13 @@ public class ATDServiceImpl implements ATDService
     
     public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException {
     	return getATDDAO().isFormEnabledAtClinic(formId, locationId);
+    }
+    
+    public void saveFormAttributeValue(FormAttributeValue value) throws APIException {
+    	getATDDAO().saveFormAttributeValue(value);
+    }
+    
+    public FormAttribute getFormAttributeByName(String formAttributeName) throws APIException {
+    	return getATDDAO().getFormAttributeByName(formAttributeName);
     }
 }
