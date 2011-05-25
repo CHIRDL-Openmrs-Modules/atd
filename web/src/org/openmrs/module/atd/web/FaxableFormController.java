@@ -1,6 +1,7 @@
 package org.openmrs.module.atd.web;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class FaxableFormController extends SimpleFormController {
 			} catch (Exception e) {
 				Log.error("Error making form faxable", e);
 				map.put("error", true);
-				map.put("forms", getForms());
+				map.put("forms", getForms(false));
 				return new ModelAndView(view, map);
 			}
 		}
@@ -65,7 +66,7 @@ public class FaxableFormController extends SimpleFormController {
 	protected Map referenceData(HttpServletRequest request) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		
-		map.put("forms", getForms());
+		map.put("forms", getForms(false));
 		
 		return map;
 	}
@@ -86,37 +87,42 @@ public class FaxableFormController extends SimpleFormController {
 			throw new Exception("atd.serverName not specified");
 		}
 		
-		Form form = formService.getForm(formId);
-		String formName = form.getName();
+		Form currentForm = formService.getForm(formId);
+		String currentFormName = currentForm.getName();
+		// We need to update retired versions of the form as well.
+		List<Form> forms = findAllVersionsOfForm(currentForm);
 		
 		FormAttribute exportAttr = atdService.getFormAttributeByName("defaultExportDirectory");
 		FormAttribute imageAttr = atdService.getFormAttributeByName("imageDirectory");
+		
+		String newExportValue = installationDirectory + File.separator + "scan" + File.separator + "Fax" + 
+			File.separator + currentFormName + "_SCAN";
+		String newImageValue = File.separator + File.separator + serverName + File.separator + "images" + 
+			File.separator + "Fax" + File.separator + currentFormName;
 		
 		// Get the merge values.  This will guide us through creating the other info we need.
 		for (Location location : locService.getAllLocations()) {
 			Integer locationId = location.getLocationId();
 			for (LocationTag tag : location.getTags()) {
 				Integer locationTagId = tag.getLocationTagId();
-				FormAttributeValue value = atdService.getFormAttributeValue(formId, "defaultMergeDirectory", locationTagId, 
-					locationId);
-				if (value != null && value.getValue() != null) {
-					// Create and save the new scan value.
-					String newExportValue = installationDirectory + File.separator + "scan" + File.separator + "Fax" + 
-						File.separator + form.getName() + "_SCAN";
-					setupFormAttributeValue(atdService, value, installationDirectory, form, locationId, locationTagId, 
-						exportAttr, newExportValue);
-					
-					// Create and save the new image value.
-					String newImageValue = File.separator + File.separator + serverName + File.separator + "images" + 
-						File.separator + "Fax" + File.separator + form.getName();
-					setupFormAttributeValue(atdService, value, serverName, form, locationId, locationTagId, 
-						imageAttr, newImageValue);
+				for (Form form : forms) {
+					FormAttributeValue value = atdService.getFormAttributeValue(form.getFormId(), "defaultMergeDirectory", 
+						locationTagId, locationId);
+					if (value != null && value.getValue() != null) {
+						// Create and save the new scan value.
+						setupFormAttributeValue(atdService, value, installationDirectory, form, locationId, locationTagId, 
+							exportAttr, newExportValue);
+						
+						// Create and save the new image value.
+						setupFormAttributeValue(atdService, value, serverName, form, locationId, locationTagId, 
+							imageAttr, newImageValue);
+					}
 				}
 			}
 		}
 
 		// Create the fax directories.
-		createFaxDirectories(formId, installationDirectory, formName);
+		createFaxDirectories(formId, installationDirectory, currentFormName);
 	}
 	
 	private void setupFormAttributeValue(ATDService atdService, FormAttributeValue mergeValue,String installationDirectory, 
@@ -141,6 +147,19 @@ public class FaxableFormController extends SimpleFormController {
 		atdService.saveFormAttributeValue(exportValue);
 	}
 	
+	private List<Form> findAllVersionsOfForm(Form matchForm) {
+		// Match based on form form name
+		String formName = matchForm.getName();
+		List<Form> forms = new ArrayList<Form>();
+		for (Form form : getForms(true)) {
+			if (formName.equals(form.getName())) {
+				forms.add(form);
+			}
+		}
+		
+		return forms;
+	}
+	
 	private void createFaxDirectories(Integer formId, String installationDirectory, String formName) throws Exception {			
 		// Create the scan directory
 		File scanDir = new File(installationDirectory + File.separator + "scan" + 
@@ -153,9 +172,9 @@ public class FaxableFormController extends SimpleFormController {
 		imageDir.mkdirs();
 	}
 	
-	private List<Form> getForms() {
+	private List<Form> getForms(boolean includeRetired) {
 		FormService formService = Context.getFormService();
-		List<Form> forms = formService.getAllForms(false);
+		List<Form> forms = formService.getAllForms(includeRetired);
 		return forms;
 		
 	}
