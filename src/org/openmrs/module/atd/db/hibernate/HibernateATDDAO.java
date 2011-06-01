@@ -1557,7 +1557,10 @@ public class HibernateATDDAO implements ATDDAO
 				setupPrioritizedFormValues(con, formId, numPrioritizedFields, locationNames);
 			}
 			
-			copyPrinterConfiguration(con, copyPrinterConfigFormId, formId, locationNames);
+			if (copyPrinterConfigFormId != null) {
+				copyPrinterConfiguration(con, copyPrinterConfigFormId, formId, locationNames);
+			}
+			
 			con.commit();
 		} catch (Exception e) {
 			try {

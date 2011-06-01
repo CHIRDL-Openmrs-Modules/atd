@@ -162,9 +162,14 @@ public class ConfigFormController extends SimpleFormController
         	}
         	
         	Form printerCopyForm = formService.getForm(printerCopy);
+        	Integer printerCopyFormId = null;
+        	if (printerCopyForm != null) {
+        		printerCopyFormId = printerCopyForm.getFormId();
+        	}
+        	
         	atdService.setupInitialFormValues(formId, formName, selectedLocations, installationDirectory, 
         		serverName, faxableForm, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
-        		printerCopyForm.getFormId());
+        		printerCopyFormId);
     	}
     	catch (Exception e) {
     		log.error("Error saving form changes", e);
