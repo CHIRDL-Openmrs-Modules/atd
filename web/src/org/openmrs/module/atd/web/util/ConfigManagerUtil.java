@@ -16,7 +16,8 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.service.ATDService;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -190,10 +191,10 @@ public class ConfigManagerUtil {
 			}
 			
 			// delete from Chirdl Util tables
-			ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
-			LocationTagAttribute attr = chirdlService.getLocationTagAttribute(form.getName());
+			ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+			LocationTagAttribute attr = chirdlutilbackportsService.getLocationTagAttribute(form.getName());
 			if (attr != null) {
-				chirdlService.deleteLocationTagAttribute(attr);
+				chirdlutilbackportsService.deleteLocationTagAttribute(attr);
 			}
 		}
 	}

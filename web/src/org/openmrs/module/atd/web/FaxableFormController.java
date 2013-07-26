@@ -17,9 +17,10 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.hibernateBeans.FormAttribute;
-import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
@@ -76,6 +77,7 @@ public class FaxableFormController extends SimpleFormController {
 		ATDService atdService = Context.getService(ATDService.class);
 		LocationService locService = Context.getLocationService();
 		FormService formService = Context.getFormService();
+		ChirdlUtilBackportsService chirdlutilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		
 		String installationDirectory = adminService.getGlobalProperty("atd.installationDirectory");
 		if (installationDirectory == null) {
@@ -92,8 +94,8 @@ public class FaxableFormController extends SimpleFormController {
 		// We need to update retired versions of the form as well.
 		List<Form> forms = findAllVersionsOfForm(currentForm);
 		
-		FormAttribute exportAttr = atdService.getFormAttributeByName("defaultExportDirectory");
-		FormAttribute imageAttr = atdService.getFormAttributeByName("imageDirectory");
+		FormAttribute exportAttr = chirdlutilBackportsService.getFormAttributeByName("defaultExportDirectory");
+		FormAttribute imageAttr = chirdlutilBackportsService.getFormAttributeByName("imageDirectory");
 		
 		String newExportValue = installationDirectory + File.separator + "scan" + File.separator + "Fax" + 
 			File.separator + currentFormName + "_SCAN";
@@ -106,15 +108,15 @@ public class FaxableFormController extends SimpleFormController {
 			for (LocationTag tag : location.getTags()) {
 				Integer locationTagId = tag.getLocationTagId();
 				for (Form form : forms) {
-					FormAttributeValue value = atdService.getFormAttributeValue(form.getFormId(), "defaultMergeDirectory", 
+					FormAttributeValue value = chirdlutilBackportsService.getFormAttributeValue(form.getFormId(), "defaultMergeDirectory", 
 						locationTagId, locationId);
 					if (value != null && value.getValue() != null) {
 						// Create and save the new scan value.
-						setupFormAttributeValue(atdService, value, installationDirectory, form, locationId, locationTagId, 
+						setupFormAttributeValue(chirdlutilBackportsService, value, installationDirectory, form, locationId, locationTagId, 
 							exportAttr, newExportValue);
 						
 						// Create and save the new image value.
-						setupFormAttributeValue(atdService, value, serverName, form, locationId, locationTagId, 
+						setupFormAttributeValue(chirdlutilBackportsService, value, serverName, form, locationId, locationTagId, 
 							imageAttr, newImageValue);
 					}
 				}
@@ -125,10 +127,11 @@ public class FaxableFormController extends SimpleFormController {
 		createFaxDirectories(formId, installationDirectory, currentFormName);
 	}
 	
-	private void setupFormAttributeValue(ATDService atdService, FormAttributeValue mergeValue,String installationDirectory, 
+	private void setupFormAttributeValue(ChirdlUtilBackportsService chirdlutilBackportsService, FormAttributeValue mergeValue,String installationDirectory, 
 	                                  Form form, Integer locationId, Integer locationTagId, FormAttribute formAttr, 
 	                                  String newValue) {
-		FormAttributeValue exportValue = atdService.getFormAttributeValue(mergeValue.getFormId(), formAttr.getName(), 
+
+		FormAttributeValue exportValue = chirdlutilBackportsService.getFormAttributeValue(mergeValue.getFormId(), formAttr.getName(), 
 			mergeValue.getLocationTagId(), mergeValue.getLocationId());
 		if (exportValue != null && exportValue.getValue() != null) {
 			// A value already exists...we need to replace it.
@@ -144,7 +147,7 @@ public class FaxableFormController extends SimpleFormController {
 		}
 		
 		// Save the value
-		atdService.saveFormAttributeValue(exportValue);
+		chirdlutilBackportsService.saveFormAttributeValue(exportValue);
 	}
 	
 	private List<Form> findAllVersionsOfForm(Form matchForm) {

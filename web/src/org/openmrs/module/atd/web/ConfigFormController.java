@@ -21,8 +21,9 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
@@ -180,10 +181,10 @@ public class ConfigFormController extends SimpleFormController
         }
         
         try {
-        	ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
+        	ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
         	LocationTagAttribute locTagAttr = new LocationTagAttribute();
         	locTagAttr.setName(formName);
-        	locTagAttr = chirdlService.saveLocationTagAttribute(locTagAttr);
+        	locTagAttr = chirdlutilbackportsService.saveLocationTagAttribute(locTagAttr);
         	for (String locName : selectedLocations) {
         		Location loc = locService.getLocation(locName);
         		Set<LocationTag> tags = loc.getTags();
@@ -195,7 +196,7 @@ public class ConfigFormController extends SimpleFormController
         			attrVal.setLocationTagAttributeId(locTagAttr.getLocationTagAttributeId());
         			attrVal.setLocationTagId(tag.getLocationTagId());
         			attrVal.setValue(String.valueOf(formId));
-        			chirdlService.saveLocationTagAttributeValue(attrVal);
+        			chirdlutilbackportsService.saveLocationTagAttributeValue(attrVal);
         		}
         		
         		LoggingUtil.logEvent(loc.getLocationId(), formId, null, LoggingConstants.EVENT_MODIFY_FORM_PROPERTIES, 

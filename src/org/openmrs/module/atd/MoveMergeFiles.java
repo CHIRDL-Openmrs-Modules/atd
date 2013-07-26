@@ -4,20 +4,28 @@
 package org.openmrs.module.atd;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.scheduler.tasks.AbstractTask;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.DecodeHintType;
 
 /**
  * @author Tammy Dugan
@@ -31,8 +39,6 @@ public class MoveMergeFiles extends AbstractTask {
 	
 	private boolean keepLooking = true;
 	
-	private static TaskDefinition taskConfig;
-	
 	private static Date lastMoveMergeFiles;
 	
 	private static Date nextLatestMoveMergeFiles;
@@ -41,7 +47,7 @@ public class MoveMergeFiles extends AbstractTask {
 	
 	@Override
 	public void initialize(TaskDefinition config) {
-		taskConfig = config;
+		super.initialize(config);
 		isInitialized = false;
 	}
 	
@@ -54,8 +60,6 @@ public class MoveMergeFiles extends AbstractTask {
 				if (!isInitialized) {
 					isInitialized = true;
 				}
-				if (Context.isAuthenticated() == false)
-					authenticate();
 				
 				//move files from pending to merge directory
 				moveMergeFiles();
@@ -86,7 +90,7 @@ public class MoveMergeFiles extends AbstractTask {
 	
 	private void moveMergeFiles() {
 		
-		ATDService atdService = Context.getService(ATDService.class);
+		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		AdministrationService adminService = Context.getAdministrationService();
 		
 		//look at a global property for the batch size of merge files that
@@ -102,31 +106,18 @@ public class MoveMergeFiles extends AbstractTask {
 			return;
 		}
 		
-		ArrayList<String> pendingDirectories = atdService.getFormAttributesByNameAsString("pendingMergeDirectory");
+		ArrayList<String> mergeDirectories = chirdlUtilBackportsService.getFormAttributesByNameAsString("defaultMergeDirectory");
 		
-		for (String pendingDirectory : pendingDirectories) {
+		for (String defaultMergeDirectory : mergeDirectories) {
 			
 			//get the value of the pending merge directory for the form			
-			if (pendingDirectory == null||pendingDirectory.length()==0) {
+			if (defaultMergeDirectory == null||defaultMergeDirectory.length()==0) {
 				continue;
 			}
 			
 			//looking up all of the default and pending directories individually
 			//was very slow so I am doing a substring match to speed this method up
-			int index = pendingDirectory.lastIndexOf("Pending");
-			
-			String defaultMergeDirectory = null;
-			
-			if(index > -1){
-				defaultMergeDirectory = pendingDirectory.substring(0,index);
-			}else
-			{
-				log.error("could not process pending directory: "+pendingDirectory);
-			}
-			
-			if(defaultMergeDirectory == null||defaultMergeDirectory.length()==0){
-				continue;
-			}
+			String pendingDirectory = defaultMergeDirectory + File.separator + "Pending" + File.separator;
 			
 			//see how many xml files are in the default merge directory for the form
 			String[] fileExtensions = new String[] { ".xml" };
@@ -138,6 +129,7 @@ public class MoveMergeFiles extends AbstractTask {
 				numFiles = files.length;
 			}
 			
+			fileExtensions = new String[] { ".xml", ".pdf" };
 			files = IOUtil.getFilesInDirectory(pendingDirectory, fileExtensions);
 			
 			if (files == null) {
@@ -150,39 +142,70 @@ public class MoveMergeFiles extends AbstractTask {
 			for (i = 0; numFiles <= numFilesToMove && i < files.length; numFiles++, i++) {
 				File fileToMove = files[i];
 				if (fileToMove.length() == 0) {
+					numFiles--;
 					continue;
 				}
 				String sourceFilename = fileToMove.getPath();
-				String targetFilename = defaultMergeDirectory + "/" + IOUtil.getFilenameWithoutExtension(sourceFilename)
-				        + ".20";
+				String targetFilename = null;
+				String extension = ".xml";
+				boolean pdfFile = false;
+				String pdfFilename = null;
+				if (sourceFilename.endsWith(".pdf")) {
+					extension = ".pdf";
+					pdfFile = true;
+					pdfFilename = getTargetPdfFilename(fileToMove);
+					if (pdfFilename == null) {
+						// Let the task try again instead of automatically failing it the first time it cannot find a barcode.
+//						File failedFile = new File(pendingDirectory
+//					        + IOUtil.getFilenameWithoutExtension(sourceFilename) + ".pdfCopyFailed");
+//						if (failedFile.exists()) {
+//							failedFile.delete();
+//						}
+//						
+//						IOUtil.renameFile(sourceFilename, failedFile.getAbsolutePath());
+						continue;
+					}
+					
+					targetFilename = defaultMergeDirectory + File.separator + pdfFilename;
+					IOUtil.renameFile(sourceFilename, pendingDirectory
+				        + pdfFilename);
+					sourceFilename = pendingDirectory + pdfFilename;
+				} else {
+					targetFilename = defaultMergeDirectory + File.separator + 
+						IOUtil.getFilenameWithoutExtension(sourceFilename) + ".move";
+				}
 				try {
 					//copy the file to .20 extension so Teleform doesn't
 					//pick up the file before it is done writing
 					IOUtil.copyFile(sourceFilename, targetFilename, true);
 					//rename the file to .xml so teleform will see it
-					IOUtil.renameFile(targetFilename, defaultMergeDirectory + "/"
-					        + IOUtil.getFilenameWithoutExtension(targetFilename) + ".xml");
+					if (!pdfFile) {
+						IOUtil.renameFile(targetFilename, defaultMergeDirectory + File.separator
+						        + IOUtil.getFilenameWithoutExtension(targetFilename) + extension);
+					}
 					
 					File srcFile = new File(sourceFilename);
-					File tgtFile = new File(targetFilename);
+//					File tgtFile = new File(targetFilename);
 					
 					//check if the file exists under the following file extensions
-					targetFilename = defaultMergeDirectory + "/" + IOUtil.getFilenameWithoutExtension(sourceFilename)
-					        + ".20";
+					if (!pdfFile) {
+						targetFilename = defaultMergeDirectory + File.separator + 
+							IOUtil.getFilenameWithoutExtension(sourceFilename) + ".20";
+					}
 					
-					tgtFile = new File(targetFilename);
+					File tgtFile = new File(targetFilename);
 					
-					if (!tgtFile.exists()) {
+					if (!tgtFile.exists() && !pdfFile) {
 						
-						targetFilename = defaultMergeDirectory + "/" + IOUtil.getFilenameWithoutExtension(sourceFilename)
-						        + ".22";
+						targetFilename = defaultMergeDirectory + File.separator + 
+							IOUtil.getFilenameWithoutExtension(sourceFilename) + ".22";
 						tgtFile = new File(targetFilename);
 						if (!tgtFile.exists()) {
-							targetFilename = defaultMergeDirectory + "/"
-							        + IOUtil.getFilenameWithoutExtension(sourceFilename) + ".xml";
+							targetFilename = defaultMergeDirectory + File.separator
+							        + IOUtil.getFilenameWithoutExtension(sourceFilename) + extension;
 							tgtFile = new File(targetFilename);
 							if (!tgtFile.exists()) {
-								targetFilename = defaultMergeDirectory + "/"
+								targetFilename = defaultMergeDirectory + File.separator
 								        + IOUtil.getFilenameWithoutExtension(sourceFilename) + ".19";
 								tgtFile = new File(targetFilename);
 							}
@@ -202,9 +225,13 @@ public class MoveMergeFiles extends AbstractTask {
 							//Teleform merger
 							IOUtil.deleteFile(targetFilename);
 						} else {
-							IOUtil.renameFile(sourceFilename, pendingDirectory + "/"
-							        + IOUtil.getFilenameWithoutExtension(sourceFilename) + ".copy");
+							extension= ".copy";
+							if (pdfFile) {
+								extension = ".pdfcopy";
+							}
 							
+							IOUtil.renameFile(sourceFilename, pendingDirectory + File.separator
+						        + IOUtil.getFilenameWithoutExtension(sourceFilename) + extension);
 						}
 					}
 				}
@@ -242,4 +269,34 @@ public class MoveMergeFiles extends AbstractTask {
 		}
 	}
 	
+	/**
+	 * Pulls the barcode from a PDF file to determine the correct filename.
+	 * 
+	 * @param pdfFile The PDF document to rename.
+	 * @return The target filename for the PDF document or null if one can't be determined.
+	 */
+	private String getTargetPdfFilename(File pdfFile) {
+		String targetFilename = null;
+		try {
+			Map<DecodeHintType,Object> hints = new HashMap<DecodeHintType,Object>();
+			Collection<BarcodeFormat> formats = new HashSet<BarcodeFormat>();
+			formats.add(BarcodeFormat.CODE_39);
+			formats.add(BarcodeFormat.CODE_128);
+			hints.put(DecodeHintType.POSSIBLE_FORMATS, formats);
+			hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+			String[] results = Util.getPdfFormBarcodes(pdfFile, hints, "[\\d]+-[\\d]+-[\\d]+");
+			if (results.length > 0) {
+				String idBarcode = results[0];
+				idBarcode = idBarcode.replace("-", "_");
+				targetFilename = idBarcode + ".pdf";
+			}
+		}
+		catch (IOException e) {
+			log.error(" IO error determining PDF filename from " + pdfFile.getAbsolutePath() + ".", e);
+		} catch (Exception e) {
+			log.error("Error determining PDF filename from " + pdfFile.getAbsolutePath() + ".", e);
+		}
+		
+		return targetFilename;
+	}
 }

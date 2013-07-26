@@ -7,13 +7,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -21,36 +18,33 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Form;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
-import org.openmrs.module.Module;
-import org.openmrs.module.ModuleFactory;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
-import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
-import org.openmrs.module.atd.hibernateBeans.FormInstance;
-import org.openmrs.module.atd.hibernateBeans.PatientState;
-import org.openmrs.module.atd.hibernateBeans.State;
-import org.openmrs.module.atd.hibernateBeans.StateAction;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.util.FileExt;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
+import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.scheduler.tasks.AbstractTask;
-import org.openmrs.util.OpenmrsClassLoader;
 
 /**
  * @author Vibha Anand
@@ -61,24 +55,17 @@ public class TeleformFileMonitor extends AbstractTask
 {
 	private static Log log = LogFactory.getLog(TeleformFileMonitor.class);
 
-	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithFilename = null;
-	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithoutFilename = null;
-	private static ConcurrentHashMap<String, LinkedList<String>> tifFileQueue = null;
+	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithFilename = new ConcurrentHashMap<FormInstance, TeleformFileState>();
+	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithoutFilename = new ConcurrentHashMap<FormInstance, TeleformFileState>();
+	private static ConcurrentHashMap<String, LinkedList<String>> tifFileQueue = new ConcurrentHashMap<String, LinkedList<String>>();
 	//private static Set<String> unparseableFiles = null;
 	private static boolean isInitialized = false;
 	private boolean keepLooking = true;
-	
-	private static TaskDefinition taskConfig;
-	private final static Lock aopLock = new ReentrantLock();
-	private final static Condition goTFStates = aopLock.newCondition();
-	private static Boolean statesBeingProcessedByAOP = false;
-	private static Boolean ignorePWSs = false;
-	private static ArrayList<TeleformFileState> pwsStatesToProcess = new ArrayList<TeleformFileState>();
-	
+
 	@Override
 	public void initialize(TaskDefinition config)
 	{
-		taskConfig = config;
+		super.initialize(config);
 		//unparseableFiles = new HashSet<String>();
 		isInitialized = false;
 		pendingStatesWithFilename = new ConcurrentHashMap<FormInstance, TeleformFileState>();
@@ -99,22 +86,11 @@ public class TeleformFileMonitor extends AbstractTask
 				{
 					init();
 				}
-				if (Context.isAuthenticated() == false)
-					authenticate();
 				
-				ArrayList<TeleformFileState> listTFstatesProcessed = new ArrayList<TeleformFileState>();
-				ignorePWSs = false;
-				processPendingStatesWithoutFilename(listTFstatesProcessed);
-				processPendingStatesWithFilename(listTFstatesProcessed);
+				ATDService atdService = Context.getService(ATDService.class);
+				processPendingStatesWithoutFilename(atdService);
+				processPendingStatesWithFilename(atdService);
 				processTifFiles();
-				kickProcess(listTFstatesProcessed);
-				if(!ignorePWSs&&pwsStatesToProcess.size()>0){
-					TeleformFileState tfFileState = pwsStatesToProcess.remove(0);
-					ArrayList<TeleformFileState> pwsFileStates = new ArrayList<TeleformFileState>();
-					pwsFileStates.add(tfFileState);
-					kickProcess(pwsFileStates);
-				}
-
 			} 
 			catch (Exception e)
 			{
@@ -136,60 +112,84 @@ public class TeleformFileMonitor extends AbstractTask
 	public static void init()
 	{
 		log.info("Initializing Teleform monitor...");
-
-		try
-		{
-			//call the initialization method if one has been set in the task property
-			String initClassString = taskConfig.getProperty("initClass");
-			String initMethodString = taskConfig.getProperty("initMethod");
-			if(initClassString == null || initMethodString == null)
-			{
-				return;
-			}
-			//class the initialization method is in
-			Class clas = null;
-
-			boolean isMyModuleStarted = false;
-			List<Module> startedModules = new ArrayList<Module>();
-			startedModules.addAll(ModuleFactory.getStartedModules());
-			for (Module r:startedModules){
-				log.info("Module started: " + r.getName());
-				if(initClassString.toLowerCase().contains(r.getName().toLowerCase()))
-				{
-					isMyModuleStarted = true;
-				}
-			}
-			try
-			{
-				if(startedModules.size() > 0 && isMyModuleStarted ) {
-					log.info("Teleform monitor: Loading class" + initClassString + "...");
-					clas = OpenmrsClassLoader.getInstance().loadClass(initClassString);
-				}
-				else
-				{
-					log.info("Teleform monitor: MODULE NOT STARTED FOR - " + initClassString + "...");
-				}
-			}
-			catch (Exception e)
-			{
-				log.error(e.getMessage());
-				log.error(Util.getStackTrace(e));
-			}
-			if (clas != null)
-			{
-				// initialization method
-				Method initMethod = clas.getMethod(initMethodString, null);
-
-				// Call the method
-				initMethod.invoke(clas.newInstance(), null);
-			}
-		} catch (Exception e)
-		{
-			log.error(e.getMessage());
-			log.error(Util.getStackTrace(e));
-		}
+		fillUnfinishedStates();
+		
 		isInitialized = true;
 		log.info("Finished initializing Teleform monitor.");
+	}
+	
+	public static void fillUnfinishedStates()
+	{
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		Calendar todaysDate = Calendar.getInstance();
+		todaysDate.set(Calendar.HOUR_OF_DAY, 0);
+		todaysDate.set(Calendar.MINUTE, 0);
+		todaysDate.set(Calendar.SECOND, 0);
+		LocationService locationService = Context.getLocationService();
+
+		List<Location> locations = locationService.getAllLocations();
+		
+		for(Location location:locations){
+		
+		Set<LocationTag> tags = location.getTags();
+		
+		if(tags != null){
+		
+			for(LocationTag tag:tags){
+				Integer locationId = location.getLocationId();
+				Integer locationTagId = tag.getLocationTagId();
+		List<PatientState> unfinishedStatesToday = chirdlutilbackportsService.
+			getUnfinishedPatientStatesAllPatients(todaysDate.getTime(),locationTagId,locationId);
+				
+		int numUnfinishedStates = unfinishedStatesToday.size();
+		double processedStates = 0;
+		
+		log.info("fillUnfinishedStates(): Starting Today's state initialization....");
+		for(PatientState currPatientState:unfinishedStatesToday)
+		{	
+			State state = currPatientState.getState();
+			if (state != null)
+			{
+				StateAction stateAction = state.getAction();
+
+				try
+				{
+					if (stateAction!=null&&stateAction.getActionName().equalsIgnoreCase(
+							"CONSUME FORM INSTANCE"))
+					{
+						TeleformFileState teleformFileState = TeleformFileMonitor
+							.addToPendingStatesWithoutFilename(
+								currPatientState.getFormInstance());
+						teleformFileState.addParameter("patientState",
+								currPatientState);
+					}
+					HashMap<String,Object> parameters = new HashMap<String,Object>();
+					parameters.put("formInstance", currPatientState.getFormInstance());
+					BaseStateActionHandler handler = BaseStateActionHandler.getInstance();
+					handler.processAction(stateAction, currPatientState.getPatient(),
+							currPatientState,parameters);
+				} catch (Exception e)
+				{
+					log.error(e.getMessage());
+					log
+							.error(org.openmrs.module.chirdlutil.util.Util
+									.getStackTrace(e));
+				}
+			}
+			if(processedStates%100==0){
+				log.info("State initialization is: "+(int)((processedStates/numUnfinishedStates)*100)+"% complete. "+
+						processedStates+" out of "+numUnfinishedStates+" processed.");
+			}
+			processedStates++;
+		}
+		
+		log.info("Today's state initialization is: "+(int)((processedStates/numUnfinishedStates)*100)+"% complete.");
+		}}}
+		
+		Thread thread = new Thread(new InitializeOldStates());
+		thread.start();
+//		ThreadManager threadManager = ThreadManager.getInstance();
+//		threadManager.execute(new InitializeOldStates(), ThreadManager.NO_LOCATION);
 	}
 	
 	@Override
@@ -205,7 +205,7 @@ public class TeleformFileMonitor extends AbstractTask
 		super.shutdown();
 	}
 	
-	public synchronized static TeleformFileState addToPendingStatesWithFilename(FormInstance formInstance,
+	public static TeleformFileState addToPendingStatesWithFilename(FormInstance formInstance,
 			String filename)
 	{
 		TeleformFileState tfFileState = new TeleformFileState();
@@ -226,7 +226,7 @@ public class TeleformFileMonitor extends AbstractTask
 		return tfFileState;
 	}
 	
-	public synchronized static TeleformFileState addToPendingStatesWithoutFilename(FormInstance formInstance)
+	public static TeleformFileState addToPendingStatesWithoutFilename(FormInstance formInstance)
 	{
 		TeleformFileState tfFileState = new TeleformFileState();
 		try{				
@@ -241,7 +241,7 @@ public class TeleformFileMonitor extends AbstractTask
 		return tfFileState;
 	}
 
-	public synchronized static void addToTifFileProcessing(FormInstance formInstance, String directoryName, String fileExt )
+	public static void addToTifFileProcessing(FormInstance formInstance, String directoryName, String fileExt )
 	{
 		if(formInstance == null){
 			log.error("FormInstance cannot be null when adding to TIF processing");
@@ -266,13 +266,13 @@ public class TeleformFileMonitor extends AbstractTask
 		//log.info("Added: " + directoryName + ": " + filename);
 	}
 	
-	private static void processPendingStatesWithoutFilename(ArrayList<TeleformFileState> listTFstatesProcessed)
+	private static void processPendingStatesWithoutFilename(ATDService atdService)
 	{
 		FormService formService = Context.getFormService();
-		ATDService atdService = Context.getService(ATDService.class);
-		ArrayList<String> exportDirectories = atdService.getFormAttributesByNameAsString("defaultExportDirectory");
+		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		ArrayList<String> exportDirectories = chirdlUtilBackportsService.getFormAttributesByNameAsString("defaultExportDirectory");
 		String[] fileExtensions = new String[]
-		{ ".xml" };
+		{ ".xml", ".xmle" };
 
 		if (exportDirectories == null || exportDirectories.size() == 0)
 		{
@@ -329,7 +329,7 @@ public class TeleformFileMonitor extends AbstractTask
 					if (formInstance == null)
 					{
 						Integer locationTagId = null;
-						List<FormAttributeValue> formAttrValues = atdService
+						List<FormAttributeValue> formAttrValues = chirdlUtilBackportsService
 							.getFormAttributeValuesByValue(
 								org.openmrs.module.chirdlutil.util.IOUtil.getDirectoryName(filename));
 
@@ -359,7 +359,7 @@ public class TeleformFileMonitor extends AbstractTask
 
 							if(formInstance == null){
 							    try {
-	                                // Strictly Stick to what was asked in the Chica's Ticket #216 (the request in the ticket was just updated today),
+	                                // Strictly Stick to what was asked in Ticket #216 (the request in the ticket was just updated today),
 	                                // with the addition of the extra backward slashes around 'bad scans' to make it compilable.  
 							    	File badScansDir = new File(currExportDirectory,"bad scans");
 							    	if (!badScansDir.exists()) {
@@ -385,7 +385,7 @@ public class TeleformFileMonitor extends AbstractTask
 										formAttrValue.getLocationId(),
 										formAttrValue.getFormId(), formInstance
 												.getFormInstanceId());
-								PatientState patientState = atdService
+								PatientState patientState = chirdlUtilBackportsService
 										.getPatientStateByFormInstanceAction(
 												lookupFormInstance,
 												"PRODUCE FORM INSTANCE");
@@ -424,27 +424,19 @@ public class TeleformFileMonitor extends AbstractTask
 							tfFileState.setFullFilePath(newFilename);
 							tfFileState.setFormInstance(formInstance);
 							pendingStatesWithoutFilename.remove(formInstance);
-							PatientState patientState = (PatientState) tfFileState.getParameter("patientState");
-							String stateName = patientState.getState().getName();
-							if (stateName.equalsIgnoreCase("PWS_wait_to_scan") || 
-									stateName.equalsIgnoreCase("PWS_process")
-							        || stateName.equalsIgnoreCase("PWS_rescan")) {
-								pwsStatesToProcess.add(tfFileState);
-							}else{
-								ignorePWSs = true;
-								listTFstatesProcessed.add(tfFileState);
-							}
+							recordMedium(formInstance, filename);
+							atdService.fileProcessed(tfFileState);
 							
 						}else{
 							
 							//see if it is retired 
-							List<PatientState> states = atdService.getPatientStatesByFormInstance(formInstance,true);
+							List<PatientState> states = chirdlUtilBackportsService.getPatientStatesByFormInstance(formInstance,true);
 							
 							if (states != null && states.size() > 0) {
 								PatientState firstState = states.get(0);
-								atdService.unretireStatesBySessionId(firstState.getSessionId());
+								chirdlUtilBackportsService.unretireStatesBySessionId(firstState.getSessionId());
 								states = 
-									atdService.getPatientStatesBySession(firstState.getSessionId(), false);
+									chirdlUtilBackportsService.getPatientStatesBySession(firstState.getSessionId(), false);
 								
 								for (PatientState formInstState : states) {
 									
@@ -481,7 +473,7 @@ public class TeleformFileMonitor extends AbstractTask
 								String action = "PRODUCE FORM INSTANCE";
 								
 								//get the session that goes with this formInstanceId
-								PatientState patientState = atdService.getPatientStateByFormInstanceAction(formInstance,
+								PatientState patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance,
 								    action);
 								
 								if (patientState != null) {
@@ -500,8 +492,8 @@ public class TeleformFileMonitor extends AbstractTask
 										stateName = "JIT_process";
 									}
 									
-									State state = atdService.getStateByName(stateName);
-									List<PatientState> patientStates = atdService.getPatientStateBySessionState(sessionId,
+									State state = chirdlUtilBackportsService.getStateByName(stateName);
+									List<PatientState> patientStates = chirdlUtilBackportsService.getPatientStateBySessionState(sessionId,
 									    state.getStateId());
 									
 									if (patientStates != null && patientStates.size() > 0) {
@@ -511,11 +503,11 @@ public class TeleformFileMonitor extends AbstractTask
 										} else {
 											stateName = "JIT_rescan";
 										}
-										State currState = atdService.getStateByName(stateName);
+										State currState = chirdlUtilBackportsService.getStateByName(stateName);
 										action = "PRODUCE FORM INSTANCE";
-										patientState = atdService.getPatientStateByFormInstanceAction(formInstance, action);
+										patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance, action);
 										try {
-											patientState = atdService.addPatientState(patientState.getPatient(), currState,
+											patientState = chirdlUtilBackportsService.addPatientState(patientState.getPatient(), currState,
 											    patientState.getSessionId(), patientState.getLocationTagId(), patientState
 											            .getLocationId());
 											tfFileState = new TeleformFileState();
@@ -525,7 +517,13 @@ public class TeleformFileMonitor extends AbstractTask
 											File newFile = new File(newFilename);
 											if (newFile.exists()) {
 												IOUtil.deleteFile(newFilename);
-											}
+												//if file delete fails, don't continue processing otherwise
+												//the file will be processed more than once
+												newFile = new File(newFilename);
+												if (newFile.exists()) {
+													continue;
+												}
+											}										
 											IOUtil.renameFile(filename, newFilename);
 											//if file rename fails, don't continue processing otherwise
 											//the file will be processed more than once
@@ -536,14 +534,8 @@ public class TeleformFileMonitor extends AbstractTask
 											tfFileState.setFullFilePath(newFilename);
 											tfFileState.setFormInstance(formInstance);
 											tfFileState.addParameter("patientState", patientState);
-											if (stateName.equalsIgnoreCase("PWS_wait_to_scan")
-											        || stateName.equalsIgnoreCase("PWS_process")
-											        || stateName.equalsIgnoreCase("PWS_rescan")) {
-												pwsStatesToProcess.add(tfFileState);
-											} else {
-												ignorePWSs = true;
-												listTFstatesProcessed.add(tfFileState);
-											}
+											recordMedium(formInstance, filename);
+											atdService.fileProcessed(tfFileState);
 										}
 										catch (Exception e) {
 											log.error("RESCAN for formInstanceId: " + formInstance.getFormInstanceId()
@@ -566,7 +558,7 @@ public class TeleformFileMonitor extends AbstractTask
 		}
 	}
 
-	private static void processPendingStatesWithFilename(ArrayList<TeleformFileState> listTFstatesProcessed) throws APIException, Exception
+	private static void processPendingStatesWithFilename(ATDService atdService) throws APIException, Exception
 	{
 		String filename = "";
 		
@@ -602,7 +594,7 @@ public class TeleformFileMonitor extends AbstractTask
 			if(twentyFilename.exists()||twentyTwoFilename.exists()){
 				// event file processed
 				iterator.remove();
-				listTFstatesProcessed.add(tfState);
+				atdService.fileProcessed(tfState);
 			}
 		}
 	}
@@ -619,53 +611,7 @@ public class TeleformFileMonitor extends AbstractTask
 				modifyFilenames(directory, ".tif", filenames);
 			}
 		}
-
-	private static void kickProcess(
-			ArrayList<TeleformFileState> listTFstatesProcessed)
-	{
-		aopLock.lock();
-		try
-		{
-			if (listTFstatesProcessed.size() > 0)
-			{
-				while (statesBeingProcessedByAOP)
-				{
-					log
-							.info("Waiting for states process in AOP to finish.....");
-					try
-					{
-						goTFStates.await();
-					} catch (InterruptedException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
-				ATDService atdService = Context.getService(ATDService.class);
-				statesBeingProcessedByAOP = true;
-				atdService.fileProcessed(listTFstatesProcessed);
-			}
-		} finally
-		{
-			aopLock.unlock();
-		}
-	}
 	
-	
-	private static void fileProcessed(TeleformFileState tfstate,ArrayList<TeleformFileState> listTFstatesProcessed)
-	{
-		String fn = tfstate.getFilename().toString();
-		log.info("fileProcessed: ADDING TF STATE to LIST for: " + fn);
-		listTFstatesProcessed.add(tfstate);	
-	}
-	
-	
-	public static void statesProcessed()
-	{
-		statesBeingProcessedByAOP = false;
-		goTFStates.signalAll();
-	}
 	/*
 	 * Find the last modified file in a folder that is modified relative to the sentinelDateTime given the criteria
 	 */
@@ -763,4 +709,39 @@ public class TeleformFileMonitor extends AbstractTask
 		return i;
 	}
 
+	/**
+	 * Records the medium for which the form was populated.  This is based on the file extension.  If the extension is 
+	 * 'xmle', the medium will be set to 'electronic'.  Otherwise, it will be set to 'paper'.
+	 * 
+	 * @param formInstance The form instance for which to record the medium.
+	 * @param filename The name of the file (including extension) being processed.
+	 */
+	private static void recordMedium(FormInstance formInstance, String filename) {
+		// Record population method as 'paper' or 'electronic'
+		if (filename == null) {
+			log.error("The filename parameter must contain a non-null value");
+			return;
+		}
+		
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		FormInstanceAttribute fia = chirdlutilbackportsService.getFormInstanceAttributeByName("medium");
+		if (fia == null) {
+			log.error("Form Instance Attribute 'medium' does not exist.  The form instance medium will not be " +
+					"recorded");
+			return;
+		}
+		
+		FormInstanceAttributeValue fiav = new FormInstanceAttributeValue();
+		fiav.setFormId(formInstance.getFormId());
+		fiav.setFormInstanceAttributeId(fia.getFormInstanceAttributeId());
+		fiav.setFormInstanceId(formInstance.getFormInstanceId());
+		fiav.setLocationId(formInstance.getLocationId());
+		if (filename.endsWith(".xmle")) {
+			fiav.setValue("electronic");
+		} else {
+			fiav.setValue("paper");
+		}
+		
+		chirdlutilbackportsService.saveFormInstanceAttributeValue(fiav);
+	}
 }

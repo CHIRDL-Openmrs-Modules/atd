@@ -2,6 +2,7 @@ package org.openmrs.module.atd.hibernateBeans;
 
 import java.util.Date;
 
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 
 /**

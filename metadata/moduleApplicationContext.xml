@@ -29,7 +29,10 @@
 				<prop key="/module/@MODULE_ID@/enableLocationsForm.form">enableLocationsForm</prop>
 				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
 				<prop key="/module/@MODULE_ID@/configurationManagerSuccess.form">configurationManagerSuccess</prop>
+				<prop key="/module/@MODULE_ID@/displayBadScans.form">displayBadScans</prop>
 				<prop key="/module/@MODULE_ID@/faxableForm.form">faxableForm</prop>
+				<prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
+				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
 			</props>
 		</property>
 	</bean>
@@ -153,9 +156,24 @@
         <property name="formView"><value>/module/@MODULE_ID@/configurationManagerSuccess</value></property>
         <property name="successView"><value>configurationManager.form</value></property>
     </bean>
+    <bean id="displayBadScans" class="@MODULE_PACKAGE@.web.DisplayBadScansController">
+        <property name="commandName"><value>displayBadScansObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/displayBadScans</value></property>
+        <property name="successView"><value>displayBadScans.form</value></property>
+    </bean>
     <bean id="faxableForm" class="@MODULE_PACKAGE@.web.FaxableFormController">
         <property name="commandName"><value>faxableFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/faxableForm</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
+    </bean>
+    <bean id="createClinicForm" class="@MODULE_PACKAGE@.web.CreateClinicFormController">
+        <property name="commandName"><value>createClinicFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/createClinicForm</value></property>
+        <property name="successView"><value>createClinicTagForm.form</value></property>
+    </bean>
+    <bean id="createClinicTagForm" class="@MODULE_PACKAGE@.web.CreateClinicTagFormController">
+        <property name="commandName"><value>createClinicTagFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/createClinicTagForm</value></property>
         <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
 	
@@ -186,17 +204,9 @@
 			</list>
 		</property>
 	</bean>
-	
+		
 	<bean id="logicTeleformExportDAO" class="org.openmrs.module.atd.datasource.XMLLogicTeleformExportDAO"/>
 	<bean id="logicTeleformExportDataSource" class="org.openmrs.module.atd.datasource.TeleformExportXMLDatasource">
 		<property name="logicTeleformExportDAO"><ref bean="logicTeleformExportDAO"></ref></property>
 	</bean>
-
-	<bean parent="logicServiceTarget">
- 		<property name="logicDataSources">
-  		<map>
-    		<entry key="xml"><ref bean="logicTeleformExportDataSource" /></entry>
-  		</map>
- 		</property>
-	</bean> 
 </beans>

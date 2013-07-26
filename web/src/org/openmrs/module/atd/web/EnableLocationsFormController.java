@@ -24,8 +24,9 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
@@ -209,13 +210,13 @@ public class EnableLocationsFormController extends SimpleFormController {
         }
         
     	List<LocationTagAttributeValue> addedTags = new ArrayList<LocationTagAttributeValue>();
-    	ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
+    	ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
         try {
-        	LocationTagAttribute locTagAttr = chirdlService.getLocationTagAttribute(formName);
+        	LocationTagAttribute locTagAttr = chirdlutilbackportsService.getLocationTagAttribute(formName);
         	if (locTagAttr == null) {
         		locTagAttr = new LocationTagAttribute();
 	        	locTagAttr.setName(formName);
-	        	locTagAttr = chirdlService.saveLocationTagAttribute(locTagAttr);
+	        	locTagAttr = chirdlutilbackportsService.saveLocationTagAttribute(locTagAttr);
         	}
         	
         	for (String locName : selectedLocations) {
@@ -229,7 +230,7 @@ public class EnableLocationsFormController extends SimpleFormController {
         			attrVal.setLocationTagAttributeId(locTagAttr.getLocationTagAttributeId());
         			attrVal.setLocationTagId(tag.getLocationTagId());
         			attrVal.setValue(String.valueOf(formId));
-        			chirdlService.saveLocationTagAttributeValue(attrVal);
+        			chirdlutilbackportsService.saveLocationTagAttributeValue(attrVal);
         			addedTags.add(attrVal);
         		}
         		
@@ -246,7 +247,7 @@ public class EnableLocationsFormController extends SimpleFormController {
 			atdService.purgeFormAttributeValues(formId);
 			// remove chirdl util attr vals
 			for (LocationTagAttributeValue val : addedTags) {
-				chirdlService.deleteLocationTagAttributeValue(val);
+				chirdlutilbackportsService.deleteLocationTagAttributeValue(val);
 			}
 			
 			return new ModelAndView(view, map);

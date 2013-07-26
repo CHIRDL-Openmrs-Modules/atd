@@ -2,6 +2,7 @@ package org.openmrs.module.atd.service;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,45 +11,35 @@ import java.util.Map;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.api.APIException;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.ParameterHandler;
 import org.openmrs.module.atd.TeleformFileState;
-import org.openmrs.module.atd.hibernateBeans.ATDError;
-import org.openmrs.module.atd.hibernateBeans.FormAttribute;
-import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
-import org.openmrs.module.atd.hibernateBeans.FormInstance;
+import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
-import org.openmrs.module.atd.hibernateBeans.PatientState;
-import org.openmrs.module.atd.hibernateBeans.Program;
-import org.openmrs.module.atd.hibernateBeans.Session;
-import org.openmrs.module.atd.hibernateBeans.State;
-import org.openmrs.module.atd.hibernateBeans.StateMapping;
+import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ATD related services
  * 
  * @author Tammy Dugan
  */
-@Transactional
 public interface ATDService
 {
 	
 	public Form teleformXMLToDatabaseForm(String formName,
 			String templateXMLFilename);
-
-	public boolean tableExists(String tableName);
-
-	public void executeSql(String sql);
 	
 	public boolean consume(InputStream customInput, FormInstance formInstance,
 			Patient patient, int encounterId,
 			Map<String,Object> baseParameters,
-			String rulePackagePrefix,ParameterHandler parameterHandler,
+			ParameterHandler parameterHandler,
 			List<FormField> fieldsToConsume,
 			Integer locationTagId, Integer sessionId
 			);
@@ -56,123 +47,30 @@ public interface ATDService
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
 			DssManager dssManager,Integer encounterId,
-			Map<String,Object> baseParameters,String rulePackagePrefix,
+			Map<String,Object> baseParameters,
 			Integer locationTagId,Integer sessionId);
 	
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
 			Integer encounterId,
 			Map<String,Object> baseParameters,
-			String rulePackagePrefix,
 			Integer locationTagId,Integer sessionId);
 	
-	public FormInstance addFormInstance(Integer formId, Integer locationId);
-	
 	public Result evaluateRule(String ruleEvalString,Patient patient,
-			Map<String, Object> baseParameters, String rulePackagePrefix);
+			Map<String, Object> baseParameters);
 	
 	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
 			Integer encounterId) throws APIException;
 	
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId);
 	
-	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName,
-			Integer locationTagId,Integer locationId);
-	
 	public ArrayList<TeleformFileState> fileProcessed(ArrayList<TeleformFileState> tfstates);
-
-	/**
-	 * Get state by state name
-	 * 
-	 * @param initialState
-	 * 
-	 * @param stateMappingId state name
-	 * @return state with given state name
-	 */
-	public StateMapping getStateMapping(State initialState,Program program);
 	
-	public Session addSession();
-	
-	public Session updateSession(Session session);
-	
-	public Session getSession(int sessionId);
-	
-	public PatientState addPatientState(Patient patient,State initialState, int sessionId,Integer locationTagId,Integer locationId);
-	
-	public PatientState updatePatientState(PatientState patientState);
-
-	public PatientState getPrevPatientStateByAction(
-			int sessionId, int patientStateId,String action);
-	
-	public List<PatientState> getPatientStatesWithForm(int sessionId);
-	
-	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction,Integer locationTagId,Integer locationId);
-	
-	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction,Integer locationTagId,Integer locationId);
-	
-	public PatientState getLastUnfinishedPatientState(Integer sessionId);
-
-	public PatientState getLastPatientState(Integer sessionId);
-	
-	public List<PatientState> getLastPatientStateAllPatients(Date optionalDateRestriction, Integer programId,
-			String startStateName, Integer locationTagId, Integer locationId);
-	
-	public State getStateByName(String stateName);
-	
-	public Program getProgramByNameVersion(String name,String version);
-	
-	public Program getProgram(Integer programId);
-	
-	public PatientState getPatientStateByEncounterFormAction(Integer encounterId, Integer formId, String action);
-
-	public PatientState getPatientStateByFormInstanceAction(FormInstance formInstance,String action);
-
-	public List<FormAttributeValue> getFormAttributesByName(String attributeName);
-	
-	public ArrayList<String> getFormAttributesByNameAsString(String attributeName);
-	
-	public List<State> getStatesByActionName(String actionName);
-	
-	public State getState(Integer stateId);
+	public TeleformFileState fileProcessed(TeleformFileState tfstate);
 	
 	public void updatePatientStates(Date thresholdDate);
-	
-	public PatientState getPatientState(Integer patientStateId);
-	
-	public List<PatientState> getPatientStateBySessionState(Integer sessionId,
-			Integer stateId);
-	
-	public List<PatientState> getAllRetiredPatientStatesWithForm(Date thresholdDate);
-	
-	public List<Session> getSessionsByEncounter(Integer encounterId);
-	
-	public List<PatientState> getPatientStatesWithFormInstances(String formName, Integer encounterId);
-	
-	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
-			Integer stateId);
-	
-	public void saveError(ATDError error);
-	
-	public List<ATDError> getATDErrorsByLevel(String errorLevel,Integer sessionId);
-	
-	public Integer getErrorCategoryIdByName(String name);
-	
-	public Program getProgram(Integer locationTagId,Integer locationId);
-	
-	public List<FormAttributeValue> getFormAttributeValuesByValue(String value);
 		
 	public void cleanCache();
-	
-	public List<PatientState> getUnfinishedPatientStateByStateSession(
-		String stateName,Integer sessionId);
-	
-	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state);
-	
-	public List<PatientState> getPatientStatesByFormInstance(FormInstance formInstance, boolean isRetired);
-	
-	public void unretireStatesBySessionId(Integer sessionId);
-
-	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired);
 	
 	/**
 	 * Populates all form fields in a form with data found in form fields from other forms.
@@ -207,7 +105,69 @@ public interface ATDService
 	
 	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException;
 	
-	public void saveFormAttributeValue(FormAttributeValue value) throws APIException;
+	/**
+	 * Retrieves a list of URL objects referencing bad scans found for the provided location.
+	 * 
+	 * @param locationName The name of the location to search for bad scans.
+	 * @return List of URL objects of the bad scans.
+	 */
+	public List<URL> getBadScans(String locationName);
+	
+	/**
+	 * Moves the provided file to its parent directory named "resolved bad scans".
+	 * 
+	 * @param url The file (in URL format) to move to the "resolved bad scans" folder.
+	 * @param formRescanned Whether or not the form was attempted to be rescanned.  If so, 
+	 * the form file will be moved to the rescanned folder.  Otherwise, it will be moved to 
+	 * the ignored folder.
+	 * 
+	 * @throws Exception
+	 */
+	public void moveBadScan(String url, boolean formRescanned) throws Exception;
 
-	public FormAttribute getFormAttributeByName(String formAttributeName) throws APIException;
+	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName);
+	
+	/**
+	 * Get all statistics for a given encounter ID and form name whether the there is an observation associated or not.
+	 * 
+	 * @param encounterId
+	 * @param formName
+	 * @return List of Statistics objects
+	 */
+	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
+
+	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName);
+	
+	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName,
+		Integer locationId);
+	
+	public List<Statistics> getStatByFormInstance(int formInstanceId,String formName,
+		Integer locationId);
+	
+	public void updateStatistics(Statistics statistics);
+
+	public void createStatistics(Statistics statistics);
+	
+	public void produce(OutputStream output, PatientState state,
+	        			Patient patient, Integer encounterId, String dssType,
+	        			int maxDssElements,Integer sessionId);
+	
+	/**
+	 * This is a method I added to get around lazy initialization errors with patient.getIdentifier() in rules
+	 * Auto generated method comment
+	 * 
+	 * @param patientId
+	 * @return
+	 */
+	public PatientIdentifier getPatientMRN(Integer patientId);
+	
+	/**
+	 * Returns the question/answer pair for a PSF form.
+	 * 
+	 * @param formInstanceId The form instance ID
+	 * @param locationId The location ID
+	 * @param patientId The patient ID
+	 * @return List of PSFQuestionAnswer objects.  This will not return null;
+	 */
+	public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId);
 }

@@ -15,10 +15,10 @@ import org.openmrs.logic.LogicCriteria;
 import org.openmrs.logic.datasource.LogicDataSource;
 import org.openmrs.logic.result.EmptyResult;
 import org.openmrs.logic.result.Result;
-import org.openmrs.module.atd.hibernateBeans.FormInstance;
+import org.openmrs.logic.util.LogicUtil;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.Records;
-import org.openmrs.logic.util.Util;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 
 /**
  * @author Tammy Dugan
@@ -26,6 +26,8 @@ import org.openmrs.logic.util.Util;
  */
 public class TeleformExportXMLDatasource implements LogicDataSource
 {
+	public static final String NAME = "xml";
+	
 	private LogicTeleformExportDAO logicTeleformExportDAO;
 	
 	public void setLogicTeleformExportDAO(LogicTeleformExportDAO logicTeleformExportXMLDAO) {
@@ -112,7 +114,7 @@ public class TeleformExportXMLDatasource implements LogicDataSource
 				}
 			}
 		}
-		Util.applyAggregators(finalResult, criteria,patients);
+		LogicUtil.applyAggregators(finalResult, criteria,patients);
 		return finalResult;
 	}
 

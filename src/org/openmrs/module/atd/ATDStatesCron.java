@@ -27,20 +27,15 @@ public class ATDStatesCron extends AbstractTask
 	private Log log = LogFactory.getLog(this.getClass());
 
 	
-	private Date startDate;
 	private Date lastRunDate;
 	private Date thresholdDate;
-	private TaskDefinition taskConfig;
 	private int retireStatesPriorToDays = -1; // in days
 
 	@Override
 	public void initialize(TaskDefinition config)
 	{
+		super.initialize(config);
 		Context.openSession();
-		if (Context.isAuthenticated() == false)
-			authenticate();
-		
-		this.taskConfig = config;
 		init();
 		Context.closeSession();
 	}
@@ -52,9 +47,6 @@ public class ATDStatesCron extends AbstractTask
 		
 		try
 		{
-			
-			if (Context.isAuthenticated() == false)
-				authenticate();
 			
 			if(retireStatesPriorToDays == -1)
 			{
@@ -99,7 +91,6 @@ public class ATDStatesCron extends AbstractTask
 		
 		try
 		{
-			startDate = GregorianCalendar.getInstance().getTime();
 			AdministrationService adminService = Context.getAdministrationService();
 			// configurable time in days before today's date and time, convert it to a negative number
 			retireStatesPriorToDays = -Integer.parseInt(adminService.getGlobalProperty("atd.retireStatesPeriod"));  // in days

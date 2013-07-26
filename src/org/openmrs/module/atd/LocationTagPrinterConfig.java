@@ -1,6 +1,6 @@
 package org.openmrs.module.atd;
 
-import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 
 
 public class LocationTagPrinterConfig {

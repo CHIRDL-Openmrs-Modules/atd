@@ -19,13 +19,15 @@ import org.openmrs.logic.LogicExpression;
 import org.openmrs.logic.LogicExpressionBinary;
 import org.openmrs.logic.op.Operator;
 import org.openmrs.logic.result.Result;
-import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.Records;
-import org.openmrs.module.atd.hibernateBeans.ATDError;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.Error;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
+import org.openmrs.module.dss.logic.op.OperandObject;
 
 /**
  * Implementation of LogicTeleformExportDAO
@@ -60,14 +62,14 @@ public class XMLLogicTeleformExportDAO implements LogicTeleformExportDAO
 	private FormInstance parseFormInstanceOldForms(HashMap<String, Field> fieldMap,
 			Integer formId,Integer locationTagId, Integer locationId)
 	{
-		String formInstanceIdTag = org.openmrs.module.atd.util.Util
+		String formInstanceIdTag = org.openmrs.module.chirdlutilbackports.util.Util
 				.getFormAttributeValue(formId, "formInstanceIdTag", locationTagId,
 						locationId);
 
 		if (formInstanceIdTag == null)
 		{
 			// try the form instance id on the back of the form
-			formInstanceIdTag = org.openmrs.module.atd.util.Util
+			formInstanceIdTag = org.openmrs.module.chirdlutilbackports.util.Util
 					.getFormAttributeValue(formId, "formInstanceIdTag2",
 							locationTagId, locationId);
 			if (formInstanceIdTag == null)
@@ -102,7 +104,7 @@ public class XMLLogicTeleformExportDAO implements LogicTeleformExportDAO
 	public FormInstance parse(InputStream input, 
 			FormInstance formInstance,Integer locationTagId)
 	{
-		ATDService atdService = Context.getService(ATDService.class);
+		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		String frontTagValue = null;
 		AdministrationService adminService = Context.getAdministrationService();
 		HashMap<String, Field> fieldMap = getParsedFile(formInstance);
@@ -128,13 +130,10 @@ public class XMLLogicTeleformExportDAO implements LogicTeleformExportDAO
 			String xmlIdTagFront = adminService
 					.getGlobalProperty("atd.xmlIdTagFront");
 			
-			String xmlIdTagBack = adminService
-				.getGlobalProperty("atd.xmlIdTagBack");
-
 			// This is possibly an old form with the single key (form_instance_id) barcode
 			// The location_id and form_id are passed through in the
 			// formInstance parameter
-			if (fieldMap.get(xmlIdTagFront) == null && fieldMap.get(xmlIdTagBack) == null)
+			if (fieldMap.get(xmlIdTagFront) == null)
 			{
 				if (formInstance != null)
 				{
@@ -214,85 +213,7 @@ public class XMLLogicTeleformExportDAO implements LogicTeleformExportDAO
 					}
 				}
 			}
-			
-			Integer locationIdBack = null;
-			Integer formIdBack = null;
-			Integer formInstanceIdBack = null;
-			String backTagValue = null;
-			
-			//read the identifier from the back
-			if (fieldMap.get(xmlIdTagBack) != null
-					&& fieldMap.get(xmlIdTagBack).getValue() != null)
-			{
-				backTagValue = fieldMap.get(xmlIdTagBack)
-						.getValue();
-				backTagValue = backTagValue.replace("*","");
-				StringTokenizer tokenizer = new StringTokenizer(
-						backTagValue, "-");
-
-				// pull out the location id
-				if (tokenizer.hasMoreTokens())
-				{
-					String locationIdString = tokenizer.nextToken();
-					if (locationIdString != null)
-					{
-						try
-						{
-							locationIdBack = Integer
-									.parseInt(locationIdString);
-						} catch (NumberFormatException e)
-						{
-						}
-					}
-				}
-
-				// pull out the form id
-				if (tokenizer.hasMoreTokens())
-				{
-					String formIdString = tokenizer.nextToken();
-					if (formIdString != null)
-					{
-						try
-						{
-							formIdBack = Integer.parseInt(formIdString);
-						} catch (NumberFormatException e)
-						{
-						}
-					}
-				}
-
-				// pull out the form instance id
-				if (tokenizer.hasMoreTokens())
-				{
-					String formInstanceIdString = tokenizer.nextToken();
-					if (formInstanceIdString != null)
-					{
-						try
-						{
-							formInstanceIdBack = Integer
-									.parseInt(formInstanceIdString);
-						} catch (NumberFormatException e)
-						{
-						}
-					}
-				}
-			}
 						
-			if(
-					(locationIdFront!=null&&!locationIdFront.equals(locationIdBack))||
-					(formIdFront!=null&&!formIdFront.equals(formIdBack))||
-					(formInstanceIdFront!=null&&!formInstanceIdFront.equals(formInstanceIdBack))
-					){
-				ATDError error = new ATDError("Warning", "ID Validity", 
-						"ID bar codes on front and back of form do not match."
-						,"Front tag name: "+xmlIdTagFront
-						+ "\r\n " + "Back tag name: "+xmlIdTagBack
-						+ "\r\n " + "front tag value: "+frontTagValue
-						+ "\r\n " + "back tag value: "+backTagValue
-						, new Date(), null);
-				atdService.saveError(error);
-			}
-			
 			if (locationIdFront != null && 
 					formIdFront != null && 
 					formInstanceIdFront != null)
@@ -314,14 +235,12 @@ public class XMLLogicTeleformExportDAO implements LogicTeleformExportDAO
 					message+=" formInstanceId ";
 				}
 				
-				ATDError error = new ATDError("Fatal", "ID Validity", 
+				Error error = new Error("Fatal", "ID Validity", 
 						"The following IDs are missing from the front of the form: "+message+"."
 						,"Front tag name: "+xmlIdTagFront
-						+ "\r\n " + "Back tag name: "+xmlIdTagBack
 						+ "\r\n " + "front tag value: "+frontTagValue
-						+ "\r\n " + "back tag value: "+backTagValue
 						, new Date(), null);
-				atdService.saveError(error);
+				chirdlUtilBackportsService.saveError(error);
 			}
 		}
 		return null;
@@ -387,9 +306,10 @@ public class XMLLogicTeleformExportDAO implements LogicTeleformExportDAO
 			}
 		} else if (operator instanceof org.openmrs.logic.op.Equals)
 		{
-			if (rightOperand instanceof FormInstance)
+			if (rightOperand != null && rightOperand instanceof OperandObject && 
+					((OperandObject)rightOperand).getObject() instanceof FormInstance)
 			{
-				FormInstance formInstance = (FormInstance) rightOperand;
+				FormInstance formInstance = (FormInstance) ((OperandObject)rightOperand).getObject();
 				parsedFile = getParsedFile(formInstance);
 				xmlResult.setParsedFile(parsedFile);
 			}

@@ -1,8 +1,13 @@
 package org.openmrs.module.atd.impl;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,12 +20,14 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
+import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
 import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Location;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
@@ -35,19 +42,18 @@ import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
 import org.openmrs.module.atd.db.ATDDAO;
-import org.openmrs.module.atd.hibernateBeans.ATDError;
-import org.openmrs.module.atd.hibernateBeans.FormAttribute;
-import org.openmrs.module.atd.hibernateBeans.FormAttributeValue;
-import org.openmrs.module.atd.hibernateBeans.FormInstance;
+import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
-import org.openmrs.module.atd.hibernateBeans.PatientState;
-import org.openmrs.module.atd.hibernateBeans.Program;
-import org.openmrs.module.atd.hibernateBeans.Session;
-import org.openmrs.module.atd.hibernateBeans.State;
-import org.openmrs.module.atd.hibernateBeans.StateMapping;
+import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.BadScansFileFilter;
 import org.openmrs.module.atd.xmlBeans.Field;
+import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
@@ -74,6 +80,12 @@ public class ATDServiceImpl implements ATDService
 	{
 		return tfstates;
 	}
+	
+	public TeleformFileState fileProcessed(TeleformFileState tfstate)
+	{
+		return tfstate;
+	}
+	
 	/**
 	 * Gets the dao object for this service. The dao
 	 * object allows access to database methods.
@@ -98,16 +110,15 @@ public class ATDServiceImpl implements ATDService
 			FormInstance formInstance,
 			Patient patient, int encounterId,
 			Map<String, Object> baseParameters,
-			String rulePackagePrefix,
 			ParameterHandler parameterHandler,
 			List<FormField> fieldsToConsume,
 			Integer locationTagId, Integer sessionId
 			)
 	{
-		long startTime = System.currentTimeMillis();
-		long totalTime = System.currentTimeMillis();
+
 		ATDService atdService = 
 			Context.getService(ATDService.class);
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		TeleformTranslator translator = new TeleformTranslator();
 		FormService formService = Context.getFormService();
 		Form databaseForm = null;
@@ -127,21 +138,42 @@ public class ATDServiceImpl implements ATDService
 		
 		//parse the xml
 		LogicService logicService = Context.getLogicService();
-		TeleformExportXMLDatasource xmlDatasource = 
-			(TeleformExportXMLDatasource) logicService
-				.getLogicDataSource("xml");
-		try
-		{
-			formInstance = xmlDatasource.parse(customInput,
-					 formInstance,locationTagId);
-		} catch (Exception e)
-		{
+		TeleformExportXMLDatasource xmlDatasource = (TeleformExportXMLDatasource) logicService.getLogicDataSource("xml");
+		try {
+			formInstance = xmlDatasource.parse(customInput, formInstance, locationTagId);
+		}
+		catch (Exception e) {
 			this.log.error("Error parsing file to be consumed");
 			this.log.error(e.getMessage());
 			this.log.error(Util.getStackTrace(e));
 			return false;
 		}
-		HashMap<String,Field> fieldMap = xmlDatasource.getParsedFile(formInstance);
+		HashMap<String, Field> fieldMap = xmlDatasource.getParsedFile(formInstance);
+		// check that the medical record number in the xml file and the medical
+		// record number of the patient match
+		String patientMedRecNumber = patient.getPatientIdentifier().getIdentifier();
+		String xmlMedRecNumber = null;
+		Integer locationId = formInstance.getLocationId();
+		Integer formId = formInstance.getFormId();
+		Integer formInstanceId = formInstance.getFormInstanceId();
+		String medRecNumberTag = org.openmrs.module.chirdlutilbackports.util.Util.getFormAttributeValue(formId,
+		    "medRecNumberTag", locationTagId, locationId);
+		
+		//MRN
+		if (medRecNumberTag != null && fieldMap.get(medRecNumberTag) != null) {
+			xmlMedRecNumber = fieldMap.get(medRecNumberTag).getValue();
+		}
+		
+		//Compare form MRNs to patient medical record number
+		if (!Util.extractIntFromString(patientMedRecNumber).equalsIgnoreCase(Util.extractIntFromString(xmlMedRecNumber))) {
+			org.openmrs.module.chirdlutilbackports.hibernateBeans.Error noMatch = new org.openmrs.module.chirdlutilbackports.hibernateBeans.Error(
+			        "Fatal", "MRN Validity", "Patient MRN" + " does not match MRN bar code ", "\r\n Form instance id: "
+			                + formInstanceId + "\r\n Patient MRN: " + patientMedRecNumber + " \r\n MRN barcode: "
+			                + xmlMedRecNumber, new Date(), sessionId);
+			chirdlutilbackportsService.saveError(noMatch);
+			return false;
+			
+		}
 		
 		LinkedHashMap<FormField,String> formFieldToValue =
 			new LinkedHashMap<FormField,String>();
@@ -149,8 +181,6 @@ public class ATDServiceImpl implements ATDService
 		if(fieldsToConsume == null){
 			fieldsToConsume = databaseForm.getOrderedFormFields();
 		}
-		
-		startTime = System.currentTimeMillis();
 		
 		//map form field definition from database
 		//to result for that field in the xml that is being consumed
@@ -171,8 +201,6 @@ public class ATDServiceImpl implements ATDService
 				}
 			}
 		}
-
-		startTime = System.currentTimeMillis();
 						
 		String mode = "CONSUME";
 		
@@ -254,7 +282,7 @@ public class ATDServiceImpl implements ATDService
 			parameters.put("locationTagId",locationTagId);
 			EncounterService encounterService = Context.getEncounterService();
 			Encounter encounter = encounterService.getEncounter(encounterId);
-			Integer locationId = encounter.getLocation().getLocationId();
+			locationId = encounter.getLocation().getLocationId();
 			parameters.put("locationId", locationId);
 			LocationService locationService = Context.getLocationService();
 			Location location = locationService.getLocation(locationId);
@@ -274,7 +302,8 @@ public class ATDServiceImpl implements ATDService
 			{
 				try
 				{
-					parameters.put("concept", currConcept.getName().getName());
+					String elementString = ((ConceptName) currConcept.getNames().toArray()[0]).getName();
+					parameters.put("concept", elementString);
 				} catch (Exception e)
 				{
 					parameters.put("concept", null);
@@ -290,8 +319,6 @@ public class ATDServiceImpl implements ATDService
 			}
 			//----------end set rule parameters
 		}
-
-		startTime = System.currentTimeMillis();
 		
 		//add child fields as parameters to parent field rules
 		HashMap<String,Integer> childIndex = new HashMap<String,Integer>();
@@ -360,8 +387,6 @@ public class ATDServiceImpl implements ATDService
 				}
 			}
 		}
-
-		startTime = System.currentTimeMillis();
 		
 		//run all the consume rules
 		for(LinkedHashMap<String, Rule> rulesToRun: 
@@ -377,8 +402,10 @@ public class ATDServiceImpl implements ATDService
 				{
 					parameters.putAll(baseParameters);
 				}
-				parameterHandler.addParameters(parameters,rule);
-				this.evaluateRule(currRuleName, patient, parameters,rulePackagePrefix);
+				if(parameterHandler != null){
+					parameterHandler.addParameters(parameters,rule);
+				}
+				this.evaluateRule(currRuleName, patient, parameters);
 			}
 		}
 		
@@ -389,7 +416,7 @@ public class ATDServiceImpl implements ATDService
 			OutputStream customOutput, Integer encounterId,
 			Integer locationTagId,Integer sessionId,State produceState)
 	{
-		return this.produce(patient,formInstance,customOutput,encounterId,null,null,
+		return this.produce(patient,formInstance,customOutput,encounterId,null,
 				locationTagId,sessionId);
 	}
 
@@ -399,7 +426,7 @@ public class ATDServiceImpl implements ATDService
 			Integer sessionId)
 	{
 		return this.produce(patient, formInstance, customOutput, 
-				dssManager, encounterId, null,null,
+				dssManager, encounterId, null,
 				locationTagId,sessionId);
 	}
 	
@@ -407,24 +434,21 @@ public class ATDServiceImpl implements ATDService
 			FormInstance formInstance, OutputStream customOutput, 
 			Integer encounterId,
 			Map<String,Object> baseParameters,
-			String rulePackagePrefix,
 			Integer locationTagId,
 			Integer sessionId)
 	{
 		DssManager dssManager = new DssManager(patient);
 		return this.produce(patient, formInstance, customOutput,
 				dssManager, encounterId,baseParameters,
-				rulePackagePrefix, locationTagId,sessionId);
+				locationTagId,sessionId);
 	}
 	
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
 			DssManager dssManager,Integer encounterId,
-			Map<String,Object> baseParameters,String rulePackagePrefix,
+			Map<String,Object> baseParameters,
 			 Integer locationTagId,Integer sessionId)
 	{
-		long totalTime = System.currentTimeMillis();
-		long startTime = System.currentTimeMillis();
 		
 		AdministrationService adminService = Context.getAdministrationService();
 		boolean mergeToTable=false;
@@ -443,7 +467,7 @@ public class ATDServiceImpl implements ATDService
 			{
 				this.createMergeXML(customOutput, patient,formInstance,
 						dssManager,encounterId,baseParameters,
-						rulePackagePrefix,locationTagId,sessionId);
+						locationTagId,sessionId);
 			} catch (Exception e)
 			{
 				this.log.error("Error creating merge xml");
@@ -460,7 +484,7 @@ public class ATDServiceImpl implements ATDService
 			{
 				this.createMergeXML(output, patient,formInstance,
 						dssManager,encounterId,baseParameters,
-						rulePackagePrefix,locationTagId,sessionId);
+						locationTagId,sessionId);
 			} catch (Exception e)
 			{
 				this.log.error("Error creating merge xml");
@@ -475,8 +499,6 @@ public class ATDServiceImpl implements ATDService
 			}
 		}
 		
-		startTime = System.currentTimeMillis();
-		startTime = System.currentTimeMillis();
 		this.saveDssElementsToDatabase(patient,formInstance,
 				dssManager,encounterId);
 		return true;
@@ -516,14 +538,14 @@ public class ATDServiceImpl implements ATDService
 			Patient patient, FormInstance formInstance, 
 			DssManager dssManager,Integer encounterId,
 			Map<String,Object> baseParameters,
-			String rulePackagePrefix,Integer locationTagId,
+			Integer locationTagId,
 			Integer sessionId
 			)
 	{
 		TeleformTranslator translator = new TeleformTranslator();
 		translator.formToTeleformOutputStream(formInstance, output,
 				patient,dssManager,encounterId,
-				baseParameters,rulePackagePrefix,
+				baseParameters,
 				locationTagId,sessionId);
 		return formInstance.getFormId();
 	}
@@ -557,25 +579,10 @@ public class ATDServiceImpl implements ATDService
 		TeleformTranslator translator = new TeleformTranslator();
 		return translator.templateXMLToDatabaseForm(formName, templateXMLFilename);
 	}
-	
-	public boolean tableExists(String tableName)
-	{
-		return getATDDAO().tableExists(tableName);	
-	}
-	
-	public void executeSql(String sql)
-	{
-		getATDDAO().executeSql(sql);
-	}
-	
-	public FormInstance addFormInstance(Integer formId,Integer locationId){
-		return getATDDAO().addFormInstance(formId,locationId);
-	}
 
 	public Result evaluateRule(String ruleEvalString,Patient patient,
-			Map<String, Object> baseParameters,String rulePackagePrefix)
+			Map<String, Object> baseParameters)
 	{
-		AdministrationService adminService = Context.getAdministrationService();
 		DssService dssService = Context.getService(DssService.class);
 		Result result = Result.emptyResult();
 		StringTokenizer tokenizer = 
@@ -611,11 +618,8 @@ public class ATDServiceImpl implements ATDService
 			rule.setTokenName(ruleToken);
 			rule.setParameters(parameters);
 			
-			String defaultPackagePrefix = Util.formatPackagePrefix(
-					adminService.getGlobalProperty("atd.defaultPackagePrefix"));
 			result = 
-				dssService.runRule(patient, rule,
-						defaultPackagePrefix,rulePackagePrefix);
+				dssService.runRule(patient, rule);
 			parameters = new HashMap<String, Object>();
 			if(baseParameters != null){
 				parameters.putAll(baseParameters);
@@ -637,12 +641,7 @@ public class ATDServiceImpl implements ATDService
 		}
 		if(result != null)
 		{
-			/*
-			 *  This is deliberate as per Tammy - to get one result per field of atd document
-			 *  Vibha- added rulePackagePrefix to qualify the above statement, otherwise you are evaluating rules in other packages
-			 */
-			
-			if(result.size() > 0 && rulePackagePrefix == null)
+			if(result.size() > 0)
 			{
 				return result.get(0);
 			}
@@ -684,180 +683,9 @@ public class ATDServiceImpl implements ATDService
 	{
 		return getATDDAO().getPatientATD(formInstance,fieldId);
 	}
-	
-	public FormAttributeValue getFormAttributeValue(Integer formId, String formAttributeName,
-			Integer locationTagId,Integer locationId)
-	{
-		return getATDDAO().getFormAttributeValue(formId,formAttributeName,locationTagId,locationId);
-	}
-	
-	/**
-	 * Get state mapping by initial state name
-	 * 
-	 * @param stateMappingId state mapping unique id
-	 * @return state with given state name
-	 */
-	public StateMapping getStateMapping(State initialState,Program program)  {
-		return getATDDAO().getStateMapping(initialState,program);
-	}
-	
-	public Session addSession() {
 		
-		Session session = new Session();
-		
-		return getATDDAO().addSession(session);
-	}
-	
-	public Session getSession(int sessionId)
-	{
-		return getATDDAO().getSession(sessionId);
-	}
-		
-	public Session updateSession(Session session) {
-		
-		return getATDDAO().updateSession(session);
-	}
-	
-	public PatientState addPatientState(Patient patient,State initialState,
-			int sessionId,Integer locationTagId,Integer locationId)
-	{
-		PatientState patientState = new PatientState();
-		patientState.setStartTime(new java.util.Date());
-		patientState.setPatient(patient);
-		patientState.setState(initialState);
-		patientState.setSessionId(sessionId);
-		patientState.setLocationId(locationId);
-		patientState.setLocationTagId(locationTagId);
-		return getATDDAO().addUpdatePatientState(patientState);
-	}
-	
-	public PatientState updatePatientState(PatientState patientState)
-	{
-		return getATDDAO().addUpdatePatientState(patientState);
-	}
-		
-	public List<PatientState> getPatientStatesWithForm(int sessionId){
-		return getATDDAO().getPatientStatesWithForm(sessionId);
-	}
-	
-	public PatientState getPrevPatientStateByAction(
-			int sessionId, int patientStateId,String action)
-	{
-		return getATDDAO().getPrevPatientStateByAction(
-				sessionId, patientStateId,action);
-	}
-	
-	public List<PatientState> getUnfinishedPatientStatesAllPatients(Date optionalDateRestriction,
-			Integer locationTagId,Integer locationId)
-	{
-		return getATDDAO().getUnfinishedPatientStatesAllPatients(optionalDateRestriction,locationTagId,locationId);
-	}
-	
-	public List<PatientState> getUnfinishedPatientStateByStateName(String state,Date optionalDateRestriction,
-			Integer locationTagId, Integer locationId){
-		return getATDDAO().getUnfinishedPatientStateByStateName(state,optionalDateRestriction,locationTagId,locationId);
-	}
-	public PatientState getLastUnfinishedPatientState(Integer sessionId){
-		return getATDDAO().getLastUnfinishedPatientState(sessionId);
-	}
-	
-	public PatientState getLastPatientState(Integer sessionId){
-		return getATDDAO().getLastPatientState(sessionId);
-	}
-	
-	public List<PatientState> getLastPatientStateAllPatients(Date optionalDateRestriction, 
-			Integer programId,String startStateName,Integer locationTagId, Integer locationId){
-		return getATDDAO().getLastPatientStateAllPatients(optionalDateRestriction, programId,startStateName, locationTagId,locationId);
-	}
-	public State getStateByName(String stateName){
-		return getATDDAO().getStateByName(stateName);
-	}
-	
-	public Program getProgramByNameVersion(String name,String version){
-		return getATDDAO().getProgramByNameVersion(name, version);
-	}
-	
-	public Program getProgram(Integer programId){
-		return getATDDAO().getProgram(programId);
-	}
-	
-	public PatientState getPatientStateByEncounterFormAction(Integer encounterId, Integer formId, String action){
-		return getATDDAO().getPatientStateByEncounterFormAction(encounterId, formId, action);
-	}
-	
-	public PatientState getPatientStateByFormInstanceAction(FormInstance formInstance,String action){
-
-		return getATDDAO().getPatientStateByFormInstanceAction(formInstance, action);
-	}
-	
-	public List<FormAttributeValue> getFormAttributesByName(String attributeName){
-		return getATDDAO().getFormAttributesByName(attributeName);
-	}
-	
-	public ArrayList<String> getFormAttributesByNameAsString(String attributeName){
-		return getATDDAO().getFormAttributesByNameAsString(attributeName);
-	}
-	
-	public List<State> getStatesByActionName(String actionName){
-		return getATDDAO().getStatesByActionName(actionName);
-	}
-	
-	public State getState(Integer stateId){
-		return getATDDAO().getState(stateId);
-	}
-	
 	public void updatePatientStates(Date thresholdDate){
 		getATDDAO().updatePatientStates(thresholdDate);
-	}
-	public PatientState getPatientState(Integer patientStateId){
-		return getATDDAO().getPatientState(patientStateId);
-	}
-	
-	public List<PatientState> getPatientStateBySessionState(Integer sessionId,
-			Integer stateId){
-		return getATDDAO().getPatientStateBySessionState(sessionId,stateId);
-	}
-	
-	public List<PatientState> getAllRetiredPatientStatesWithForm(Date thresholdDate){
-		return getATDDAO().getAllRetiredPatientStatesWithForm(thresholdDate);
-	}
-	
-	public List<Session> getSessionsByEncounter(Integer encounterId){
-		return getATDDAO().getSessionsByEncounter(encounterId);
-	}
-	
-	public List<PatientState> getPatientStatesWithFormInstances(String formName, Integer encounterId){
-		return getATDDAO().getPatientStatesWithFormInstances(formName, encounterId);
-	}
-
-	public List<PatientState> getPatientStateByEncounterState(Integer encounterId,
-			Integer stateId){
-		return getATDDAO().getPatientStateByEncounterState(encounterId,stateId);
-	}
-	
-	public void saveError(ATDError error){
-		getATDDAO().saveError(error);
-	}
-	
-	public List<ATDError> getATDErrorsByLevel(String errorLevel,Integer sessionId){
-		return getATDDAO().getATDErrorsByLevel(errorLevel, sessionId);
-	}
-	
-	public Integer getErrorCategoryIdByName(String name){
-		return getATDDAO().getErrorCategoryIdByName(name);
-	}
-	
-	public Program getProgram(Integer locationTagId,Integer locationId){
-		return getATDDAO().getProgram(locationTagId, locationId);
-	}
-
-	public List<FormAttributeValue> getFormAttributeValuesByValue(String value){
-		return getATDDAO().getFormAttributeValuesByValue(value);
-	}
-	
-	public List<PatientState> getUnfinishedPatientStateByStateSession(
-		String stateName,Integer sessionId){
-		return getATDDAO().getUnfinishedPatientStateByStateSession(stateName, sessionId);
 	}
 	
     public void cleanCache() {
@@ -867,29 +695,6 @@ public class ATDServiceImpl implements ATDService
         
     }
     
-	public List<PatientState> getPatientStateByFormInstanceState(FormInstance formInstance, State state) {
-		return getATDDAO().getPatientStateByFormInstanceState(formInstance, state);
-	}
-	public List<PatientState> getPatientStatesByFormInstance(FormInstance formInstance, boolean isRetired) {
-		return getATDDAO().getPatientStatesByFormInstance(formInstance, isRetired);
-	}
-	
-	public List<PatientState> getPatientStatesBySession(Integer sessionId,boolean isRetired){
-		return getATDDAO().getPatientStatesBySession(sessionId, isRetired);
-	}
-
-	
-	public void unretireStatesBySessionId(Integer sessionId){
-		List<PatientState> patientStates = 
-			this.getPatientStatesBySession(sessionId,true);
-		
-		for(PatientState patientState:patientStates){
-			patientState.setRetired(false);
-			patientState.setDateRetired(null);
-			this.updatePatientState(patientState);
-		}
-	}
-
     public void prePopulateNewFormFields(Integer formId) {
 	    getATDDAO().prePopulateNewFormFields(formId);
     }
@@ -929,12 +734,242 @@ public class ATDServiceImpl implements ATDService
     public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException {
     	return getATDDAO().isFormEnabledAtClinic(formId, locationId);
     }
+    public void updateStatistics(Statistics statistics)
+	{
+    	getATDDAO().updateStatistics(statistics);
+	}
+	
+	public void createStatistics(Statistics statistics)
+	{
+		getATDDAO().addStatistics(statistics);
+	}
+	
+	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName, 
+		Integer locationId)	{
+		return getATDDAO().getStatByIdAndRule(formInstanceId,ruleId,formName,locationId);
+	}
+	
+	public List<Statistics> getStatByFormInstance(int formInstanceId,String formName, 
+		Integer locationId){
+		return getATDDAO().getStatByFormInstance(formInstanceId,formName, locationId);
+	}
+	
+	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName){
+		return getATDDAO().getStatsByEncounterForm(encounterId, formName);
+	}
+	
+	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName){
+		return getATDDAO().getAllStatsByEncounterForm(encounterId, formName);
+	}
+
+	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName){
+		return getATDDAO().getStatsByEncounterFormNotPrioritized(encounterId, formName);
+	}
+	
+	/**
+	 * @should testPSFProduce
+	 * @should testPWSProduce
+	 */
+	public void produce(OutputStream output, PatientState state,
+			Patient patient, Integer encounterId, String dssType,
+			int maxDssElements,Integer sessionId)
+	{
+		ATDService atdService = Context
+				.getService(ATDService.class);
+
+		DssManager dssManager = new DssManager(patient);
+		dssManager.setMaxDssElementsByType(dssType, maxDssElements);
+		HashMap<String, Object> baseParameters = new HashMap<String, Object>();
+
+		FormInstance formInstance = state.getFormInstance();
+		atdService.produce(patient, formInstance, output, dssManager,
+				encounterId, baseParameters,state.getLocationTagId(),sessionId);
+		Integer formInstanceId = formInstance.getFormInstanceId();
+		Integer locationId = formInstance.getLocationId();
+		Integer formId = formInstance.getFormId();
+		FormService formService = Context.getFormService();
+		Form form = formService.getForm(formId);
+		String formName = form.getName();
+		this.saveStats(patient, formInstanceId, dssManager, encounterId,state.getLocationTagId(),
+			locationId,formName);
+	}
+	
+	private void saveStats(Patient patient, Integer formInstanceId, DssManager dssManager, Integer encounterId,
+	                       Integer locationTagId, Integer locationId, String formName) {
+		HashMap<String, ArrayList<DssElement>> dssElementsByType = dssManager.getDssElementsByType();
+		EncounterService encounterService = Context.getService(EncounterService.class);
+		Encounter encounter = (Encounter) encounterService.getEncounter(encounterId);
+		String type = null;
+		
+		if (dssElementsByType == null) {
+			return;
+		}
+		Iterator<String> iter = dssElementsByType.keySet().iterator();
+		ArrayList<DssElement> dssElements = null;
+		
+		while (iter.hasNext()) {
+			type = iter.next();
+			dssElements = dssElementsByType.get(type);
+			for (int i = 0; i < dssElements.size(); i++) {
+				DssElement currDssElement = dssElements.get(i);
+				
+				this.addStatistics(patient, currDssElement, formInstanceId, i, encounter, formName, locationTagId,
+				    locationId);
+			}
+		}
+	}
+	
+	private void addStatistics(Patient patient, DssElement currDssElement, Integer formInstanceId, int questionPosition,
+	                           Encounter encounter, String formName, Integer locationTagId, Integer locationId) {
+		DssService dssService = Context.getService(DssService.class);
+		Integer ruleId = currDssElement.getRuleId();
+		Rule rule = dssService.getRule(ruleId);
+		
+		Statistics statistics = new Statistics();
+		statistics.setAgeAtVisit(Util.adjustAgeUnits(patient.getBirthdate(), null));
+		statistics.setPriority(rule.getPriority());
+		statistics.setFormInstanceId(formInstanceId);
+		statistics.setLocationTagId(locationTagId);
+		statistics.setPosition(questionPosition + 1);
+		
+		statistics.setRuleId(ruleId);
+		statistics.setPatientId(patient.getPatientId());
+		statistics.setFormName(formName);
+		statistics.setEncounterId(encounter.getEncounterId());
+		statistics.setLocationId(locationId);
+		
+		ATDService atdService = Context.getService(ATDService.class);
+		
+		atdService.createStatistics(statistics);
+	}
+
     
-    public void saveFormAttributeValue(FormAttributeValue value) throws APIException {
-    	getATDDAO().saveFormAttributeValue(value);
+    public List<URL> getBadScans(String locationName) {
+        AdministrationService adminService = Context.getAdministrationService();
+        String imageDirStr = adminService.getGlobalProperty("atd.defaultTifImageDirectory");
+        if (imageDirStr == null || imageDirStr.length() == 0) {
+        	log.equals("Please specify a value for the global property 'atd.defaultTifImageDirectory'");
+        	return new ArrayList<URL>();
+        }
+        
+        File imageDirectory = new File(imageDirStr, locationName);
+        if (!imageDirectory.exists()) {
+        	log.error("Cannot find directory: " + imageDirStr + File.separator + locationName);
+        	return new ArrayList<URL>();
+        }
+        
+        List<URL> badScans = new ArrayList<URL>();
+        String ignoreExtensions = adminService.getGlobalProperty("atd.badScansExcludedExtensions");
+        List<String> extensionList = new ArrayList<String>();
+        if (ignoreExtensions != null) {
+        	StringTokenizer tokenizer = new StringTokenizer(ignoreExtensions, ",");
+        	while (tokenizer.hasMoreTokens()) {
+        		extensionList.add(tokenizer.nextToken());
+        	}
+        }
+        
+        FilenameFilter fileFilter = new BadScansFileFilter(new Date(), extensionList);
+        return getBadScans(imageDirectory, badScans, fileFilter);
     }
     
-    public FormAttribute getFormAttributeByName(String formAttributeName) throws APIException {
-    	return getATDDAO().getFormAttributeByName(formAttributeName);
+    public void moveBadScan(String url, boolean formRescanned) throws Exception {
+        try {
+        	URL urlLoc = new URL(url);
+            File fileLoc = new File(urlLoc.getFile());
+            if (!fileLoc.exists()) {
+            	log.warn("Bad scan does not exist: " + fileLoc.getAbsolutePath());
+            	return;
+            }
+            
+            File parentFile = fileLoc.getParentFile();
+            File rescannedScansDir = null;
+            if (formRescanned) {
+            	rescannedScansDir = new File(parentFile, "rescanned bad scans");
+            } else {
+            	rescannedScansDir = new File(parentFile, "ignored bad scans");
+            }
+            
+            if (!rescannedScansDir.exists()) {
+            	rescannedScansDir.mkdirs();
+            }
+            
+            String filename = fileLoc.getName();
+            File newLoc = new File(rescannedScansDir, filename);
+            if (newLoc.exists()) {
+            	int i = 1;
+            	int index = filename.indexOf("."); 
+            	String name = null;
+            	String extension = "";
+            	if (index >= 0) {
+            		name = filename.substring(0, index);
+            		extension = filename.substring(index, filename.length());
+            	} else {
+            		name = filename;
+            	}
+            	newLoc = new File(rescannedScansDir, name + "_" + i++ + extension);
+            	while (newLoc.exists() && i < 1000) {
+            		newLoc = new File(rescannedScansDir, name + "_" + i++ + extension);
+            	}
+            }
+            
+            IOUtil.copyFile(fileLoc.getAbsolutePath(), newLoc.getAbsolutePath());
+            fileLoc.delete();
+            
+            // log the event
+            String description = null;
+            if (formRescanned) {
+            	description = "User attempted to rescan a bad scan: " + newLoc.getAbsolutePath();
+            } else {
+            	description = "User ignored a bad scan: " + newLoc.getAbsolutePath();
+            }
+            
+            org.openmrs.module.chirdlutilbackports.hibernateBeans.Error event = new org.openmrs.module.chirdlutilbackports.hibernateBeans.Error("Info", "Bad Scans", description, null, new Date(), null);
+            ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+            chirdlutilbackportsService.saveError(event);
+        }
+        catch (Exception e) {
+            log.error("Error moving bad scan", e);
+            throw e;
+        }
+    }
+    
+    private List<URL> getBadScans(File imageDirectory, List<URL> badScans, FilenameFilter fileFilter) {
+		File[] files = imageDirectory.listFiles(fileFilter);
+		if (files != null) {
+			for (File foundFile : files) {
+				if (foundFile.isDirectory()) {
+					getBadScans(foundFile, badScans, fileFilter);
+				} else {
+    				try {
+    					URI foundUri = foundFile.toURI();
+                        URL foundUrl = foundUri.toURL();
+                        badScans.add(foundUrl);
+                    }
+                    catch (MalformedURLException e) {
+                        log.error("Error converting file to URL", e);
+                    }
+				}
+			}
+		}
+    	
+    	return badScans;
+    }
+    
+    /**
+	 * This is a method I added to get around lazy initialization errors with patient.getIdentifier() in rules
+	 * Auto generated method comment
+	 * 
+	 * @param patientId
+	 * @return
+	 */
+    public PatientIdentifier getPatientMRN(Integer patientId){
+		return getATDDAO().getPatientMRN(patientId);
+	}
+
+	/**
+	 * @see org.openmrs.module.atd.service.ATDService#getPSFQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer)
+	 */
+    public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId) {
+	    return getATDDAO().getPSFQuestionAnswers(formInstanceId, locationId, patientId);
     }
 }

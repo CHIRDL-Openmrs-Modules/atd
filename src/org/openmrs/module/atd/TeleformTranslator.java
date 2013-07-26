@@ -9,15 +9,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
+import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
 import org.openmrs.Field;
 import org.openmrs.FieldType;
@@ -33,18 +37,19 @@ import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
-import org.openmrs.module.atd.hibernateBeans.FormInstance;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
+import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
+import org.openmrs.module.chirdlutil.util.Util;
+import org.openmrs.module.chirdlutil.util.XMLUtil;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
-import org.openmrs.module.chirdlutil.util.Util;
-import org.openmrs.module.chirdlutil.util.XMLUtil;
 import org.openmrs.util.OpenmrsUtil;
 
 /**
@@ -212,9 +217,9 @@ public class TeleformTranslator
 	public void formToTeleformOutputStream(FormInstance formInstance, OutputStream output,
 			Patient patient,DssManager dssManager,
 			Integer encounterId,Map<String,Object> baseParameters,
-			String rulePackagePrefix,
 			Integer locationTagId,Integer sessionId)
 	{
+		String threadName = Thread.currentThread().getName();
 		long totalTime = System.currentTimeMillis();
 		long startTime = System.currentTimeMillis();
 		Form form = databaseToForm(formInstance.getFormId());
@@ -227,11 +232,8 @@ public class TeleformTranslator
 		}
 		String resultString = null;
 
-		AdministrationService adminService = Context.getAdministrationService();
 		ATDService atdService = Context.getService(ATDService.class);
 		
-		String defaultPackagePrefix = Util.formatPackagePrefix(
-				adminService.getGlobalProperty("atd.defaultPackagePrefix"));
 		String defaultValue = null;
 		FieldType priorMergeType = this.getFieldType("Prioritized Merge Field");
 		FieldType mergeType = this.getFieldType("Merge Field");
@@ -255,8 +257,10 @@ public class TeleformTranslator
 		HashMap<String,Integer> dssMergeCounters = 
 			new HashMap<String,Integer>();
 		
+		startTime = System.currentTimeMillis();
 		List<FormField> formFields = form.getOrderedFormFields();//get all fields for the form
-		
+		System.out.println("formToTeleformOutputStream(" + threadName + "): get ordered form fields: "+
+			(System.currentTimeMillis()-startTime));
 		FormService formService = Context.getFormService();
 		startTime = System.currentTimeMillis();
 		//iterate through all the form fields
@@ -313,7 +317,8 @@ public class TeleformTranslator
 			{
 				try
 				{
-					parameters.put("concept", concept.getName().getName());
+					String elementString = ((ConceptName) concept.getNames().toArray()[0]).getName();
+					parameters.put("concept", elementString);
 				} catch (Exception e)
 				{
 					parameters.put("concept", null);
@@ -340,8 +345,8 @@ public class TeleformTranslator
 				
 				//We need to set the max number of prioritized elements to generate
 				if (dssManager.getMaxDssElementsByType(ruleType) == 0) {
-					ChirdlUtilService chirdlUtilService = Context.getService(ChirdlUtilService.class);
-					LocationTagAttributeValue locTagAttrValue = chirdlUtilService.getLocationTagAttributeValue(
+					ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+					LocationTagAttributeValue locTagAttrValue = chirdlutilbackportsService.getLocationTagAttributeValue(
 					    locationTagId, ruleType, locationId);
 					
 					Integer formId = null;
@@ -355,7 +360,7 @@ public class TeleformTranslator
 							catch (Exception e) {}
 						}
 					}
-					String propertyValue = org.openmrs.module.atd.util.Util.getFormAttributeValue(formId, "numPrompts",
+					String propertyValue = org.openmrs.module.chirdlutilbackports.util.Util.getFormAttributeValue(formId, "numPrompts",
 					    locationTagId, locationId);
 					
 					try {
@@ -364,9 +369,7 @@ public class TeleformTranslator
 					}
 					catch (NumberFormatException e) {}
 				}
-				dssManager.populateDssElements(
-						ruleType, false,parameters,
-						defaultPackagePrefix);
+				dssManager.populateDssElements(ruleType, false, parameters);
 				totalPopulateDssElementTime+=System.currentTimeMillis()-startTime1;
 				//get the result for this field
 				Result result = processDssElements(dssManager, dssMergeCounter,
@@ -392,19 +395,19 @@ public class TeleformTranslator
 					//produce other rule based fields
 					long startTime1 = System.currentTimeMillis();
 					Result result = atdService.evaluateRule(defaultValue,
-							patient,parameters,rulePackagePrefix);
+							patient,parameters);
 					totalEvaluateRule+=System.currentTimeMillis()-startTime1;
 					fieldToResult.put(currFormField, result);
 				}
 			}
 		}
 		
-		System.out.println("formToTeleformOutputStream: total totalEvaluateRule: "+
+		System.out.println("formToTeleformOutputStream(" + threadName + "): total totalEvaluateRule: "+
 			totalEvaluateRule);
-		System.out.println("formToTeleformOutputStream: total totalPopulateDssElementTime: "+
+		System.out.println("formToTeleformOutputStream(" + threadName + "): total totalPopulateDssElementTime: "+
 			totalPopulateDssElementTime);
 
-		System.out.println("formToTeleformOutputStream: time iterate through form fields: "+
+		System.out.println("formToTeleformOutputStream(" + threadName + "): time iterate through form fields: "+
 			(System.currentTimeMillis()-startTime));
 		startTime = System.currentTimeMillis();
 		
@@ -422,7 +425,6 @@ public class TeleformTranslator
 			
 			if(fieldResult == null)
 			{
-				fieldNameResult.put(fieldName, null);
 				continue;
 			}
 			
@@ -463,6 +465,23 @@ public class TeleformTranslator
 				}
 			}
 			fieldNameResult.put(fieldName, resultString);
+		
+			//look at results after the first elements to see if there
+			//see if there are any value@field values that need to be parsed
+			if (fieldResult instanceof Result) {
+				
+				Result results = (Result) fieldResult;
+				
+				if(results.size()>1){
+									
+					for(int i=1;i<results.size();i++){
+						Result currResult = results.get(i);
+						resultString = currResult.toString();
+						mapResult(resultString,fieldNameResult);
+					}
+					
+				}	
+			}
 		}
 		
 		startTime = System.currentTimeMillis();
@@ -495,26 +514,17 @@ public class TeleformTranslator
 			{
 				currRule.setParameters(parameters);
 				long startTime1 = System.currentTimeMillis();
-				Result result = dssService.runRule(patient, currRule,
-						defaultPackagePrefix, rulePackagePrefix);
+				Result result = dssService.runRule(patient, currRule);
 				totalRunRule+=(System.currentTimeMillis()-startTime1);
 				for (Result currResult : result)
 				{
 					resultString = currResult.toString();
-					int atIndex = resultString.indexOf("@");
-					if (atIndex >= 0)
-					{
-						String fieldName = resultString.substring(atIndex + 1,
-								resultString.length()).trim();
-						resultString = resultString.substring(0, atIndex)
-								.trim();
-						fieldNameResult.put(fieldName, resultString);
-					}
+					mapResult(resultString,fieldNameResult);
 				}
 			}
 		}
-		System.out.println("formToTeleformOutputStream: total run rule: "+totalRunRule);
-		System.out.println("formToTeleformOutputStream: non prioritized fields: "+
+		System.out.println("formToTeleformOutputStream(" + threadName + "): total run rule: "+totalRunRule);
+		System.out.println("formToTeleformOutputStream(" + threadName + "): non prioritized fields: "+
 		(System.currentTimeMillis()-startTime));
 		startTime = System.currentTimeMillis();
 		
@@ -547,6 +557,28 @@ public class TeleformTranslator
 	            log.error("Error generated", e);
             }
 		}
+		
+		System.out.println("formToTeleformOutputStream(" + threadName + "): serialize XML: "+
+			(System.currentTimeMillis()-startTime));
+	}
+	
+	private void mapResult(String resultString,
+	                       LinkedHashMap<String, String> fieldNameResult){
+		
+		StringTokenizer tokenizer = new StringTokenizer(resultString, ",");
+		while (tokenizer.hasMoreTokens()) {
+			String currResult = tokenizer.nextToken();
+
+			int atIndex = currResult.indexOf("@");
+			if (atIndex >= 0 && atIndex + 1 < currResult.length()) {
+				String fieldName = currResult.substring(atIndex + 1, currResult.length()).trim();
+				currResult = currResult.substring(0, atIndex).trim();
+				if(currResult.length()>0){
+					fieldNameResult.put(fieldName, currResult);
+				}
+			}
+		}
+		
 	}
 	
 	private Result processDssElements(DssManager dssManager, int dssMergeCounter, 
@@ -616,6 +648,9 @@ public class TeleformTranslator
 			currFieldName = fields.get(i).getId();
 			currField = new Field();
 			currField.setName(currFieldName);
+			currField.setCreator(Context.getAuthenticatedUser());
+			currField.setDateCreated(new Date());
+			currField.setUuid(UUID.randomUUID().toString());
 			String type = fields.get(i).getType();
 			if(type != null && type.equalsIgnoreCase("Export"))
 			{
@@ -648,7 +683,8 @@ public class TeleformTranslator
 		// Check if table exists
 		ATDService atdService = Context
 		.getService(ATDService.class);
-		boolean tableExists = atdService.tableExists(tableName);
+		ChirdlUtilService chirdlutilService = Context.getService(ChirdlUtilService.class);
+		boolean tableExists = chirdlutilService.tableExists(tableName);
 		
 		//if the table doesn't exist, create it
 		if (!tableExists)
@@ -661,7 +697,7 @@ public class TeleformTranslator
 			XMLUtil.transformXML(new ByteArrayInputStream(inputXML.toString().getBytes()),
 					transformOutput, new FileInputStream(xsltFilename),
 					parameters);
-			atdService.executeSql(transformOutput.toString());
+			chirdlutilService.executeSql(transformOutput.toString());
 		}
 		
 		//insert the data rows
@@ -673,6 +709,6 @@ public class TeleformTranslator
 		XMLUtil.transformXML(new ByteArrayInputStream(inputXML.toString().getBytes()),
 				transformOutput, new FileInputStream(xsltFilename),
 				parameters);
-		atdService.executeSql(transformOutput.toString());
+		chirdlutilService.executeSql(transformOutput.toString());
 	}
 }

@@ -6,7 +6,8 @@ package org.openmrs.module.atd;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openmrs.module.atd.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+
 
 /**
  * @author Vibha Anand

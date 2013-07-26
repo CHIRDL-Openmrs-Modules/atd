@@ -17,8 +17,9 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttribute;
-import org.openmrs.module.chirdlutil.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
@@ -98,11 +99,11 @@ public class ReplaceRetireFormController extends SimpleFormController {
 	}
 	
 	private void updateChirdlData(Form form, Form newForm) throws Exception {
-    	ChirdlUtilService chirdlService = Context.getService(ChirdlUtilService.class);
-    	LocationTagAttribute replaceLocTagAttr = chirdlService.getLocationTagAttribute(form.getName());
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);    	
+		LocationTagAttribute replaceLocTagAttr = chirdlutilbackportsService.getLocationTagAttribute(form.getName());
     	if (replaceLocTagAttr != null) {
     		replaceLocTagAttr.setName(newForm.getName());
-    		replaceLocTagAttr = chirdlService.saveLocationTagAttribute(replaceLocTagAttr);
+    		replaceLocTagAttr = chirdlutilbackportsService.saveLocationTagAttribute(replaceLocTagAttr);
         	LocationService locService = Context.getLocationService();
         	String newFormIdStr = String.valueOf(newForm.getFormId());
         	for (Location location : locService.getAllLocations(false)) {
@@ -111,11 +112,11 @@ public class ReplaceRetireFormController extends SimpleFormController {
         			Iterator<LocationTag> i = tags.iterator();
         			while (i.hasNext()) {
         				LocationTag tag = i.next();
-        				LocationTagAttributeValue replaceVal = chirdlService.getLocationTagAttributeValue(
+        				LocationTagAttributeValue replaceVal = chirdlutilbackportsService.getLocationTagAttributeValue(
         					tag.getLocationTagId(), form.getName(), location.getLocationId());
         				if (replaceVal != null) {
         					replaceVal.setValue(newFormIdStr);
-	        				chirdlService.saveLocationTagAttributeValue(replaceVal);
+        					chirdlutilbackportsService.saveLocationTagAttributeValue(replaceVal);
         				}
         			}
         		}

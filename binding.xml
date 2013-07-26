@@ -13,5 +13,73 @@
 <value name="id" field="id" style="attribute" />
 <value name="Value" field="value" usage="optional" />
 <value name="taborder" field="taborder" style="attribute" usage="optional" />
+<value style="attribute" name="substituteEstimate" get-method="getSubstituteEstimate" set-method="setSubstituteEstimate" usage="optional"/>
 </mapping>
+<mapping class="org.openmrs.module.atd.xmlBeans.Value" name="value">
+    <structure ordered="false" choice="true">
+      <structure type="org.openmrs.module.atd.xmlBeans.Plus" test-method="ifPlus" get-method="getPlus" set-method="setPlus" usage="optional"/>
+      <structure type="org.openmrs.module.atd.xmlBeans.Mean" test-method="ifMean" get-method="getMean" set-method="setMean" usage="optional"/>
+      <structure type="org.openmrs.module.atd.xmlBeans.Choose" test-method="ifChoose" get-method="getChoose" set-method="setChoose" usage="optional"/>
+    </structure>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Mean" name="mean">
+    <collection item-type="org.openmrs.module.atd.xmlBeans.Field" get-method="getFields" set-method="setFields" create-type="java.util.ArrayList"/>
+    <value style="attribute" name="excludeEmpty" get-method="getExcludeEmpty" set-method="setExcludeEmpty" usage="optional"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Plus" name="plus">
+    <structure ordered="false" choice="true">
+      <collection item-type="org.openmrs.module.atd.xmlBeans.Field" test-method="ifField" get-method="getFields" set-method="setFields" usage="optional" create-type="java.util.ArrayList"/>
+      <collection item-type="org.openmrs.module.atd.xmlBeans.Choose" test-method="ifChoose" get-method="getChooses" set-method="setChooses" usage="optional" create-type="java.util.ArrayList"/>
+    </structure>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Then" name="then">
+  <structure ordered="false" choice="true">
+    <value name="cn" field="result"/>
+    <value name="ccode" field="result"/>
+    </structure>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Scores" name="scores">
+    <collection item-type="org.openmrs.module.atd.xmlBeans.Score" get-method="getScores" set-method="setScores" create-type="java.util.ArrayList"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Score" name="score">
+    <value style="element" name="maxBlankFieldsAllowed" get-method="getMaxBlankFieldsAllowed" set-method="setMaxBlankFieldsAllowed" usage="optional"/>
+    <structure type="org.openmrs.module.atd.xmlBeans.Concept" get-method="getConcept" set-method="setConcept"/>
+    <structure type="org.openmrs.module.atd.xmlBeans.Value" get-method="getValue" set-method="setValue"/>
+    <structure type="org.openmrs.module.atd.xmlBeans.EstimatedScoreValue" get-method="getEstimatedScoreValue" set-method="setEstimatedScoreValue" usage="optional"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.If" name="if">
+    <structure type="org.openmrs.module.atd.xmlBeans.Geq" get-method="getGeq" set-method="setGeq" usage="optional"/>
+    <structure type="org.openmrs.module.atd.xmlBeans.Eq" get-method="getEq" set-method="setEq" usage="optional"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Geq" name="geq">
+    <structure type="org.openmrs.module.atd.xmlBeans.Field" get-method="getField" set-method="setField"/>
+    <value name="cn" field="result"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Eq" name="eq">
+    <structure type="org.openmrs.module.atd.xmlBeans.Field" get-method="getField" set-method="setField"/>
+    <value name="cn" field="result"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.FormConfig" name="form_config">
+    <structure type="org.openmrs.module.atd.xmlBeans.Scores" get-method="getScores" set-method="setScores"/>
+    <structure type="org.openmrs.module.atd.xmlBeans.LanguageAnswers" get-method="getLanguageAnswers" set-method="setLanguageAnswers" usage="optional"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Concept" name="concept">
+    <value style="attribute" name="system" get-method="getSystem" set-method="setSystem"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.EstimatedScoreValue" name="estimatedScoreValue">
+    <structure type="org.openmrs.module.atd.xmlBeans.Value" get-method="getValue" set-method="setValue"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.Choose" name="choose">
+    <structure type="org.openmrs.module.atd.xmlBeans.If" get-method="getIf" set-method="setIf"/>
+    <structure type="org.openmrs.module.atd.xmlBeans.Then" get-method="getThen" set-method="setThen"/>
+  </mapping>
+  <mapping class="org.openmrs.module.atd.xmlBeans.LanguageAnswers" name="language_answers">
+	<collection field="languages"/>
+  </mapping>
+
+  <mapping class="org.openmrs.module.atd.xmlBeans.Language" name="language">
+	<collection field="fields"/>
+	<value name="name" field="name" style="attribute" />
+  </mapping>
 </binding>
