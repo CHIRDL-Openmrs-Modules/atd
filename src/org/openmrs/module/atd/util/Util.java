@@ -122,7 +122,7 @@ public class Util {
 			if (ruleId != null) {
 				List<Statistics> statistics = atdService.getStatByIdAndRule(formInstanceId, ruleId, formName, locationId);
 				
-				if (statistics != null) {
+				if (statistics != null && statistics.size() > 0) {
 					Statistics stat = statistics.get(0);
 					
 					if (stat.getObsvId() == null) {
