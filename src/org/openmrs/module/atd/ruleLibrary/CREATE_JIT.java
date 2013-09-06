@@ -18,6 +18,8 @@ import org.openmrs.logic.rule.RuleParameterInfo;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
@@ -78,6 +80,8 @@ public class CREATE_JIT implements Rule
 		Patient patient = patientService.getPatient(patientId);
 		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		String formName = (String) parameters.get("param1");
+		Object param2Object = parameters.get("param2");
+		
 		Integer sessionId = (Integer) parameters.get("sessionId");
 		if(sessionId != null){
 			Integer locationTagId = (Integer) parameters.get("locationTagId"); 
@@ -87,6 +91,10 @@ public class CREATE_JIT implements Rule
 			
 			try {
 				HashMap<String,Object> actionParameters = new HashMap<String,Object>();
+				if (param2Object != null && param2Object instanceof String){
+					String trigger = (String) param2Object;
+					actionParameters.put("trigger", trigger);
+				}
 				actionParameters.put("formName", formName);
             	StateManager.runState(patient, sessionId, currState,actionParameters,
             		locationTagId,

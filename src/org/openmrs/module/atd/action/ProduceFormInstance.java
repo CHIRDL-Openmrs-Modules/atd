@@ -23,6 +23,8 @@ import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.Session;
@@ -67,8 +69,13 @@ public class ProduceFormInstance implements ProcessStateAction
 		Session session = chirdlutilbackportsService.getSession(sessionId);
 		Integer encounterId = session.getEncounterId();
 		String formName = null;
+		String trigger = null;
 		if(parameters != null){
 			formName = (String) parameters.get("formName");
+			Object param2Object = parameters.get("trigger");
+			if (param2Object != null && param2Object instanceof String){
+				trigger = (String) param2Object;
+			}
 		}
 		if(formName == null){
 			formName = currState.getFormName();
@@ -116,6 +123,26 @@ public class ProduceFormInstance implements ProcessStateAction
 		patientState.setFormInstance(formInstance);
 		chirdlutilbackportsService.updatePatientState(patientState);
 		Integer formInstanceId = formInstance.getFormInstanceId();
+		
+		//If triggered by a force print, save as a form instance attibute value for later reference
+		try {
+			if (trigger != null && trigger.equalsIgnoreCase("forcePrint")){
+				FormInstanceAttributeValue fiav = new FormInstanceAttributeValue();
+				FormInstanceAttribute attr = chirdlutilbackportsService
+					.getFormInstanceAttributeByName("trigger");
+				if (attr != null){
+					System.out.println("Attribute is not null");
+					fiav.setFormInstanceAttributeId(attr.getFormInstanceAttributeId());
+					fiav.setFormId(formInstance.getFormId());
+					fiav.setFormInstanceId(formInstance.getFormInstanceId());
+					fiav.setLocationId(locationId);
+					fiav.setValue(trigger);
+					chirdlutilbackportsService.saveFormInstanceAttributeValue(fiav);
+				}
+			}
+		}catch (Exception e){
+			log.error("Error when saving the form attribute for trigger. ",e);
+		}
 		String mergeDirectory = IOUtil
 				.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
 						.getFormAttributeValue(formId, "defaultMergeDirectory",
