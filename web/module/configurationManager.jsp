@@ -52,6 +52,19 @@
                 </td>
             </tr>
         </table></center>
+        <br/>
+        <br/>
+        <center><h3>Clinic Configuration</h3></center>
+        <center><table>
+            <tr style="padding: 5px">
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/createClinicForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/createClinicButton.gif"/></a>
+                </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/createClinicTagForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/createClinicTagButton.gif"/></a>
+                </td>
+            </tr>
+        </table></center>
         <!-- <br/>
         <br/>
         <center><h3>Clinic Configuration</h3></center>

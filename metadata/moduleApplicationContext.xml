@@ -169,7 +169,7 @@
     <bean id="createClinicForm" class="@MODULE_PACKAGE@.web.CreateClinicFormController">
         <property name="commandName"><value>createClinicFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/createClinicForm</value></property>
-        <property name="successView"><value>createClinicTagForm.form</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     <bean id="createClinicTagForm" class="@MODULE_PACKAGE@.web.CreateClinicTagFormController">
         <property name="commandName"><value>createClinicTagFormObject</value></property>
