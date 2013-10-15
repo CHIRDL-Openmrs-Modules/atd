@@ -54,7 +54,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		map.put("programs", backportsService.getAllPrograms());
 		map.put("currentTags", Context.getLocationService().getAllLocationTags(false));
 		map.put("locations", Context.getLocationService().getAllLocations(false));
-		map.put("locationTagAttributes", getLocationTagAttributes());
+		map.put("locationTagAttributes", getNonFormLocationTagAttributes());
 		
 		return map;
 	}
@@ -190,7 +190,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		map.put("currentTags", Context.getLocationService().getAllLocationTags(false));
 		map.put("locations", Context.getLocationService().getAllLocations(false));
 		
-		List<LocationTagAttribute> locationTagAttributes = getLocationTagAttributes();
+		List<LocationTagAttribute> locationTagAttributes = getNonFormLocationTagAttributes();
 		for (LocationTagAttribute locationTagAttribute : locationTagAttributes) {
 			String value = request.getParameter(locationTagAttribute.getName());
 			if (value != null && value.trim().length() > 0) {
@@ -202,7 +202,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 	private boolean createClinicTag(HttpServletRequest request, Location location, String tagName) 
 	throws Exception {
 		LocationTag locationTag = createLocationTag(request, location, tagName);
-		addLocationTagAttributes(request, location, locationTag);
+		addNonFormLocationTagAttributes(request, location, locationTag);
 		addFormAttributeValues(request, location, locationTag);
 		
 		return true;
@@ -235,12 +235,12 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		return locationTag;
 	}
 	
-	private void addLocationTagAttributes(HttpServletRequest request, Location location, LocationTag locationTag) 
+	private void addNonFormLocationTagAttributes(HttpServletRequest request, Location location, LocationTag locationTag) 
 	throws IOException {
 		ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Integer locationId = location.getLocationId();
 		Integer locationTagId = locationTag.getLocationTagId();
-		List<LocationTagAttribute> locationTagAttributes = getLocationTagAttributes();
+		List<LocationTagAttribute> locationTagAttributes = getNonFormLocationTagAttributes();
 		for (LocationTagAttribute locationTagAttribute : locationTagAttributes) {
 			String locTagAttrName = locationTagAttribute.getName();
 			String value = request.getParameter(locTagAttrName);
@@ -286,6 +286,9 @@ public class CreateClinicTagFormController extends SimpleFormController {
 			addFormAttributeValue(backportsService, locationId, locationTag.getLocationTagId(), copyLocationId, 
 				copyTag.getLocationTagId(), formAttr, forms, copyLocationName, locationName);
 		}
+		
+		addFormLocationTagAttributes(backportsService, locationId, locationTag.getLocationTagId(), forms, copyLocationId, 
+			copyTag.getLocationTagId());
 	}
 	
 	private void addFormAttributeValue(ChirdlUtilBackportsService backportsService, Integer locationId, 
@@ -323,9 +326,20 @@ public class CreateClinicTagFormController extends SimpleFormController {
 					File file = new File(dir);
 					file.mkdirs();
 				}
-				
-				LocationTagAttribute lta = backportsService.getLocationTagAttribute(form.getName());
-				if (lta != null) {
+			}
+		}
+		
+	}
+	
+	private void addFormLocationTagAttributes(ChirdlUtilBackportsService backportsService, Integer locationId, 
+	  	                                   Integer locationTagId, List<Form> forms, Integer copyLocationId, 
+	  	                                   Integer copyLocationTagId) {
+		for (Form form : forms) {
+			LocationTagAttribute lta = backportsService.getLocationTagAttribute(form.getName());
+			if (lta != null) {
+				LocationTagAttributeValue existingLtav = backportsService.getLocationTagAttributeValue(copyLocationTagId, 
+					form.getName(), copyLocationId);
+				if (existingLtav != null) {
 					LocationTagAttributeValue ltav = new LocationTagAttributeValue();
 					ltav.setLocationId(locationId);
 					ltav.setLocationTagAttributeId(lta.getLocationTagAttributeId());
@@ -335,10 +349,9 @@ public class CreateClinicTagFormController extends SimpleFormController {
 				}
 			}
 		}
-		
 	}
 	
-	private List<LocationTagAttribute> getLocationTagAttributes() {
+	private List<LocationTagAttribute> getNonFormLocationTagAttributes() {
 		List<LocationTagAttribute> locTagAttrs = 
 			Context.getService(ChirdlUtilBackportsService.class).getAllLocationTagAttributes();
 		Set<String> uniqueFormNames = new HashSet<String>();
@@ -346,7 +359,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 			uniqueFormNames.add(form.getName());
 		}
 		
-		for (int i=locTagAttrs.size()-1; i > 0; i--) {
+		for (int i=locTagAttrs.size()-1; i >= 0; i--) {
 			LocationTagAttribute locTagAttr = locTagAttrs.get(i);
 			if (uniqueFormNames.contains(locTagAttr.getName())) {
 				locTagAttrs.remove(i);
