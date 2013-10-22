@@ -33,6 +33,7 @@
 				<prop key="/module/@MODULE_ID@/faxableForm.form">faxableForm</prop>
 				<prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
 				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
+			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
 			</props>
 		</property>
 	</bean>
@@ -176,7 +177,11 @@
         <property name="formView"><value>/module/@MODULE_ID@/createClinicTagForm</value></property>
         <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
-	
+	<bean id="importConceptsFromFile" class="@MODULE_PACKAGE@.web.ImportConceptsFromFileController">
+        <property name="commandName"><value>importConceptsFromFileObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/importConceptsFromFile</value></property>
+        <property name="successView"><value>importConceptsFromFile.form</value></property>
+	</bean>
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list>

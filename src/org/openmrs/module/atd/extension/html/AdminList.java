@@ -38,6 +38,7 @@ public class AdminList extends AdministrationSectionExt {
 		//map.put("module/atd/replaceForm.form", "Replace Form");
 		//map.put("module/atd/updateForm.form", "Update Form");
 		map.put("module/atd/configurationManager.form", "Configuration Manager");
+		map.put("module/atd/importConceptsFromFile.form", "Import Concepts From File");
 		return map;
 	}
 	
