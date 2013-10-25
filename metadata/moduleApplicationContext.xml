@@ -34,6 +34,7 @@
 				<prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
 				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
 			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
+			    <prop key="/module/@MODULE_ID@/createFormFromFile.form">createFormFromFile</prop>
 			</props>
 		</property>
 	</bean>
@@ -181,6 +182,11 @@
         <property name="commandName"><value>importConceptsFromFileObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/importConceptsFromFile</value></property>
         <property name="successView"><value>importConceptsFromFile.form</value></property>
+	</bean>
+	<bean id="createFormFromFile" class="@MODULE_PACKAGE@.web.CreateFormFromFileController">
+        <property name="commandName"><value>createFormFromFileObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/createFormFromFile</value></property>
+        <property name="successView"><value>createFormFromFile.form</value></property>
 	</bean>
 	<bean parent="serviceContext">
 		<property name="moduleService">

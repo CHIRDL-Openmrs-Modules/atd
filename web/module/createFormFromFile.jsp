@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <%@ include file="/WEB-INF/template/header.jsp"%>
-<openmrs:require allPrivileges="View Encounters, View Patients, View Concept Classes" otherwise="/login.htm" redirect="/module/chirdutil/importConceptsFromFile.form" />
+<openmrs:require allPrivileges="View Encounters, View Patients, View Concept Classes" otherwise="/login.htm" redirect="/module/chirdutil/createFormFromFile.form" />
 <link
     href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
     type="text/css" rel="stylesheet" />
@@ -9,17 +9,17 @@
 	// Nannette Thacker http://www.shiningstar.net
 	function confirmCancel()
 	{
-	    var agree=confirm("Are you sure you want to stop importing concepts?");
+	    var agree=confirm("Are you sure you want to stop creating the form?");
 	    if (agree) {
-	    	   window.location = '${pageContext.request.contextPath}/module/atd/importConceptsFromFile.form';
+	    	   window.location = '${pageContext.request.contextPath}/module/atd/createFormFromFile.form';
 	    }
 	}
     // -->
 </script>
 <html>
     <body OnLoad="document.input.formName.focus();">
-		<p><h3>Import Concepts:</h3></p>
-		<form name="input" action="importConceptsFromFile.form" method="post" enctype="multipart/form-data">
+		<p><h3>Create Form:</h3></p>
+		<form name="input" action="createFormFromFile.form" method="post" enctype="multipart/form-data">
 		<table>
 		   
 		    <tr style="padding: 5px">
