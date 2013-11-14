@@ -86,5 +86,6 @@
 	<classpathentry kind="lib" path="lib-common/zxing/zxing-core-2.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/zxing/zxing-javase-2.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/opencsv/opencsv-2.3.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
