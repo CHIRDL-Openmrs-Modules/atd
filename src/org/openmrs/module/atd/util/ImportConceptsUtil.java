@@ -55,7 +55,7 @@ public class ImportConceptsUtil {
 	
 	public static void createConceptsFromFile(InputStream inputStream) {
 		int conceptsCreated = 0;
-		HashMap<String, ConceptDescriptor> conceptByName = new HashMap<String, ConceptDescriptor>();
+		List<ConceptDescriptor> conceptDescriptorsToLink = new ArrayList<ConceptDescriptor>();
 		ConceptService conceptService = Context.getConceptService();
 		
 		try {
@@ -83,12 +83,6 @@ public class ImportConceptsUtil {
 				ConceptClass conceptClass = conceptService.getConceptClassByName(currTerm.getConceptClass());
 				
 				newConcept.setConceptClass(conceptClass);
-				Integer nextId = conceptService.getMaxConceptId();
-				if(nextId == null){
-					nextId = 0;
-				}
-				newConcept.setConceptId(nextId + 1);
-				
 				String datatype = currTerm.getDatatype();
 				
 				ConceptDatatype conceptDatatype = conceptService.getConceptDatatypeByName(datatype);
@@ -98,7 +92,7 @@ public class ImportConceptsUtil {
 				conceptDescription.setDescription(currTerm.getDescription());
 				conceptDescription.setLocale(new Locale("en"));
 				newConcept.addDescription(conceptDescription);
-				conceptByName.put(conceptName.getName(), currTerm);
+				conceptDescriptorsToLink.add(currTerm);
 				Concept concept = conceptService.getConceptByName(conceptName.getName());
 				
 				if (concept != null) {
@@ -150,13 +144,12 @@ public class ImportConceptsUtil {
 			}
 		}
 		catch (Exception e) {
-			log.error(e.getMessage());
-			log.error(e);
+			log.error("Error creating concepts from file", e);
 		}
 		int conceptAnswersCreated = 0;
 		
 		//link all the answers to the parent
-		for (ConceptDescriptor currDescriptor : conceptByName.values()) {
+		for (ConceptDescriptor currDescriptor : conceptDescriptorsToLink) {
 			String parentName = currDescriptor.getParentConcept();
 			
 			if (parentName != null) {
@@ -234,7 +227,9 @@ public class ImportConceptsUtil {
 				return new ArrayList<ConceptDescriptor>();
 			}
 		}
-		catch (Exception e) {}
+		catch (Exception e) {
+			log.error("Error parsing concept file", e);
+		}
 		finally {
 			inputStream.close();
 		}
