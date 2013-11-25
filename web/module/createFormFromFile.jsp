@@ -23,7 +23,7 @@
 		<table>
 		   
 		    <tr style="padding: 5px">
-		        <td style="padding: 0px 0px 10px 0px">Concept csv file:</td>
+		        <td style="padding: 0px 0px 10px 0px">Form csv file:</td>
 		        <td style="padding: 0px 0px 10px 0px">
 		            <input type="file" name="dataFile" value="${dataFile}">
 		        </td>         
