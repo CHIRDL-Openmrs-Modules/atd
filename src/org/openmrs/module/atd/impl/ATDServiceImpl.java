@@ -148,6 +148,12 @@ public class ATDServiceImpl implements ATDService
 			this.log.error(Util.getStackTrace(e));
 			return false;
 		}
+		
+		if (formInstance == null) {
+			log.error("Form instance came back null");
+			return false;
+		}
+		
 		HashMap<String, Field> fieldMap = xmlDatasource.getParsedFile(formInstance);
 		// check that the medical record number in the xml file and the medical
 		// record number of the patient match
