@@ -420,6 +420,14 @@ public class TeleformFileMonitor extends AbstractTask
 							if(!newFile.exists()){
 								continue;
 							}
+							
+							// check to make sure the original file is gone.  If not, don't continue processing.  Otherwise 
+							// the file will be processed more than once.
+							File oldFile = new File(filename);
+							if (oldFile.exists()) {
+								IOUtil.deleteFile(newFilename);
+								continue;
+							}
 							    
 							tfFileState.setFullFilePath(newFilename);
 							tfFileState.setFormInstance(formInstance);
@@ -531,6 +539,15 @@ public class TeleformFileMonitor extends AbstractTask
 											if (!newFile.exists()) {
 												continue;
 											}
+											
+											// check to make sure the original file is gone.  If not, don't continue 
+											// processing.  Otherwise the file will be processed more than once.
+											File oldFile = new File(filename);
+											if (oldFile.exists()) {
+												IOUtil.deleteFile(newFilename);
+												continue;
+											}
+											
 											tfFileState.setFullFilePath(newFilename);
 											tfFileState.setFormInstance(formInstance);
 											tfFileState.addParameter("patientState", patientState);
