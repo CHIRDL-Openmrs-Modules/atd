@@ -141,6 +141,7 @@ public class FormScoringUtil {
 				//compute each score and save it to a concept in the database
 				for (Score score : scores.getScores()) {
 					
+					//if we have an estimated score to substitute if a field is empty, compute that value here
 					EstimatedScoreValue estimatedScoreValue = score.getEstimatedScoreValue();
 					Double estimatedScore = null;
 					if (estimatedScoreValue != null) {
@@ -352,6 +353,9 @@ public class FormScoringUtil {
 					scoreTotal += Integer.parseInt(scorableFormField.getValue());
 				}else{
 					
+					//if the field does not have a value and has an attribute value indicating that
+					//an estimate of the field should be substituted, then use the value of estimatedScore
+					//in the sum
 					boolean substituteEstimate = false;
 					String substituteEstimateString = currField.getSubstituteEstimate();
 					if (substituteEstimateString != null) {
