@@ -9,9 +9,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.PatientIdentifier;
@@ -76,13 +78,13 @@ public class HibernateATDDAO implements ATDDAO
 		{
 			DssService dssService = Context.getService(DssService.class);
 			String sql = "select * from atd_patient_atd_element "
-					+ "where form_instance_id=? and form_id=? and location_id=? and field_id=?";
+					+ "where form_id=? and field_id=? and form_instance_id=? and location_id=?";
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
-			qry.setInteger(0,formInstance.getFormInstanceId());
-			qry.setInteger(1, formInstance.getFormId());
-			qry.setInteger(2, formInstance.getLocationId());
-			qry.setInteger(3, fieldId);
+			qry.setInteger(0, formInstance.getFormId());
+			qry.setInteger(1, fieldId);
+			qry.setInteger(2,formInstance.getFormInstanceId());
+			qry.setInteger(3, formInstance.getLocationId());
 			qry.addEntity(PatientATD.class);
 
 			List<PatientATD> list = qry.list();
@@ -106,6 +108,24 @@ public class HibernateATDDAO implements ATDDAO
 			log.error(Util.getStackTrace(e));
 		}
 		return null;
+	}
+	
+	/**
+	 * @see org.openmrs.module.atd.db.ATDDAO#getPatientATDs(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance, java.util.List)
+	 */
+	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
+		Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(PatientATD.class);
+		if (formInstance != null) {
+			criteria.add(Restrictions.eq("formInstanceId", formInstance.getFormInstanceId()));
+			criteria.add(Restrictions.eq("formId", formInstance.getFormId()));
+			criteria.add(Restrictions.eq("locationId", formInstance.getLocationId()));
+		}
+		
+		if (fieldIds != null && fieldIds.size() > 0) {
+			criteria.add(Restrictions.in("fieldId", fieldIds));
+		}
+		
+		return criteria.list();
 	}
 
 	public void updatePatientStates(Date thresholdDate){

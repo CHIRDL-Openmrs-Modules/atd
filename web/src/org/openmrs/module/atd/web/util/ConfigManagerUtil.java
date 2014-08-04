@@ -1,6 +1,7 @@
 package org.openmrs.module.atd.web.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,9 +17,9 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.CreateFormUtil;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -49,6 +50,30 @@ public class ConfigManagerUtil {
 		
 		// Load the XML file
 		form = translator.templateXMLToDatabaseForm(formName, file.getAbsolutePath());
+		return form;
+	}
+	
+	/**
+	 * Loads a form via the CSV file format.
+	 * 
+	 * @param multipartFile MultipartFile object containing the CSV file information.
+	 * @param formName The name of the database form.
+	 * @return The database Form object.
+	 * @throws Exception
+	 */
+	public static Form loadFormFromCSVFile(MultipartFile multipartFile, String formName) throws Exception {
+		Form form = null;
+		String formLoadDir = Context.getAdministrationService().getGlobalProperty("atd.formLoadDirectory");
+		// Place the file in the forms to load directory
+		File file = new File(formLoadDir, formName + ".csv");
+		if (file.exists()) {
+			file.delete();
+		}
+		
+		multipartFile.transferTo(file);
+		
+		// Load the CSV file
+		form = CreateFormUtil.createFormFromCSVFile(new FileInputStream(file));
 		return form;
 	}
 	

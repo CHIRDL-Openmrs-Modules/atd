@@ -52,7 +52,6 @@ public class ProduceFormInstance implements ProcessStateAction
 			PatientState patientState, HashMap<String, Object> parameters)
 	{
 		long totalTime = System.currentTimeMillis();
-		long startTime = System.currentTimeMillis();
 		//lookup the patient again to avoid lazy initialization errors
 		PatientService patientService = Context.getPatientService();
 		ATDService atdService = Context.getService(ATDService.class);
@@ -101,7 +100,7 @@ public class ProduceFormInstance implements ProcessStateAction
 			//open an error state
 			currState = chirdlutilbackportsService.getStateByName("ErrorState");
 			chirdlutilbackportsService.addPatientState(patient,
-					currState, sessionId,locationTagId,locationId);
+					currState, sessionId,locationTagId,locationId, null);
 			log.error(formName+
 					" locationTagAttribute does not exist for locationTagId: "+
 					locationTagId+" locationId: "+locationId);
@@ -110,7 +109,6 @@ public class ProduceFormInstance implements ProcessStateAction
 		
 		FormService formService = Context.getFormService();
 		Form form = formService.getForm(formId);
-		startTime = System.currentTimeMillis();
 		
 		// write the form
 		FormInstance formInstance = chirdlutilbackportsService.addFormInstance(formId,
@@ -143,33 +141,15 @@ public class ProduceFormInstance implements ProcessStateAction
 		}catch (Exception e){
 			log.error("Error when saving the form attribute for trigger. ",e);
 		}
-		String mergeDirectory = IOUtil
-				.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
-						.getFormAttributeValue(formId, "defaultMergeDirectory",
-								locationTagId, locationId));
-
-		String mergeFilename = mergeDirectory + "Pending/"+formInstance.toString() + ".xml";
-		int maxDssElements = Util
-				.getMaxDssElements(formId, locationTagId, locationId);
 		
-		try {
-			FileOutputStream output = new FileOutputStream(mergeFilename);
-			startTime = System.currentTimeMillis();
-			atdService.produce(output, patientState, patient, encounterId, formName, maxDssElements, sessionId);
-			startTime = System.currentTimeMillis();
-			output.flush();
-			output.close();
-		}
-		catch (IOException e) {
-			log.error("Could not produce merge xml for file: "+mergeFilename, e);
-		}
+		produceForm(formId, locationId, locationTagId, encounterId, sessionId, formInstance, patientState, patient, 
+			formName, atdService);
 
 		StateManager.endState(patientState);
 		System.out.println("Produce: Total time to produce "+form.getName()+"(" + Thread.currentThread().getName() + "): "+
 			(System.currentTimeMillis()-totalTime));
 		BaseStateActionHandler.changeState(patient, sessionId, currState, stateAction, parameters,
 				locationTagId, locationId);
-		startTime = System.currentTimeMillis();
 		// update statistics
 		List<Statistics> statistics = atdService.getStatByFormInstance(
 				formInstanceId, formName, locationId);
@@ -186,4 +166,23 @@ public class ProduceFormInstance implements ProcessStateAction
 		//deliberately empty because processAction changes the state
 	}
 
+	protected void produceForm(Integer formId, Integer locationId, Integer locationTagId, Integer encounterId, 
+	                           Integer sessionId, FormInstance formInstance, PatientState patientState, Patient patient, 
+	                           String formName, ATDService atdService) {
+		String mergeDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
+		        .getFormAttributeValue(formId, "defaultMergeDirectory", locationTagId, locationId));
+		
+		String mergeFilename = mergeDirectory + "Pending/" + formInstance.toString() + ".xml";
+		int maxDssElements = Util.getMaxDssElements(formId, locationTagId, locationId);
+		
+		try {
+			FileOutputStream output = new FileOutputStream(mergeFilename);
+			atdService.produce(output, patientState, patient, encounterId, formName, maxDssElements, sessionId);
+			output.flush();
+			output.close();
+		}
+		catch (IOException e) {
+			log.error("Could not produce merge xml for file: " + mergeFilename, e);
+		}
+	}
 }

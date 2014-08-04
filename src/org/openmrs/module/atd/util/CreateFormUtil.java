@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,6 @@ import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.FormService;
-import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.TeleformTranslator;
 
@@ -49,7 +49,7 @@ public class CreateFormUtil {
 	
 	private static Log log = LogFactory.getLog(CreateFormUtil.class);
 	
-	public static void createFormFromFile(InputStream inputStream) {
+	public static Collection<Form> createFormsFromCSVFile(InputStream inputStream) {
 		HashMap<String, HashMap<String,FormDescriptor>> formNameFieldNameDescriptorMap = new HashMap<String, HashMap<String,FormDescriptor>> ();
 		HashMap<String, HashMap<String,FormField>> formNameFieldNameFormFieldMap = new HashMap<String, HashMap<String,FormField>>();
 		ConceptService conceptService = Context.getConceptService();
@@ -157,6 +157,20 @@ public class CreateFormUtil {
 			}
 		}
 		
+		return forms.values();
+	}
+	
+	public static Form createFormFromCSVFile(InputStream inputStream) throws IllegalArgumentException {
+		Collection<Form> forms = createFormsFromCSVFile(inputStream);
+		if (forms == null || forms.size() == 0) {
+			log.error("There are no forms found in the CSV file");
+			return null;
+		} else if (forms.size() > 1) {
+			log.error("There are multiple forms in the CSV file, and this is not allowed.");
+			throw new IllegalArgumentException("There are multiple forms in the CSV file, and this is not allowed.");
+		}
+		
+		return forms.iterator().next();
 	}
 	
 	/**

@@ -3,8 +3,6 @@ package org.openmrs.module.atd.ruleLibrary;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.api.ConceptService;
@@ -13,22 +11,20 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicContext;
 import org.openmrs.logic.LogicCriteria;
-import org.openmrs.logic.impl.LogicCriteriaImpl;
 import org.openmrs.logic.LogicException;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.Rule;
+import org.openmrs.logic.impl.LogicCriteriaImpl;
 import org.openmrs.logic.op.Operator;
 import org.openmrs.logic.result.Result;
 import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
+import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.dss.logic.op.OperandObject;
 
-import org.openmrs.module.atd.service.ATDService;
-
 public class consumeHeight implements Rule
 {
-	private Log log = LogFactory.getLog(this.getClass());
 	private LogicService logicService = Context.getLogicService();
 
 	/**
@@ -102,7 +98,7 @@ public class consumeHeight implements Rule
 		if (formInstance == null)
 		{
 			throw new LogicException(
-					"The xml datasource requires a formInstanceId");
+					"The form datasource requires a formInstanceId");
 		}
 
 		LogicCriteria formIdCriteria = new LogicCriteriaImpl(Operator.EQUALS, new OperandObject(formInstance));
@@ -111,7 +107,7 @@ public class consumeHeight implements Rule
 		formIdCriteria = formIdCriteria.and(fieldNameCriteria);
 
 		Result ruleResult = context.read(patientId, this.logicService
-				.getLogicDataSource("xml"), formIdCriteria);
+				.getLogicDataSource("form"), formIdCriteria);
 		
 		String primaryResult = ruleResult.toString();
 		
@@ -122,7 +118,7 @@ public class consumeHeight implements Rule
 		formIdCriteria = formIdCriteria.and(fieldNameCriteria);
 
 		ruleResult = context.read(patientId, this.logicService
-				.getLogicDataSource("xml"), formIdCriteria);
+				.getLogicDataSource("form"), formIdCriteria);
 		
 		String secondaryResult = ruleResult.toString();
 			

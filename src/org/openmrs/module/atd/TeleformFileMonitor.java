@@ -29,7 +29,7 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
+import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.chirdlutil.util.FileExt;
 import org.openmrs.module.chirdlutil.util.IOUtil;
@@ -289,8 +289,8 @@ public class TeleformFileMonitor extends AbstractTask
 				continue;
 			}
 			LogicService logicService = Context.getLogicService();
-			TeleformExportXMLDatasource xmlDatasource = (TeleformExportXMLDatasource) logicService
-					.getLogicDataSource("xml");
+			FormDatasource formDatasource = (FormDatasource) logicService
+					.getLogicDataSource("form");
 			
 			for (File currFile : files)
 			{
@@ -322,7 +322,7 @@ public class TeleformFileMonitor extends AbstractTask
 						continue;
 					}
 	
-					formInstance = xmlDatasource.parse(input,formInstance,null);
+					formInstance = formDatasource.parseTeleformXmlFormat(input,formInstance,null);
 					input.close();
 					//This is an old form with a single key (formInstanceId) barcode
 					//we need to figure out the formId, locationId, and locationTagId
@@ -353,7 +353,7 @@ public class TeleformFileMonitor extends AbstractTask
 								}
 								continue;
 							}
-							formInstance = xmlDatasource.parse(input,
+							formInstance = formDatasource.parseTeleformXmlFormat(input,
 									formInstance, locationTagId);
 							input.close();
 
@@ -385,10 +385,9 @@ public class TeleformFileMonitor extends AbstractTask
 										formAttrValue.getLocationId(),
 										formAttrValue.getFormId(), formInstance
 												.getFormInstanceId());
-								PatientState patientState = chirdlUtilBackportsService
-										.getPatientStateByFormInstanceAction(
-												lookupFormInstance,
-												"PRODUCE FORM INSTANCE");
+								PatientState patientState = 
+									org.openmrs.module.atd.util.Util.getProducePatientStateByFormInstanceAction(
+										lookupFormInstance);
 								if (patientState != null)
 								{
 									formInstance = new FormInstance(
@@ -478,11 +477,12 @@ public class TeleformFileMonitor extends AbstractTask
 								//This means we have found a .xml file that is not in pending processing.
 								//This is most likely a rescan. We need to see if a scan already exists
 								//for the session that has this formInstance
-								String action = "PRODUCE FORM INSTANCE";
 								
 								//get the session that goes with this formInstanceId
-								PatientState patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance,
-								    action);
+								PatientState patientState = 
+									org.openmrs.module.atd.util.Util.getProducePatientStateByFormInstanceAction(formInstance);
+//								PatientState patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance,
+//								    action);
 								
 								if (patientState != null) {
 									String formName = formService.getForm(formInstance.getFormId()).getName();
@@ -512,12 +512,14 @@ public class TeleformFileMonitor extends AbstractTask
 											stateName = "JIT_rescan";
 										}
 										State currState = chirdlUtilBackportsService.getStateByName(stateName);
-										action = "PRODUCE FORM INSTANCE";
-										patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance, action);
+										patientState = 
+											org.openmrs.module.atd.util.Util.getProducePatientStateByFormInstanceAction(
+												formInstance);
+//										patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance, action);
 										try {
 											patientState = chirdlUtilBackportsService.addPatientState(patientState.getPatient(), currState,
 											    patientState.getSessionId(), patientState.getLocationTagId(), patientState
-											            .getLocationId());
+											            .getLocationId(), patientState.getFormInstance());
 											tfFileState = new TeleformFileState();
 											String newFilename = IOUtil.getDirectoryName(filename) + "/"
 											        + formInstance.toString() + "_rescan.20";

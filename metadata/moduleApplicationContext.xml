@@ -216,8 +216,8 @@
 		</property>
 	</bean>
 		
-	<bean id="logicTeleformExportDAO" class="org.openmrs.module.atd.datasource.XMLLogicTeleformExportDAO"/>
-	<bean id="logicTeleformExportDataSource" class="org.openmrs.module.atd.datasource.TeleformExportXMLDatasource">
-		<property name="logicTeleformExportDAO"><ref bean="logicTeleformExportDAO"></ref></property>
+	<bean id="logicFormDAO" class="org.openmrs.module.atd.datasource.LogicFormDAOImpl"/>
+	<bean id="logicFormDataSource" class="org.openmrs.module.atd.datasource.FormDatasource">
+		<property name="logicFormDAO"><ref bean="logicFormDAO"></ref></property>
 	</bean>
 </beans>

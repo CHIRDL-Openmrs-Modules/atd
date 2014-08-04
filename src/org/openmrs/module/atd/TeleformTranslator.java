@@ -36,7 +36,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
+import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
@@ -220,7 +220,6 @@ public class TeleformTranslator
 			Integer locationTagId,Integer sessionId)
 	{
 		String threadName = Thread.currentThread().getName();
-		long totalTime = System.currentTimeMillis();
 		long startTime = System.currentTimeMillis();
 		Form form = databaseToForm(formInstance.getFormId());
 		if(form == null) 
@@ -616,11 +615,11 @@ public class TeleformTranslator
 		int order = 0;
 
 		LogicService logicService = Context.getLogicService();
-		TeleformExportXMLDatasource xmlDatasource = 
-			(TeleformExportXMLDatasource) logicService
-				.getLogicDataSource("xml");
+		FormDatasource formDatasource = 
+			(FormDatasource) logicService
+				.getLogicDataSource("form");
 		
-		Records records = xmlDatasource.parse(input);
+		Records records = formDatasource.parseTeleformXmlFormat(input);
 		
 		ArrayList<org.openmrs.module.atd.xmlBeans.Field> fields = records
 				.getRecord().getFields();
@@ -681,8 +680,6 @@ public class TeleformTranslator
 		String tableName = "TFORM_" + formName;
 
 		// Check if table exists
-		ATDService atdService = Context
-		.getService(ATDService.class);
 		ChirdlUtilService chirdlutilService = Context.getService(ChirdlUtilService.class);
 		boolean tableExists = chirdlutilService.tableExists(tableName);
 		

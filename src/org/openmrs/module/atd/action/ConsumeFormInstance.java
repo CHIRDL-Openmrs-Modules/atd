@@ -18,7 +18,7 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
+import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
@@ -107,9 +107,9 @@ public class ConsumeFormInstance implements ProcessStateAction
 			catch (Exception e) {}
 			LogicService logicService = Context.getLogicService();
 			
-			TeleformExportXMLDatasource xmlDatasource = (TeleformExportXMLDatasource) logicService.getLogicDataSource("xml");
+			FormDatasource xmlDatasource = (FormDatasource) logicService.getLogicDataSource("form");
 			if (purgeXMLDatasourceProperty != null && purgeXMLDatasourceProperty == 1) {
-				xmlDatasource.deleteParsedFile(formInstance);
+				xmlDatasource.deleteForm(formInstance);
 			}
 		}
 		catch (Exception e) {

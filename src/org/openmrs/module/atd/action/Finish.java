@@ -13,7 +13,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
+import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
@@ -45,7 +45,7 @@ public class Finish implements ProcessStateAction {
 		
 		LogicService logicService = Context.getLogicService();
 		
-		TeleformExportXMLDatasource xmlDatasource = (TeleformExportXMLDatasource) logicService.getLogicDataSource("xml");
+		FormDatasource xmlDatasource = (FormDatasource) logicService.getLogicDataSource("form");
 		try {
 			Integer purgeXMLDatasourceProperty = null;
 			try {
@@ -60,7 +60,7 @@ public class Finish implements ProcessStateAction {
 					FormInstance formInstance = state.getFormInstance();
 					
 					if (formInstance != null) {
-						xmlDatasource.deleteParsedFile(formInstance);
+						xmlDatasource.deleteForm(formInstance);
 					}
 				}
 			}

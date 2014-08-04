@@ -99,7 +99,7 @@ public class consumeTwoPart implements Rule
 		if (formInstance == null)
 		{
 			throw new LogicException(
-					"The xml datasource requires a formInstanceId");
+					"The form datasource requires a formInstanceId");
 		}
 
 		LogicCriteria formIdCriteria = new LogicCriteriaImpl(Operator.EQUALS, new OperandObject(formInstance));
@@ -108,7 +108,7 @@ public class consumeTwoPart implements Rule
 		formIdCriteria = formIdCriteria.and(fieldNameCriteria);
 
 		Result ruleResult = context.read(patientId, this.logicService
-				.getLogicDataSource("xml"), formIdCriteria);
+				.getLogicDataSource("form"), formIdCriteria);
 		
 		String primaryResult = ruleResult.toString();
 				
@@ -119,7 +119,7 @@ public class consumeTwoPart implements Rule
 		formIdCriteria = formIdCriteria.and(fieldNameCriteria);
 
 		ruleResult = context.read(patientId, this.logicService
-				.getLogicDataSource("xml"), formIdCriteria);
+				.getLogicDataSource("form"), formIdCriteria);
 		
 		String secondaryResult = ruleResult.toString();
 			

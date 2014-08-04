@@ -40,7 +40,7 @@ import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.ParameterHandler;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.TeleformTranslator;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
+import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.atd.db.ATDDAO;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -138,9 +138,9 @@ public class ATDServiceImpl implements ATDService
 		
 		//parse the xml
 		LogicService logicService = Context.getLogicService();
-		TeleformExportXMLDatasource xmlDatasource = (TeleformExportXMLDatasource) logicService.getLogicDataSource("xml");
+		FormDatasource xmlDatasource = (FormDatasource) logicService.getLogicDataSource("form");
 		try {
-			formInstance = xmlDatasource.parse(customInput, formInstance, locationTagId);
+			formInstance = xmlDatasource.parseTeleformXmlFormat(customInput, formInstance, locationTagId);
 		}
 		catch (Exception e) {
 			this.log.error("Error parsing file to be consumed");
@@ -154,7 +154,7 @@ public class ATDServiceImpl implements ATDService
 			return false;
 		}
 		
-		HashMap<String, Field> fieldMap = xmlDatasource.getParsedFile(formInstance);
+		HashMap<String, Field> fieldMap = xmlDatasource.getFormFields(formInstance);
 		// check that the medical record number in the xml file and the medical
 		// record number of the patient match
 		String patientMedRecNumber = patient.getPatientIdentifier().getIdentifier();
@@ -697,7 +697,7 @@ public class ATDServiceImpl implements ATDService
     public void cleanCache() {
         log.info("Clear the cache if any");
         // parsedFile belongs to ATD, deal in there
-        ((TeleformExportXMLDatasource) Context.getLogicService().getLogicDataSource("xml")).clearParsedFile();
+        ((FormDatasource) Context.getLogicService().getLogicDataSource("form")).clearForms();
         
     }
     
@@ -977,5 +977,19 @@ public class ATDServiceImpl implements ATDService
 	 */
     public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId) {
 	    return getATDDAO().getPSFQuestionAnswers(formInstanceId, locationId, patientId);
+    }
+
+	/**
+	 * @see org.openmrs.module.atd.service.ATDService#updatePatientATD(org.openmrs.module.atd.hibernateBeans.PatientATD)
+	 */
+    public PatientATD updatePatientATD(PatientATD patientATD) throws APIException {
+	    return getATDDAO().addPatientATD(patientATD);
+    }
+
+	/**
+	 * @see org.openmrs.module.atd.service.ATDService#getPatientATDs(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance, java.util.List)
+	 */
+    public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
+	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
 }

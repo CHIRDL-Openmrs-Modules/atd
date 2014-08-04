@@ -81,7 +81,8 @@ public class ReplaceFormController extends SimpleFormController {
 					
 					String extension = filename.substring(index + 1, filename.length());
 					if (!extension.equalsIgnoreCase("xml") && !extension.equalsIgnoreCase("fxf") && 
-							!extension.equalsIgnoreCase("zip") && !extension.equalsIgnoreCase("jar")) {
+							!extension.equalsIgnoreCase("zip") && !extension.equalsIgnoreCase("jar") &&
+							!extension.equalsIgnoreCase("csv")) {
 						map.put("incorrectExtension", true);
 						map.put("forms", formService.getAllForms(false));
 						map.put("selectedForm", replaceFormIdStr);
@@ -89,7 +90,19 @@ public class ReplaceFormController extends SimpleFormController {
 					}
 					
 					String formName = replaceForm.getName() + "_replace_" + System.currentTimeMillis();
-					newForm = ConfigManagerUtil.loadTeleformFile(dataFile, formName);
+					if (extension.equalsIgnoreCase("csv")) {
+						newForm = ConfigManagerUtil.loadFormFromCSVFile(dataFile, formName);
+					} else {
+						newForm = ConfigManagerUtil.loadTeleformFile(dataFile, formName);
+					}
+					
+					if (newForm == null) {
+						map.put("failedFileUpload", true);
+						map.put("forms", formService.getAllForms(false));
+						map.put("selectedForm", replaceFormIdStr);
+						return new ModelAndView(view, map);
+					}
+					
 					LoggingUtil.logEvent(null, newForm.getFormId(), null, LoggingConstants.EVENT_CREATE_FORM, 
 						Context.getUserContext().getAuthenticatedUser().getUserId(), 
 						"Form created.  Class: " + ReplaceFormController.class.getCanonicalName());

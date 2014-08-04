@@ -12,6 +12,7 @@ import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.atd.TeleformFileMonitor;
 import org.openmrs.module.atd.TeleformFileState;
+import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
@@ -44,8 +45,7 @@ public class WaitForPrint implements ProcessStateAction
 		if(formInstance == null){
 		
 		Integer sessionId = patientState.getSessionId();
-		PatientState stateWithFormId = chirdlutilbackportsService.getPrevPatientStateByAction(sessionId, 
-			patientState.getPatientStateId(),"PRODUCE FORM INSTANCE");
+		PatientState stateWithFormId = Util.getPrevProducePatientStateByAction(patientState, sessionId);
 		
 		formInstance = patientState.getFormInstance();
 

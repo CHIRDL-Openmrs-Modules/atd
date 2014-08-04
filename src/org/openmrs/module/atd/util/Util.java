@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,12 +32,15 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.TeleformTranslator;
+import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
 import org.openmrs.module.atd.xmlBeans.Language;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
 /**
  *
@@ -281,5 +285,63 @@ public class Util {
 				}
 			}
 		}
+	}
+	
+	public static PatientState getPrevProducePatientStateByAction (PatientState patientState, Integer sessionId) {
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		PatientState stateWithFormId = chirdlutilbackportsService.getPrevPatientStateByAction(sessionId, 
+			patientState.getPatientStateId(),"PRODUCE FORM INSTANCE");
+		if (stateWithFormId == null) {
+			return chirdlutilbackportsService.getPrevPatientStateByAction(sessionId, 
+				patientState.getPatientStateId(),"PRODUCE ELECTRONIC FORM INSTANCE");
+		}
+		
+		return stateWithFormId;
+	}
+	
+	public static PatientState getProducePatientStateByFormInstanceAction (FormInstance formInstance) {
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		PatientState patientState = chirdlutilbackportsService.getPatientStateByFormInstanceAction(formInstance, 
+			"PRODUCE FORM INSTANCE");
+		if (patientState == null) {
+			return chirdlutilbackportsService.getPatientStateByFormInstanceAction(formInstance, 
+				"PRODUCE ELECTRONIC FORM INSTANCE");
+		}
+		
+		return patientState;
+	}
+	
+	public static PatientState getProducePatientStateByEncounterFormAction(Integer encounterId, Integer formId) {
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		PatientState patientStateProduce = chirdlutilbackportsService.getPatientStateByEncounterFormAction(encounterId, 
+			formId, "PRODUCE FORM INSTANCE");
+		if (patientStateProduce == null) {
+			return patientStateProduce = chirdlutilbackportsService.getPatientStateByEncounterFormAction(encounterId, 
+				formId, "PRODUCE ELECTRONIC FORM INSTANCE");
+		}
+		
+		return patientStateProduce;
+	}
+	
+	/**
+	 * Returns PatientATD objects based on the form instance and field Id information provided.
+	 * 
+	 * @param formInstance Form Instance object.
+	 * @param fieldIds Field Ids to find.
+	 * 
+	 * @return Map of fieldId to PatientATD object.
+	 */
+	public static Map<Integer, PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
+		Map<Integer, PatientATD> patdMap = new HashMap<Integer, PatientATD>();
+		List<PatientATD> patds = Context.getService(ATDService.class).getPatientATDs(formInstance, fieldIds);
+		if (patds == null) {
+			return patdMap;
+		}
+		
+		for (PatientATD patd : patds) {
+			patdMap.put(patd.getFieldId(), patd);
+		}
+		
+		return patdMap;
 	}
 }

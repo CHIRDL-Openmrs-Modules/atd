@@ -16,14 +16,12 @@ package org.openmrs.module.atd.util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
-import org.openmrs.Encounter;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
@@ -34,9 +32,8 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
-import org.openmrs.module.atd.hibernateBeans.Statistics;
-import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.datasource.FormDatasource;
+import org.openmrs.module.atd.xmlBeans.Choose;
 import org.openmrs.module.atd.xmlBeans.Eq;
 import org.openmrs.module.atd.xmlBeans.EstimatedScoreValue;
 import org.openmrs.module.atd.xmlBeans.Field;
@@ -46,9 +43,8 @@ import org.openmrs.module.atd.xmlBeans.If;
 import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
 import org.openmrs.module.atd.xmlBeans.Mean;
 import org.openmrs.module.atd.xmlBeans.Plus;
-import org.openmrs.module.atd.xmlBeans.Scores;
-import org.openmrs.module.atd.xmlBeans.Choose;
 import org.openmrs.module.atd.xmlBeans.Score;
+import org.openmrs.module.atd.xmlBeans.Scores;
 import org.openmrs.module.atd.xmlBeans.Then;
 import org.openmrs.module.atd.xmlBeans.Value;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
@@ -71,8 +67,8 @@ public class FormScoringUtil {
 		
 		//parse the scan xml
 		LogicService logicService = Context.getLogicService();
-		TeleformExportXMLDatasource xmlDatasource = (TeleformExportXMLDatasource) logicService.getLogicDataSource("xml");
-		HashMap<String, org.openmrs.module.atd.xmlBeans.Field> fieldMap = xmlDatasource.getParsedFile(formInstance);
+		FormDatasource formDatasource = (FormDatasource) logicService.getLogicDataSource("form");
+		HashMap<String, org.openmrs.module.atd.xmlBeans.Field> fieldMap = formDatasource.getFormFields(formInstance);
 		
 		//map fields to languages
 		FormAttributeValue scorableFormConfigAttrVal = chirdlutilbackportsService.getFormAttributeValue(formId, "scorableFormConfigFile",

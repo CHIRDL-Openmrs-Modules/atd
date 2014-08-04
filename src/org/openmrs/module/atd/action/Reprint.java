@@ -11,18 +11,18 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.Session;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
-import org.openmrs.module.chirdlutil.util.IOUtil;
 
 /**
  * @author tmdugan
@@ -39,8 +39,6 @@ public class Reprint implements ProcessStateAction
 			PatientState patientState, HashMap<String, Object> parameters)
 	{
 		//lookup the patient again to avoid lazy initialization errors
-		ChirdlUtilService chirdlUtilService = Context.getService(ChirdlUtilService.class);
-
 		PatientService patientService = Context.getPatientService();
 		Integer patientId = patient.getPatientId();
 		patient = patientService.getPatient(patientId);
@@ -81,14 +79,15 @@ public class Reprint implements ProcessStateAction
 			//open an error state
 			State currState = chirdlutilbackportsService.getStateByName("ErrorState");
 			chirdlutilbackportsService.addPatientState(patient,
-					currState, sessionId,locationTagId,locationId);
+					currState, sessionId,locationTagId,locationId, null);
 			log.error(formName+
 					" locationTagAttribute does not exist for locationTagId: "+
 					locationTagId+" locationId: "+locationId);
 			return;
 		}
-		PatientState patientStateProduce = chirdlutilbackportsService.getPatientStateByEncounterFormAction(
-				encounterId, formId,"PRODUCE FORM INSTANCE");
+		
+		PatientState patientStateProduce = 
+			org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(encounterId, formId);
 
 		if (patientStateProduce != null)
 		{
@@ -99,38 +98,50 @@ public class Reprint implements ProcessStateAction
 			parameters.put("formInstance", formInstance);
 			patientState.setFormInstance(formInstance);
 			chirdlutilbackportsService.updatePatientState(patientState);
-			String mergeDirectory = IOUtil
-			.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
-					.getFormAttributeValue(formInstance.getFormId(),
-							"defaultMergeDirectory",locationTagId,formInstance.getLocationId()));
-			if (mergeDirectory != null)
-			{
-				File dir = new File(mergeDirectory);
-				for (String fileName : dir.list())
+			FormAttributeValue fav = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
+				formInstance.getFormId(), "mobileOnly", locationTagId, locationId);
+			if (fav == null || !"true".equalsIgnoreCase(fav.getValue())) {
+				String mergeDirectory = IOUtil
+						.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
+								.getFormAttributeValue(formInstance.getFormId(),
+										"defaultMergeDirectory",locationTagId,formInstance.getLocationId()));
+				if (mergeDirectory != null)
 				{
-					if (fileName.startsWith(formInstance.toString() + "."))
+					File dir = new File(mergeDirectory);
+					for (String fileName : dir.list())
 					{
-						fileName = mergeDirectory + "/" + fileName;
-						IOUtil.renameFile(fileName, fileName.substring(0,
-								fileName.lastIndexOf("."))
-								+ ".xml");
-						StateManager.endState(patientState);
-						State currState = patientState.getState();
-						BaseStateActionHandler.changeState(patient, sessionId, currState,
-							stateAction,parameters,locationTagId,locationId);
-						break;
+						if (fileName.startsWith(formInstance.toString() + "."))
+						{
+							fileName = mergeDirectory + "/" + fileName;
+							IOUtil.renameFile(fileName, fileName.substring(0,
+									fileName.lastIndexOf("."))
+									+ ".xml");
+							StateManager.endState(patientState);
+							State currState = patientState.getState();
+							BaseStateActionHandler.changeState(patient, sessionId, currState,
+								stateAction,parameters,locationTagId,locationId);
+							break;
+						}
 					}
+				} else
+				{
+					log.error("Reprint failed for patient: "
+							+ patient.getPatientId()
+							+ " because merge directory was null.");
 				}
-			} else
-			{
-				log.error("Reprint failed for patient: "
-						+ patient.getPatientId()
-						+ " because merge directory was null.");
+			} else {
+				StateManager.endState(patientState);
+				State currState = patientState.getState();
+				BaseStateActionHandler.changeState(patient, sessionId, currState,
+					stateAction,parameters,locationTagId,locationId);
 			}
 		}
 
 	}
 
+	/**
+	 * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#changeState(org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState, java.util.HashMap)
+	 */
 	public void changeState(PatientState patientState,
 			HashMap<String, Object> parameters) {
 		//deliberately empty because processAction changes the state

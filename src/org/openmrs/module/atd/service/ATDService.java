@@ -62,6 +62,15 @@ public interface ATDService
 	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
 			Integer encounterId) throws APIException;
 	
+	/**
+	 * Update an existing PatientATD object.
+	 * 
+	 * @param patientATD The PatientATD object to update.
+	 * @return The updated PatientATD object.
+	 * @throws APIException
+	 */
+	public PatientATD updatePatientATD(PatientATD patientATD) throws APIException;
+	
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId);
 	
 	public ArrayList<TeleformFileState> fileProcessed(ArrayList<TeleformFileState> tfstates);
@@ -170,4 +179,14 @@ public interface ATDService
 	 * @return List of PSFQuestionAnswer objects.  This will not return null;
 	 */
 	public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId);
+	
+	/**
+	 * Returns PatientATD objects based on the form instance and field Id information provided.
+	 * 
+	 * @param formInstance Form Instance object.
+	 * @param fieldIds Field Ids to find.
+	 * 
+	 * @return List of PatientATD objects matching the criteria provided.
+	 */
+	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
 }

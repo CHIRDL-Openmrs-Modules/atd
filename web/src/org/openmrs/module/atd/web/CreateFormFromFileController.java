@@ -65,7 +65,7 @@ public class CreateFormFromFileController extends SimpleFormController {
 					}
 					
 					//filename
-					CreateFormUtil.createFormFromFile(dataFile.getInputStream());
+					CreateFormUtil.createFormsFromCSVFile(dataFile.getInputStream());
 					
 				} else {
 					map.put("missingFile", true);

@@ -36,7 +36,7 @@ import org.openmrs.logic.Rule;
 import org.openmrs.logic.result.Result;
 import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
-import org.openmrs.module.atd.datasource.TeleformExportXMLDatasource;
+import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
@@ -85,8 +85,8 @@ public class CheckIncompleteScoringJit implements Rule {
 		
 		//parse the scan xml
 		LogicService logicService = Context.getLogicService();
-		TeleformExportXMLDatasource xmlDatasource = (TeleformExportXMLDatasource) logicService.getLogicDataSource("xml");
-		HashMap<String, org.openmrs.module.atd.xmlBeans.Field> fieldMap = xmlDatasource.getParsedFile(formInstance);
+		FormDatasource xmlDatasource = (FormDatasource) logicService.getLogicDataSource("form");
+		HashMap<String, org.openmrs.module.atd.xmlBeans.Field> fieldMap = xmlDatasource.getFormFields(formInstance);
 		
 		if(fieldMap == null){
 			return Result.emptyResult();
@@ -255,9 +255,7 @@ public class CheckIncompleteScoringJit implements Rule {
 						
 						//add a JIT_incomplete state if there is no open JIT_incomplete states
 						if (openJITIncompleteState == null) {
-							PatientState patientState = chirdlUtilBackportsService.addPatientState(patient, currState, sessionId, locationTagId, locationId);
-							patientState.setFormInstance(formInstance);
-							chirdlUtilBackportsService.updatePatientState(patientState);
+							chirdlUtilBackportsService.addPatientState(patient, currState, sessionId, locationTagId, locationId, formInstance);
 						}else{
 							//update the start time if the state already exists
 							openJITIncompleteState.setStartTime(new java.util.Date());

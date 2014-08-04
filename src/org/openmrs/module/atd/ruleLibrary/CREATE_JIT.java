@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Form;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
@@ -17,9 +18,8 @@ import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttribute;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
@@ -78,7 +78,6 @@ public class CREATE_JIT implements Rule
 	{
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(patientId);
-		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		String formName = (String) parameters.get("param1");
 		Object param2Object = parameters.get("param2");
 		
@@ -87,7 +86,10 @@ public class CREATE_JIT implements Rule
 			Integer locationTagId = (Integer) parameters.get("locationTagId"); 
 			FormInstance formInstance = (FormInstance) parameters.get("formInstance");
 			Integer locationId = formInstance.getLocationId();
-			State currState = chirdlUtilBackportsService.getStateByName("JIT_create");
+			State currState = getCreateState(formName, locationTagId, locationId);
+			if (currState == null) {
+				return Result.emptyResult();
+			}
 			
 			try {
 				HashMap<String,Object> actionParameters = new HashMap<String,Object>();
@@ -102,9 +104,30 @@ public class CREATE_JIT implements Rule
             		BaseStateActionHandler.getInstance());
             }
             catch (Exception e) {
-	            log.error("",e);
+	            log.error("Error creating JIT",e);
             }
 		}	
 		return Result.emptyResult();
+	}
+	
+	protected State getCreateState(String formName, Integer locationTagId, Integer locationId) 
+	{
+		String stateName = "JIT_create";
+		Form form = Context.getFormService().getForm(formName);
+		if (form == null) {
+			log.error("No form found with name: " + formName);
+			return null;
+		}
+		
+		// Check to see if the form is mobile only
+		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		FormAttributeValue fav = 
+			chirdlUtilBackportsService.getFormAttributeValue(form.getFormId(), "mobileOnly", locationTagId, locationId);
+		if (fav != null && fav.getValue() != null && fav.getValue().equalsIgnoreCase("true")) {
+			stateName = "JIT_mobile_create";
+		}
+		
+		State currState = chirdlUtilBackportsService.getStateByName(stateName);
+		return currState;
 	}
 }
