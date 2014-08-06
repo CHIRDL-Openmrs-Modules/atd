@@ -22,19 +22,35 @@ img.close {
 }
 
 div.div_popup_form {
+	
 	position: absolute;
 	left: 50%;
+	height: auto;
+	width: auto;
+	margin-left: -350px;
 	top: 17%;
-	margin-left: -202px;
 	font-family: 'Raleway', sans-serif;
 }
 
 form {
-	max-width: 300px;
-	min-width: 250px;
+	width:600px;
+	height: auto;
 	padding: 10px 50px;
 	border: 2px solid gray;
 	border-radius: 10px;
 	font-family: raleway;
 	background-color: white;
+}
+
+.location_table{
+	margin-left:auto;
+	margin-right:auto;
+}
+
+h3{
+	margin-left:35%;
+}
+
+.location_attri_submit{
+	margin-left:270px;
 }

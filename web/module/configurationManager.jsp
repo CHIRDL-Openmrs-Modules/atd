@@ -75,6 +75,10 @@
                 </td>
             </tr>
         </table></center> -->
+        <form action="configurationManager.form" method="post" enctype="multipart/form-data">
+        form name: <input type="text" name="formName">
+        	<input type="submit" value="submit">
+        </form>
     </body>
 </html>
 <%@ include file="/WEB-INF/template/footer.jsp"%>

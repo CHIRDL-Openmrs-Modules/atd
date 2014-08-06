@@ -224,44 +224,6 @@ public class ConfigFormController2 extends SimpleFormController
 	@Override
 	protected Map referenceData(HttpServletRequest request) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		/*
-		LocationService locService = Context.getLocationService();
-		List<Location> locations = locService.getAllLocations(false);
-		List<String> locNames = new ArrayList<String>();
-		for (Location location : locations) {
-			boolean checkLocation = false;
-			String name = location.getName();
-			String checked = request.getParameter("checked_" + name);
-			if (checked != null && "true".equalsIgnoreCase(checked)) {
-				checkLocation = true;
-			}
-			
-			locNames.add(name);
-			map.put("checked_" + name, checkLocation);
-		}
-
-		String formId = request.getParameter("formId");
-		
-		ChirdlUtilBackportsService service = Context.getService(ChirdlUtilBackportsService.class);
-		LocationService locationService = Context.getLocationService();
-		List<Location> locations = locationService.getAllLocations();
-		List<LocationTagAttribute> locationTagAttributesList = service.getAllLocationTagAttributes();
-		for(LocationTagAttribute lta: locationTagAttributesList){
-			FormAttributeValue value = service.getFormAttributeValue(formId, "ageMin", lta, service.add);
-		}
-		
-		map.put(key, value)
-		
-		map.put("ageMin", request.getParameter("ageMin"));
-		map.put("ageMax", request.getParameter("ageMax"));
-		map.put("ageMinUnit", request.getParameter("ageMinUnit"));
-		map.put("ageMaxUnit", request.getParameter("ageMaxUnit"));
-		
-		map.put("locations", locNames);
-		map.put("formName", request.getParameter("formName"));
-		map.put("formId", request.getParameter("formId"));
-		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
-		*/
 		
 		//in inner list, the structure is {location, locationtag}
 		String formId = request.getParameter("formId");
@@ -280,9 +242,21 @@ public class ConfigFormController2 extends SimpleFormController
             	positions.add(position);
             	//will update to iterate the attributes table to export all attribute values later
             	FormAttributeValue forcePrintable =  cubService.getFormAttributeValue(iFormId, "forcePrintable", tag.getId(), currLoc.getId());
-            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"forcePrintable", forcePrintable);
             	FormAttributeValue autoFax =  cubService.getFormAttributeValue(iFormId, "auto-fax", tag.getId(), currLoc.getId());
+            	FormAttributeValue displayname =  cubService.getFormAttributeValue(iFormId, "displayName", tag.getId(), currLoc.getId());
+            	FormAttributeValue mobileOnly =  cubService.getFormAttributeValue(iFormId, "mobileOnly", tag.getId(), currLoc.getId());
+            	FormAttributeValue ageMin =  cubService.getFormAttributeValue(iFormId, "ageMin", tag.getId(), currLoc.getId());
+            	FormAttributeValue ageMinUnits =  cubService.getFormAttributeValue(iFormId, "ageMinUnits", tag.getId(), currLoc.getId());
+            	FormAttributeValue ageMax =  cubService.getFormAttributeValue(iFormId, "ageMax", tag.getId(), currLoc.getId());
+            	FormAttributeValue ageMaxUnits =  cubService.getFormAttributeValue(iFormId, "ageMaxUnits", tag.getId(), currLoc.getId());
+            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"forcePrintable", forcePrintable);
             	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"auto-fax", autoFax);
+            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"displayname", displayname);
+            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"mobileOnly", mobileOnly);
+            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"miniAge", ageMin);
+            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"miniAgeUnit", ageMinUnits);
+            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"maxAge", ageMax);
+            	map.put(currLoc.getId()+"#$#"+tag.getId()+"#$#"+"maxAgeUnit", ageMaxUnits);         
             }
         }
 		map.put("positions", positions);

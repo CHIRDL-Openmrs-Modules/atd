@@ -151,7 +151,7 @@
     <bean id="configurationManager" class="@MODULE_PACKAGE@.web.ConfigurationManagerController">
         <property name="commandName"><value>configurationManagerObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
-        <property name="successView"><value>configurationManager.form</value></property>
+        <property name="successView"><value>configForm2.form</value></property>
     </bean>
     <bean id="configurationManagerSuccess" class="@MODULE_PACKAGE@.web.ConfigManagerSuccessController">
         <property name="commandName"><value>configurationManagerSuccessObject</value></property>
