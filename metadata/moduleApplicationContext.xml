@@ -104,7 +104,7 @@
     <bean id="chooseLocation" class="@MODULE_PACKAGE@.web.chooseLocationController">
         <property name="commandName"><value>chooseLocationObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/chooseLocation</value></property>
-        <property name="successView"><value>configForm3.form</value></property>
+        <property name="successView"><value>configForm4.form</value></property>
     </bean> 
     
     <bean id="configForm2" class="@MODULE_PACKAGE@.web.ConfigFormController2">
@@ -118,9 +118,9 @@
         <property name="formView"><value>/module/@MODULE_ID@/configForm3</value></property>
         <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
-    <bean id="configForm4" class="@MODULE_PACKAGE@.web.ConfigFormController3">
-        <property name="commandName"><value>configForm3Object</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/configForm3</value></property>
+    <bean id="configForm4" class="@MODULE_PACKAGE@.web.ConfigFormController4">
+        <property name="commandName"><value>configForm4Object</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configForm4</value></property>
         <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
     
