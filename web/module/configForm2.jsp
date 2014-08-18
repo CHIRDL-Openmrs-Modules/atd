@@ -3,8 +3,7 @@
 <%@ page import="org.openmrs.Location"%>
 <%@ page import="org.openmrs.LocationTag"%>
 <%@ page import="java.util.*"%>
-<%@ page
-	import="org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue"%>
+<%@ page import="org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
@@ -26,9 +25,10 @@
 
 </head>
 <body>
+	<form action="configForm2.form" method="post" id="attribute_form" class="the_form">
 	<div id="div_popup_displayname" class="div_popup">
 		<div class="div_popup_form">
-			<form action="#" method="post" id="displayname_form" class="the_form">
+			<div class="div_subForm">
 				<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close"
 					onclick="closeForm('div_popup_displayname')" />
 				<p>
@@ -49,18 +49,18 @@
 						<td style="padding: 0px 0px 10px 0px"><%=  lTag.getName() %><%= " at "%><%= currLoc.getName() %>
 						</td>
 						<td style="padding: 0px 0px 10px 0px">
-							<input type="text" name="inpt_displayname" value="<%= shownDisplayname%>"/>
+							<input type="text" name="<%= "inpt_displayname#$#" + currLoc.getId()+"#$#"+lTag.getId()%>" value="<%= shownDisplayname%>"/>
 						</td>
 					</tr>
 					<%} %>
 				</table>
-				<input type="submit" id="displayname_submit" class="location_attri_submit" value="submit" />
-			</form>
+				<button type="button" id="displayname_change" class="location_attri_change" onclick="changeLocationAttributes('div_popup_displayname')">change</button>
+			</div>
 		</div>
 	</div>
 	<div id="div_popup_faxable" class="div_popup">
 		<div class="div_popup_form">
-			<form action="#" method="post" id="faxable_form" class="the_form">
+			<div class="div_subForm">
 				<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close"
 					onclick="closeForm('div_popup_faxable')" />
 				<p>
@@ -84,27 +84,27 @@
 						<td style="padding: 0px 0px 10px 0px"><%=  lTag.getName() %><%= " at "%><%= currLoc.getName() %>
 						</td>
 						<td style="padding: 0px 0px 10px 0px"><input type="radio"
-							name="<%= "inpt_faxable_" + currLoc.getId()+"#$#"+lTag.getId() %>"
-							value="Yes" onclick="input.scanNo.checked = true"
+							name="<%= "inpt_faxable#$#" + currLoc.getId()+"#$#"+lTag.getId() %>"
+							value="true" onclick="input.scanNo.checked = true"
 							<%if(faxableStatus==1) {%> checked <%} %>>
 							Yes&nbsp <input type="radio"
-							name="<%="inpt_faxable_"+ currLoc.getId()+"#$#"+lTag.getId() %>"
-							value="No" onclick="input.scoringFile.disabled = true"
+							name="<%="inpt_faxable#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>"
+							value="false" onclick="input.scoringFile.disabled = true"
 							<%if(faxableStatus==2) {%> checked <%} %>> No <input
 							type="radio"
-							name="<%="inpt_faxable_"+ currLoc.getId()+"#$#"+lTag.getId() %>"
+							name="<%="inpt_faxable#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>"
 							value="notSet" <%if(faxableStatus==0) {%> checked <%} %>>
 							Not Set</td>
 					</tr>
 					<%} %>
 				</table>
-				<input type="submit" id="faxable_submit" class="location_attri_submit" value="submit" />
-			</form>
+				<button type="button" id="faxable_change" class="location_attri_change" onclick="changeLocationAttributes('div_popup_faxable')">change</button>
+			</div>
 		</div>
 	</div>
 	<div id="div_popup_fprintable" class="div_popup">
-		<div class="div_popup_form">
-			<form action="#" method="post" id="fprintable_form" class="the_form">
+		<div class="div_popup_form">	
+			<div class="div_subForm">
 				<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close"
 					onclick="closeForm('div_popup_fprintable')" />
 				<p>
@@ -128,28 +128,28 @@
 						<td style="padding: 0px 0px 10px 0px"><%=  lTag.getName() %><%= " at "%><%= currLoc.getName() %>
 						</td>
 						<td style="padding: 0px 0px 10px 0px"><input type="radio"
-							name="<%= "inpt_fprintable_" + currLoc.getId()+"#$#"+lTag.getId() %>"
-							value="Yes" onclick="input.scanNo.checked = true"
+							name="<%= "inpt_fprintable#$#" + currLoc.getId()+"#$#"+lTag.getId() %>"
+							value="true" onclick="input.scanNo.checked = true"
 							<%if(forcePrintableStatus==1) {%> checked <%} %>>
 							Yes&nbsp <input type="radio"
-							name="<%="inpt_fprintable_"+ currLoc.getId()+"#$#"+lTag.getId() %>"
-							value="No" onclick="input.scoringFile.disabled = true"
+							name="<%="inpt_fprintable#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>"
+							value="false" onclick="input.scoringFile.disabled = true"
 							<%if(forcePrintableStatus==2) {%> checked <%} %>> No <input
 							type="radio"
-							name="<%="inpt_fprintable_"+ currLoc.getId()+"#$#"+lTag.getId() %>"
+							name="<%="inpt_fprintable#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>"
 							value="notSet" <%if(forcePrintableStatus==0) {%> checked <%} %>>
 							Not Set</td>
 					</tr>
 					<%} %>
 				</table>
-				<input type="submit" id="fprintable_submit" class="location_attri_submit" value="submit" />
-			</form>
+				<button type="button" id="fprintable_change" class="location_attri_change" onclick="changeLocationAttributes('div_popup_fprintable')">change</button>
+			</div>
 		</div>
 	</div>	
 	
 	<div id="div_popup_mobileOnly" class="div_popup">
 		<div class="div_popup_form">
-			<form action="#" method="post" id="mobileOnly_form" class="the_form">
+			<div class="div_subForm">
 				<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close"
 					onclick="closeForm('div_popup_mobileOnly')" />
 				<p>
@@ -173,29 +173,29 @@
 						<td style="padding: 0px 0px 10px 0px"><%=  lTag.getName() %><%= " at "%><%= currLoc.getName() %>
 						</td>
 						<td style="padding: 0px 0px 10px 0px"><input type="radio"
-							name="<%= "inpt_mobileOnly_" + currLoc.getId()+"#$#"+lTag.getId() %>"
-							value="Yes" onclick="input.scanNo.checked = true"
+							name="<%= "inpt_mobileOnly#$#" + currLoc.getId()+"#$#"+lTag.getId() %>"
+							value="true" onclick="input.scanNo.checked = true"
 							<%if(mobileOnlyStatus==1) {%> checked <%} %>>
 							Yes&nbsp <input type="radio"
-							name="<%="inpt_mobileOnly_"+ currLoc.getId()+"#$#"+lTag.getId() %>"
-							value="No" onclick="input.scoringFile.disabled = true"
+							name="<%="inpt_mobileOnly#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>"
+							value="false" onclick="input.scoringFile.disabled = true"
 							<%if(mobileOnlyStatus==2) {%> checked <%} %>> No <input
 							type="radio"
-							name="<%="inpt_mobileOnly_"+ currLoc.getId()+"#$#"+lTag.getId() %>"
+							name="<%="inpt_mobileOnly#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>"
 							value="notSet" <%if(mobileOnlyStatus==0) {%> checked <%} %>>
 							Not Set</td>
 					</tr>
 					<%} %>
 				</table>
-				<input type="submit" id="mobileOnly_submit" class="location_attri_submit" value="submit" />
-			</form>
+				<button type="button" id="mobileOnly_change" class="location_attri_change" onclick="changeLocationAttributes('div_popup_mobileOnly')">change</button>
+			</div>
 		</div>
 	</div>	
 	
 	
 	<div id="div_popup_scannable" class="div_popup">
 		<div class="div_popup_form">
-			<form action="#" method="post" id="scannable_form" class="the_form">
+			<div class="div_subForm">
 				<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close"
 					onclick="closeForm('div_popup_scannable')" />
 				<p>
@@ -227,13 +227,13 @@
 							onclick="input.scoringFile.disabled = true"> No</td>
 					</tr>
 				</table>
-				<input type="submit" id="scannable_submit" class="location_attri_submit" value="submit" />
-			</form>
+				<button id="scannable_change" type="button" class="location_attri_change" onclick="changeLocationAttributes('div_popup_scannable')">change</button>
+			</div>
 		</div>
 	</div>
 	<div id="div_popup_miniAge" class="div_popup">
 		<div class="div_popup_form">
-			<form action="#" method="post" id="minimal_age_form" class="the_form">
+			<div class="div_subForm">
 				<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close"
 					onclick="closeForm('div_popup_miniAge')" />
 				<p>
@@ -259,10 +259,10 @@
 					<tr style="padding: 5px">
 						<td style="padding: 0px 0px 10px 0px"><%=  lTag.getName() %><%= " at "%><%= currLoc.getName() %></td>
 						<td style="padding: 0px 0px 10px 0px">minimal applicable age:
-							<input type="text" name="<%="inpt_miniAge_"+ currLoc.getId()+"#$#"+lTag.getId() %>" value="<%= shownMiniAge %>">
+							<input type="text" name="<%="inpt_miniAge#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>" value="<%= shownMiniAge %>">
 						</td>
 						<td style="padding: 0px 0px 10px 0px">age unit: <select
-							id="ageMinUnitSelect_A" name="<%="inpt_miniAgeUnit_"+ currLoc.getId()+"#$#"+lTag.getId() %>" >
+							id="ageMinUnitSelect_A" name="<%="inpt_miniAgeUnit#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>" >
 								<option value="none" <%if(shownAgeUnit.equals("")){ %>selected="selected" <%} %>>none</option>
 								<option value="yo" <%if(shownAgeUnit.equals("yo")){ %>selected="selected" <%} %>>year</option>
 								<option value="mo" <%if(shownAgeUnit.equals("mo")){ %>selected="selected" <%} %>>month</option>
@@ -273,13 +273,13 @@
 					</tr>
 					<%} %>
 				</table>
-				<input type="submit" id="miniAge_submit" class="location_attri_submit" value="submit" />
-			</form>
+				<button id="miniAge_change" type="button" class="location_attri_change" onclick="changeLocationAttributes('div_popup_miniAge')">change</button>
+			</div>
 		</div>
 	</div>
 	<div id="div_popup_maxAge" class="div_popup">
 		<div class="div_popup_form">
-			<form action="#" method="post" id="maximal_age_form" class="the_form">
+			<div class="div_subForm">
 				<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close"
 					onclick="closeForm('div_popup_maxAge')" />
 				<p>
@@ -304,10 +304,10 @@
 					<tr style="padding: 5px">
 						<td style="padding: 0px 0px 10px 0px"><%=  lTag.getName() %><%= " at "%><%= currLoc.getName() %></td>
 						<td style="padding: 0px 0px 10px 0px">maximal applicable age:
-							<input type="text" name="<%="inpt_maxAge_"+ currLoc.getId()+"#$#"+lTag.getId() %>" value="<%= shownMaxAge%>">
+							<input type="text" name="<%="inpt_maxAge#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>" value="<%= shownMaxAge%>">
 						</td>
 						<td style="padding: 0px 0px 10px 0px">age unit: <select
-							id="ageMaxUnitSelect_A" name="<%= "inpt_maxAge_"+ currLoc.getId()+"#$#"+lTag.getId() %>" >
+							id="ageMaxUnitSelect_A" name="<%= "inpt_maxAgeUnit#$#"+ currLoc.getId()+"#$#"+lTag.getId() %>" >
 								<option value="none" <%if(shownAgeUnit.equals("")){ %>selected="selected" <%} %>>none</option>
 								<option value="yo" <%if(shownAgeUnit.equals("yo")){ %>selected="selected" <%} %>>year</option>
 								<option value="mo" <%if(shownAgeUnit.equals("mo")){ %>selected="selected" <%} %>>month</option>
@@ -318,11 +318,11 @@
 					</tr>
 					<%} %>
 				</table>
-				<input type="submit" id="maxAge_submit" class="location_attri_submit" value="submit" />
-			</form>
+				<button id="maxAge_change" type="button" class="location_attri_change" onclick="changeLocationAttributes('div_popup_maxAge')">change</button>
+			</div>
 		</div>
 	</div>
-
+</form>
 
 	<p>
 	<h2>Configure Form Properties:</h2>
@@ -372,6 +372,9 @@
 			</td>
 		</tr>
 	</table>
+	<br/>
+	<br/>
+	<button onclick="document.forms['attribute_form'].submit()">submit</button>
 </body>
 </html>
 <%@ include file="/WEB-INF/template/footer.jsp"%>

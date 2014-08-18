@@ -16,7 +16,10 @@
 				<prop key="/module/@MODULE_ID@/deleteForms.form">deleteForms</prop>
 				<prop key="/module/@MODULE_ID@/createForm.form">createForm</prop>
 				<prop key="/module/@MODULE_ID@/popFormFields.form">popFormFields</prop>
+				<prop key="/module/@MODULE_ID@/configForm.form">configForm</prop>
 				<prop key="/module/@MODULE_ID@/configForm2.form">configForm2</prop>
+				<prop key="/module/@MODULE_ID@/configForm3.form">configForm3</prop>
+				<prop key="/module/@MODULE_ID@/configForm4.form">configForm4</prop>
 				<prop key="/module/@MODULE_ID@/mlmForm.form">mlmForm</prop>
 				<prop key="/module/@MODULE_ID@/printerFormSelectionForm.form">printerFormSelectionForm</prop>
 				<prop key="/module/@MODULE_ID@/printerLocationForm.form">printerLocationForm</prop>
@@ -35,6 +38,7 @@
 				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
 			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/createFormFromFile.form">createFormFromFile</prop>
+			    <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
 			</props>
 		</property>
 	</bean>
@@ -87,12 +91,36 @@
     <bean id="popFormFields" class="@MODULE_PACKAGE@.web.PopulateFormFieldsController">
         <property name="commandName"><value>popFormFieldsObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/popFormFields</value></property>
-        <property name="successView"><value>configForm2.form</value></property>
+        <property name="successView"><value>configForm.form</value></property>
     </bean>  
+     
+    <bean id="configForm" class="@MODULE_PACKAGE@.web.ConfigFormController">
+        <property name="commandName"><value>configFormObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configForm</value></property>
+        <property name="successView"><value>mlmForm.form</value></property>
+    </bean> 
+    
+    
+    <bean id="chooseLocation" class="@MODULE_PACKAGE@.web.chooseLocationController">
+        <property name="commandName"><value>chooseLocationObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/chooseLocation</value></property>
+        <property name="successView"><value>configForm3.form</value></property>
+    </bean> 
     
     <bean id="configForm2" class="@MODULE_PACKAGE@.web.ConfigFormController2">
         <property name="commandName"><value>configFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configForm2</value></property>
+        <property name="successView"><value>mlmForm.form</value></property>
+    </bean> 
+    
+    <bean id="configForm3" class="@MODULE_PACKAGE@.web.ConfigFormController3">
+        <property name="commandName"><value>configForm3Object</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configForm3</value></property>
+        <property name="successView"><value>mlmForm.form</value></property>
+    </bean> 
+    <bean id="configForm4" class="@MODULE_PACKAGE@.web.ConfigFormController3">
+        <property name="commandName"><value>configForm3Object</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configForm3</value></property>
         <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
     
@@ -151,7 +179,7 @@
     <bean id="configurationManager" class="@MODULE_PACKAGE@.web.ConfigurationManagerController">
         <property name="commandName"><value>configurationManagerObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
-        <property name="successView"><value>configForm2.form</value></property>
+        <property name="successView"><value>chooseLocation.form</value></property>
     </bean>
     <bean id="configurationManagerSuccess" class="@MODULE_PACKAGE@.web.ConfigManagerSuccessController">
         <property name="commandName"><value>configurationManagerSuccessObject</value></property>

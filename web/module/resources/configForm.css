@@ -32,7 +32,7 @@ div.div_popup_form {
 	font-family: 'Raleway', sans-serif;
 }
 
-form {
+.div_subForm {
 	width:600px;
 	height: auto;
 	padding: 10px 50px;
@@ -51,6 +51,6 @@ h3{
 	margin-left:35%;
 }
 
-.location_attri_submit{
+.location_attri_change{
 	margin-left:270px;
 }

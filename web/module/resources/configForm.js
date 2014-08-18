@@ -36,6 +36,11 @@ function closeForm(div_id) {
 	document.getElementById(div_id).style.display = "none";
 }
 
+function changeLocationAttributes(div_id){
+	document.getElementById(div_id).style.display="none";
+}
+
+
 // function to check parent node and return result accordingly
 function checkParent(t) {
 	while (t.parentNode) {
