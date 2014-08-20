@@ -126,6 +126,7 @@ public class ConfigFormController3 extends SimpleFormController {
 			}
 			/*for getting the value that is applied for all positions and storing it */
 			String feedbackAllPositionValue = request.getParameter("inpt_"+fa.getFormAttributeId()+"#$#ALL#$#ALL");
+			feedbackAllPositionValue = feedbackAllPositionValue.trim();
 			if(feedbackAllPositionValue !=null && !feedbackAllPositionValue.equals("")){
 				for(ArrayList<Object> position: positions){
 					Location currLoc = (Location)position.get(0);

@@ -16,28 +16,15 @@
 <link
 	href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
 	type="text/css" rel="stylesheet" />
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/moduleResources/atd/configForm.css" />
-<script
-	src="${pageContext.request.contextPath}/moduleResources/atd/configForm.js"></script>
-<link
-	href="${pageContext.request.contextPath}/moduleResources/atd/kendo.common.min.css"
-	rel="stylesheet" />
-<link
-	href="${pageContext.request.contextPath}/moduleResources/atd/kendo.default.min.css"
-	rel="stylesheet" />
-<link
-	href="${pageContext.request.contextPath}/moduleResources/atd/kendo.dataviz.min.css"
-	rel="stylesheet" />
-<link
-	href="${pageContext.request.contextPath}/moduleResources/atd/kendo.dataviz.default.min.css"
-	rel="stylesheet" />
-<script
-	src="${pageContext.request.contextPath}/moduleResources/atd/jquery.min.js"></script>
-<script
-	src="${pageContext.request.contextPath}/moduleResources/atd/angular.min.js"></script>
-<script
-	src="${pageContext.request.contextPath}/moduleResources/atd/kendo.all.min.js"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/moduleResources/atd/configForm.css" />
+<script src="${pageContext.request.contextPath}/moduleResources/atd/configForm.js"></script>
+<link href="${pageContext.request.contextPath}/moduleResources/atd/kendo.common.min.css" rel="stylesheet" />
+<link href="${pageContext.request.contextPath}/moduleResources/atd/kendo.default.min.css" rel="stylesheet" />
+<link href="${pageContext.request.contextPath}/moduleResources/atd/kendo.dataviz.min.css" rel="stylesheet" />
+<link href="${pageContext.request.contextPath}/moduleResources/atd/kendo.dataviz.default.min.css" rel="stylesheet" />
+<script src="${pageContext.request.contextPath}/moduleResources/atd/jquery.min.js"></script>
+<script src="${pageContext.request.contextPath}/moduleResources/atd/angular.min.js"></script>
+<script src="${pageContext.request.contextPath}/moduleResources/atd/kendo.all.min.js"></script>
 
 
 
@@ -72,7 +59,7 @@
 							<tr style="padding: 5px">
 								<td style="padding: 0px 0px 10px 0px">for all position</td>
 								<td style="padding: 0px 0px 10px 0px">
-									<input type="text" name="inpt_${fa.formAttributeId}#$#ALL#$#ALL" id="inpt_${fa.formAttributeId}_ALL_ALL" />
+									<input type="text" name="inpt_${fa.formAttributeId}#$#ALL#$#ALL" value="  " id="inpt_${fa.formAttributeId}_ALL_ALL" />
 								</td>
 							</tr>
 							<script>
