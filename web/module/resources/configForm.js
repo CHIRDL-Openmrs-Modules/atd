@@ -56,3 +56,10 @@ function checkParent(t) {
 	alert("outside, return true");
 	return true
 }
+
+//Escapes special characters and returns a valid jQuery selector
+function jqSelector(str)
+{
+	return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
+}
+

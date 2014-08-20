@@ -118,7 +118,7 @@
         <property name="formView"><value>/module/@MODULE_ID@/configForm3</value></property>
         <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
-    <bean id="configForm4" class="@MODULE_PACKAGE@.web.ConfigFormController4">
+    <bean id="configForm4" class="@MODULE_PACKAGE@.web.ConfigFormController3">
         <property name="commandName"><value>configForm4Object</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configForm4</value></property>
         <property name="successView"><value>mlmForm.form</value></property>

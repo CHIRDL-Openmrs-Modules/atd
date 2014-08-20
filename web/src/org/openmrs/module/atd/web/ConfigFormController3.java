@@ -85,7 +85,12 @@ public class ConfigFormController3 extends SimpleFormController {
 	protected Object formBackingObject(HttpServletRequest request) throws Exception {
 		return "testing";
 	}
-
+	/*
+	 * There are two kinds of input text: form attribute value for all positions and these for each different position. For the former one, leaving the text field blank
+	 * would not delete the current value in server for all positions but for the latter ones it does. users may set some specific values to positions that they think identical
+	 * in position-specific text fields and leave all-positions field blank, but once user input some values in all-position field, it will override the values of each specific-position field.
+	 * When the page is new loaded, the position-specific text fields reflect the current value of each position but all-positions field is always blank.
+	 * */
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -100,6 +105,7 @@ public class ConfigFormController3 extends SimpleFormController {
 		LocationService locationService = Context.getLocationService();
 		List<Location> locations = locationService.getAllLocations();
 		for (FormAttribute fa: editableFormAttributes){
+			/*for storing values with each position */
 			for (ArrayList<Object> position: positions) {
 				Location currLoc = (Location)position.get(0);
 				LocationTag tag = (LocationTag)position.get(1);
@@ -116,6 +122,15 @@ public class ConfigFormController3 extends SimpleFormController {
 					if(currentStoredValue!=null && !currentStoredValue.equals("")){
 						cubService.deleteFormAttributeValue((FormAttributeValue)currentStoredValue );
 					}
+				}
+			}
+			/*for getting the value that is applied for all positions and storing it */
+			String feedbackAllPositionValue = request.getParameter("inpt_"+fa.getFormAttributeId()+"#$#ALL#$#ALL");
+			if(feedbackAllPositionValue !=null && !feedbackAllPositionValue.equals("")){
+				for(ArrayList<Object> position: positions){
+					Location currLoc = (Location)position.get(0);
+					LocationTag tag = (LocationTag)position.get(1);
+					cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackAllPositionValue);
 				}
 			}
 		}
