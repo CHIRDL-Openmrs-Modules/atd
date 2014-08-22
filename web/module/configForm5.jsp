@@ -36,8 +36,7 @@
 
 </head>
 <body>
-	<form action="configForm4.form" method="post" id="attribute_form"
-		class="the_form">
+	<form action="configForm5.form" method="post" id="attribute_form" class="the_form">
 		<c:forEach items="${editableFormAttributes}" var="fa" varStatus="status">
 			<c:set var="formAttributeId">${fa.formAttributeId}</c:set>
 			<c:set var="valueEnumList" value="${formAttributesValueEnumMap[formAttributeId]}" />
@@ -75,14 +74,10 @@
                         index: 3
                     });
 					</script>
-							<c:forEach items="${positions}" var="position"
-								varStatus="pStatus">
-								<c:set var="currLoc" value="${position[0]}" />
-								<c:set var="lTag" value="${position[1]}" />
-								<c:set var="theId"
-									value="${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}" />
-								<c:set var="currentValue"
-									value="${formAttributesValueMap[theId]}" />
+					<c:forEach items="${locationsList}" var="currLoc" varStatus="locStatus">
+						<c:forEach items="${locationTagsMap[currLoc.id]}" var="lTag" varStatus="tagStatus"> 
+								<c:set var="theId" value="${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}" />
+								<c:set var="currentValue"  value="${formAttributesValueMap[theId]}" />
 								<c:set var="currentValueStr" value="" />
 								<c:if test="${not empty currentValue }">
 									<c:set var="currentValueStr" value="${currentValue.value}" />
@@ -93,7 +88,7 @@
 										<input type="text" name="inpt_${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}" value="${currentValueStr}" id="inpt_${fa.formAttributeId}_${currLoc.id}_${lTag.id}" />
 									</td>
 								</tr>
-								<script>
+					<script>
 					<c:set var = "inptId" value = "inpt_${fa.formAttributeId}_${currLoc.id}_${lTag.id}"/>
                     $("#${inptId}").kendoComboBox({
                         dataTextField: "text",
@@ -110,6 +105,7 @@
                         index: 3
                     });
 					</script>
+								</c:forEach>
 							</c:forEach>
 						</table>
 						<button type="button" id="${fa.formAttributeId}_change"
@@ -127,8 +123,7 @@
 	<h2>Configure Form Properties:</h2>
 	</p>
 	<table>
-		<c:forEach var="fa" items="${editableFormAttributes }"
-			varStatus="status">
+		<c:forEach var="fa" items="${editableFormAttributes }" varStatus="status">
 			<tr style="padding: 5px">
 				<td style="padding: 0px 0px 10px 0px">attribute name:
 					${fa.name}</td>
