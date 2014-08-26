@@ -21,43 +21,47 @@
 <script src="${pageContext.request.contextPath}/moduleResources/atd/jquery.min.js"></script>
 <script src="${pageContext.request.contextPath}/moduleResources/atd/angular.min.js"></script>
 <script src="${pageContext.request.contextPath}/moduleResources/atd/kendo.all.min.js"></script>
-
-
-
 <title>Configure Form</title>
-
-<%
-	List<ArrayList<Object>> positions = (ArrayList<ArrayList<Object>>)(request.getAttribute("positions"));
-	Map<String, Object> formAttributesValueMap = (Map<String, Object>)(request.getAttribute("formAttributesValueMap"));
-	Map<String, List<String>> formAttributesValueEnumMap = (Map<String, List<String>>)(request.getAttribute("formAttributesValueEnumMap"));
-	List<FormAttribute> editableFormAttributes = (List<FormAttribute>)(request.getAttribute("editableFormAttributes"));
-%>
-
-
+<script type="text/javascript">
+	var originalValues = {};
+	/*
+	<c:forEach items = "${editableFormAttributes}" var="fa" varStatus="faStatus">
+		<c:forEach items = "${locationsList}" var="currLoc" varStatus="currLocStatus">
+			<c:forEach items="${locationTagsMap[currLoc.id]}" var="lTag" varStatus="tagStatus">
+				originalValue[" /"]
+			
+			</c:forEach>
+		</c:forEach>
+	</c:forEach>
+	*/
+	
+</script>
 </head>
 <body>
 	<form action="configForm5.form" method="post" id="attribute_form" class="the_form">
 		<c:forEach items="${editableFormAttributes}" var="fa" varStatus="status">
+			<script>
+				originalValues["${fa.formAttributeId}"]={};
+			</script>
 			<c:set var="formAttributeId">${fa.formAttributeId}</c:set>
 			<c:set var="valueEnumList" value="${formAttributesValueEnumMap[formAttributeId]}" />
 			<div id="div_popup_${fa.formAttributeId}" class="div_popup">
 				<div class="div_popup_form">
 					<div class="div_subForm">
-						<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close" onclick="closeForm('div_popup_${fa.formAttributeId}')" />
+						<img src="${pageContext.request.contextPath}/moduleResources/atd/3.png" class="close" onclick="restore('div_popup_${fa.formAttributeId}','${fa.formAttributeId}', originalValues)" />
 						<p>
 						<h3>
 							Choose <c:out value="${fa.name}" />
 						</h3>
 						</p>
-
 						<table class="location_table">
 							<tr style="padding: 5px">
 								<td style="padding: 0px 0px 10px 0px">for all position</td>
 								<td style="padding: 0px 0px 10px 0px">
-									<input type="text" name="inpt_${fa.formAttributeId}#$#ALL#$#ALL" value="  " id="inpt_${fa.formAttributeId}_ALL_ALL" />
+									<input type="text" name="inpt_${fa.formAttributeId}#$#ALL#$#ALL" id="inpt_${fa.formAttributeId}_ALL_ALL" onchange="assignValueSubClass('inpt_${fa.formAttributeId}_ALL_ALL')"/>
 								</td>
 							</tr>
-						<script>
+					<script>
 					<c:set var = "inptallId" value = "inpt_${fa.formAttributeId}_ALL_ALL"/>
                     $("#${inptallId}").kendoComboBox({
                         dataTextField: "text",
@@ -71,12 +75,44 @@
                         ],
                         filter: "contains",
                         suggest: true,
-                        index: 3
+                        index: 3,
+                        autoBind:false,
+                        text:""
                     });
 					</script>
 					<c:forEach items="${locationsList}" var="currLoc" varStatus="locStatus">
+						<c:set var="allId" value="${fa.formAttributeId}#$#${currLoc.id}#$#ALL" />
+						<c:set var = "allInptId" value = "inpt_${fa.formAttributeId}_${currLoc.id}_ALL"/> 
+						<tr style="padding: 5px">
+							<td style="padding: 0px 0px 10px 0px">all location tag name at ${currLoc.name}</td>
+							<td style="padding: 0px 0px 10px 0px">
+								<input type="text"  id="${allInptId}" class="${fa.formAttributeId} ALL" onchange="assignValueSubClass('${allInptId}'); removeValueSuperClass('${allInptId}')"/>
+							</td>
+						</tr>
+						<script>
+
+                    	$("#${allInptId}").kendoComboBox({
+                        	dataTextField: "text",
+                        	dataValueField: "value",
+                        	dataSource: [
+                                <c:if test = "${not empty valueEnumList}">
+                                	<c:forEach items = "${valueEnumList}" var = "enumStr" varStatus="comboxStatus">
+                                		{text: "${enumStr}" , value: "${enumStr}"},
+                                	</c:forEach>
+                                </c:if>
+                        	],
+                        	filter: "contains",
+                        	suggest: true,
+                        	index: 3,
+                            autoBind:false,
+                            text:""
+                    	});
+						</script>
+						
+						
 						<c:forEach items="${locationTagsMap[currLoc.id]}" var="lTag" varStatus="tagStatus"> 
 								<c:set var="theId" value="${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}" />
+								<c:set var = "inptId" value = "inpt_${fa.formAttributeId}_${currLoc.id}_${lTag.id}"/>
 								<c:set var="currentValue"  value="${formAttributesValueMap[theId]}" />
 								<c:set var="currentValueStr" value="" />
 								<c:if test="${not empty currentValue }">
@@ -85,11 +121,11 @@
 								<tr style="padding: 5px">
 									<td style="padding: 0px 0px 10px 0px">${lTag.name} at ${currLoc.name}</td>
 									<td style="padding: 0px 0px 10px 0px">
-										<input type="text" name="inpt_${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}" value="${currentValueStr}" id="inpt_${fa.formAttributeId}_${currLoc.id}_${lTag.id}" />
+										<input type="text" name="inpt_${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}" value="${currentValueStr}" id = "${inptId}" class = "${fa.formAttributeId} ${currLoc.id}"  onchange="removeValueSuperClass('${inptId}')"/>
 									</td>
 								</tr>
 					<script>
-					<c:set var = "inptId" value = "inpt_${fa.formAttributeId}_${currLoc.id}_${lTag.id}"/>
+					originalValues["${fa.formAttributeId}"]["${inptId}"]="${currentValueStr}";
                     $("#${inptId}").kendoComboBox({
                         dataTextField: "text",
                         dataValueField: "value",
@@ -102,8 +138,11 @@
                         ],
                         filter: "contains",
                         suggest: true,
-                        index: 3
+                        index: 3,
+                        autoBind:false,
+                        text:"${currentValueStr}"
                     });
+                    
 					</script>
 								</c:forEach>
 							</c:forEach>
@@ -139,6 +178,7 @@
 	<br />
 	<br />
 	<button onclick="document.forms['attribute_form'].submit()">submit</button>
+	<a style="margin:0px 0px 0px 50px " href="${pageContext.request.contextPath}/module/atd/configurationManager.form"><button>cancel</button></a> 
 </body>
 </html>
 <%@ include file="/WEB-INF/template/footer.jsp"%>

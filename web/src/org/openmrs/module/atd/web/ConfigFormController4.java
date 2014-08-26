@@ -127,6 +127,7 @@ public class ConfigFormController4 extends SimpleFormController {
 				}
 			}
 			/*for getting the value that is applied for all positions and storing it */
+			/*
 			String feedbackAllPositionValue = request.getParameter("inpt_"+fa.getFormAttributeId()+"#$#ALL#$#ALL");
 			feedbackAllPositionValue = feedbackAllPositionValue.trim();
 			if(feedbackAllPositionValue !=null && !feedbackAllPositionValue.equals("")){
@@ -136,6 +137,7 @@ public class ConfigFormController4 extends SimpleFormController {
 					}
 				}
 			}
+			*/
 		}
 		
 		map.put("formId", iFormId.toString());
