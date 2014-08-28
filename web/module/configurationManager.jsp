@@ -39,6 +39,13 @@
                 </td>
             </tr>
         </table></center>
+        <center><table>
+        	<tr style="padding: 5px">
+        		<td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/getFormByName.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/editFormAttributes.gif"/></a>
+                </td>
+        	</tr>
+        </table></center>
         <br/>
         <br/>
         <center><h3>Printer Configuration</h3></center>

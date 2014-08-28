@@ -54,3 +54,16 @@ h3{
 .location_attri_change{
 	margin-left:270px;
 }
+
+.blockColor1{
+	background-color: #C3FC91;
+}
+
+.blockColor2{
+	background-color: #F9D8F4;
+}
+
+.div_table{
+	width: 100%;
+	height: auto;
+}

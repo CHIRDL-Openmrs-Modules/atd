@@ -28,17 +28,4 @@ public class ConfigurationManagerController extends SimpleFormController {
 		return "testing";
 	}
 	
-	@Override
-	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, 
-	                                             BindException errors) throws Exception {
-		String formName = request.getParameter("formName");
-		Map<String, Object> map = new HashMap<String, Object>();
-		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-		FormService fs =Context.getFormService();
-		Form form = fs.getForm(formName);
-		map.put("formId", form.getId());
-		String view = getSuccessView();
-		return new ModelAndView(
-				new RedirectView(view), map);
-	}
 }
