@@ -9,6 +9,8 @@ import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,4 +114,8 @@ public interface ATDDAO {
 	 * @return List of PSFQuestionAnswer objects.  This will not return null.
 	 */
 	public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId);
+	
+	public List<ConceptDescriptor> getAllConceptAsDescriptor();
+	
+	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor();
 }

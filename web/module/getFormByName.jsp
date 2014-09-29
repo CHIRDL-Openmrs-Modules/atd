@@ -6,11 +6,33 @@
 <title>Chica get form name</title>
 </head>
 <body>
-<form method="post" action="getFormByName.form">
-	Please enter the form name:  <input type="text" name="formName"/>   <input type="submit" value="submit"/>
+<form method="post" action="getFormByName.form" enctype="multipart/form-data">
+	Form name:  <input type="text" name="formName"/>
 	<c:if test="${not empty noSuchName and noSuchName =='true' }">
 		&nbsp;The form name does not exist
 	</c:if>
+	<br/><br/>
+	Edit type:  
+	<c:if test = "${not empty typeNotChosen and typeNotChosen=='true'}"> 
+		&nbsp;choose a editing type
+	</c:if>
+	<br/>
+	<input type="radio" name="editType" value="manual" onclick="document.getElementById('csvFile').disabled = true"/> Edit manually online <br/>
+	<input type="radio" name="editType" value="csv" onclick="document.getElementById('csvFile').disabled = false"/> Edit by uploading csv file <br/>
+	<br/>
+	upload csv file:   <input type=file id="csvFile" name="csvFile" accept="text/xml" disabled/>
+	<c:if test = "${not empty csvFileError and csvFileError=='typeError'}">
+		&nbsp;not a csv format file
+	</c:if>
+	<c:if test = "${not empty csvFileError and csvFileError=='csvFileEmpty'}">
+		&nbsp;csv file empty
+	</c:if>
+	<c:if test = "${not empty csvFileError and csvFileError=='notMultipart'}">
+		&nbsp;form error
+	</c:if>
+	<br/>
+	<input type="submit" value="submit"/>
+
 </form>
 </body>
 </html>

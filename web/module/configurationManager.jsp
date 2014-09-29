@@ -44,6 +44,12 @@
         		<td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/getFormByName.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/editFormAttributes.gif"/></a>
                 </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/exportFormCsv.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormAttributes.gif"/></a>
+                </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/exportFormDefinitionCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormDefinition.gif"/></a>
+                </td>
         	</tr>
         </table></center>
         <br/>
@@ -72,6 +78,14 @@
                 </td>
             </tr>
         </table></center>
+        <center><h3>Concept Definination</h3></center>
+        <center><table>
+            <tr style="padding: 5px">
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/exportConceptCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportConcepts.gif"/></a>
+                </td>
+            </tr>
+        </table></center>
         <!-- <br/>
         <br/>
         <center><h3>Clinic Configuration</h3></center>
@@ -82,10 +96,6 @@
                 </td>
             </tr>
         </table></center> -->
-        <form action="configurationManager.form" method="post" enctype="multipart/form-data">
-        form name: <input type="text" name="formName">
-        	<input type="submit" value="submit">
-        </form>
     </body>
 </html>
 <%@ include file="/WEB-INF/template/footer.jsp"%>

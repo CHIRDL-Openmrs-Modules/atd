@@ -41,27 +41,45 @@
 			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/createFormFromFile.form">createFormFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
-			    <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
+			    <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByNameTest</prop>
+			    <prop key="/module/@MODULE_ID@/showFormAttributeValue.form">showFormAttributeValue</prop>
+			    <prop key="/module/@MODULE_ID@/exportFormCsv.form">exportFormCsv</prop>
+			    <prop key="/module/@MODULE_ID@/exportConceptCSV.form">exportConceptCSV</prop>
+			    <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV.form">exportFormDefinitionCSV</prop>					    
 			</props>
 		</property>
 	</bean>
-<bean id="ruleBuilderForm" class="org.openmrs.module.atd.web.RuleBuilderFormController" lazy-init="default" autowire="default" dependency-check="default">
-<property name="commandName"><value>rule</value></property>
-<property name="commandClass">
-  <value>org.openmrs.module.atd.RuleBuilderForm</value> 
-  </property>
-<property name="formView"><value>/module/@MODULE_ID@/ruleBuilderForm</value></property>
-<property name="successView"><value>ruleBuilder.form</value></property>
-  </bean>
-  
-<bean id="dataForm" class="org.openmrs.module.atd.web.DataFormController" lazy-init="default" autowire="default" dependency-check="default">
-<property name="commandName"><value>data</value></property>
-<property name="commandClass">
-  <value>org.openmrs.module.atd.DataForm</value> 
-  </property>
-<property name="formView"> <value>/module/@MODULE_ID@/dataForm</value></property>
-<property name="successView"><value>data.form</value></property>
-  </bean>
+<bean id="ruleBuilderForm" class="org.openmrs.module.atd.web.RuleBuilderFormController"
+	lazy-init="default" autowire="default" dependency-check="default">
+	<property name="commandName">
+		<value>rule</value>
+	</property>
+	<property name="commandClass">
+		<value>org.openmrs.module.atd.RuleBuilderForm</value>
+	</property>
+	<property name="formView">
+		<value>/module/@MODULE_ID@/ruleBuilderForm</value>
+	</property>
+	<property name="successView">
+		<value>ruleBuilder.form</value>
+	</property>
+</bean>
+
+	<bean id="dataForm" class="org.openmrs.module.atd.web.DataFormController"
+		lazy-init="default" autowire="default" dependency-check="default">
+		<property name="commandName">
+			<value>data</value>
+		</property>
+		<property name="commandClass">
+			<value>org.openmrs.module.atd.DataForm</value>
+		</property>
+		<property name="formView">
+			<value>/module/@MODULE_ID@/dataForm</value>
+		</property>
+		<property name="successView">
+			<value>data.form</value>
+		</property>
+	</bean>
 	
 	<bean id="uploadForms" class="org.openmrs.module.atd.web.UploadFormsController">
 		<property name="commandName"><value>UploadFormsObject</value></property>
@@ -194,10 +212,11 @@
         <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
         <property name="successView"><value>configurationManager.form</value></property>
     </bean>
-    <bean id="getFormByName" class="@MODULE_PACKAGE@.web.GetFormByNameController">
+
+    <bean id="getFormByNameTest" class="@MODULE_PACKAGE@.web.GetFormByNameController">
         <property name="commandName"><value>getFormByNameObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/getFormByName</value></property>
-        <property name="successView"><value>chooseLocation.form</value></property>
+        <property name="successView"><value>showFormAttributeValue.form</value></property>
     </bean>
     <bean id="configurationManagerSuccess" class="@MODULE_PACKAGE@.web.ConfigManagerSuccessController">
         <property name="commandName"><value>configurationManagerSuccessObject</value></property>
@@ -234,6 +253,27 @@
         <property name="formView"><value>/module/@MODULE_ID@/createFormFromFile</value></property>
         <property name="successView"><value>createFormFromFile.form</value></property>
 	</bean>
+	<bean id="showFormAttributeValue" class="@MODULE_PACKAGE@.web.ShowFormAttributeValueController">
+        <property name="commandName"><value>showFormAttributeValueObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/showFormAttributeValue</value></property> 
+        <property name="successView"><value>mlmForm.form</value></property>
+	</bean>	
+	<bean id="exportFormCsv" class="@MODULE_PACKAGE@.web.ExportFormCsvController">
+        <property name="commandName"><value>exportFormCsvObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/exportFormCsv</value></property> 
+        <property name="successView"><value>mlmForm.form</value></property>
+	</bean>	
+	<bean id="exportConceptCSV" class="@MODULE_PACKAGE@.web.ExportConceptCSVController">
+        <property name="commandName"><value>exportConceptCsvObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/exportConceptCSV</value></property> 
+        <property name="successView"><value>mlmForm.form</value></property>
+	</bean>	
+	<bean id="exportFormDefinitionCSV" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSVController">
+        <property name="commandName"><value>exportFormDefinitionCsvObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV</value></property> 
+        <property name="successView"><value>mlmForm.form</value></property>
+	</bean>
+	
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list>
@@ -261,7 +301,7 @@
 			</list>
 		</property>
 	</bean>
-		
+	
 	<bean id="logicTeleformExportDAO" class="org.openmrs.module.atd.datasource.XMLLogicTeleformExportDAO"/>
 	<bean id="logicTeleformExportDataSource" class="org.openmrs.module.atd.datasource.TeleformExportXMLDatasource">
 		<property name="logicTeleformExportDAO"><ref bean="logicTeleformExportDAO"></ref></property>

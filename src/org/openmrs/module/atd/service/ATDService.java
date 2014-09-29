@@ -20,6 +20,8 @@ import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
@@ -170,4 +172,8 @@ public interface ATDService
 	 * @return List of PSFQuestionAnswer objects.  This will not return null;
 	 */
 	public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId);
+	
+	public List<ConceptDescriptor> getAllConceptsAsDescriptor();
+	
+	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor();
 }

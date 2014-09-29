@@ -166,7 +166,7 @@ public class CreateFormUtil {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private static List<FormDescriptor> getFormInfo(InputStream inputStream) throws FileNotFoundException, IOException {
+	public static List<FormDescriptor> getFormInfo(InputStream inputStream) throws FileNotFoundException, IOException {
 		
 		List<FormDescriptor> list = null;
 		try {

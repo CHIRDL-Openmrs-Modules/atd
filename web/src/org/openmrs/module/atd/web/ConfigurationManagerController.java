@@ -28,4 +28,6 @@ public class ConfigurationManagerController extends SimpleFormController {
 		return "testing";
 	}
 	
+	
+	
 }

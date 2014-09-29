@@ -78,13 +78,7 @@ public class ConfigFormController4 extends SimpleFormController {
 	}
 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject
-	 * (javax.servlet.http.HttpServletRequest)
-	 */
+
 	@Override
 	protected Object formBackingObject(HttpServletRequest request) throws Exception {
 		return "testing";
@@ -126,18 +120,6 @@ public class ConfigFormController4 extends SimpleFormController {
 					}
 				}
 			}
-			/*for getting the value that is applied for all positions and storing it */
-			/*
-			String feedbackAllPositionValue = request.getParameter("inpt_"+fa.getFormAttributeId()+"#$#ALL#$#ALL");
-			feedbackAllPositionValue = feedbackAllPositionValue.trim();
-			if(feedbackAllPositionValue !=null && !feedbackAllPositionValue.equals("")){
-				for(Location currLoc : locationsList){
-					for (LocationTag tag : locationTagsMap.get(currLoc.getId())) {
-						cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackAllPositionValue);
-					}
-				}
-			}
-			*/
 		}
 		
 		map.put("formId", iFormId.toString());

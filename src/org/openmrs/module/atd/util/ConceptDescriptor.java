@@ -34,7 +34,8 @@ public class ConceptDescriptor {
 	
 	private String units = null;
 		
-	private Concept concept = null;
+	//private Concept concept = null;
+	private int conceptId;
 	
 	/**
 	 * Constructor Method
@@ -125,23 +126,16 @@ public class ConceptDescriptor {
 	public void setUnits(String units) {
 		this.units = units;
 	}
-	
-	/**
-	 * Auto generated method comment
-	 * 
-	 * @param newConcept
-	 */
-	public void setConcept(Concept newConcept) {
-		this.concept = newConcept;
+
+	public int getConceptId() {
+		return conceptId;
 	}
 
+	public void setConceptId(int conceptId) {
+		this.conceptId = conceptId;
+	}
 	
-    /**
-     * @return the concept
-     */
-    public Concept getConcept() {
-    	return this.concept;
-    }
+
 	
 	
 }

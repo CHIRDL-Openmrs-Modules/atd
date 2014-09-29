@@ -13,10 +13,19 @@
  */
 package org.openmrs.module.atd.util;
 
+import java.io.DataOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,10 +34,13 @@ import org.openmrs.Encounter;
 import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
+import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
@@ -36,7 +48,15 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
 import org.openmrs.module.atd.xmlBeans.Language;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
+
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
+import au.com.bytecode.opencsv.bean.CsvToBean;
+import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 
 /**
  *
@@ -48,15 +68,12 @@ public class Util {
 	public static int getMaxDssElements(Integer formId, Integer locationTagId, Integer locationId) {
 		String propertyValue = null;
 		int maxDssElements = 0;
-		
 		propertyValue = org.openmrs.module.chirdlutilbackports.util.Util.getFormAttributeValue(formId, "numPrompts",
 		    locationTagId, locationId);
-		
 		try {
 			maxDssElements = Integer.parseInt(propertyValue);
 		}
 		catch (NumberFormatException e) {}
-		
 		return maxDssElements;
 	}
 	
@@ -261,8 +278,6 @@ public class Util {
 	
 	public static void populateFieldNameArrays(HashMap<String, HashMap<String, Field>> languages, 
 	                                           LanguageAnswers answersByLanguage) {
-		
-		
 		if (answersByLanguage != null) {
 			ArrayList<Language> xmlLanguages = answersByLanguage.getLanguages();
 			
@@ -282,4 +297,234 @@ public class Util {
 			}
 		}
 	}
+	
+	public static List<FormAttributeValueDescriptor> getFormAttributeValueDescriptorFromCSVInputStream(InputStream input){
+		List<FormAttributeValueDescriptor> favdList = null;
+		try{
+			InputStreamReader inStreamReader = new InputStreamReader(input);
+			CSVReader reader = new CSVReader(inStreamReader, ',');
+			HeaderColumnNameTranslateMappingStrategy<FormAttributeValueDescriptor> strat = new HeaderColumnNameTranslateMappingStrategy<FormAttributeValueDescriptor>();
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("form_name", "formName");
+			map.put("location_name", "locationName");
+			map.put("location_tag_name", "locationTagName");
+			map.put("attribute_name", "attributeName");
+			map.put("attribute_value", "attributeValue");
+			strat.setType(FormAttributeValueDescriptor.class);
+			strat.setColumnMapping(map);
+			CsvToBean<FormAttributeValueDescriptor> csv = new CsvToBean<FormAttributeValueDescriptor>();
+			favdList = csv.parse(strat, reader);
+		}
+		catch(Exception e){
+			log.error(e);
+		}
+		return favdList;
+	}
+	
+	public static List<FormAttributeValue> getFormAttributeValuesFromDescriptors(List<FormAttributeValueDescriptor> favdList){
+		List<FormAttributeValue> favList = new ArrayList<FormAttributeValue>();
+		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
+		FormService fs =Context.getFormService();
+		LocationService locationService = Context.getLocationService();
+		try{
+			if (favdList != null) {
+				for(FormAttributeValueDescriptor favd: favdList){
+					/*create FormAttribbuteValue object by FormAttributeVlaueDescriptor*/
+					FormAttributeValue fav = new FormAttributeValue();
+					Integer formId = fs.getForm(favd.getFormName()).getId();
+					Integer locationId = locationService.getLocation(favd.getLocationName()).getId();
+					Integer locationTagId = locationService.getLocationTagByName(favd.getLocationTagName()).getId();
+					Integer faId = cubService.getFormAttributeByName(favd.getAttributeName()).getFormAttributeId();
+					fav.setFormId(formId);
+					fav.setFormAttributeId(faId);
+					fav.setLocationId(locationId);
+					fav.setLocationTagId(locationTagId);
+					fav.setValue(favd.getAttributeValue());
+					favList.add(fav);
+				}
+			}
+		}
+		catch (Exception e) {
+			log.error(e);
+		}
+		return favList;
+	}
+	
+	public static FormAttributeValueDescriptor formAttributeValueToDescriptor(FormAttributeValue fav){
+		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
+		FormService fs =Context.getFormService();
+		LocationService locationService = Context.getLocationService();
+		Form form = fs.getForm(fav.getFormId());
+		if(form==null){
+			return null;
+		}
+		String formName = form.getName();
+		FormAttribute fa = cubService.getFormAttributeById(fav.getFormAttributeId());
+		if(fa==null){
+			return null;
+		}
+		String faName = fa.getName();
+		Location location = locationService.getLocation(fav.getLocationId());
+		if(location==null){
+			return null;
+		}
+		String locationName = location.getName();
+		LocationTag locationTag = locationService.getLocationTag(fav.getLocationTagId());
+		if(locationTag==null){
+			return null;
+		}
+		String locationTagName = locationTag.getName();
+		FormAttributeValueDescriptor favd = new FormAttributeValueDescriptor(formName, locationName, locationTagName, faName, fav.getValue());
+		return favd;
+	}
+	
+	public static void exportFormAttributeValueAsCsv(Writer writer, List<FormAttributeValueDescriptor> favdList){
+		CSVWriter csvWriter=null;
+		try {
+			csvWriter = new CSVWriter(writer);
+			String[] columnNames = new String[5];
+			columnNames[0]="form_name";
+			columnNames[1]="location_name";
+			columnNames[2]="location_tag_name";
+			columnNames[3]="attribute_name";
+			columnNames[4]="attribute_value";
+			csvWriter.writeNext(columnNames);
+			for(FormAttributeValueDescriptor favd: favdList){
+				String[] item = new String[5];
+				item[0] = favd.getFormName(); 
+				item[1] = favd.getLocationName();
+				item[2] = favd.getLocationTagName();  
+				item[3] = favd.getAttributeName();
+				item[4] = favd.getAttributeValue();
+				csvWriter.writeNext(item);
+			}
+			csvWriter.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			if(csvWriter!=null){
+				csvWriter.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void exportAllConceptsAsCSV(Writer writer, List<ConceptDescriptor> cdList){
+		CSVWriter csvWriter=null;
+		try {
+			csvWriter = new CSVWriter(writer);
+			String[] columnNames = new String[7];
+			columnNames[0]="name";
+			columnNames[1]="concept class";
+			columnNames[2]="datatype";
+			columnNames[3]="description";
+			columnNames[4]="concept_id";
+			columnNames[5]="units";
+			columnNames[6]="parent concept";
+			csvWriter.writeNext(columnNames);
+			for(ConceptDescriptor cd: cdList){
+				String[] item = new String[7];
+				item[0] = cd.getName();
+				item[1] = cd.getConceptClass();
+				item[2] = cd.getDatatype();  
+				item[3] = cd.getDescription();
+				item[4] = Integer.toString(cd.getConceptId());
+				item[5] = cd.getUnits();
+				item[6] = cd.getParentConcept();
+				csvWriter.writeNext(item);
+			}
+			csvWriter.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			if(csvWriter!=null){
+				csvWriter.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void exportAllFormDefinitionCSV(Writer writer, List<FormDefinitionDescriptor> fddList){
+		try{
+		CSVWriter csvWriter=null;
+		csvWriter = new CSVWriter(writer);
+		String[] columnNames = new String[8];
+		columnNames[0]="form name";
+		columnNames[1]="form description";
+		columnNames[2]="field name";
+		columnNames[3]="field type";
+		columnNames[4]="concept name";
+		columnNames[5]="default value";
+		columnNames[6]="field number";
+		columnNames[7]="parent field name";
+		csvWriter.writeNext(columnNames);
+		for(FormDefinitionDescriptor fdd: fddList){
+			String[] item = new String[8];
+			item[0] = fdd.getFormName();
+			item[1] = fdd.getFormDescription();
+			item[2] = fdd.getFieldName();
+			item[3] = fdd.getFieldType();
+			item[4] = fdd.getConceptName();
+			item[5] = fdd.getDefaultValue();
+			item[6] = Integer.toString(fdd.getFieldNumber());
+			item[7] = fdd.getParentFieldName();
+			csvWriter.writeNext(item);
+		}
+		csvWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public static List<FormAttributeValue> getFormAttributeValuesFromCSVInputStream(InputStream input){
+		List<FormAttributeValue> favList = new ArrayList<FormAttributeValue>();
+		List<FormAttributeValueDescriptor> favdList = null;
+		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
+		FormService fs =Context.getFormService();
+		LocationService locationService = Context.getLocationService();
+		try {
+			InputStreamReader inStreamReader = new InputStreamReader(input);
+			CSVReader reader = new CSVReader(inStreamReader, ',');
+			HeaderColumnNameTranslateMappingStrategy<FormAttributeValueDescriptor> strat = new HeaderColumnNameTranslateMappingStrategy<FormAttributeValueDescriptor>();
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("form_name", "formName");
+			map.put("location_name", "locationName");
+			map.put("location_tag_name", "locationTagName");
+			map.put("attribute_name", "attributeName");
+			map.put("attribute_value", "attributeValue");
+			strat.setType(FormAttributeValueDescriptor.class);
+			strat.setColumnMapping(map);
+			
+			CsvToBean<FormAttributeValueDescriptor> csv = new CsvToBean<FormAttributeValueDescriptor>();
+			favdList = csv.parse(strat, reader);
+			
+			if (favdList != null) {
+				for(FormAttributeValueDescriptor favd: favdList){
+					/*create FormAttribbuteValue object by FormAttributeVlaueDescriptor*/
+					FormAttributeValue fav = new FormAttributeValue();
+					Integer formId = fs.getForm(favd.getFormName()).getId();
+					Integer locationId = locationService.getLocation(favd.getLocationName()).getId();
+					Integer locationTagId = locationService.getLocationTagByName(favd.getLocationTagName()).getId();
+					Integer faId = cubService.getFormAttributeByName(favd.getAttributeName()).getFormAttributeId();
+					fav.setFormId(formId);
+					fav.setFormAttributeId(faId);
+					fav.setLocationId(locationId);
+					fav.setLocationTagId(locationTagId);
+					fav.setValue(favd.getAttributeValue());
+					favList.add(fav);
+				}
+			}
+		}
+		catch (Exception e) {
+			log.error(e);
+		}
+		return favList;
+	}
+	
 }

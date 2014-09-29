@@ -47,6 +47,8 @@ import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.BadScansFileFilter;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
@@ -978,4 +980,14 @@ public class ATDServiceImpl implements ATDService
     public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId) {
 	    return getATDDAO().getPSFQuestionAnswers(formInstanceId, locationId, patientId);
     }
+
+	@Override
+	public List<ConceptDescriptor> getAllConceptsAsDescriptor() {
+		return this.dao.getAllConceptAsDescriptor();
+	}
+
+	@Override
+	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor() {
+		return this.dao.getAllFormDefinitionAsDescriptor();
+	}
 }
