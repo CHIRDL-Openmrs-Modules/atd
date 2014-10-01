@@ -990,4 +990,11 @@ public class ATDServiceImpl implements ATDService
 	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor() {
 		return this.dao.getAllFormDefinitionAsDescriptor();
 	}
+
+	@Override
+	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(Integer formId) {
+		return this.dao.getFormDefinitionAsDescriptor(formId);
+	}
+	
+	
 }

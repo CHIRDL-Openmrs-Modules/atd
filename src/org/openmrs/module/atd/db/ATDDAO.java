@@ -118,4 +118,6 @@ public interface ATDDAO {
 	public List<ConceptDescriptor> getAllConceptAsDescriptor();
 	
 	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor();
+	
+	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(int formId);
 }

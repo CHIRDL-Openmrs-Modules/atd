@@ -176,4 +176,6 @@ public interface ATDService
 	public List<ConceptDescriptor> getAllConceptsAsDescriptor();
 	
 	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor();
+	
+	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(Integer formId);
 }

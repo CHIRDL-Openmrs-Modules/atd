@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
 public class ExportFormDefinitionCSVController extends SimpleFormController {
-	List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
+	List<FormDefinitionDescriptor> fddList;
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();

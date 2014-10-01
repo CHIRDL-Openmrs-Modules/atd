@@ -45,7 +45,7 @@
 			    <prop key="/module/@MODULE_ID@/showFormAttributeValue.form">showFormAttributeValue</prop>
 			    <prop key="/module/@MODULE_ID@/exportFormCsv.form">exportFormCsv</prop>
 			    <prop key="/module/@MODULE_ID@/exportConceptCSV.form">exportConceptCSV</prop>
-			    <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV.form">exportFormDefinitionCSV</prop>					    
+			    <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV2.form">exportFormDefinitionCSV2</prop>					    
 			</props>
 		</property>
 	</bean>
@@ -268,9 +268,9 @@
         <property name="formView"><value>/module/@MODULE_ID@/exportConceptCSV</value></property> 
         <property name="successView"><value>mlmForm.form</value></property>
 	</bean>	
-	<bean id="exportFormDefinitionCSV" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSVController">
-        <property name="commandName"><value>exportFormDefinitionCsvObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV</value></property> 
+	<bean id="exportFormDefinitionCSV2" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSV2Controller">
+        <property name="commandName"><value>exportFormDefinitionCsv2Object</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV2</value></property> 
         <property name="successView"><value>mlmForm.form</value></property>
 	</bean>
 	

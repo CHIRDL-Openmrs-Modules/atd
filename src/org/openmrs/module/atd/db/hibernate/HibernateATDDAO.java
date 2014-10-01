@@ -1294,31 +1294,6 @@ public class HibernateATDDAO implements ATDDAO
 	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor() {
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
 		Connection con = this.sessionFactory.getCurrentSession().connection();
-		/*
-		String sql = "SELECT a.name AS form_name,"
-			       + "		a.description AS form_description,"
-			       + "		b.name AS field_name,"
-			       + "		c.name AS field_type,"
-			       + "		d.name AS concept_name,"
-			       + "		b.default_value,"
-			       + "		ff.field_number,"
-			       + "		e.name AS parent_field_name"
-			       + "FROM form a"
-			       + "		INNER JOIN form_field ff"
-			       + "  		ON ff.form_id = a.form_id"
-			       + "		INNER JOIN field b"
-			       + "			ON ff.field_id = b.field_id"
-			       + "		INNER JOIN field_type c"
-			       + "			ON b.field_type = c.field_type_id"
-			       + "		LEFT JOIN concept_name d"
-			       + "			ON b.concept_id = d.concept_id"
-			       + "		LEFT JOIN (SELECT b.*, a.name"
-			       + "			FROM field a"
-			       + "          	INNER JOIN form_field b"
-			       + "				ON a.field_id = b.field_id) e"
-			       + "  	ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id"
-			 	   + "WHERE a.retired = 0";
-		*/
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
        + " INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id LEFT JOIN (SELECT b.*, a.name FROM    field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id WHERE a.retired = 0";
 		try {
@@ -1354,6 +1329,50 @@ public class HibernateATDDAO implements ATDDAO
 			}
 		}
 		
+		return fddList;
+	}
+
+	@Override
+	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(int formId){
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
+				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
+				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id IN (?)";
+		PreparedStatement ps = null;
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, formId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()){
+				String formName = rs.getString("form_name");
+				String formDescription = rs.getString("form_description");
+				String fieldName = rs.getString("field_name");
+				String fieldType = rs.getString("field_type");
+				String conceptName = rs.getString("concept_name");
+				String defaultValue = rs.getString("default_value");
+				int fieldNumber = rs.getInt("field_number");
+				String parentFieldName = rs.getString("parent_field_name");
+				FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
+				fdd.setFormName(formName);
+				fdd.setFormDescription(formDescription);
+				fdd.setFieldName(fieldName);
+				fdd.setFieldType(fieldType);
+				fdd.setConceptName(conceptName);
+				fdd.setDefaultValue(defaultValue);
+				fdd.setFieldNumber(fieldNumber);
+				fdd.setParentFieldName(parentFieldName);
+				fddList.add(fdd);
+			}
+			con.close();
+		} catch (SQLException e){
+			try {
+				con.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		}
 		return fddList;
 	}
 }
