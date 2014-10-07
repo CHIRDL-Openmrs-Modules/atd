@@ -702,4 +702,18 @@ where a.form_attribute_id=c.form_attribute_id;
         ('mobileOnly', 'Indicates if the form will be used as a mobile-only version.');
         </sql>
     </diff>
+     <diff>
+        <version>1.3.2</version>
+        <author>Tammy Dugan</author>
+        <date>September 16, 2014</date>
+        <description>
+        Add new 'outputType' form attribute.
+        </description>
+        <sql>
+        INSERT INTO chirdlutilbackports_form_attribute
+        (`name`, `description`)
+        VALUES
+        ('outputType', 'Indicates if the form should be printed via Teleform or available as a pdf. Valid values are "pdf" and "teleformXML". Both can be chosen by separating with commas');
+        </sql>
+    </diff>
 </sqldiff>

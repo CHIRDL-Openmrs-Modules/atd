@@ -129,6 +129,11 @@
         <description>The user to place in the from section of outgoing faxes that are sent.
         </description>
     </globalProperty>
+    <globalProperty>
+        <property>atd.pdfTemplateDirectory</property>
+        <description>Directory containing all form pdf templates.
+        </description>
+    </globalProperty>
 	<!-- Internationalization -->
 	<!-- All message codes should start with moduleId.* -->
 	<messages>
