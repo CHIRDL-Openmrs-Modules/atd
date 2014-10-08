@@ -9,6 +9,10 @@
 <body>
 
 	<div id= "form_div"> 
+		<c:if test="${error}=='serverError'">
+			<h2>Server error, operation failed.</h2>
+			<br/>
+		</c:if>
 		<form method="post" action = "exportConceptCSV.form" >
 			<input style="padding: 0px 10px 0px 0px" type="submit"   value="export to csv">
 			<a href="${pageContext.request.contextPath}/module/atd/configurationManager.form"><input style="padding: 0px 10px 0px 0px, margin:0px 200px 0px 0px" type="button" value="back to manager page"/></a>

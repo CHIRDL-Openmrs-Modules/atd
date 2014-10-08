@@ -1,5 +1,6 @@
 package org.openmrs.module.atd.web;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class ExportFormCsvController extends SimpleFormController {
+public class ExportFormCSVController extends SimpleFormController {
 	List<FormAttributeValueDescriptor> favdList=null;
 	String formName =null;
 	
@@ -52,7 +53,7 @@ public class ExportFormCsvController extends SimpleFormController {
 			}
 			List<FormAttributeValue> favList = cubService.getAllFormAttributeValuesByFormId(form.getFormId());
 			for(FormAttributeValue fav: favList){
-				FormAttributeValueDescriptor favd = Util.formAttributeValueToDescriptor(fav);
+				FormAttributeValueDescriptor favd = Util.getFormAttributeValue(fav);
 				favdList.add(favd);
 				
 			}
@@ -69,7 +70,12 @@ public class ExportFormCsvController extends SimpleFormController {
 			String headerKey = "Content-Disposition";
 			String headerValue = String.format("attachment; filename=\"%s\"", csvFileName);
 			response.setHeader(headerKey, headerValue);
-			Util.exportFormAttributeValueAsCsv(response.getWriter(), favdList);
+			try{
+				Util.exportFormAttributeValueAsCSV(response.getWriter(), favdList);
+			}catch(IOException e){
+				map.put("error", "serverError");
+				return new ModelAndView(getFormView(), map);
+			}
 			return new ModelAndView(new RedirectView(getSuccessView()), map);
 		}
 		

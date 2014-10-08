@@ -1,5 +1,6 @@
 package org.openmrs.module.atd.db;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -115,9 +116,25 @@ public interface ATDDAO {
 	 */
 	public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId);
 	
-	public List<ConceptDescriptor> getAllConceptAsDescriptor();
+	/**
+	 * Get all concept information from database as list of ConceptDescriptor
+	 * @return A list of ConceptDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<ConceptDescriptor> getAllConcept() throws SQLException ;
 	
-	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor();
+	/**
+	 * Get all form definition from database as list of FormDefinitionDescriptor
+	 * @return A list of FormDefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException ;
 	
-	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(int formId);
+	/**
+	 * Get the form definition from database with the form that has id as formId. 
+	 * @param The id of the form
+	 * @return	A list of DefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException;
 }

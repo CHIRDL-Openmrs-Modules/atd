@@ -59,7 +59,9 @@ import au.com.bytecode.opencsv.bean.CsvToBean;
 import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 
 /**
- *
+ * 
+ * @author wang417
+ * A util tool to help proceed format, I/O, showing views of data, and form javabeans
  */
 public class Util {
 	
@@ -298,7 +300,13 @@ public class Util {
 		}
 	}
 	
-	public static List<FormAttributeValueDescriptor> getFormAttributeValueDescriptorFromCSVInputStream(InputStream input){
+	/**
+	 * read csv input stream and create FormAttributeValue objects according to it.
+	 * @param input the inputStream including the data source
+	 * @return a list of new created FormAttributeValueDescriptor objects.
+	 * @throws Exception 
+	 */
+	public static List<FormAttributeValueDescriptor> getFormAttributeValueDescriptorFromCSV(InputStream input) throws Exception{
 		List<FormAttributeValueDescriptor> favdList = null;
 		try{
 			InputStreamReader inStreamReader = new InputStreamReader(input);
@@ -317,40 +325,50 @@ public class Util {
 		}
 		catch(Exception e){
 			log.error(e);
+			throw e;
 		}
 		return favdList;
 	}
 	
-	public static List<FormAttributeValue> getFormAttributeValuesFromDescriptors(List<FormAttributeValueDescriptor> favdList){
+	/**
+	 * Create FormAttributeValue object from a FormAttributeValueDescriptor object
+	 * @param favdList data source
+	 * @return a list of new created FormAttributeValue objects
+	 */
+	public static List<FormAttributeValue> getFormAttributeValues(List<FormAttributeValueDescriptor> favdList) {
 		List<FormAttributeValue> favList = new ArrayList<FormAttributeValue>();
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-		FormService fs =Context.getFormService();
+		FormService fs = Context.getFormService();
 		LocationService locationService = Context.getLocationService();
-		try{
-			if (favdList != null) {
-				for(FormAttributeValueDescriptor favd: favdList){
-					/*create FormAttribbuteValue object by FormAttributeVlaueDescriptor*/
-					FormAttributeValue fav = new FormAttributeValue();
-					Integer formId = fs.getForm(favd.getFormName()).getId();
-					Integer locationId = locationService.getLocation(favd.getLocationName()).getId();
-					Integer locationTagId = locationService.getLocationTagByName(favd.getLocationTagName()).getId();
-					Integer faId = cubService.getFormAttributeByName(favd.getAttributeName()).getFormAttributeId();
-					fav.setFormId(formId);
-					fav.setFormAttributeId(faId);
-					fav.setLocationId(locationId);
-					fav.setLocationTagId(locationTagId);
-					fav.setValue(favd.getAttributeValue());
-					favList.add(fav);
-				}
+		if (favdList != null) {
+			for (FormAttributeValueDescriptor favd : favdList) {
+				/*
+				 * create FormAttribbuteValue object by
+				 * FormAttributeVlaueDescriptor
+				 */
+				FormAttributeValue fav = new FormAttributeValue();
+				Integer formId = fs.getForm(favd.getFormName()).getId();
+				Integer locationId = locationService.getLocation(favd.getLocationName()).getId();
+				Integer locationTagId = locationService.getLocationTagByName(favd.getLocationTagName()).getId();
+				Integer faId = cubService.getFormAttributeByName(favd.getAttributeName()).getFormAttributeId();
+				fav.setFormId(formId);
+				fav.setFormAttributeId(faId);
+				fav.setLocationId(locationId);
+				fav.setLocationTagId(locationTagId);
+				fav.setValue(favd.getAttributeValue());
+				favList.add(fav);
 			}
 		}
-		catch (Exception e) {
-			log.error(e);
-		}
+
 		return favList;
 	}
 	
-	public static FormAttributeValueDescriptor formAttributeValueToDescriptor(FormAttributeValue fav){
+	/**
+	 * Create FormAttributeValueDescriptor object from a FormAttributeValue object
+	 * @param fav data source
+	 * @return the new created FormAttributeValueDescriptor object
+	 */
+	public static FormAttributeValueDescriptor getFormAttributeValue(FormAttributeValue fav){
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		FormService fs =Context.getFormService();
 		LocationService locationService = Context.getLocationService();
@@ -378,7 +396,13 @@ public class Util {
 		return favd;
 	}
 	
-	public static void exportFormAttributeValueAsCsv(Writer writer, List<FormAttributeValueDescriptor> favdList){
+	/**
+	 * export all form attribute value info in system outside as csv file format
+	 * @param writer a writer object containing outputstream destination
+	 * @param favdList the data source
+	 * @throws IOException 
+	 */
+	public static void exportFormAttributeValueAsCSV(Writer writer, List<FormAttributeValueDescriptor> favdList) throws IOException{
 		CSVWriter csvWriter=null;
 		try {
 			csvWriter = new CSVWriter(writer);
@@ -391,7 +415,7 @@ public class Util {
 			csvWriter.writeNext(columnNames);
 			for(FormAttributeValueDescriptor favd: favdList){
 				String[] item = new String[5];
-				item[0] = favd.getFormName(); 
+				item[0] = favd.getFormName();
 				item[1] = favd.getLocationName();
 				item[2] = favd.getLocationTagName();  
 				item[3] = favd.getAttributeName();
@@ -401,18 +425,19 @@ public class Util {
 			csvWriter.close();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e);
+			throw e;
 		}
-		try {
-			if(csvWriter!=null){
-				csvWriter.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 	}
 	
-	public static void exportAllConceptsAsCSV(Writer writer, List<ConceptDescriptor> cdList){
+	/**
+	 * export all concept info in system outside as csv file format
+	 * @param writer a writer object containing outputstream destination
+	 * @param cdList the data source
+	 * @throws IOException 
+	 */
+	public static void exportAllConceptsAsCSV(Writer writer, List<ConceptDescriptor> cdList) throws IOException{
 		CSVWriter csvWriter=null;
 		try {
 			csvWriter = new CSVWriter(writer);
@@ -439,18 +464,19 @@ public class Util {
 			csvWriter.close();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			if(csvWriter!=null){
-				csvWriter.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e);
+			throw e;
 		}
 	}
 	
-	public static void exportAllFormDefinitionCSV(Writer writer, List<FormDefinitionDescriptor> fddList){
+	/**
+	 * export all form definition in system outside as csv file format
+	 * @param writer a writer object containing outputstream destination
+	 * @param fddList the data source
+	 * @throws IOException 
+	 * 
+	 */
+	public static void exportAllFormDefinitionCSV(Writer writer, List<FormDefinitionDescriptor> fddList) throws IOException{
 		try{
 		CSVWriter csvWriter=null;
 		csvWriter = new CSVWriter(writer);
@@ -478,11 +504,18 @@ public class Util {
 		}
 		csvWriter.close();
 		}catch(IOException e){
-			e.printStackTrace();
+			log.error(e);
+			throw e;
 		}
 	}
 	
-	public static List<FormAttributeValue> getFormAttributeValuesFromCSVInputStream(InputStream input){
+	/**
+	 * read the csv file and parse the information of it to a list of FormAttributeValue objects
+	 * @param input an InputStream Object
+	 * @return a list of FormAttributeValue objects
+	 * @throws Exception 
+	 */
+	public static List<FormAttributeValue> getFormAttributeValuesFromCSV(InputStream input) throws Exception{
 		List<FormAttributeValue> favList = new ArrayList<FormAttributeValue>();
 		List<FormAttributeValueDescriptor> favdList = null;
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
@@ -523,6 +556,7 @@ public class Util {
 		}
 		catch (Exception e) {
 			log.error(e);
+			throw e;
 		}
 		return favList;
 	}

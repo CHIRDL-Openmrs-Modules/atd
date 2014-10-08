@@ -3,6 +3,7 @@ package org.openmrs.module.atd.service;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -173,9 +174,25 @@ public interface ATDService
 	 */
 	public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId);
 	
-	public List<ConceptDescriptor> getAllConceptsAsDescriptor();
+	/**
+	 * Get all concept information in system as list of ConceptDescriptor
+	 * @return A list of ConceptDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException;
 	
-	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor();
+	/**
+	 * Get all form definition in system as list of FormDefinitionDescriptor
+	 * @return A list of FormDefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException;
 	
-	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(Integer formId);
+	/**
+	 * get the form definition in database with the form that has id as formId. 
+	 * @param form id
+	 * @return A list of DefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException;
 }

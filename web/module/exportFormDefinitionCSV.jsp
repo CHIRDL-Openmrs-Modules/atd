@@ -7,7 +7,9 @@
 <title>Insert title here</title>
 </head>
 <body>
-
+	<c:if test = "${error}=='serverError'">
+		<h2>Server error, operation failed.</h2>
+	</c:if>
 	<div id= "form_div"> 
 		<form method="post" action = "exportFormDefinitionCSV.form" >
 			<input style="padding: 0px 10px 0px 0px" type="submit"   value="export to csv" />

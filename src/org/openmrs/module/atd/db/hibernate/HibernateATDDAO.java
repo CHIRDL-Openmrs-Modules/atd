@@ -1227,8 +1227,10 @@ public class HibernateATDDAO implements ATDDAO
 		return new ArrayList<PSFQuestionAnswer>();
     }
 
-	@Override
-	public List<ConceptDescriptor> getAllConceptAsDescriptor() {
+/**
+ * @see org.openmrs.module.atd.db.ATDDAO#getAllConceptAsDescriptor()
+ */
+	public List<ConceptDescriptor> getAllConcept() throws SQLException {
 		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		String sql = "SELECT distinct a.*, b.name AS \"parent concept\""
@@ -1272,26 +1274,19 @@ public class HibernateATDDAO implements ATDDAO
 				cd.setDescription(description);
 				cd.setUnits(units);
 				cd.setParentConcept(parentConcept);
-				//Concept concept = new Concept();
-				//concept.setConceptId(Integer.parseInt(conceptId));
 				cd.setConceptId(conceptId);
 				cdList.add(cd);
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}finally{
-			try {
-				con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			con.close();
+			
 		}
 		
 		return cdList;
 	}
 	
-	@Override
-	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor() {
+
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException {
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
@@ -1319,22 +1314,15 @@ public class HibernateATDDAO implements ATDDAO
 				fdd.setParentFieldName(parentFieldName);
 				fddList.add(fdd);
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}finally{
-			try {
-				con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			con.close();
 		}
 		
 		return fddList;
 	}
 
-	@Override
-	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(int formId){
-		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
+	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException{
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>(); 
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
 				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
@@ -1364,14 +1352,9 @@ public class HibernateATDDAO implements ATDDAO
 				fdd.setParentFieldName(parentFieldName);
 				fddList.add(fdd);
 			}
+			
+		} finally{
 			con.close();
-		} catch (SQLException e){
-			try {
-				con.close();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			e.printStackTrace();
 		}
 		return fddList;
 	}

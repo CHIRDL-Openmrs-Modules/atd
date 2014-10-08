@@ -34,9 +34,21 @@ public class ConceptDescriptor {
 	
 	private String units = null;
 		
-	//private Concept concept = null;
 	private int conceptId;
 	
+	
+	
+	public ConceptDescriptor(String name, String conceptClass, String datatype, String description, String parentConcept, String units, int conceptId) {
+		super();
+		this.name = name;
+		this.conceptClass = conceptClass;
+		this.datatype = datatype;
+		this.description = description;
+		this.parentConcept = parentConcept;
+		this.units = units;
+		this.conceptId = conceptId;
+	}
+
 	/**
 	 * Constructor Method
 	 */
@@ -133,6 +145,69 @@ public class ConceptDescriptor {
 
 	public void setConceptId(int conceptId) {
 		this.conceptId = conceptId;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((conceptClass == null) ? 0 : conceptClass.hashCode());
+		result = prime * result + conceptId;
+		result = prime * result + ((datatype == null) ? 0 : datatype.hashCode());
+		result = prime * result + ((description == null) ? 0 : description.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((parentConcept == null) ? 0 : parentConcept.hashCode());
+		result = prime * result + ((units == null) ? 0 : units.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ConceptDescriptor other = (ConceptDescriptor) obj;
+		if (conceptClass == null) {
+			if (other.conceptClass != null)
+				return false;
+		} else if (!conceptClass.equals(other.conceptClass))
+			return false;
+		if (conceptId != other.conceptId)
+			return false;
+		if (datatype == null) {
+			if (other.datatype != null)
+				return false;
+		} else if (!datatype.equals(other.datatype))
+			return false;
+		if (description == null) {
+			if (other.description != null)
+				return false;
+		} else if (!description.equals(other.description))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (parentConcept == null) {
+			if (other.parentConcept != null)
+				return false;
+		} else if (!parentConcept.equals(other.parentConcept))
+			return false;
+		if (units == null) {
+			if (other.units != null)
+				return false;
+		} else if (!units.equals(other.units))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "ConceptDescriptor [name=" + name + ", conceptClass=" + conceptClass + ", datatype=" + datatype + ", description=" + description + ", parentConcept=" + parentConcept + ", units=" + units + ", conceptId=" + conceptId + "]";
 	}
 	
 

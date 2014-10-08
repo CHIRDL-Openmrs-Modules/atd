@@ -6,6 +6,9 @@
 <title>Chica get form name</title>
 </head>
 <body>
+<c:if test = "${ioerror}=='true'">
+	<h2>server mistake occurs</h2>
+</c:if>
 <form method="post" action="getFormByName.form" enctype="multipart/form-data">
 	Form name:  <input type="text" name="formName"/>
 	<c:if test="${not empty noSuchName and noSuchName =='true' }">

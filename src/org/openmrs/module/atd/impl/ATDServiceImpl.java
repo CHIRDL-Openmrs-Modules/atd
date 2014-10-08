@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -981,19 +982,16 @@ public class ATDServiceImpl implements ATDService
 	    return getATDDAO().getPSFQuestionAnswers(formInstanceId, locationId, patientId);
     }
 
-	@Override
-	public List<ConceptDescriptor> getAllConceptsAsDescriptor() {
-		return this.dao.getAllConceptAsDescriptor();
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
+		return this.dao.getAllConcept();
 	}
 
-	@Override
-	public List<FormDefinitionDescriptor> getAllFormDefinitionAsDescriptor() {
-		return this.dao.getAllFormDefinitionAsDescriptor();
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException {
+		return this.dao.getAllFormDefinition();
 	}
 
-	@Override
-	public List<FormDefinitionDescriptor> getFormDefinitionAsDescriptor(Integer formId) {
-		return this.dao.getFormDefinitionAsDescriptor(formId);
+	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException {
+		return this.dao.getFormDefinition(formId);
 	}
 	
 	

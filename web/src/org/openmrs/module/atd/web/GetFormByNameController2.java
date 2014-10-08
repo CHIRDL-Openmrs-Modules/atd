@@ -70,7 +70,13 @@ public class GetFormByNameController2 extends SimpleFormController {
 						map.put("incorrectExtension", true);
 						return new ModelAndView(backView, map);
 					}
-					List<FormAttributeValue> favList = Util.getFormAttributeValuesFromCSVInputStream(input);
+					List<FormAttributeValue> favList = null;
+					try{
+						favList = Util.getFormAttributeValuesFromCSV(input);
+					}catch(Exception e){
+						map.put("ioerror", true);
+						return new ModelAndView(backView, map);
+					}
 					for(FormAttributeValue fav: favList){
 						cubService.saveFormAttributeValue(fav);
 					}

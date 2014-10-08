@@ -80,7 +80,7 @@ public class GetFormByNameController extends SimpleFormController {
 						map.put("csvFileError", "typeError");
 						return new ModelAndView(backView, map);
 					}
-					favdList = Util.getFormAttributeValueDescriptorFromCSVInputStream(input);
+					favdList = Util.getFormAttributeValueDescriptorFromCSV(input);
 					ModelAndView mv =  new ModelAndView(new RedirectView(getSuccessView()),map); 
 					mv.addObject("favdList", favdList);
 					request.getSession().setAttribute("favdList", favdList);

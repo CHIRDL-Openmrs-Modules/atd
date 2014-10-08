@@ -31,7 +31,7 @@ public class ShowFormAttributeValueController extends SimpleFormController {
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		List<FormAttributeValue>  favList = Util.getFormAttributeValuesFromDescriptors(favdList);
+		List<FormAttributeValue>  favList = Util.getFormAttributeValues(favdList);
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		if(favList!=null){
 			for(FormAttributeValue fav: favList){

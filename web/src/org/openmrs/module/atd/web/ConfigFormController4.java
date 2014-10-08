@@ -51,32 +51,6 @@ public class ConfigFormController4 extends SimpleFormController {
 	private Set<Integer> locationsIdSet;
 	private Map<Integer, List<LocationTag>> locationTagsMap;
 	private List<FormAttribute> editableFormAttributes;
-/*
-	private void rollBack() {
-		LocationService locationService = Context.getLocationService();
-		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-		for (FormAttribute fa : editableFormAttributes) {
-			for (ArrayList<Object> position : positions) {
-				Location currLoc = (Location) position.get(0);
-				LocationTag tag = (LocationTag) position.get(1);
-				cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), (String) formAttributesValueMap.get(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId()));
-				
-			}
-		}
-	}
-
-	private Map<String, Object> keepInputBack(HttpServletRequest request) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		for(FormAttribute fa: editableFormAttributes){
-		for (ArrayList<Object> position : positions) {
-			Location currLoc = (Location) position.get(0);
-			LocationTag tag = (LocationTag) position.get(1);
-			map.put(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId(), request.getParameter(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId()));
-		}
-		}
-		return map;
-	}
-*/
 
 
 	@Override
