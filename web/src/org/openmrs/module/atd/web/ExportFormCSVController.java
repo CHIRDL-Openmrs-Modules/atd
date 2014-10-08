@@ -16,11 +16,13 @@ import org.openmrs.module.atd.util.FormAttributeValueDescriptor;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
+import org.springframework.context.annotation.Scope;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
+@Scope("session")
 public class ExportFormCSVController extends SimpleFormController {
 	List<FormAttributeValueDescriptor> favdList=null;
 	String formName =null;

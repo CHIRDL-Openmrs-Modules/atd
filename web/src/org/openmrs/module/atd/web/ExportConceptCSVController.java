@@ -13,6 +13,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.Util;
+import org.springframework.context.annotation.Scope;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author wang417
  * For the page exportConceptCSV.form, exporting concept information as csv files.
  */
+@Scope("session")
 public class ExportConceptCSVController extends SimpleFormController {
 	private List<ConceptDescriptor> cdList;
 	@Override

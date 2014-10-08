@@ -29,7 +29,7 @@
 	
 	
 	<p></p>
-	<form action="" method="post" id="location_form">
+	<form action="chooseLocation.form" method="post" id="location_form">
 		<table class="location_table">
 					<tr style="padding: 5px">
 						<td>

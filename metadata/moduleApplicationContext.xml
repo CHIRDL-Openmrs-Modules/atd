@@ -17,11 +17,7 @@
 				<prop key="/module/@MODULE_ID@/createForm.form">createForm</prop>
 				<prop key="/module/@MODULE_ID@/popFormFields.form">popFormFields</prop>
 				<prop key="/module/@MODULE_ID@/configForm.form">configForm</prop>
-				<prop key="/module/@MODULE_ID@/configForm2.form">configForm2</prop>
-				<prop key="/module/@MODULE_ID@/configForm3.form">configForm3</prop>
-				<prop key="/module/@MODULE_ID@/configForm4.form">configForm4</prop>
-				<prop key="/module/@MODULE_ID@/configForm5.form">configForm5</prop>
-				<prop key="/module/@MODULE_ID@/configForm6.form">configForm6</prop>
+				<prop key="/module/@MODULE_ID@/configFormAttributeValue.form">configFormAttributeValue</prop>
 				<prop key="/module/@MODULE_ID@/mlmForm.form">mlmForm</prop>
 				<prop key="/module/@MODULE_ID@/printerFormSelectionForm.form">printerFormSelectionForm</prop>
 				<prop key="/module/@MODULE_ID@/printerLocationForm.form">printerLocationForm</prop>
@@ -115,7 +111,7 @@
         <property name="successView"><value>configForm.form</value></property>
     </bean>  
      
-    <bean id="chooseLocation" class="@MODULE_PACKAGE@.web.ChooseLocationController2">
+    <bean id="chooseLocation" class="@MODULE_PACKAGE@.web.ChooseLocationController">
         <property name="commandName"><value>chooseLocationObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/chooseLocation</value></property>
         <property name="successView"><value>configForm6.form</value></property>
@@ -127,32 +123,9 @@
         <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
     
-    <bean id="configForm2" class="@MODULE_PACKAGE@.web.ConfigFormController2">
-        <property name="commandName"><value>configFormObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/configForm2</value></property>
-        <property name="successView"><value>mlmForm.form</value></property>
-    </bean> 
-    
-    <bean id="configForm3" class="@MODULE_PACKAGE@.web.ConfigFormController3">
-        <property name="commandName"><value>configForm3Object</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/configForm3</value></property>
-        <property name="successView"><value>mlmForm.form</value></property>
-    </bean> 
-    <bean id="configForm4" class="@MODULE_PACKAGE@.web.ConfigFormController3">
-        <property name="commandName"><value>configForm4Object</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/configForm4</value></property>
-        <property name="successView"><value>mlmForm.form</value></property>
-    </bean> 
-    
-    <bean id="configForm5" class="@MODULE_PACKAGE@.web.ConfigFormController4">
-        <property name="commandName"><value>configForm5Object</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/configForm5</value></property>
-        <property name="successView"><value>mlmForm.form</value></property>
-    </bean> 
-    
-    <bean id="configForm6" class="@MODULE_PACKAGE@.web.ConfigFormController4">
-        <property name="commandName"><value>configForm6Object</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/configForm6</value></property>
+    <bean id="configFormAttributeValue" class="@MODULE_PACKAGE@.web.ConfigFormAttributeValueController">
+        <property name="commandName"><value>configFormAttributeValueObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configFormAttributeValue</value></property>
         <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
     <bean id="mlmForm" class="@MODULE_PACKAGE@.web.MLMFormController">

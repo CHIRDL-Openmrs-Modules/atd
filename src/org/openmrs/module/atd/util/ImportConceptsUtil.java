@@ -96,7 +96,8 @@ public class ImportConceptsUtil {
 				Concept concept = conceptService.getConceptByName(conceptName.getName());
 				
 				if (concept != null) {
-					currTerm.setConcept(concept);
+					//currTerm.setConcept(concept);
+					currTerm.setConceptId(concept.getConceptId());
 					log.error("Could not create concept: " + conceptName.getName() + ". It already exists.");
 					
 					//update the description, units, or class if they have changed
@@ -132,8 +133,8 @@ public class ImportConceptsUtil {
 					continue;
 				}else{				
 					conceptService.saveConcept(newConcept);
-					currTerm.setConcept(newConcept);
-				
+					//currTerm.setConcept(newConcept);
+					currTerm.setConceptId(newConcept.getConceptId());
 					conceptsCreated++;
 				}
 				

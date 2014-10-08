@@ -2,6 +2,7 @@ package org.openmrs.module.atd.web;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class chooseLocationController extends SimpleFormController {
+public class ChooseLocationController extends SimpleFormController {
 	private String formIdStr;
 
 	@Override
@@ -47,21 +48,23 @@ public class chooseLocationController extends SimpleFormController {
 	
 	@Override
 	protected Map referenceData(HttpServletRequest request) throws Exception {
-		ArrayList<ArrayList<Object>> positions = new ArrayList<ArrayList<Object>>();
+		List<Location> locationsList = new ArrayList<Location>();
+		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		formIdStr = (String)request.getParameter("formId");
 		LocationService locationService = Context.getLocationService();
 		List<Location> locations = locationService.getAllLocations();
 		for (Location currLoc : locations){
+			locationsList.add(currLoc);
             Set<LocationTag> tags = currLoc.getTags();
+            List<LocationTag> locationTagsList = new ArrayList<LocationTag>();
             for (LocationTag tag : tags){
-            	ArrayList<Object> position = new ArrayList<Object>();
-            	position.add(currLoc);
-            	position.add(tag);
-            	positions.add(position);
-            }   
+            	locationTagsList.add(tag);
+            }
+            locationTagsMap.put(currLoc.getId(), locationTagsList);
 		}
-		map.put("positions", positions);
+		map.put("locationsList", locationsList);
+		map.put("locationTagsMap", locationTagsMap);
 		return map;
 	}
 	

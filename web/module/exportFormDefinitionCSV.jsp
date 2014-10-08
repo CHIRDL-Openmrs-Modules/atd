@@ -4,19 +4,29 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Export form Definition</title>
 </head>
 <body>
 	<c:if test = "${error}=='serverError'">
 		<h2>Server error, operation failed.</h2>
 	</c:if>
 	<div id= "form_div"> 
-		<form method="post" action = "exportFormDefinitionCSV.form" >
-			<input style="padding: 0px 10px 0px 0px" type="submit"   value="export to csv" />
-			<a href="${pageContext.request.contextPath}/module/atd/configurationManager.form"> <input style="padding: 0px 10px 0px 0px, margin:0px 200px 0px 0px" type="button" value="back to manager page"/></a>
+		<form method="post" action = "exportFormDefinitionCSV.form">
+			form name:  <input type="text" name="formName">
+			<input id="purpose" type="hidden" name="purpose"/> 
+			<input style="padding: 0px 10px 0px 0px" type="submit"   value="show this form definition" onclick="document.getElementById('purpose').value='showForm'"/>
+			<c:if test="${not empty error && error=='formNameEmpty'}" >Form name cannot be empty</c:if>
+			<c:if test="${not empty error && error=='formNameNonexist'}" >Form name does not exist</c:if>
+			<br/>
+			<input style="padding: 0px 10px 0px 0px" type="submit"   value="show all forms definition" onclick="document.getElementById('purpose').value='showAllForms'"/>
+			<br/>
+			<input style="padding: 0px 10px 0px 0px" type="submit"   value="export to csv" onclick="document.getElementById('purpose').value='export'"/> 
+			<c:if test="${not empty error && error=='NoFormChosen' }">No form is chosen</c:if>
+			<br/>
+			<a href="${pageContext.request.contextPath}/module/atd/configurationManager.form"><input style="padding: 0px 10px 0px 0px, margin:0px 200px 0px 0px" type="button" value="back to manager page"/></a>
 		</form>
 	</div>
-
+	
 	<div id= "formValue_div">
 		<table border="1px">
 			<tr style="padding: 5px">

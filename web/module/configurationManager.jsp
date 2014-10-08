@@ -78,7 +78,7 @@
                 </td>
             </tr>
         </table></center>
-        <center><h3>Concept Definination</h3></center>
+        <center><h3>Concept Definition</h3></center>
         <center><table>
             <tr style="padding: 5px">
                 <td style="padding: 10px 10px 10px 10px">

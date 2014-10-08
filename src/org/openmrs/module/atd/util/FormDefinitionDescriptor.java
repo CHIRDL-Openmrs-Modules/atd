@@ -31,6 +31,11 @@ public class FormDefinitionDescriptor {
 	}
 	
 	
+	public FormDefinitionDescriptor() {
+		
+	}
+
+
 	public String getFormName() {
 		return formName;
 	}

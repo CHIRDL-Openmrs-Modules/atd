@@ -33,6 +33,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
+import org.springframework.context.annotation.Scope;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -40,7 +41,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class ConfigFormController4 extends SimpleFormController {
+@Scope("session")
+public class ConfigFormAttributeValueController extends SimpleFormController {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());

@@ -17,6 +17,7 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
+import org.springframework.context.annotation.Scope;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
@@ -26,6 +27,7 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author wang417
  * For the page exportFormDefinitionCSV.form, exporting form definition information as csv files.
  */
+@Scope("session")
 public class ExportFormDefinitionCSVController extends SimpleFormController {
 	String formName =null;
 	List<FormDefinitionDescriptor> fddList;
@@ -40,8 +42,6 @@ public class ExportFormDefinitionCSVController extends SimpleFormController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try{
 			FormService fs = Context.getFormService();
-			ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-
 			String purpose = request.getParameter("purpose");
 			if(purpose.equals("showForm")){
 				formName = request.getParameter("formName");
