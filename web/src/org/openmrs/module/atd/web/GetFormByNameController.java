@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
@@ -25,24 +27,33 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-/*original 2*/
+
 public class GetFormByNameController extends SimpleFormController {
+	protected final Log log = LogFactory.getLog(getClass());
+	
 	@Override
 	protected Object formBackingObject(HttpServletRequest request)
 			throws Exception {
-		return "testing";
+		return "testing"; 
 	}
 	
-	@Override
-	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, BindException errors) throws Exception {
+	
+	
+
+	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) throws Exception {
 		String editType = request.getParameter("editType");
 		Map<String, Object> map = new HashMap<String, Object>();
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		FormService fs =Context.getFormService();
+		List<FormAttributeValueDescriptor> favdList=null;
 		String view = null;
 		String backView = getFormView();
-		if(editType.equals("enter")){
-			view = "mannualEdit";
+		if(editType==null || editType.equals("")){
+			map.put("typeNotChosen", "true");
+			return new ModelAndView(backView, map);
+		}
+		if(editType.equals("manual")){
+			view = "chooseLocation.form";
 			String formName = request.getParameter("formName");
 			Form form = fs.getForm(formName);
 			if(form==null){
@@ -50,10 +61,9 @@ public class GetFormByNameController extends SimpleFormController {
 				return new ModelAndView(backView, map);
 			}
 			map.put("formId", form.getId());
-			return new ModelAndView(
-					new RedirectView(view), map);
+			return new ModelAndView(new RedirectView(view),map);  
 		}else{
-			view = "csvFileSuccess";
+			view = "showFormAttributeValue.form";
 			if(request instanceof MultipartHttpServletRequest){
 				MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 				MultipartFile csvFile = multipartRequest.getFile("csvFile");
@@ -67,33 +77,27 @@ public class GetFormByNameController extends SimpleFormController {
 					}
 					String extension = filename.substring(index + 1, filename.length());
 					if (!extension.equalsIgnoreCase("csv")) {
-						map.put("incorrectExtension", true);
+						map.put("csvFileError", "typeError");
 						return new ModelAndView(backView, map);
 					}
-					List<FormAttributeValue> favList = null;
 					try{
-						favList = Util.getFormAttributeValuesFromCSV(input);
+						favdList = Util.getFormAttributeValueDescriptorFromCSV(input);
 					}catch(Exception e){
-						map.put("ioerror", true);
-						return new ModelAndView(backView, map);
+						map.put("ioError", true);
 					}
-					for(FormAttributeValue fav: favList){
-						cubService.saveFormAttributeValue(fav);
-					}
+					ModelAndView mv =  new ModelAndView(new RedirectView(getSuccessView()),map); 
+					mv.addObject("favdList", favdList);
+					request.getSession().setAttribute("favdList", favdList);
+					return mv;
 				}else{
 					map.put("csvFileError", "csvFileEmpty");
 					return new ModelAndView(backView, map);
 				}
-				return new ModelAndView(
-						new RedirectView(view), map);
+				
 			}else{
 				map.put("csvFileError", "notMultipart");
 				return new ModelAndView(backView, map);
 			}
 		}
 	}
-
-
-	
-	
 }
