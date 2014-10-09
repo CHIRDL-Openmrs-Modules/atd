@@ -45,10 +45,10 @@
                     <a href="${pageContext.request.contextPath}/module/atd/getFormByName.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/editFormAttributes.gif"/></a>
                 </td>
                 <td style="padding: 10px 10px 10px 10px">
-                    <a href="${pageContext.request.contextPath}/module/atd/exportFormCsv.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormAttributes.gif"/></a>
+                    <a href="${pageContext.request.contextPath}/module/atd/exportFormCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormAttributes.gif"/></a>
                 </td>
                 <td style="padding: 10px 10px 10px 10px">
-                    <a href="${pageContext.request.contextPath}/module/atd/exportFormDefinitionCSV2.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormDefinition.gif"/></a>
+                    <a href="${pageContext.request.contextPath}/module/atd/exportFormDefinitionCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormDefinition.gif"/></a>
                 </td>
         	</tr>
         </table></center>

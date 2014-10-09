@@ -21,7 +21,7 @@
 </head>
 <body>
 	<p>
-	<h2>choose the location and location tag you want to apply:</h2>
+	<h2>Choose the location and location tag you want to apply:</h2>
 	</p>
 	<c:if test="${NoPositionSelected == 'true'}">
   		<p>You have to choose at least one location</p>
@@ -36,7 +36,7 @@
 							<input type="checkbox" name="positions_applicable" id= "ALL#$#ALL" onchange="checkSubClass('ALL#$#ALL')"/>
 						</td>
 						<td style="padding: 0px 0px 10px 0px">
-							For All locations
+							For all locations
 						</td>				
 					</tr>
 					<c:forEach items = "${locationsList}" var = "location" varStatus = "locsStatus">
