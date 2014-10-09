@@ -22,8 +22,8 @@
 			</c:if>
 			<br/>
 			<input id="purpose" type="hidden" name="purpose"/> 
-			<input style="padding: 0px 0px 10px 0px" type="submit"   value="show form values" onclick="document.getElementById('purpose').value='showForm'"/>
-			<input style="padding: 0px 0px 10px 0px" type="submit"   value="export to csv" onclick="document.getElementById('purpose').value='export'"/>
+			<input style="padding: 0px 10px 0px  0px" type="submit"   value="show form values" onclick="document.getElementById('purpose').value='showForm'"/>
+			<input style="padding: 0px 10px 0px 0px" type="submit"   value="export to csv" onclick="document.getElementById('purpose').value='export'"/>
 			<c:if test= "${error}=='exportNotReady'">
 				<h2>No information is loaded to export.</h2>
 			</c:if>			
