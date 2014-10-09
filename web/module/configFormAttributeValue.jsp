@@ -44,7 +44,7 @@
 </script>
 </head>
 <body>
-	<form action="configForm6.form" method="post" id="attribute_form"
+	<form action="configFormAttributeValue.form" method="post" id="attribute_form"
 		class="the_form">
 		<c:forEach items="${editableFormAttributes}" var="fa" varStatus="status">
 			<script>

@@ -82,10 +82,5 @@ public class ExportFormCSVController extends SimpleFormController {
 		}
 		
 	}
-
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		return super.referenceData(request);
-	}
 	
 }

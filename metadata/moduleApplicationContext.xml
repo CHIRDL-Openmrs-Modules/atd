@@ -237,7 +237,7 @@
         <property name="successView"><value>mlmForm.form</value></property>
 	</bean>	
 	<bean id="exportConceptCSV" class="@MODULE_PACKAGE@.web.ExportConceptCSVController">
-        <property name="commandName"><value>exportConceptCsvObject</value></property>
+        <property name="commandName"><value>exportConceptCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportConceptCSV</value></property> 
         <property name="successView"><value>mlmForm.form</value></property>
 	</bean>	
