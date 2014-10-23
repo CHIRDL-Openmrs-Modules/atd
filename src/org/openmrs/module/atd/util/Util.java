@@ -325,6 +325,7 @@ public class Util {
 		}
 		catch(Exception e){
 			log.error(e);
+			e.printStackTrace();
 			throw e;
 		}
 		return favdList;

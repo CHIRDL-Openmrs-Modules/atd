@@ -12,6 +12,8 @@
 	</c:if>
 	<div id= "form_div"> 
 		<form method="post" action = "exportFormDefinitionCSV.form">
+			<input type="hidden" name="checkedFormName" value="${checkedFormName}"/>
+			<input type="hidden" name="checkedAllForm" value="${checkedAllForm}"/>
 			form name:  <input type="text" name="formName">
 			<input id="purpose" type="hidden" name="purpose"/> 
 			<input style="padding: 0px 10px 0px 0px" type="submit"   value="show this form definition" onclick="document.getElementById('purpose').value='showForm'"/>

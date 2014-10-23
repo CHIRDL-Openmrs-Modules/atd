@@ -30,6 +30,7 @@
 	
 	<p></p>
 	<form action="chooseLocation.form" method="post" id="location_form">
+		<input type="hidden" name = "formIdStr" value="${formIdStr}"/>
 		<table class="location_table">
 					<tr style="padding: 5px">
 						<td>

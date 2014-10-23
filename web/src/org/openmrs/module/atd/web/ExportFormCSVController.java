@@ -24,8 +24,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @Scope("session")
 public class ExportFormCSVController extends SimpleFormController {
-	List<FormAttributeValueDescriptor> favdList=null;
-	String formName =null;
 	
 	@Override
 	protected Object formBackingObject(HttpServletRequest request) throws Exception {
@@ -42,8 +40,10 @@ public class ExportFormCSVController extends SimpleFormController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		String purpose = request.getParameter("purpose");
 		if(purpose.equals("showForm")){
-			formName = request.getParameter("formName");
-			favdList = new ArrayList<FormAttributeValueDescriptor>();
+			String formName = request.getParameter("formName");
+			//map.put("checkedFormName", formName);
+			request.setAttribute("checkedFormName", formName);
+			List<FormAttributeValueDescriptor> favdList = new ArrayList<FormAttributeValueDescriptor>();
 			if(formName==null || formName.equals("")){
 				map.put("error", "formNameEmpty");
 				return new ModelAndView(getFormView(), map);
@@ -63,15 +63,24 @@ public class ExportFormCSVController extends SimpleFormController {
 			request.setAttribute("favdList", favdList);
 			return new ModelAndView(getFormView());
 		}else{
-			if(favdList==null || formName==null){
+			String checkedFormName = request.getParameter("checkedFormName");
+			if(checkedFormName==null){
 				map.put("error", "exportNotReady");
 				return new ModelAndView(getFormView(), map);
 			}
-			String csvFileName = formName+".csv";
+			String csvFileName = checkedFormName+".csv";
 			response.setContentType("text/csv");
 			String headerKey = "Content-Disposition";
 			String headerValue = String.format("attachment; filename=\"%s\"", csvFileName);
 			response.setHeader(headerKey, headerValue);
+			Form form = fs.getForm(checkedFormName);
+			List<FormAttributeValue> favList = cubService.getAllFormAttributeValuesByFormId(form.getFormId());
+			List<FormAttributeValueDescriptor> favdList = new ArrayList<FormAttributeValueDescriptor>();
+			for(FormAttributeValue fav: favList){
+				FormAttributeValueDescriptor favd = Util.getFormAttributeValue(fav);
+				favdList.add(favd);
+				
+			}
 			try{
 				Util.exportFormAttributeValueAsCSV(response.getWriter(), favdList);
 			}catch(IOException e){

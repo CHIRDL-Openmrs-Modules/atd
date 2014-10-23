@@ -13,6 +13,7 @@
 			<h2>Server error: operation failed.</h2>
 		</c:if>
 		<form method="post" action = "exportFormCSV.form" >
+			<input type="hidden" name="checkedFormName" value="${checkedFormName}"/>
 			form name:  <input type="text" name="formName">
 			<c:if test= "${error}=='formNameEmpty'">
 				<h2>Form name cannot be empty.</h2>

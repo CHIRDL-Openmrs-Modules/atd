@@ -46,13 +46,6 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
-	private Map<String, Object> formAttributesValueMap;
-	private Map<String, List<String>> formAttributesValueEnumMap;
-	private Integer iFormId;
-	private List<Location> locationsList;
-	private Set<Integer> locationsIdSet;
-	private Map<Integer, List<LocationTag>> locationTagsMap;
-	private List<FormAttribute> editableFormAttributes;
 
 
 	@Override
@@ -67,15 +60,28 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 	 * */
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, BindException errors) throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		FormService formService = Context.getFormService();
-		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {
 			return new ModelAndView(new RedirectView("configurationManager.form"));
 		}
+		String formId = request.getParameter("formId");
+		Integer iFormId = Integer.parseInt(formId);
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		FormService formService = Context.getFormService();
+		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
+
 		String successViewName = getSuccessView();
 		String gobackViewName = this.getFormView();
+		List<Location> locationsList = new ArrayList<Location>();
+		Set<Integer> locationsIdSet = new HashSet<Integer>();
+		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
+		configPositionInfo(locationsList, locationsIdSet, locationTagsMap, request);
+		//get editable attribute
+		List<FormAttribute> editableFormAttributes = getEditableFormAttributes();
+		Map<String, Object> formAttributesValueMap=getFormAttributesValueMap(locationsList,locationTagsMap, editableFormAttributes,iFormId, request,cubService);
+		//get attribute value enumeration info for each attribute
+		Map<String, List<String>> formAttributesValueEnumMap = getFormAttributesValueEnumMap(editableFormAttributes,cubService);
 		for (FormAttribute fa: editableFormAttributes){
 			/*for storing values with each position */
 			for (Location currLoc : locationsList) {
@@ -107,17 +113,96 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 	@Override
 	protected Map referenceData(HttpServletRequest request) throws Exception {
 		//empty and initialize positions every time when this page is redirected to. 
-		locationsList = new ArrayList<Location>();
-		locationsIdSet = new HashSet<Integer>();
-		locationTagsMap = new HashMap<Integer, List<LocationTag>>();
-		formAttributesValueEnumMap = new HashMap<String, List<String>>();
-		formAttributesValueMap = new HashMap<String, Object>();
-		//editableFormAttributes = new ArrayList<FormAttribute>();
+		List<Location> locationsList = new ArrayList<Location>();
+		Set<Integer> locationsIdSet = new HashSet<Integer>();
+		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
+		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		Map<String, Object> map = new HashMap<String, Object>();
+		configPositionInfo(locationsList, locationsIdSet, locationTagsMap, request);
+		String formId = request.getParameter("formId");
+		Integer iFormId = Integer.parseInt(formId);
+		//this.iFormId = iFormId;
+		//get editable attribute
+		List<FormAttribute> editableFormAttributes = getEditableFormAttributes();
+		
+		//get current attributes value info for each position and attributes
+		Map<String, Object> formAttributesValueMap = getFormAttributesValueMap(locationsList,locationTagsMap, editableFormAttributes,iFormId, request,cubService);
+
+		//get attribute value enumeration info for each attribute
+		Map<String, List<String>> formAttributesValueEnumMap = getFormAttributesValueEnumMap(editableFormAttributes,cubService);
+		String[] positionStrs = request.getParameterValues("positions");
+		map.put("positionStrs", positionStrs);
+		map.put("locationsList", locationsList);
+		map.put("locationTagsMap", locationTagsMap);
+		map.put("formAttributesValueEnumMap", formAttributesValueEnumMap);
+		map.put("editableFormAttributes", editableFormAttributes);
+		map.put("formAttributesValueMap", formAttributesValueMap);
+		map.put("formId", formId);
+		map.put("formName", request.getParameter("formName"));
+		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
+		return map;
+	}
+	
+	private Map<String, Object> getFormAttributesValueMap(List<Location> locationsList, Map<Integer, List<LocationTag>> locationTagsMap,List<FormAttribute> editableFormAttributes, Integer iFormId, HttpServletRequest request, ChirdlUtilBackportsService cubService){
+		Map<String, Object> formAttributesValueMap = new HashMap<String, Object>();
+		String back = request.getParameter("redirectBack");
+		//get current attributes value info for each position and attributes
+		if("true".equalsIgnoreCase(back)){
+			for (Location currLoc: locationsList) {
+				for(LocationTag tag: locationTagsMap.get(currLoc.getId())){
+					for(FormAttribute efa: editableFormAttributes){
+						String favId = efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId();
+						formAttributesValueMap.put(favId, request.getParameter(favId));
+					}
+				}
+			}
+		}else{
+			for (Location currLoc: locationsList) {
+				for(LocationTag tag: locationTagsMap.get(currLoc.getId())){
+					for(FormAttribute efa: editableFormAttributes){
+						FormAttributeValue theValue = cubService.getFormAttributeValue(iFormId, efa.getName(), tag.getId(), currLoc.getId());
+						//formAttributesValueMap key is ids of formAttributeValue, Location, locationTag
+						formAttributesValueMap.put(efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId(), theValue);
+					}
+				}
+			}
+		}
+		return formAttributesValueMap;
+	}
+
+	public Map<String, List<String>> getFormAttributesValueEnumMap(List<FormAttribute> editableFormAttributes, ChirdlUtilBackportsService cubService){
+		//get attribute value enumeration info for each attribute
+		Map<String, List<String>> formAttributesValueEnumMap = new HashMap<String, List<String>>();
+		for(FormAttribute efa: editableFormAttributes){
+			formAttributesValueEnumMap.put(efa.getFormAttributeId().toString(), cubService.getCurrentFormAttributeValueStrCollection(efa));
+		}
+		return formAttributesValueEnumMap;
+	}
+	
+	
+	private boolean checkParameter(HttpServletRequest request, String parameterName) {
+		boolean positive = false;
+		String parameter = request.getParameter(parameterName);
+		if ("true".equalsIgnoreCase(parameter)) {
+			positive = true;
+		}
+
+		return positive;
+	}
+	
+	private List<FormAttribute> getEditableFormAttributes(){
+		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
+		List<FormAttribute> editable = cubService.getAllEditableFormAttributes();
+		if(editable==null){
+			return new ArrayList<FormAttribute>();
+		}
+		return editable;
+	}
+	
+	private void configPositionInfo(List<Location> locationsList, Set<Integer> locationsIdSet,Map<Integer, List<LocationTag>> locationTagsMap, HttpServletRequest request){
 		// positionStrs are position array. for position string, it is composed
 		// of locationId + "#$#"+ locationTagId
 		String[] positionStrs = request.getParameterValues("positions");
-		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		LocationService locationService = Context.getLocationService();
 		if (positionStrs != null) {
 			StringTokenizer st = null;
@@ -157,69 +242,5 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 				
 			}
 		}
-		String formId = request.getParameter("formId");
-		Integer iFormId = Integer.parseInt(formId);
-		this.iFormId = iFormId;
-		//get editable attribute
-		editableFormAttributes = getEditableFormAttributes();
-		
-		
-		
-		//get current attributes value info for each position and attributes
-		String back = request.getParameter("redirectBack");
-		if("true".equalsIgnoreCase(back)){
-			for (Location currLoc: locationsList) {
-				for(LocationTag tag: locationTagsMap.get(currLoc.getId())){
-					for(FormAttribute efa: editableFormAttributes){
-						String favId = efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId();
-						formAttributesValueMap.put(favId, request.getParameter(favId));
-					}
-				}
-			}
-		}else{
-			for (Location currLoc: locationsList) {
-				for(LocationTag tag: locationTagsMap.get(currLoc.getId())){
-					for(FormAttribute efa: editableFormAttributes){
-						FormAttributeValue theValue = cubService.getFormAttributeValue(iFormId, efa.getName(), tag.getId(), currLoc.getId());
-						//formAttributesValueMap key is ids of formAttributeValue, Location, locationTag
-						formAttributesValueMap.put(efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId(), theValue);
-					}
-				}
-			}
-		}
-
-		//get attribute value enumeration info for each attribute
-		for(FormAttribute efa: editableFormAttributes){
-			formAttributesValueEnumMap.put(efa.getFormAttributeId().toString(), cubService.getCurrentFormAttributeValueStrCollection(efa));
-		}
-		
-		map.put("locationsList", locationsList);
-		map.put("locationTagsMap", locationTagsMap);
-		map.put("formAttributesValueEnumMap", formAttributesValueEnumMap);
-		map.put("editableFormAttributes", editableFormAttributes);
-		map.put("formAttributesValueMap", formAttributesValueMap);
-		map.put("formId", formId);
-		map.put("formName", request.getParameter("formName"));
-		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
-		return map;
-	}
-
-	private boolean checkParameter(HttpServletRequest request, String parameterName) {
-		boolean positive = false;
-		String parameter = request.getParameter(parameterName);
-		if ("true".equalsIgnoreCase(parameter)) {
-			positive = true;
-		}
-
-		return positive;
-	}
-	
-	private List<FormAttribute> getEditableFormAttributes(){
-		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-		List<FormAttribute> editable = cubService.getAllEditableFormAttributes();
-		if(editable==null){
-			return new ArrayList<FormAttribute>();
-		}
-		return editable;
 	}
 }

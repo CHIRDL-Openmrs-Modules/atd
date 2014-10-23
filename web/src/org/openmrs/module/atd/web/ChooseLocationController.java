@@ -20,9 +20,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-@Scope("session")
 public class ChooseLocationController extends SimpleFormController {
-	private String formIdStr;
+	//private String formIdStr;
 
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request,
@@ -37,7 +36,7 @@ public class ChooseLocationController extends SimpleFormController {
 					new RedirectView(gobackViewName), map);
 		}
 		map.put("positions", positionStrs);
-		map.put("formId", formIdStr);
+		map.put("formId", request.getParameter("formIdStr"));
 		String successViewName = this.getSuccessView();
 		return new ModelAndView(new RedirectView(successViewName), map);
 	}
@@ -53,7 +52,8 @@ public class ChooseLocationController extends SimpleFormController {
 		List<Location> locationsList = new ArrayList<Location>();
 		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		formIdStr = (String)request.getParameter("formId");
+		String formIdStr = (String)request.getParameter("formId");
+		map.put("formIdStr", formIdStr);
 		LocationService locationService = Context.getLocationService();
 		List<Location> locations = locationService.getAllLocations();
 		for (Location currLoc : locations){

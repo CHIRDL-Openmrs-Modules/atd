@@ -46,6 +46,11 @@
 <body>
 	<form action="configFormAttributeValue.form" method="post" id="attribute_form"
 		class="the_form">
+		<input type="hidden" name="formId" value="${formId }" />
+		<c:forEach items="${positionStrs}" var="ps" varStatus="status">
+			<input type="hidden" name="positions" value="${ps}" />
+		</c:forEach>
+		
 		<c:forEach items="${editableFormAttributes}" var="fa" varStatus="status">
 			<script>
 				originalValues["${fa.formAttributeId}"]={};

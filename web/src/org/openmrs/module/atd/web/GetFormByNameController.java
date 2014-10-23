@@ -84,11 +84,18 @@ public class GetFormByNameController extends SimpleFormController {
 						favdList = Util.getFormAttributeValueDescriptorFromCSV(input);
 					}catch(Exception e){
 						map.put("ioError", true);
+						return new ModelAndView(backView, map);
 					}
-					ModelAndView mv =  new ModelAndView(new RedirectView(getSuccessView()),map); 
-					mv.addObject("favdList", favdList);
-					request.getSession().setAttribute("favdList", favdList);
-					return mv;
+					//mv.addObject("favdList", favdList);
+					//request.getSession().setAttribute("favdList", favdList);
+					List<FormAttributeValue>  favList = Util.getFormAttributeValues(favdList);
+					if(favList!=null){
+						for(FormAttributeValue fav: favList){
+							cubService.saveFormAttributeValue(fav);
+						}
+					}
+					
+					return new ModelAndView(new RedirectView(getSuccessView()),map);
 				}else{
 					map.put("csvFileError", "csvFileEmpty");
 					return new ModelAndView(backView, map);

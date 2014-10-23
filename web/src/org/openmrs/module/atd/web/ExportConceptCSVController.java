@@ -23,9 +23,7 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author wang417
  * For the page exportConceptCSV.form, exporting concept information as csv files.
  */
-@Scope("session")
 public class ExportConceptCSVController extends SimpleFormController {
-	private List<ConceptDescriptor> cdList;
 	@Override
 	protected Object formBackingObject(HttpServletRequest request)
 			throws Exception {
@@ -40,6 +38,7 @@ public class ExportConceptCSVController extends SimpleFormController {
 		String headerKey = "Content-Disposition";
 		String headerValue = String.format("attachment; filename=\"%s\"", csvFileName);
 		response.setHeader(headerKey, headerValue);
+		List<ConceptDescriptor> cdList=null;
 		try{
 		Util.exportAllConceptsAsCSV(response.getWriter(), cdList);
 		}
@@ -55,7 +54,7 @@ public class ExportConceptCSVController extends SimpleFormController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try{
 		ATDService atdService = Context.getService(ATDService.class);
-		cdList = atdService.getAllConcepts();
+		List<ConceptDescriptor> cdList = atdService.getAllConcepts();
 		map.put("cdList", cdList);
 		}catch(SQLException e){
 			map.put("error", "serverError");
