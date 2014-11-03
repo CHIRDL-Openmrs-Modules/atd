@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
 public class ChooseLocationController extends SimpleFormController {
-	//private String formIdStr;
 
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request,
