@@ -33,6 +33,9 @@
 	<c:if test = "${not empty csvFileError and csvFileError=='notMultipart'}">
 		&nbsp;form error
 	</c:if>
+	<c:if test = "${not empty csvFileError and csvFileError=='notFAV'}">
+		&nbsp;Not form attribute values
+	</c:if>
 	<br/>
 	<input type="submit" value="submit"/>
 

@@ -348,10 +348,18 @@ public class Util {
 				 * FormAttributeVlaueDescriptor
 				 */
 				FormAttributeValue fav = new FormAttributeValue();
-				Integer formId = fs.getForm(favd.getFormName()).getId();
-				Integer locationId = locationService.getLocation(favd.getLocationName()).getId();
-				Integer locationTagId = locationService.getLocationTagByName(favd.getLocationTagName()).getId();
-				Integer faId = cubService.getFormAttributeByName(favd.getAttributeName()).getFormAttributeId();
+				Form form = fs.getForm(favd.getFormName());
+				if(form==null) continue;
+				Integer formId = form.getId();
+				Location loc = locationService.getLocation(favd.getLocationName());
+				if(loc==null) continue;
+				Integer locationId = loc.getId();
+				LocationTag locTag = locationService.getLocationTagByName(favd.getLocationTagName());
+				if(locTag==null) continue;
+				Integer locationTagId = locTag.getId();
+				FormAttribute fv = cubService.getFormAttributeByName(favd.getAttributeName());
+				if(fv==null) continue;
+				Integer faId = fv.getFormAttributeId();
 				fav.setFormId(formId);
 				fav.setFormAttributeId(faId);
 				fav.setLocationId(locationId);

@@ -38,10 +38,10 @@
 			    <prop key="/module/@MODULE_ID@/createFormFromFile.form">createFormFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
 			    <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
-			    <prop key="/module/@MODULE_ID@/showFormAttributeValue.form">showFormAttributeValue</prop>
 			    <prop key="/module/@MODULE_ID@/exportFormCSV.form">exportFormCSV</prop>
 			    <prop key="/module/@MODULE_ID@/exportConceptCSV.form">exportConceptCSV</prop>
-			    <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV.form">exportFormDefinitionCSV</prop>					    
+			    <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV.form">exportFormDefinitionCSV</prop>	
+		        <prop key="/module/@MODULE_ID@/operationSuccess.form">operationSuccess</prop>			    
 			</props>
 		</property>
 	</bean>
@@ -126,7 +126,7 @@
     <bean id="configFormAttributeValue" class="@MODULE_PACKAGE@.web.ConfigFormAttributeValueController">
         <property name="commandName"><value>configFormAttributeValueObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configFormAttributeValue</value></property>
-        <property name="successView"><value>mlmForm.form</value></property>
+        <property name="successView"><value>operationSuccess.form</value></property>
     </bean> 
     <bean id="mlmForm" class="@MODULE_PACKAGE@.web.MLMFormController">
         <property name="commandName"><value>mlmFormObject</value></property>
@@ -189,7 +189,7 @@
     <bean id="getFormByName" class="@MODULE_PACKAGE@.web.GetFormByNameController">
         <property name="commandName"><value>getFormByNameObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/getFormByName</value></property>
-        <property name="successView"><value>mlmForm.form</value></property>
+        <property name="successView"><value>operationSuccess.form</value></property>
     </bean>
     <bean id="configurationManagerSuccess" class="@MODULE_PACKAGE@.web.ConfigManagerSuccessController">
         <property name="commandName"><value>configurationManagerSuccessObject</value></property>
@@ -226,27 +226,26 @@
         <property name="formView"><value>/module/@MODULE_ID@/createFormFromFile</value></property>
         <property name="successView"><value>createFormFromFile.form</value></property>
 	</bean>
-	<bean id="showFormAttributeValue" class="@MODULE_PACKAGE@.web.ShowFormAttributeValueController">
-        <property name="commandName"><value>showFormAttributeValueObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/showFormAttributeValue</value></property> 
-        <property name="successView"><value>mlmForm.form</value></property>
-	</bean>	
 	<bean id="exportFormCSV" class="@MODULE_PACKAGE@.web.ExportFormCSVController">
         <property name="commandName"><value>exportFormCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportFormCSV</value></property> 
-        <property name="successView"><value>mlmForm.form</value></property>
+        <property name="successView"><value>operationSuccess.form</value></property>
 	</bean>	
 	<bean id="exportConceptCSV" class="@MODULE_PACKAGE@.web.ExportConceptCSVController">
         <property name="commandName"><value>exportConceptCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportConceptCSV</value></property> 
-        <property name="successView"><value>mlmForm.form</value></property>
+        <property name="successView"><value>operationSuccess.form</value></property>
 	</bean>	
 	<bean id="exportFormDefinitionCSV" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSVController">
         <property name="commandName"><value>exportFormDefinitionCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV</value></property> 
-        <property name="successView"><value>mlmForm.form</value></property>
+        <property name="successView"><value>operationSuccess.form</value></property>
 	</bean>
-	
+	<bean id="operationSuccess" class="@MODULE_PACKAGE@.web.OperationSuccessController">
+        <property name="commandName"><value>operationSuccessObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/operationSuccess</value></property> 
+        <property name="successView"><value>configurationManager.form</value></property>
+	</bean>
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list>

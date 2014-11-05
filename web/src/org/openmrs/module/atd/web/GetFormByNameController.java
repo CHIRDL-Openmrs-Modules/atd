@@ -63,7 +63,6 @@ public class GetFormByNameController extends SimpleFormController {
 			map.put("formId", form.getId());
 			return new ModelAndView(new RedirectView(view),map);  
 		}else{
-			view = "showFormAttributeValue.form";
 			if(request instanceof MultipartHttpServletRequest){
 				MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 				MultipartFile csvFile = multipartRequest.getFile("csvFile");
@@ -89,12 +88,16 @@ public class GetFormByNameController extends SimpleFormController {
 					//mv.addObject("favdList", favdList);
 					//request.getSession().setAttribute("favdList", favdList);
 					List<FormAttributeValue>  favList = Util.getFormAttributeValues(favdList);
+					if(favdList.size()!=0 && favList.size()==0){
+						map.put("csvFileError", "notFAV");
+						return new ModelAndView(backView, map);
+					}
 					if(favList!=null){
 						for(FormAttributeValue fav: favList){
 							cubService.saveFormAttributeValue(fav);
 						}
 					}
-					
+					map.put("operationType", "Import form attribute values");
 					return new ModelAndView(new RedirectView(getSuccessView()),map);
 				}else{
 					map.put("csvFileError", "csvFileEmpty");

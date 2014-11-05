@@ -7,10 +7,10 @@
 <title>Insert title here</title>
 </head>
 <body>
-        <form name="input" action="mlmForm.form" method="post" enctype="multipart/form-data">
+        <form name="input" action="operationSuccess.form" method="post" enctype="multipart/form-data">
         <table>
             <tr style="padding: 5px">
-                <td style="padding: 0px 0px 10px 0px">${operation} successful</td>
+                <td style="padding: 0px 0px 10px 0px">${operationType} successful</td>
             </tr>
             <tr style="padding: 10px">
                 <td colspan="3" align="center"><hr size="3" color="black"/></td>

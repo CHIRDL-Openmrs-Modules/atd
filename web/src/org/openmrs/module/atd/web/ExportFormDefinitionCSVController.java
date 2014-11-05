@@ -27,7 +27,6 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author wang417
  * For the page exportFormDefinitionCSV.form, exporting form definition information as csv files.
  */
-@Scope("session")
 public class ExportFormDefinitionCSVController extends SimpleFormController {
 
 	@Override
@@ -89,6 +88,7 @@ public class ExportFormDefinitionCSVController extends SimpleFormController {
 					fddList = atdService.getAllFormDefinition();
 				}
 				Util.exportAllFormDefinitionCSV(response.getWriter(), fddList);
+				map.put("operationType", "export form definition as csv file");
 				return new ModelAndView(new RedirectView(getSuccessView()), map);
 			}
 		}catch(SQLException e){

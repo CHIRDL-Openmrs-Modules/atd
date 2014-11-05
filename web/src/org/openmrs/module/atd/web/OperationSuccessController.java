@@ -12,6 +12,11 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
 public class OperationSuccessController extends SimpleFormController {
+	
+	@Override
+	protected Object formBackingObject(HttpServletRequest request) throws Exception {
+		return "testing";
+	}
 
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) throws Exception {

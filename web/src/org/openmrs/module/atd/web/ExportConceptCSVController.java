@@ -46,6 +46,7 @@ public class ExportConceptCSVController extends SimpleFormController {
 			map.put("error", "serverError");
 			return new ModelAndView(getFormView(), map);
 		}
+		map.put("operationType", "export concept as csv file");
 		return new ModelAndView(new RedirectView(getSuccessView()), map);
 	}
 

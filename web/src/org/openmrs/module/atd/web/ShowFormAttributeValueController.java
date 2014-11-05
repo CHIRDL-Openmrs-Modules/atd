@@ -19,9 +19,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.*;
 
-@Scope("session")
 public class ShowFormAttributeValueController extends SimpleFormController {
-	private List<FormAttributeValueDescriptor> favdList;
 	@Override
 	protected Object formBackingObject(HttpServletRequest request)
 			throws Exception {
@@ -33,6 +31,8 @@ public class ShowFormAttributeValueController extends SimpleFormController {
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
+		Object obj = request.getSession().getAttribute("favdList");
+		List<FormAttributeValueDescriptor>  favdList = (List<FormAttributeValueDescriptor>)obj;
 		List<FormAttributeValue>  favList = Util.getFormAttributeValues(favdList);
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		if(favList!=null){
@@ -50,7 +50,7 @@ public class ShowFormAttributeValueController extends SimpleFormController {
 	protected Map referenceData(HttpServletRequest request, Object command, Errors errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		Object obj = request.getSession().getAttribute("favdList");
-		favdList = (List<FormAttributeValueDescriptor>)obj;
+		List<FormAttributeValueDescriptor>  favdList = (List<FormAttributeValueDescriptor>)obj;
 		map.put("favdList", favdList);
 		return map;
 	}

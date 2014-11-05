@@ -105,6 +105,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		}
 		
 		map.put("formId", iFormId.toString());
+		map.put("operationType", "Editing form attributes value");
 		successViewName = getSuccessView();
 		return new ModelAndView(new RedirectView(successViewName), map);
 		

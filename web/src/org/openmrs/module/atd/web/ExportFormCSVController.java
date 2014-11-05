@@ -22,7 +22,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-@Scope("session")
 public class ExportFormCSVController extends SimpleFormController {
 	
 	@Override
@@ -87,6 +86,7 @@ public class ExportFormCSVController extends SimpleFormController {
 				map.put("error", "serverError");
 				return new ModelAndView(getFormView(), map);
 			}
+			map.put("operationType", "export form attribute values as csv file");
 			return new ModelAndView(new RedirectView(getSuccessView()), map);
 		}
 		
