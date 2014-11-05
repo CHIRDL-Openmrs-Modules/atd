@@ -179,7 +179,10 @@ public class ProduceFormInstance implements ProcessStateAction
 		    "outputType", locationTagId, locationId);
 		
 		if (outputTypeString == null) {
-			outputTypeString = "teleformXML";
+			outputTypeString = Context.getAdministrationService().getGlobalProperty("atd.defaultOutputType");
+			if (outputTypeString == null) {
+				outputTypeString = "teleformXML";
+			}
 		}
 		
 		StringTokenizer tokenizer = new StringTokenizer(outputTypeString,",");

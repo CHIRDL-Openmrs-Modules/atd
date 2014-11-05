@@ -134,6 +134,12 @@
         <description>Directory containing all form pdf templates.
         </description>
     </globalProperty>
+    <globalProperty>
+        <property>atd.defaultOutputType</property>
+        <defaultValue>teleformXML</defaultValue>
+        <description>The default output for creating merge documents.  The current possible values are teleformXML and pdf</description>
+    </globalProperty>
+    
 	<!-- Internationalization -->
 	<!-- All message codes should start with moduleId.* -->
 	<messages>
