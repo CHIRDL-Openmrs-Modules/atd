@@ -3,10 +3,13 @@
  */
 package org.openmrs.module.atd.action;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -166,23 +169,67 @@ public class ProduceFormInstance implements ProcessStateAction
 		//deliberately empty because processAction changes the state
 	}
 
-	protected void produceForm(Integer formId, Integer locationId, Integer locationTagId, Integer encounterId, 
-	                           Integer sessionId, FormInstance formInstance, PatientState patientState, Patient patient, 
+	protected void produceForm(Integer formId, Integer locationId, Integer locationTagId, Integer encounterId,
+	                           Integer sessionId, FormInstance formInstance, PatientState patientState, Patient patient,
 	                           String formName, ATDService atdService) {
 		String mergeDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
 		        .getFormAttributeValue(formId, "defaultMergeDirectory", locationTagId, locationId));
 		
-		String mergeFilename = mergeDirectory + "Pending/" + formInstance.toString() + ".xml";
+		String outputTypeString = org.openmrs.module.chirdlutilbackports.util.Util.getFormAttributeValue(formId,
+		    "outputType", locationTagId, locationId);
+		
+		if (outputTypeString == null) {
+			outputTypeString = Context.getAdministrationService().getGlobalProperty("atd.defaultOutputType");
+			if (outputTypeString == null) {
+				outputTypeString = "teleformXML";
+			}
+		}
+		
+		StringTokenizer tokenizer = new StringTokenizer(outputTypeString,",");
+		HashMap<String, OutputStream> outputs = new HashMap<String, OutputStream>();
 		int maxDssElements = Util.getMaxDssElements(formId, locationTagId, locationId);
 		
-		try {
-			FileOutputStream output = new FileOutputStream(mergeFilename);
-			atdService.produce(output, patientState, patient, encounterId, formName, maxDssElements, sessionId);
-			output.flush();
-			output.close();
+		while (tokenizer.hasMoreTokens()) {
+			String mergeFilename = null;
+			try {
+				String currToken = tokenizer.nextToken().trim();
+				
+				if (currToken.equalsIgnoreCase("teleformXML")) {
+					File pendingDir = new File(mergeDirectory, "Pending");
+					pendingDir.mkdirs();
+					mergeFilename = pendingDir.getAbsolutePath() + File.separator + formInstance.toString() + ".xml";
+				}
+				if (currToken.equalsIgnoreCase("pdf")) {
+					File pdfDir = new File(mergeDirectory, "pdf");
+					pdfDir.mkdirs();
+					mergeFilename =pdfDir.getAbsolutePath() + File.separator + formInstance.toString() + ".pdf";
+				}
+				
+				if (mergeFilename != null) {
+					FileOutputStream output = new FileOutputStream(mergeFilename);
+					
+					outputs.put(currToken, output);
+				} else {
+					log.error("mergeFilename is null");
+				}
+				
+			}
+			catch (IOException e) {
+				log.error("Could not produce merge xml for file: " + mergeFilename, e);
+			}
 		}
-		catch (IOException e) {
-			log.error("Could not produce merge xml for file: " + mergeFilename, e);
+		
+		atdService.produce(outputs, patientState, patient, encounterId, formName, maxDssElements, sessionId);
+		
+		for (OutputStream output : outputs.values()) {
+			try {
+				output.flush();
+				output.close();
+			}
+			catch (IOException e) {
+				
+			}
 		}
+		
 	}
 }
