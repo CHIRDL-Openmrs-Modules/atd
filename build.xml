@@ -107,9 +107,9 @@
 	     </copy>
 		
 		<!-- Copy test files -->
-	     <!--<copy todir="build/">
-	     	<fileset dir="test" includes="*.xml" />
-	     </copy>-->
+         <!--<copy todir="build/">
+         	<fileset dir="test" includes="*.xml" />
+         </copy>-->
 		
 		<!-- Create distributable jar file -->
 		<jar destfile="dist/${module.id}-${module.version}.omod">
