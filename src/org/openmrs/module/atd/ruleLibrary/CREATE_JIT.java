@@ -16,6 +16,7 @@ import org.openmrs.logic.Rule;
 import org.openmrs.logic.result.Result;
 import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
@@ -80,14 +81,14 @@ public class CREATE_JIT implements Rule
 	{
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(patientId);
-		String formName = (String) parameters.get("param1");
-		Object param2Object = parameters.get("param2");
+		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
+		Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_2);
 		
-		Integer sessionId = (Integer) parameters.get("sessionId");
+		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
 		if(sessionId != null){
-			Integer locationTagId = (Integer) parameters.get("locationTagId"); 
-			FormInstance formInstance = (FormInstance) parameters.get("formInstance");
+			Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
+			FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
 			Integer locationId = formInstance.getLocationId();
 			State currState = getCreateState(formName, locationTagId, locationId);
 			if (currState == null) {
@@ -98,9 +99,9 @@ public class CREATE_JIT implements Rule
 				HashMap<String,Object> actionParameters = new HashMap<String,Object>();
 				if (param2Object != null && param2Object instanceof String){
 					String trigger = (String) param2Object;
-					actionParameters.put("trigger", trigger);
+					actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
 				}
-				actionParameters.put("formName", formName);
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
             	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
             		locationTagId,
             		locationId,
@@ -124,7 +125,7 @@ public class CREATE_JIT implements Rule
 	
 	protected State getCreateState(String formName, Integer locationTagId, Integer locationId) 
 	{
-		String stateName = "JIT_create";
+		String stateName = ChirdlUtilConstants.STATE_JIT_CREATE;
 		Form form = Context.getFormService().getForm(formName);
 		if (form == null) {
 			log.error("No form found with name: " + formName);
@@ -134,9 +135,11 @@ public class CREATE_JIT implements Rule
 		// Check to see if the form is mobile only
 		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		FormAttributeValue fav = 
-			chirdlUtilBackportsService.getFormAttributeValue(form.getFormId(), "mobileOnly", locationTagId, locationId);
-		if (fav != null && fav.getValue() != null && fav.getValue().equalsIgnoreCase("true")) {
-			stateName = "JIT_mobile_create";
+			chirdlUtilBackportsService.getFormAttributeValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTR_MOBILE_ONLY, 
+				locationTagId, locationId);
+		if (fav != null && fav.getValue() != null && fav.getValue().equalsIgnoreCase(
+			ChirdlUtilConstants.FORM_ATTR_VAL_TRUE)) {
+			stateName = ChirdlUtilConstants.STATE_JIT_MOBILE_CREATE;
 		}
 		
 		State currState = chirdlUtilBackportsService.getStateByName(stateName);

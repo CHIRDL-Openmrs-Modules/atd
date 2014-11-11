@@ -47,6 +47,7 @@ import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.BadScansFileFilter;
 import org.openmrs.module.atd.xmlBeans.Field;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
@@ -522,20 +523,21 @@ public class ATDServiceImpl implements ATDService
 		
 		for(String outputType:outputs.keySet()){
 			OutputStream output = outputs.get(outputType);
-			if (outputType.equalsIgnoreCase("teleformXML")) {
+			if (outputType.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML)) {
 				translator.formToTeleformXML(formInstance, output, patient, dssManager, encounterId, baseParameters,
 				    locationTagId, sessionId);
 			}
 			
-			if (outputType.equalsIgnoreCase("pdf")) {
-				String templateDirectory = adminService.getGlobalProperty("atd.pdfTemplateDirectory");
+			if (outputType.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_PDF)) {
+				String templateDirectory = adminService.getGlobalProperty(
+					ChirdlUtilConstants.GLOBAL_PROP_PDF_TEMPLATE_DIRECTORY);
 				if (templateDirectory == null || templateDirectory.trim().length() == 0) {
 					log.error("Value cannot be found for global property: atd.pdfTemplateDirectory.  No pdf "
 							+ "merge file will be created for form: " + formName);
 					continue;
 				}
 				
-				File pdfTemplate = new File(templateDirectory, formName + "_template.pdf");
+				File pdfTemplate = new File(templateDirectory, formName + ChirdlUtilConstants.FILE_PDF_TEMPLATE);
 				translator.formToPDF(pdfTemplate.getAbsolutePath(), formInstance, output, patient, dssManager,
 				    encounterId, baseParameters, locationTagId, sessionId);
 			}

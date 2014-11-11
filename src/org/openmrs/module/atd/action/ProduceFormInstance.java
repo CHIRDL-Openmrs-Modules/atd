@@ -21,6 +21,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.Util;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
@@ -73,8 +74,8 @@ public class ProduceFormInstance implements ProcessStateAction
 		String formName = null;
 		String trigger = null;
 		if(parameters != null){
-			formName = (String) parameters.get("formName");
-			Object param2Object = parameters.get("trigger");
+			formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_NAME);
+			Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_TRIGGER);
 			if (param2Object != null && param2Object instanceof String){
 				trigger = (String) param2Object;
 			}
@@ -101,7 +102,7 @@ public class ProduceFormInstance implements ProcessStateAction
 		
 		if(formId == null){
 			//open an error state
-			currState = chirdlutilbackportsService.getStateByName("ErrorState");
+			currState = chirdlutilbackportsService.getStateByName(ChirdlUtilConstants.STATE_ERROR_STATE);
 			chirdlutilbackportsService.addPatientState(patient,
 					currState, sessionId,locationTagId,locationId, null);
 			log.error(formName+
@@ -120,17 +121,17 @@ public class ProduceFormInstance implements ProcessStateAction
 		if(parameters == null){
 			parameters = new HashMap<String,Object>();
 		}
-		parameters.put("formInstance", formInstance);
+		parameters.put(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE, formInstance);
 		patientState.setFormInstance(formInstance);
 		chirdlutilbackportsService.updatePatientState(patientState);
 		Integer formInstanceId = formInstance.getFormInstanceId();
 		
 		//If triggered by a force print, save as a form instance attibute value for later reference
 		try {
-			if (trigger != null && trigger.equalsIgnoreCase("forcePrint")){
+			if (trigger != null && trigger.equalsIgnoreCase(ChirdlUtilConstants.FORM_INST_ATTR_VAL_FORCE_PRINT)){
 				FormInstanceAttributeValue fiav = new FormInstanceAttributeValue();
 				FormInstanceAttribute attr = chirdlutilbackportsService
-					.getFormInstanceAttributeByName("trigger");
+					.getFormInstanceAttributeByName(ChirdlUtilConstants.FORM_INST_ATTR_TRIGGER);
 				if (attr != null){
 					System.out.println("Attribute is not null");
 					fiav.setFormInstanceAttributeId(attr.getFormInstanceAttributeId());
@@ -173,19 +174,20 @@ public class ProduceFormInstance implements ProcessStateAction
 	                           Integer sessionId, FormInstance formInstance, PatientState patientState, Patient patient,
 	                           String formName, ATDService atdService) {
 		String mergeDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
-		        .getFormAttributeValue(formId, "defaultMergeDirectory", locationTagId, locationId));
+		        .getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_MERGE_DIRECTORY, locationTagId, 
+		        	locationId));
 		
 		String outputTypeString = org.openmrs.module.chirdlutilbackports.util.Util.getFormAttributeValue(formId,
-		    "outputType", locationTagId, locationId);
+			ChirdlUtilConstants.FORM_ATTR_OUTPUT_TYPE, locationTagId, locationId);
 		
 		if (outputTypeString == null) {
-			outputTypeString = Context.getAdministrationService().getGlobalProperty("atd.defaultOutputType");
+			outputTypeString = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_DEFAULT_OUTPUT_TYPE);
 			if (outputTypeString == null) {
-				outputTypeString = "teleformXML";
+				outputTypeString = ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML;
 			}
 		}
 		
-		StringTokenizer tokenizer = new StringTokenizer(outputTypeString,",");
+		StringTokenizer tokenizer = new StringTokenizer(outputTypeString, ChirdlUtilConstants.GENERAL_INFO_COMMA);
 		HashMap<String, OutputStream> outputs = new HashMap<String, OutputStream>();
 		int maxDssElements = Util.getMaxDssElements(formId, locationTagId, locationId);
 		
@@ -194,15 +196,17 @@ public class ProduceFormInstance implements ProcessStateAction
 			try {
 				String currToken = tokenizer.nextToken().trim();
 				
-				if (currToken.equalsIgnoreCase("teleformXML")) {
-					File pendingDir = new File(mergeDirectory, "Pending");
+				if (currToken.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML)) {
+					File pendingDir = new File(mergeDirectory, ChirdlUtilConstants.FILE_PENDING);
 					pendingDir.mkdirs();
-					mergeFilename = pendingDir.getAbsolutePath() + File.separator + formInstance.toString() + ".xml";
+					mergeFilename = pendingDir.getAbsolutePath() + File.separator + formInstance.toString() + 
+							ChirdlUtilConstants.FILE_EXTENSION_XML;
 				}
-				if (currToken.equalsIgnoreCase("pdf")) {
-					File pdfDir = new File(mergeDirectory, "pdf");
+				if (currToken.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_PDF)) {
+					File pdfDir = new File(mergeDirectory, ChirdlUtilConstants.FORM_ATTR_VAL_PDF);
 					pdfDir.mkdirs();
-					mergeFilename =pdfDir.getAbsolutePath() + File.separator + formInstance.toString() + ".pdf";
+					mergeFilename =pdfDir.getAbsolutePath() + File.separator + formInstance.toString() + 
+							ChirdlUtilConstants.FILE_EXTENSION_PDF;
 				}
 				
 				if (mergeFilename != null) {
