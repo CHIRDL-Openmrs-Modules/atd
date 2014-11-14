@@ -38,8 +38,13 @@ import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
+import org.openmrs.module.chirdlutil.xmlBeans.serverconfig.ImageForm;
+import org.openmrs.module.chirdlutil.xmlBeans.serverconfig.ImageMerge;
+import org.openmrs.module.chirdlutil.xmlBeans.serverconfig.ServerConfig;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
@@ -49,7 +54,9 @@ import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
 import org.openmrs.util.OpenmrsUtil;
 
+import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.AcroFields;
+import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 
@@ -245,12 +252,79 @@ public class TeleformTranslator
 	        	resultString = fieldNameResult.get(fieldName);			
 	        	form.setField(fieldName, resultString);
 	        }
+	        
+	        postProcessPDF(reader, formInstance, stamper, locationTagId);
+	        
 	        stamper.close();
 	        reader.close();
         }
         catch (Exception e) {
-	        log.error("Error generating PDF version of form: "+formInstance, e);
+	        log.error("Error generating PDF version of form: " + formInstance, e);
         }
+	}
+	
+	/**
+	 * Performs any post-processing on a PDF merge form.
+	 * 
+	 * @param reader The PdfReader object created from the template PDF file.
+	 * @param formInstance FormInstance object containing the form instance information for the form being merged.
+	 * @param stamper The PdfStamper used to place objects in the PDF file.
+	 * @param locationTagId The location tag identifier.
+	 */
+	private void postProcessPDF(PdfReader reader, FormInstance formInstance, PdfStamper stamper, Integer locationTagId) {
+		Integer formId = formInstance.getFormId();
+		Form form = Context.getFormService().getForm(formId);
+		mergePDFImages(form, formInstance, locationTagId, stamper);
+	}
+	
+	/**
+	 * Merges any needed images to the PDF form.
+	 * 
+	 * @param form The database form containing the information about the PDF form.
+	 * @param formInstance The instance of the form to have data merged.
+	 * @param locationTagId The locationTagId of the location tag requesting the merge.
+	 * @param stamper The PDF stamper used to merge the images.
+	 */
+	private void mergePDFImages(Form form, FormInstance formInstance, Integer locationTagId, PdfStamper stamper) {
+		try {
+			// Merge any images need to the form.
+			FormAttributeValue fav = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
+				form.getFormId(), ChirdlUtilConstants.FORM_ATTR_REQUIRES_PDF_IMAGE_MERGE, locationTagId, 
+				formInstance.getLocationId());
+			if (fav == null || fav.getValue() == null || 
+					!ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(fav.getValue())) {
+				return;
+			}
+			
+			ServerConfig serverConfig = Util.getServerConfig();
+			if (serverConfig == null) {
+				log.warn("Server config file cannot be found.  No PDF image processing will take place.");
+				return;
+			}
+			
+			ImageForm imageForm = serverConfig.getPDFImageForm(form.getName());
+			if (imageForm == null) {
+				return;
+			}
+			
+			AcroFields fields = stamper.getAcroFields();
+			List<ImageMerge> imageMerges = imageForm.getImageMerges();
+			if (imageMerges == null) {
+				return;
+			}
+			
+			for (ImageMerge imageMerge : imageMerges) {
+				String fieldName = imageMerge.getFieldName();
+				String filePath = fields.getField(fieldName);
+				Image image = Image.getInstance(filePath);
+				image.setRotationDegrees(imageMerge.getRotation());
+				image.setAbsolutePosition(imageMerge.getPositionX(), imageMerge.getPositionY());
+				PdfContentByte content = stamper.getUnderContent(imageMerge.getPageNumber());
+				content.addImage(image);
+			}
+		} catch (Exception e) {
+			log.error("Error post-processing PDF form: " + form.getName(), e);
+		}
 	}
 
 	/**
