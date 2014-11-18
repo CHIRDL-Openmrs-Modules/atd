@@ -316,6 +316,10 @@ public class TeleformTranslator
 			for (ImageMerge imageMerge : imageMerges) {
 				String fieldName = imageMerge.getFieldName();
 				String filePath = fields.getField(fieldName);
+				if (filePath == null || filePath.trim().length() == 0) {
+					continue;
+				}
+				
 				Image image = Image.getInstance(filePath);
 				image.setRotationDegrees(imageMerge.getRotation());
 				image.setAbsolutePosition(imageMerge.getPositionX(), imageMerge.getPositionY());
