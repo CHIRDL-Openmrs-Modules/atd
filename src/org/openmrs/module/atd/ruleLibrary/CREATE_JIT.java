@@ -20,6 +20,8 @@ import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
@@ -82,6 +84,7 @@ public class CREATE_JIT implements Rule
 		Object param2Object = parameters.get("param2");
 		
 		Integer sessionId = (Integer) parameters.get("sessionId");
+		FormInstanceTag formInstTag = null;
 		if(sessionId != null){
 			Integer locationTagId = (Integer) parameters.get("locationTagId"); 
 			FormInstance formInstance = (FormInstance) parameters.get("formInstance");
@@ -98,15 +101,24 @@ public class CREATE_JIT implements Rule
 					actionParameters.put("trigger", trigger);
 				}
 				actionParameters.put("formName", formName);
-            	StateManager.runState(patient, sessionId, currState,actionParameters,
+            	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
             		locationTagId,
             		locationId,
             		BaseStateActionHandler.getInstance());
+            	FormInstance formInst = patientState.getFormInstance();
+            	if (formInst != null) {
+            		formInstTag = new FormInstanceTag(formInst, locationTagId);
+            	}
             }
             catch (Exception e) {
 	            log.error("Error creating JIT",e);
             }
 		}	
+		
+		if (formInstTag != null) {
+			return new Result(formInstTag.toString());
+		}
+		
 		return Result.emptyResult();
 	}
 	

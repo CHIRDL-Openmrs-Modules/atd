@@ -1,6 +1,5 @@
 package org.openmrs.module.atd.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
@@ -443,71 +442,43 @@ public class ATDServiceImpl implements ATDService
 			Integer locationTagId,
 			Integer sessionId)
 	{
-		DssManager dssManager = new DssManager(patient);
-		return this.produce(patient, formInstance, customOutput,
-				dssManager, encounterId,baseParameters,
-				locationTagId,sessionId);
+		HashMap<String, OutputStream> outputs = new HashMap<String,OutputStream>();
+		outputs.put("teleformXML", customOutput);
+		return  produce(patient, formInstance, outputs,
+            encounterId, baseParameters, locationTagId,sessionId);
 	}
 	
-	public boolean produce(Patient patient,
-			FormInstance formInstance, OutputStream customOutput, 
-			DssManager dssManager,Integer encounterId,
-			Map<String,Object> baseParameters,
-			 Integer locationTagId,Integer sessionId)
-	{
+	public boolean produce(Patient patient, FormInstance formInstance, Map<String, OutputStream> outputs,
+	                       Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId, Integer sessionId) {
+		DssManager dssManager = new DssManager(patient);
+	
+		return this.produce(patient, formInstance, outputs, dssManager, encounterId, baseParameters, locationTagId,
+		    sessionId);
+	}        	
+	
+	public boolean produce(Patient patient, FormInstance formInstance, Map<String,OutputStream> outputs, DssManager dssManager,
+	                       Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId, Integer sessionId) {
 		
-		AdministrationService adminService = Context.getAdministrationService();
-		boolean mergeToTable=false;
-		try
-		{
-			mergeToTable = Boolean.parseBoolean(
-					adminService.getGlobalProperty("atd.mergeToTable"));
-		} catch (Exception e1)
-		{
-		}
-		FormService formService = Context.getFormService();
-		
-		if(!mergeToTable)
-		{
-			try
-			{
-				this.createMergeXML(customOutput, patient,formInstance,
-						dssManager,encounterId,baseParameters,
-						locationTagId,sessionId);
-			} catch (Exception e)
-			{
+			try {
+				this.createMergeFile(outputs, patient, formInstance, dssManager, encounterId, baseParameters,
+				    locationTagId, sessionId);
+			}
+			catch (Exception e) {
 				this.log.error("Error creating merge xml");
 				this.log.error(e.getMessage());
 				this.log.error(Util.getStackTrace(e));
 				return false;
 			}
-		}
-		
-		if(mergeToTable)
-		{
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			try
-			{
-				this.createMergeXML(output, patient,formInstance,
-						dssManager,encounterId,baseParameters,
-						locationTagId,sessionId);
-			} catch (Exception e)
-			{
-				this.log.error("Error creating merge xml");
-				this.log.error(e.getMessage());
-				this.log.error(Util.getStackTrace(e));
-				return false;
-			}
-			if(formInstance != null){
-				String formname = formService.getForm(formInstance.getFormId()).getName();
-				this.createMergeTable(output.toString(),
-					formInstance.getFormInstanceId(), formname);
-			}
-		}
-		
-		this.saveDssElementsToDatabase(patient,formInstance,
-				dssManager,encounterId);
+
+		this.saveDssElementsToDatabase(patient, formInstance, dssManager, encounterId);
 		return true;
+	}
+	
+	public boolean produce(Patient patient, FormInstance formInstance, OutputStream customOutput, DssManager dssManager,
+	                       Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId, Integer sessionId) {
+		HashMap<String, OutputStream> outputs = new HashMap<String,OutputStream>();
+		outputs.put("teleformXML", customOutput);
+		return produce(patient, formInstance, outputs, dssManager, encounterId, baseParameters, locationTagId, sessionId);
 	}
 	
 	private void saveDssElementsToDatabase(Patient patient,
@@ -531,7 +502,7 @@ public class ATDServiceImpl implements ATDService
 		while (iter.hasNext())
 		{
 			dssElements = iter.next();
-			for (int i=0,pos=0; i < dssElements.size(); i++,pos++)
+			for (int i=0; i < dssElements.size(); i++)
 			{
 				DssElement currDssElement = dssElements.get(i);
 				atdService.addPatientATD(patientId, formInstance,
@@ -540,44 +511,37 @@ public class ATDServiceImpl implements ATDService
 		}
 	}
 	
-	private int createMergeXML(OutputStream output, 
-			Patient patient, FormInstance formInstance, 
-			DssManager dssManager,Integer encounterId,
-			Map<String,Object> baseParameters,
-			Integer locationTagId,
-			Integer sessionId
-			)
-	{
+	private int createMergeFile(Map<String,OutputStream> outputs, Patient patient, FormInstance formInstance, DssManager dssManager,
+	                           Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId,
+	                           Integer sessionId) {
 		TeleformTranslator translator = new TeleformTranslator();
-		translator.formToTeleformOutputStream(formInstance, output,
-				patient,dssManager,encounterId,
-				baseParameters,
-				locationTagId,sessionId);
-		return formInstance.getFormId();
-	}
-	
-	private void createMergeTable(String inputXML, 
-			Integer formInstanceId, String formname)
-	{
+		Integer formId = formInstance.getFormId();
+		FormService formService = Context.getFormService();
+		String formName = formService.getForm(formId).getName();
 		AdministrationService adminService = Context.getAdministrationService();
-		String xsltFilename = 
-			adminService.getGlobalProperty("atd.convertMergeXMLToTableFile");
-		if(xsltFilename == null){
-			this.log.error("No xslt filename. You need to set global property atd.convertMergeXMLToTableFile. Could not convert teleform xml to table for form: "+
-					formname +" with id: "+formInstanceId+".");
-			return;
+		
+		for(String outputType:outputs.keySet()){
+			OutputStream output = outputs.get(outputType);
+			if (outputType.equalsIgnoreCase("teleformXML")) {
+				translator.formToTeleformXML(formInstance, output, patient, dssManager, encounterId, baseParameters,
+				    locationTagId, sessionId);
+			}
+			
+			if (outputType.equalsIgnoreCase("pdf")) {
+				String templateDirectory = adminService.getGlobalProperty("atd.pdfTemplateDirectory");
+				if (templateDirectory == null || templateDirectory.trim().length() == 0) {
+					log.error("Value cannot be found for global property: atd.pdfTemplateDirectory.  No pdf "
+							+ "merge file will be created for form: " + formName);
+					continue;
+				}
+				
+				File pdfTemplate = new File(templateDirectory, formName + "_template.pdf");
+				translator.formToPDF(pdfTemplate.getAbsolutePath(), formInstance, output, patient, dssManager,
+				    encounterId, baseParameters, locationTagId, sessionId);
+			}
 		}
-		TeleformTranslator translator = new TeleformTranslator();
-		try
-		{
-			translator.teleformXMLToTable(inputXML,
-					xsltFilename,formname,
-					formInstanceId);
-		} catch (Exception e)
-		{		
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
-		}
+	
+		return formInstance.getFormId();
 	}
 
 	public Form teleformXMLToDatabaseForm(String formName, String templateXMLFilename)
@@ -776,9 +740,15 @@ public class ATDServiceImpl implements ATDService
 	 * @should testPSFProduce
 	 * @should testPWSProduce
 	 */
-	public void produce(OutputStream output, PatientState state,
-			Patient patient, Integer encounterId, String dssType,
-			int maxDssElements,Integer sessionId)
+	public void produce(OutputStream output, PatientState state, Patient patient, Integer encounterId, String dssType,
+	                    int maxDssElements, Integer sessionId) {
+		HashMap<String, OutputStream> outputs = new HashMap<String, OutputStream>();
+		outputs.put("teleformXML", output);
+		produce(outputs, state, patient, encounterId, dssType, maxDssElements, sessionId);
+	}
+	public void produce(Map<String,OutputStream> outputs, PatientState state,
+	        			Patient patient, Integer encounterId, String dssType,
+	        			int maxDssElements,Integer sessionId)
 	{
 		ATDService atdService = Context
 				.getService(ATDService.class);
@@ -788,7 +758,7 @@ public class ATDServiceImpl implements ATDService
 		HashMap<String, Object> baseParameters = new HashMap<String, Object>();
 
 		FormInstance formInstance = state.getFormInstance();
-		atdService.produce(patient, formInstance, output, dssManager,
+		atdService.produce(patient, formInstance, outputs, dssManager,
 				encounterId, baseParameters,state.getLocationTagId(),sessionId);
 		Integer formInstanceId = formInstance.getFormInstanceId();
 		Integer locationId = formInstance.getLocationId();
