@@ -17,6 +17,7 @@
 				<prop key="/module/@MODULE_ID@/createForm.form">createForm</prop>
 				<prop key="/module/@MODULE_ID@/popFormFields.form">popFormFields</prop>
 				<prop key="/module/@MODULE_ID@/configForm.form">configForm</prop>
+				<prop key="/module/@MODULE_ID@/configFormAttributeValue.form">configFormAttributeValue</prop>
 				<prop key="/module/@MODULE_ID@/mlmForm.form">mlmForm</prop>
 				<prop key="/module/@MODULE_ID@/printerFormSelectionForm.form">printerFormSelectionForm</prop>
 				<prop key="/module/@MODULE_ID@/printerLocationForm.form">printerLocationForm</prop>
@@ -35,6 +36,12 @@
 				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
 			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/createFormFromFile.form">createFormFromFile</prop>
+			    <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
+			    <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
+			    <prop key="/module/@MODULE_ID@/exportFormCSV.form">exportFormCSV</prop>
+			    <prop key="/module/@MODULE_ID@/exportConceptCSV.form">exportConceptCSV</prop>
+			    <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV.form">exportFormDefinitionCSV</prop>	
+		        <prop key="/module/@MODULE_ID@/operationSuccess.form">operationSuccess</prop>			    
 			</props>
 		</property>
 	</bean>
@@ -89,6 +96,12 @@
         <property name="formView"><value>/module/@MODULE_ID@/popFormFields</value></property>
         <property name="successView"><value>configForm.form</value></property>
     </bean>  
+     
+    <bean id="chooseLocation" class="@MODULE_PACKAGE@.web.ChooseLocationController">
+        <property name="commandName"><value>chooseLocationObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/chooseLocation</value></property>
+        <property name="successView"><value>configFormAttributeValue.form</value></property>
+    </bean> 
     
     <bean id="configForm" class="@MODULE_PACKAGE@.web.ConfigFormController">
         <property name="commandName"><value>configFormObject</value></property>
@@ -96,6 +109,11 @@
         <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
     
+    <bean id="configFormAttributeValue" class="@MODULE_PACKAGE@.web.ConfigFormAttributeValueController">
+        <property name="commandName"><value>configFormAttributeValueObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/configFormAttributeValue</value></property>
+        <property name="successView"><value>operationSuccess.form</value></property>
+    </bean> 
     <bean id="mlmForm" class="@MODULE_PACKAGE@.web.MLMFormController">
         <property name="commandName"><value>mlmFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/mlmForm</value></property>
@@ -153,6 +171,12 @@
         <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
         <property name="successView"><value>configurationManager.form</value></property>
     </bean>
+
+    <bean id="getFormByName" class="@MODULE_PACKAGE@.web.GetFormByNameController">
+        <property name="commandName"><value>getFormByNameObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/getFormByName</value></property>
+        <property name="successView"><value>operationSuccess.form</value></property>
+    </bean>
     <bean id="configurationManagerSuccess" class="@MODULE_PACKAGE@.web.ConfigManagerSuccessController">
         <property name="commandName"><value>configurationManagerSuccessObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configurationManagerSuccess</value></property>
@@ -187,6 +211,26 @@
         <property name="commandName"><value>createFormFromFileObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/createFormFromFile</value></property>
         <property name="successView"><value>createFormFromFile.form</value></property>
+	</bean>
+	<bean id="exportFormCSV" class="@MODULE_PACKAGE@.web.ExportFormCSVController">
+        <property name="commandName"><value>exportFormCSVObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/exportFormCSV</value></property> 
+        <property name="successView"><value>operationSuccess.form</value></property>
+	</bean>	
+	<bean id="exportConceptCSV" class="@MODULE_PACKAGE@.web.ExportConceptCSVController">
+        <property name="commandName"><value>exportConceptCSVObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/exportConceptCSV</value></property> 
+        <property name="successView"><value>operationSuccess.form</value></property>
+	</bean>	
+	<bean id="exportFormDefinitionCSV" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSVController">
+        <property name="commandName"><value>exportFormDefinitionCSVObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV</value></property> 
+        <property name="successView"><value>operationSuccess.form</value></property>
+	</bean>
+	<bean id="operationSuccess" class="@MODULE_PACKAGE@.web.OperationSuccessController">
+        <property name="commandName"><value>operationSuccessObject</value></property>
+        <property name="formView"><value>/module/@MODULE_ID@/operationSuccess</value></property> 
+        <property name="successView"><value>configurationManager.form</value></property>
 	</bean>
 	<bean parent="serviceContext">
 		<property name="moduleService">

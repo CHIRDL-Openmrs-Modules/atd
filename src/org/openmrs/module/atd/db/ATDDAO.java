@@ -1,5 +1,6 @@
 package org.openmrs.module.atd.db;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -9,6 +10,8 @@ import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -122,4 +125,25 @@ public interface ATDDAO {
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
+    /**
+	 * Get all concept information from database as list of ConceptDescriptor
+	 * @return A list of ConceptDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<ConceptDescriptor> getAllConcept() throws SQLException ;
+	
+	/**
+	 * Get all form definition from database as list of FormDefinitionDescriptor
+	 * @return A list of FormDefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException ;
+	
+	/**
+	 * Get the form definition from database with the form that has id as formId. 
+	 * @param The id of the form
+	 * @return	A list of DefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException;
 }

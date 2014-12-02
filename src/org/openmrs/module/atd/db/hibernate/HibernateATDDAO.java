@@ -2,6 +2,8 @@ package org.openmrs.module.atd.db.hibernate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,6 +28,8 @@ import org.openmrs.module.atd.db.ATDDAO;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
@@ -1239,4 +1243,136 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return new ArrayList<PSFQuestionAnswer>();
     }
+
+/**
+ * @see org.openmrs.module.atd.db.ATDDAO#getAllConceptAsDescriptor()
+ */
+	public List<ConceptDescriptor> getAllConcept() throws SQLException {
+		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		String sql = "SELECT distinct a.*, b.name AS \"parent concept\""
+                   + "FROM    (SELECT a.name AS name,"
+                   + "                c.name AS \"concept class\","
+                   + "                d.name AS \"datatype\","
+                   + "                e.description AS description,"
+                   + "                g.concept_id,"
+                   + "                f.units AS units"
+                   + "           FROM concept_name a"
+                   + "                INNER JOIN concept b"
+                   + "                    ON a.concept_id = b.concept_id"
+                   + "                INNER JOIN concept_class c"
+                   + "                    ON b.class_id = c.concept_class_id"
+                   + "                INNER JOIN concept_datatype d"
+                   + "                    ON b.datatype_id = d.concept_datatype_id"
+                   + "                LEFT JOIN concept_description e"
+                   + "                    ON e.concept_id = b.concept_id"
+                   + "                LEFT JOIN concept_numeric f"
+                   + "                    ON f.concept_id = b.concept_id"
+                   + "                LEFT JOIN concept_answer g"
+                   + "                    ON g.answer_concept = b.concept_id) a"
+                   + "          LEFT JOIN"
+                   + "               concept_name b"
+                   + "               ON a.concept_id = b.concept_id";
+		try {
+			java.sql.Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				String name = rs.getString("name");
+				String conceptClass = rs.getString("concept class");
+				String dataType = rs.getString("datatype");
+				String description = rs.getString("description");
+				Integer conceptId = rs.getInt("concept_id");
+				String units = rs.getString("units");
+				String parentConcept = rs.getString("parent concept");
+				ConceptDescriptor cd = new ConceptDescriptor();
+				cd.setName(name);
+				cd.setConceptClass(conceptClass);
+				cd.setDatatype(dataType);
+				cd.setDescription(description);
+				cd.setUnits(units);
+				cd.setParentConcept(parentConcept);
+				cd.setConceptId(conceptId);
+				cdList.add(cd);
+			}
+		}finally{
+			con.close();
+			
+		}
+		
+		return cdList;
+	}
+	
+
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException {
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
+       + " INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id LEFT JOIN (SELECT b.*, a.name FROM    field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id WHERE a.retired = 0";
+		try {
+			java.sql.Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				String formName = rs.getString("form_name");
+				String formDescription = rs.getString("form_description");
+				String fieldName = rs.getString("field_name");
+				String fieldType = rs.getString("field_type");
+				String conceptName = rs.getString("concept_name");
+				String defaultValue = rs.getString("default_value");
+				int fieldNumber = rs.getInt("field_number");
+				String parentFieldName = rs.getString("parent_field_name");
+				FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
+				fdd.setFormName(formName);
+				fdd.setFormDescription(formDescription);
+				fdd.setFieldName(fieldName);
+				fdd.setFieldType(fieldType);
+				fdd.setConceptName(conceptName);
+				fdd.setDefaultValue(defaultValue);
+				fdd.setFieldNumber(fieldNumber);
+				fdd.setParentFieldName(parentFieldName);
+				fddList.add(fdd);
+			}
+		}finally{
+			con.close();
+		}
+		
+		return fddList;
+	}
+
+	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException{
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>(); 
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
+				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
+				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id IN (?)";
+		PreparedStatement ps = null;
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, formId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()){
+				String formName = rs.getString("form_name");
+				String formDescription = rs.getString("form_description");
+				String fieldName = rs.getString("field_name");
+				String fieldType = rs.getString("field_type");
+				String conceptName = rs.getString("concept_name");
+				String defaultValue = rs.getString("default_value");
+				int fieldNumber = rs.getInt("field_number");
+				String parentFieldName = rs.getString("parent_field_name");
+				FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
+				fdd.setFormName(formName);
+				fdd.setFormDescription(formDescription);
+				fdd.setFieldName(fieldName);
+				fdd.setFieldType(fieldType);
+				fdd.setConceptName(conceptName);
+				fdd.setDefaultValue(defaultValue);
+				fdd.setFieldNumber(fieldNumber);
+				fdd.setParentFieldName(parentFieldName);
+				fddList.add(fdd);
+			}
+			
+		} finally{
+			con.close();
+		}
+		return fddList;
+	}
 }

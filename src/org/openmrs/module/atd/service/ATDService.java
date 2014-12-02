@@ -3,6 +3,7 @@ package org.openmrs.module.atd.service;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +21,8 @@ import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
@@ -189,4 +192,26 @@ public interface ATDService
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
+
+	/**
+	 * Get all concept information in system as list of ConceptDescriptor
+	 * @return A list of ConceptDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException;
+	
+	/**
+	 * Get all form definition in system as list of FormDefinitionDescriptor
+	 * @return A list of FormDefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException;
+	
+	/**
+	 * get the form definition in database with the form that has id as formId. 
+	 * @param form id
+	 * @return A list of DefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException;
 }

@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,6 +48,8 @@ import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.BadScansFileFilter;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
@@ -992,4 +995,16 @@ public class ATDServiceImpl implements ATDService
     public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
+
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
+		return this.dao.getAllConcept();
+	}
+
+	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException {
+		return this.dao.getAllFormDefinition();
+	}
+
+	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException {
+		return this.dao.getFormDefinition(formId);
+	}
 }
