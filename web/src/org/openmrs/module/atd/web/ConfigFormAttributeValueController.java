@@ -25,7 +25,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-
+/**
+ * 
+ * @author wang417
+ * controller for configFormAttributeValue.form
+ */
 public class ConfigFormAttributeValueController extends SimpleFormController {
 
 	/** Logger for this class and subclasses */
@@ -62,8 +66,6 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		//get editable attribute
 		List<FormAttribute> editableFormAttributes = getEditableFormAttributes();
 		Map<String, Object> formAttributesValueMap=getFormAttributesValueMap(locationsList,locationTagsMap, editableFormAttributes,iFormId, request,cubService);
-		//get attribute value enumeration info for each attribute
-		Map<String, List<String>> formAttributesValueEnumMap = getFormAttributesValueEnumMap(editableFormAttributes,cubService);
 		for (FormAttribute fa: editableFormAttributes){
 			/*for storing values with each position */
 			for (Location currLoc : locationsList) {

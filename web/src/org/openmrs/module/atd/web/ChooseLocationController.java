@@ -22,7 +22,7 @@ import org.springframework.web.servlet.view.RedirectView;
 /**
  * 
  * @author wang417
- * controller for ChooseLocation.form
+ * controller for chooseLocation.form
  */
 public class ChooseLocationController extends SimpleFormController {
 
