@@ -1245,9 +1245,9 @@ public class HibernateATDDAO implements ATDDAO
     }
 
 /**
- * @see org.openmrs.module.atd.db.ATDDAO#getAllConceptAsDescriptor()
+ * @see org.openmrs.module.atd.db.ATDDAO#getAllConcept()
  */
-	public List<ConceptDescriptor> getAllConcept() throws SQLException {
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
 		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		String sql = "SELECT distinct a.*, b.name AS \"parent concept\""
@@ -1302,8 +1302,10 @@ public class HibernateATDDAO implements ATDDAO
 		return cdList;
 	}
 	
-
-	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException {
+	/**
+	 *  @see org.openmrs.module.atd.db.ATDDAO#getAllFormDefinitions()
+	 */
+	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
 		Connection con = this.sessionFactory.getCurrentSession().connection();
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
@@ -1337,7 +1339,9 @@ public class HibernateATDDAO implements ATDDAO
 		
 		return fddList;
 	}
-
+	/**
+	 * @see org.openmrs.module.atd.db.ATDDAO#getFormDefinition()
+	 */
 	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException{
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>(); 
 		Connection con = this.sessionFactory.getCurrentSession().connection();

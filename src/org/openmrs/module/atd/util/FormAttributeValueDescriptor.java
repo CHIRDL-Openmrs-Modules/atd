@@ -12,10 +12,23 @@ public class FormAttributeValueDescriptor {
 	private String attributeName;
 	private String attributeValue;
 	
+	/**
+	 * Constructor method
+	 * create an empty FormAttributeValueDescriptor
+	 */
 	public FormAttributeValueDescriptor(){
 		
 	}
 	
+	/**
+	 * Constructor method
+	 * create an FormAttributeValueDescriptor with form name, location name, location tag name, attribute name, attribute value
+	 * @param formName form name
+	 * @param locationName location name
+	 * @param locationTagName location tag name
+	 * @param attributeName attribute name
+	 * @param attributeValue attribute value
+	 */
 	public FormAttributeValueDescriptor(String formName, String locationName, String locationTagName, String attributeName, String attributeValue) {
 		this.formName = formName;
 		this.locationName = locationName;

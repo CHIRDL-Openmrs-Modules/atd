@@ -17,7 +17,18 @@ public class FormDefinitionDescriptor {
 	
 	
 	
-	
+	/**
+	 * Constructor method
+	 * create a constructor method with values of form name, form description, field name, field type, concept name, default form definition value, field number, parent field name
+	 * @param formName form name
+	 * @param formDescription form description
+	 * @param fieldName field name
+	 * @param fieldType field type
+	 * @param conceptName concept name
+	 * @param defaultValue default form definition value
+	 * @param fieldNumber field number
+	 * @param parentFieldName parent field name
+	 */
 	public FormDefinitionDescriptor(String formName, String formDescription, String fieldName, String fieldType, String conceptName, String defaultValue, int fieldNumber, String parentFieldName) {
 		super();
 		this.formName = formName;
@@ -30,7 +41,10 @@ public class FormDefinitionDescriptor {
 		this.parentFieldName = parentFieldName;
 	}
 	
-	
+	/**
+	 * Constructor method
+	 * create an empty FormDefinitionDescriptor
+	 */
 	public FormDefinitionDescriptor() {
 		
 	}

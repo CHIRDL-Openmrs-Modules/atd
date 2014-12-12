@@ -3,7 +3,6 @@ package org.openmrs.module.atd.web;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,32 +10,17 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.View;
-
 import org.apache.commons.logging.Log;
-import org.apache.log4j.Logger;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Form;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.service.ATDService;
-import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.openmrs.module.chirdlutil.log.LoggingConstants;
-import org.openmrs.module.chirdlutil.log.LoggingUtil;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.validation.BindException;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
@@ -68,11 +52,9 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		Integer iFormId = Integer.parseInt(formId);
 		
 		Map<String, Object> map = new HashMap<String, Object>();
-		FormService formService = Context.getFormService();
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 
 		String successViewName = getSuccessView();
-		String gobackViewName = this.getFormView();
 		List<Location> locationsList = new ArrayList<Location>();
 		Set<Integer> locationsIdSet = new HashSet<Integer>();
 		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
@@ -106,7 +88,6 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		
 		map.put("formId", iFormId.toString());
 		map.put("operationType", "Editing form attributes value");
-		successViewName = getSuccessView();
 		return new ModelAndView(new RedirectView(successViewName), map);
 		
 	}

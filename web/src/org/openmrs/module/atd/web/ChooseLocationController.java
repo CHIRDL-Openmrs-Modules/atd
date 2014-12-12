@@ -19,7 +19,11 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
-
+/**
+ * 
+ * @author wang417
+ * controller for ChooseLocation.form
+ */
 public class ChooseLocationController extends SimpleFormController {
 
 	@Override
@@ -54,7 +58,7 @@ public class ChooseLocationController extends SimpleFormController {
 		String formIdStr = (String)request.getParameter("formId");
 		map.put("formIdStr", formIdStr);
 		LocationService locationService = Context.getLocationService();
-		List<Location> locations = locationService.getAllLocations();
+		List<Location> locations = locationService.getAllLocations(false);
 		for (Location currLoc : locations){
 			locationsList.add(currLoc);
             Set<LocationTag> tags = currLoc.getTags();

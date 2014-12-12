@@ -997,11 +997,11 @@ public class ATDServiceImpl implements ATDService
     }
 
 	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
-		return this.dao.getAllConcept();
+		return this.dao.getAllConcepts();
 	}
 
-	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException {
-		return this.dao.getAllFormDefinition();
+	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
+		return this.dao.getAllFormDefinitions();
 	}
 
 	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException {

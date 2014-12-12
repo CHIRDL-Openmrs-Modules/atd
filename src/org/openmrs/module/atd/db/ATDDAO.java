@@ -130,14 +130,14 @@ public interface ATDDAO {
 	 * @return A list of ConceptDescriptor objects
 	 * @throws SQLException
 	 */
-	public List<ConceptDescriptor> getAllConcept() throws SQLException ;
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException ;
 	
 	/**
 	 * Get all form definition from database as list of FormDefinitionDescriptor
 	 * @return A list of FormDefinitionDescriptor objects
 	 * @throws SQLException
 	 */
-	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException ;
+	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException ;
 	
 	/**
 	 * Get the form definition from database with the form that has id as formId. 

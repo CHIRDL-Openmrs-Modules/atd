@@ -37,7 +37,17 @@ public class ConceptDescriptor {
 	private int conceptId;
 	
 	
-	
+	/**
+	 * Constructor Method
+	 * Create a ConceptDescriptor with name, concept class, data type, description, parent concept, units, concept Id
+	 * @param name concept name
+	 * @param conceptClass the class of concept
+	 * @param datatype datatype
+	 * @param description description of this concept
+	 * @param parentConcept parent concept
+	 * @param units measurement unit
+	 * @param conceptId the id of concept
+	 */
 	public ConceptDescriptor(String name, String conceptClass, String datatype, String description, String parentConcept, String units, int conceptId) {
 		super();
 		this.name = name;
@@ -51,6 +61,7 @@ public class ConceptDescriptor {
 
 	/**
 	 * Constructor Method
+	 * Create a empty ConceptDescriptor.
 	 */
 	public ConceptDescriptor() {
 	}

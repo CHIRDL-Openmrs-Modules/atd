@@ -62,7 +62,7 @@ public class ExportFormDefinitionCSVController extends SimpleFormController {
 			}else if(purpose.equals("showAllForms")){
 				request.setAttribute("checkedAllForm", "true");
 				ATDService atdService = Context.getService(ATDService.class);
-				fddList = atdService.getAllFormDefinition();
+				fddList = atdService.getAllFormDefinitions();
 				request.setAttribute("fddList", fddList);
 				return new ModelAndView(getFormView());
 			}else{
@@ -85,7 +85,7 @@ public class ExportFormDefinitionCSVController extends SimpleFormController {
 				}else{
 					/*choose to show all form*/
 					ATDService atdService = Context.getService(ATDService.class);
-					fddList = atdService.getAllFormDefinition();
+					fddList = atdService.getAllFormDefinitions();
 				}
 				Util.exportAllFormDefinitionCSV(response.getWriter(), fddList);
 				map.put("operationType", "export form definition as csv file");

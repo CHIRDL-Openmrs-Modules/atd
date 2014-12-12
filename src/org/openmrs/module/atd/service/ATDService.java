@@ -205,7 +205,7 @@ public interface ATDService
 	 * @return A list of FormDefinitionDescriptor objects
 	 * @throws SQLException
 	 */
-	public List<FormDefinitionDescriptor> getAllFormDefinition() throws SQLException;
+	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException;
 	
 	/**
 	 * get the form definition in database with the form that has id as formId. 
