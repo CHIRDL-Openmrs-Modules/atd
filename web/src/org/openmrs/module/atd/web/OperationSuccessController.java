@@ -11,6 +11,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
+/**
+ * 
+ * @author wang417
+ * Controller for operationSuccess.form
+ */
 public class OperationSuccessController extends SimpleFormController {
 	
 	@Override

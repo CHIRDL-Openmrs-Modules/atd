@@ -1,8 +1,6 @@
 package org.openmrs.module.atd.web;
 
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +14,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.atd.util.Util;
-import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;

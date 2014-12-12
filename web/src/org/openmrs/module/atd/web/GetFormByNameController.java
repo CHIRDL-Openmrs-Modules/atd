@@ -13,21 +13,22 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.util.CreateFormUtil;
 import org.openmrs.module.atd.util.FormAttributeValueDescriptor;
-import org.openmrs.module.atd.util.FormDescriptor;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-
+/**
+ * 
+ * @author wang417
+ * Controller for getFormByName.form
+ */
 public class GetFormByNameController extends SimpleFormController {
 	protected final Log log = LogFactory.getLog(getClass());
 	

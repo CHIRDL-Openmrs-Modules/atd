@@ -10,15 +10,18 @@ import org.openmrs.module.atd.util.FormAttributeValueDescriptor;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
-
 import java.util.*;
 
+/**
+ * 
+ * @author wang417
+ * Controller for ShowFormAttributeValue.form
+ */
 public class ShowFormAttributeValueController extends SimpleFormController {
 	@Override
 	protected Object formBackingObject(HttpServletRequest request)
