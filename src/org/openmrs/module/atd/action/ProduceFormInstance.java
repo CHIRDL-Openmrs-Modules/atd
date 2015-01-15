@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.print.PrintException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
@@ -23,9 +25,11 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.IOUtil;
+import org.openmrs.module.chirdlutil.util.PrintServices;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
 import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttributeValue;
@@ -73,13 +77,20 @@ public class ProduceFormInstance implements ProcessStateAction
 		Integer encounterId = session.getEncounterId();
 		String formName = null;
 		String trigger = null;
+		String autoPrintStr = null;
 		if(parameters != null){
 			formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_NAME);
 			Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_TRIGGER);
 			if (param2Object != null && param2Object instanceof String){
 				trigger = (String) param2Object;
 			}
+			
+			Object param3Object = parameters.get(ChirdlUtilConstants.PARAMETER_AUTO_PRINT);
+			if (param3Object != null && param3Object instanceof String){
+				autoPrintStr = (String) param3Object;
+			}
 		}
+		
 		if(formName == null){
 			formName = currState.getFormName();
 		}
@@ -146,8 +157,13 @@ public class ProduceFormInstance implements ProcessStateAction
 			log.error("Error when saving the form attribute for trigger. ",e);
 		}
 		
+		Boolean autoPrint = null;
+		if (autoPrintStr != null && autoPrintStr.trim().length() > 0) {
+			autoPrint = Boolean.valueOf(autoPrintStr);
+		}
+		
 		produceForm(formId, locationId, locationTagId, encounterId, sessionId, formInstance, patientState, patient, 
-			formName, atdService);
+			formName, atdService, autoPrint);
 
 		StateManager.endState(patientState);
 		System.out.println("Produce: Total time to produce "+form.getName()+"(" + Thread.currentThread().getName() + "): "+
@@ -172,7 +188,7 @@ public class ProduceFormInstance implements ProcessStateAction
 
 	protected void produceForm(Integer formId, Integer locationId, Integer locationTagId, Integer encounterId,
 	                           Integer sessionId, FormInstance formInstance, PatientState patientState, Patient patient,
-	                           String formName, ATDService atdService) {
+	                           String formName, ATDService atdService, Boolean autoPrint) {
 		String mergeDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
 		        .getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_MERGE_DIRECTORY, locationTagId, 
 		        	locationId));
@@ -190,7 +206,7 @@ public class ProduceFormInstance implements ProcessStateAction
 		StringTokenizer tokenizer = new StringTokenizer(outputTypeString, ChirdlUtilConstants.GENERAL_INFO_COMMA);
 		HashMap<String, OutputStream> outputs = new HashMap<String, OutputStream>();
 		int maxDssElements = Util.getMaxDssElements(formId, locationTagId, locationId);
-		
+		File pdfFile = null;
 		while (tokenizer.hasMoreTokens()) {
 			String mergeFilename = null;
 			try {
@@ -207,6 +223,7 @@ public class ProduceFormInstance implements ProcessStateAction
 					pdfDir.mkdirs();
 					mergeFilename =pdfDir.getAbsolutePath() + File.separator + formInstance.toString() + 
 							ChirdlUtilConstants.FILE_EXTENSION_PDF;
+					pdfFile = new File(mergeFilename);
 				}
 				
 				if (mergeFilename != null) {
@@ -235,5 +252,53 @@ public class ProduceFormInstance implements ProcessStateAction
 			}
 		}
 		
+		if (Boolean.TRUE.equals(autoPrint) && pdfFile != null) {
+			autoPrintForm(formId, locationId, locationTagId, pdfFile);
+		}
+	}
+	
+	/**
+	 * Auto-prints a form.  It will print to the default printer unless the alternate printer is being used.
+	 * 
+	 * @param formId The form identifier.
+	 * @param locationId The location identifier.
+	 * @param locationTagId The location tag identifier.
+	 * @param formToPrint The form to print.
+	 */
+	protected void autoPrintForm (Integer formId, Integer locationId, Integer locationTagId, File formToPrint) {
+		String printerName = null;
+		FormAttributeValue altPrinterVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
+			formId, ChirdlUtilConstants.FORM_ATTR_USE_ALTERNATE_PRINTER, locationTagId, locationId);
+		if (altPrinterVal == null || altPrinterVal.getValue() == null || altPrinterVal.getValue().trim().equalsIgnoreCase("false")) {
+			FormAttributeValue printerVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
+				formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_PRINTER, locationTagId, locationId);
+			if (printerVal == null || printerVal.getValue() == null || printerVal.getValue().trim().length() == 0) {
+				log.error("Form was set to auto-print, but there is no default printer found.  Form ID: " + formId + 
+					" Location ID: " + locationId + " Location Tag ID: " + locationTagId);
+				return;
+			}
+			
+			printerName = printerVal.getValue().trim();
+		} else {
+			FormAttributeValue printerVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
+				formId, ChirdlUtilConstants.FORM_ATTR_ALTERNATE_PRINTER, locationTagId, locationId);
+			if (printerVal == null || printerVal.getValue() == null || printerVal.getValue().trim().length() == 0) {
+				log.error("Form was set to auto-print to the alternate printer, but there is no alternate printer found.  Form ID: " + formId + 
+					" Location ID: " + locationId + " Location Tag ID: " + locationTagId);
+				return;
+			}
+			
+			printerName = printerVal.getValue().trim();
+		}
+		
+		try {
+	        PrintServices.printFile(printerName, formToPrint);
+        }
+        catch (IOException e) {
+	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
+        }
+        catch (PrintException e) {
+	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
+        }
 	}
 }

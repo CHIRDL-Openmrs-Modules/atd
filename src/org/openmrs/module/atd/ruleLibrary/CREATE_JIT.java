@@ -83,6 +83,7 @@ public class CREATE_JIT implements Rule
 		Patient patient = patientService.getPatient(patientId);
 		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
 		Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_2);
+		Object param3Object = parameters.get(ChirdlUtilConstants.PARAMETER_3);
 		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
@@ -101,6 +102,12 @@ public class CREATE_JIT implements Rule
 					String trigger = (String) param2Object;
 					actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
 				}
+				
+				if (param3Object != null && param3Object instanceof String){
+					String autoPrint = (String) param3Object;
+					actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
+				}
+				
 				actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
             	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
             		locationTagId,
