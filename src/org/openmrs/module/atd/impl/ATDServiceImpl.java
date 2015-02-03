@@ -523,7 +523,8 @@ public class ATDServiceImpl implements ATDService
 		
 		for(String outputType:outputs.keySet()){
 			OutputStream output = outputs.get(outputType);
-			if (outputType.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML)) {
+			if (outputType.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML) || 
+					outputType.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_PDF)) {
 				translator.formToTeleformXML(formInstance, output, patient, dssManager, encounterId, baseParameters,
 				    locationTagId, sessionId);
 			}

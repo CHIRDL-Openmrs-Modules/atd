@@ -713,7 +713,7 @@ where a.form_attribute_id=c.form_attribute_id;
         INSERT INTO chirdlutilbackports_form_attribute
         (`name`, `description`)
         VALUES
-        ('outputType', 'Indicates if the form should be printed via Teleform or available as a pdf. Valid values are "pdf" and "teleformXML". Both can be chosen by separating with commas');
+        ('outputType', 'Indicates if the form should be printed via Teleform or available as a pdf. Valid values are "pdf", "teleformXML", and "teleformPdf". All can be chosen by separating with commas');
         </sql>
     </diff>
     <diff>

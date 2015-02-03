@@ -212,7 +212,8 @@ public class ProduceFormInstance implements ProcessStateAction
 			try {
 				String currToken = tokenizer.nextToken().trim();
 				
-				if (currToken.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML)) {
+				if (currToken.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML) || 
+						currToken.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_PDF)) {
 					File pendingDir = new File(mergeDirectory, ChirdlUtilConstants.FILE_PENDING);
 					pendingDir.mkdirs();
 					mergeFilename = pendingDir.getAbsolutePath() + File.separator + formInstance.toString() + 
