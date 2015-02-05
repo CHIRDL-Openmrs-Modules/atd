@@ -270,7 +270,8 @@ public class ProduceFormInstance implements ProcessStateAction
 		String printerName = null;
 		FormAttributeValue altPrinterVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
 			formId, ChirdlUtilConstants.FORM_ATTR_USE_ALTERNATE_PRINTER, locationTagId, locationId);
-		if (altPrinterVal == null || altPrinterVal.getValue() == null || altPrinterVal.getValue().trim().equalsIgnoreCase("false")) {
+		if (altPrinterVal == null || altPrinterVal.getValue() == null || 
+				altPrinterVal.getValue().trim().equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_FALSE)) {
 			FormAttributeValue printerVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
 				formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_PRINTER, locationTagId, locationId);
 			if (printerVal == null || printerVal.getValue() == null || printerVal.getValue().trim().length() == 0) {
