@@ -155,18 +155,12 @@ public class MoveMergeFiles extends AbstractTask {
 					pdfFile = true;
 					pdfFilename = getTargetPdfFilename(fileToMove);
 					if (pdfFilename == null) {
-						// Let the task try again instead of automatically failing it the first time it cannot find a barcode.
-//						File failedFile = new File(pendingDirectory
-//					        + IOUtil.getFilenameWithoutExtension(sourceFilename) + ".pdfCopyFailed");
-//						if (failedFile.exists()) {
-//							failedFile.delete();
-//						}
-//						
-//						IOUtil.renameFile(sourceFilename, failedFile.getAbsolutePath());
 						continue;
 					}
 					
-					targetFilename = defaultMergeDirectory + File.separator + pdfFilename;
+					File targetDir = new File(defaultMergeDirectory, "pdf");
+					targetDir.mkdirs();
+					targetFilename = defaultMergeDirectory + File.separator + "pdf" + File.separator + pdfFilename;
 					IOUtil.renameFile(sourceFilename, pendingDirectory
 				        + pdfFilename);
 					sourceFilename = pendingDirectory + pdfFilename;
