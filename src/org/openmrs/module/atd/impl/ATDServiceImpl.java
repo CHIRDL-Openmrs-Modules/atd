@@ -444,7 +444,7 @@ public class ATDServiceImpl implements ATDService
 			Integer sessionId)
 	{
 		HashMap<String, OutputStream> outputs = new HashMap<String,OutputStream>();
-		outputs.put("teleformXML", customOutput);
+		outputs.put(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML, customOutput);
 		return  produce(patient, formInstance, outputs,
             encounterId, baseParameters, locationTagId,sessionId);
 	}
@@ -478,7 +478,7 @@ public class ATDServiceImpl implements ATDService
 	public boolean produce(Patient patient, FormInstance formInstance, OutputStream customOutput, DssManager dssManager,
 	                       Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId, Integer sessionId) {
 		HashMap<String, OutputStream> outputs = new HashMap<String,OutputStream>();
-		outputs.put("teleformXML", customOutput);
+		outputs.put(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML, customOutput);
 		return produce(patient, formInstance, outputs, dssManager, encounterId, baseParameters, locationTagId, sessionId);
 	}
 	

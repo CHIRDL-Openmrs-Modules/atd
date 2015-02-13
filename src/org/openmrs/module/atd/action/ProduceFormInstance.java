@@ -186,6 +186,21 @@ public class ProduceFormInstance implements ProcessStateAction
 		//deliberately empty because processAction changes the state
 	}
 
+	/**
+	 * Creates an instance of the specified form.
+	 * 
+	 * @param formId The form ID.
+	 * @param locationId The location ID.
+	 * @param locationTagId The location tag ID.
+	 * @param encounterId The encounter ID.
+	 * @param sessionId The sessionId.
+	 * @param formInstance The instance information for the form.
+	 * @param patientState The current patient state
+	 * @param patient The patient owner of the form.
+	 * @param formName The name of the form.
+	 * @param atdService The ATDService for business logic access.
+	 * @param autoPrint Auto prints the form instance (if PDF file) when true, doesn't auto print when false.
+	 */
 	protected void produceForm(Integer formId, Integer locationId, Integer locationTagId, Integer encounterId,
 	                           Integer sessionId, FormInstance formInstance, PatientState patientState, Patient patient,
 	                           String formName, ATDService atdService, Boolean autoPrint) {

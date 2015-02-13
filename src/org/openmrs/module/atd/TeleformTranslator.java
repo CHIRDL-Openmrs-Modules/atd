@@ -200,6 +200,18 @@ public class TeleformTranslator
 		return form.getFormId();
 	}
 
+	/**
+	 * Takes an instance of a form and serializes as XML to an output stream.
+	 * 
+	 * @param formInstance The form instance to serialize.
+	 * @param output The output stream where the XML will be written.
+	 * @param patient The patient owner of the form.
+	 * @param dssManager DssManager containing all the form field information to be written.
+	 * @param encounterId The patient's encounter ID.
+	 * @param baseParameters Map containing parameters.
+	 * @param locationTagId The location tag ID.
+	 * @param sessionId The session ID.
+	 */
 	public void formToTeleformXML(FormInstance formInstance, OutputStream output, Patient patient, DssManager dssManager,
 	                              Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId,
 	                              Integer sessionId) {
@@ -237,6 +249,19 @@ public class TeleformTranslator
 		}
 	}
 	
+	/**
+	 * Merges form field information to a PDF file.
+	 * 
+	 * @param templatePDF The location of the PDF template file.
+	 * @param formInstance The instance of a form that will have its metadata written to the PDF file.
+	 * @param output The output stream where the merged PDF file will be written.
+	 * @param patient The patient owner of the form.
+	 * @param dssManager DssManager containing all the information for the merge fields.
+	 * @param encounterId The encounter ID.
+	 * @param baseParameters Map containing parameters.
+	 * @param locationTagId The location tag ID.
+	 * @param sessionId The session ID.
+	 */
 	public void formToPDF(String templatePDF, FormInstance formInstance, OutputStream output,
 	                      Patient patient, DssManager dssManager, Integer encounterId, Map<String, Object> baseParameters,
 	                      Integer locationTagId, Integer sessionId) {
