@@ -730,4 +730,22 @@ where a.form_attribute_id=c.form_attribute_id;
         ('requriesPDFImageMerge', 'Indicates if the pdf form needs images merged.');
         </sql>
     </diff>
+    <diff>
+        <version>1.3.5</version>
+        <author>Steve McKee</author>
+        <date>February 12, 2015</date>
+        <description>
+        Add scheduled task information for the delete merged pdf files task.
+        </description>
+	    <sql>
+	        INSERT INTO scheduler_task_config
+	        (`name`, `schedulable_class`, `start_time`, `start_time_pattern`, `repeat_interval`, `start_on_startup`, `created_by`, `date_created`, `uuid`)
+	        values ('DeleteMergedPDFFiles', 'org.openmrs.module.atd.DeleteMergedPDFFiles', '2015-02-15 02:00:00', 'MM/dd/yyyy HH:mm:ss',
+	        86400, 1, 1, NOW(), UUID());
+	        
+	        INSERT INTO scheduler_task_config_property 
+	        (`name`, `value`, `task_config_id`) 
+	        values('daysToKeep', '14', (select task_config_id from scheduler_task_config where name = 'DeleteMergedPDFFiles'));
+	    </sql>
+    </diff> 
 </sqldiff>
