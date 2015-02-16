@@ -23,6 +23,7 @@
 	<classpathentry kind="lib" path="lib-common/jakarta-taglibs/taglibs-standard-1.1.jar"/>
 	<classpathentry kind="lib" path="lib-common/jfreechart/jcommon-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib-common/jfreechart/jfreechart-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib-common/jstl/jstl-1.1.jar"/>
 	<classpathentry kind="lib" path="lib-common/jta/jta.jar"/>
 	<classpathentry kind="lib" path="lib-common/mail/activation.jar"/>
 	<classpathentry kind="lib" path="lib-common/mail/mail.jar"/>
