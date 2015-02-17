@@ -191,7 +191,6 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		map.put("locations", Context.getLocationService().getAllLocations(false));
 		
 		List<LocationTagAttribute> locationTagAttributes = getNonFormLocationTagAttributes();
-		map.put("locationTagAttributes", locationTagAttributes);
 		for (LocationTagAttribute locationTagAttribute : locationTagAttributes) {
 			String value = request.getParameter(locationTagAttribute.getName());
 			if (value != null && value.trim().length() > 0) {
