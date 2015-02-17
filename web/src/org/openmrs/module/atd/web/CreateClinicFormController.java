@@ -99,7 +99,6 @@ public class CreateClinicFormController extends SimpleFormController {
 		map.put("state", request.getParameter("state"));
 		map.put("zip", request.getParameter("zip"));
 		List<LocationAttribute> locationAttributes = getAllLocationAttributes();
-		map.put("locationAttributes", locationAttributes);
 		for (LocationAttribute locationAttribute : locationAttributes) {
 			String value = request.getParameter(locationAttribute.getName());
 			if (value != null && value.trim().length() > 0) {
