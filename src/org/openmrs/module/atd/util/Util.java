@@ -597,20 +597,7 @@ public class Util {
 		FormService fs =Context.getFormService();
 		LocationService locationService = Context.getLocationService();
 		try {
-			InputStreamReader inStreamReader = new InputStreamReader(input);
-			CSVReader reader = new CSVReader(inStreamReader, ',');
-			HeaderColumnNameTranslateMappingStrategy<FormAttributeValueDescriptor> strat = new HeaderColumnNameTranslateMappingStrategy<FormAttributeValueDescriptor>();
-			Map<String, String> map = new HashMap<String, String>();
-			map.put("form_name", "formName");
-			map.put("location_name", "locationName");
-			map.put("location_tag_name", "locationTagName");
-			map.put("attribute_name", "attributeName");
-			map.put("attribute_value", "attributeValue");
-			strat.setType(FormAttributeValueDescriptor.class);
-			strat.setColumnMapping(map);
-			
-			CsvToBean<FormAttributeValueDescriptor> csv = new CsvToBean<FormAttributeValueDescriptor>();
-			favdList = csv.parse(strat, reader);
+			favdList = getFormAttributeValueDescriptorFromCSV(input);
 			
 			if (favdList != null) {
 				for(FormAttributeValueDescriptor favd: favdList){
