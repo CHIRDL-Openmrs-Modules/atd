@@ -522,6 +522,7 @@ public class ATDServiceImpl implements ATDService
 		AdministrationService adminService = Context.getAdministrationService();
 		
 		for(String outputType:outputs.keySet()){
+			outputType = outputType.trim();
 			OutputStream output = outputs.get(outputType);
 			if (outputType.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML) || 
 					outputType.equalsIgnoreCase(ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_PDF)) {

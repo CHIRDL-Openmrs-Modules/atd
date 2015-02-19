@@ -75,7 +75,7 @@ public class WaitForPrint implements ProcessStateAction
 				ChirdlUtilConstants.GLOBAL_PROP_DEFAULT_OUTPUT_TYPE);
 		} else {
 			String[] outputTypes = fav.getValue().split(ChirdlUtilConstants.GENERAL_INFO_COMMA);
-			outputType = outputTypes[0];
+			outputType = outputTypes[0].trim();
 		}
 		
 		String mergeFilename = "";
