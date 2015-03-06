@@ -268,7 +268,7 @@ public class ProduceFormInstance implements ProcessStateAction
 			}
 		}
 		
-		if (Boolean.TRUE.equals(autoPrint) && pdfFile != null) {
+		if (Boolean.TRUE == autoPrint && pdfFile != null) {
 			autoPrintForm(formId, locationId, locationTagId, pdfFile);
 		}
 	}
