@@ -556,14 +556,16 @@ public class Util {
 		CSVWriter csvWriter=null;
 		csvWriter = new CSVWriter(writer);
 		String[] columnNames = new String[8];
-		columnNames[0]="form name";
-		columnNames[1]="form description";
-		columnNames[2]="field name";
-		columnNames[3]="field type";
-		columnNames[4]="concept name";
-		columnNames[5]="default value";
-		columnNames[6]="field number";
-		columnNames[7]="parent field name";
+		
+		// DWE CHICA-280 4/7/15 Changed the column names to match what the import is expecting
+		columnNames[0]="form_name";
+		columnNames[1]="form_description";
+		columnNames[2]="field_name";
+		columnNames[3]="field_type";
+		columnNames[4]="concept_name";
+		columnNames[5]="default_value";
+		columnNames[6]="field_number";
+		columnNames[7]="parent_field_name";
 		csvWriter.writeNext(columnNames);
 		for(FormDefinitionDescriptor fdd: fddList){
 			String[] item = new String[8];
