@@ -1,5 +1,6 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <%@ include file="/WEB-INF/template/header.jsp"%>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -10,51 +11,114 @@
 	<c:if test = "${error}=='serverError'">
 		<h2>Server error, operation failed.</h2>
 	</c:if>
-	<div id= "form_div"> 
+	
+	<h3>Export Form Definitions</h3>
+	
+	<div id= "form_div">
 		<form method="post" action = "exportFormDefinitionCSV.form">
-			<input type="hidden" name="checkedFormName" value="${checkedFormName}"/>
-			<input type="hidden" name="checkedAllForm" value="${checkedAllForm}"/>
-			form name:  <input type="text" name="formName">
-			<input id="purpose" type="hidden" name="purpose"/> 
-			<input style="padding: 0px 10px 0px 0px" type="submit"   value="show this form definition" onclick="document.getElementById('purpose').value='showForm'"/>
-			<c:if test="${not empty error && error=='formNameEmpty'}" >Form name cannot be empty</c:if>
-			<c:if test="${not empty error && error=='formNameNonexist'}" >Form name does not exist</c:if>
+			<table style="padding-left: 5px;">
+				<tr>
+					<td><label for="formNameSelect">Form name:</label></td>
+					<td><select name="formNameSelect" id="formNameSelect" onchange="this.form.submit();">
+						<c:if test = "${selectedFormId == chooseFormOptionConstant}">
+							<option value="-" disabled selected style="display:none;">--Please select a form</option>
+						</c:if>
+				        <c:forEach items="${forms}" var="form">
+				        	<c:choose>
+				        		<c:when test="${form.formId == selectedFormId}">
+	            					<option value="${form.formId == null ? allFormsOptionConstant : form.formId}" selected>${form.name == null ? "- All Forms -" : form.name}</option>
+	        					</c:when>
+	        					<c:otherwise>
+	        						<option value="${form.formId == null ? allFormsOptionConstant : form.formId}">${form.name == null ? "- All Forms -" : form.name}</option>
+	        					</c:otherwise>
+				        	</c:choose>
+				        </c:forEach>
+						</select>
+					</td>
+				</tr>
+			</table>
+			
+			<table style="padding-left: 5px; padding-top: 5px;" width="100%">
+				<tr>
+				<td>
+					<div id= "formDefinition_div">
+						<table id="formDefinitionTable" class="display" cellspacing="0" width="100%">
+							<thead>
+								<tr>
+									<th id="formName">Form Name</th>
+									<th id="formDesc">Form Description</th>
+									<th id="fieldName">Field Name</th>
+									<th id="fieldType">Field Type</th>
+									<th id="conceptName">Concept Name</th>
+									<th id="defaultValue">Default Value</th>
+									<th id="fieldNumber">Field Number</th>
+									<th id="parentFieldName">Parent Field Name</th>
+								</tr>
+							</thead>
+							
+							<tbody>
+								<c:forEach var="fdd" items="${fddList}" varStatus="status">
+									<tr>
+										<td>${fdd.formName}</td>
+										<td>${fdd.formDescription}</td>
+										<td>${fdd.fieldName}</td>
+										<td>${fdd.fieldType}</td>
+										<td>${fdd.conceptName}</td>
+										<td>${fdd.defaultValue}</td>
+										<td>${fdd.fieldNumber}</td>
+										<td>${fdd.parentFieldName}</td>
+									</tr>
+								</c:forEach>
+							</tbody>
+						</table>
+					</div>
+				</td>
+				</tr>
+			</table>
+			
+			<hr size="3" color="black"/>
+			
+			<table align="right">
+				<tr><td><input type="Submit" name="exportToCSV" id="exportToCSV" value="Export to CSV"/></td>
+					<td><input type="button" value="Back to Configuration Manager" onclick="backToConfigManager();"/></td>
+				</tr>
+			</table>
 			<br/>
-			<input style="padding: 0px 10px 0px 0px" type="submit"   value="show all forms definition" onclick="document.getElementById('purpose').value='showAllForms'"/>
 			<br/>
-			<input style="padding: 0px 10px 0px 0px" type="submit"   value="export to csv" onclick="document.getElementById('purpose').value='export'"/> 
-			<c:if test="${not empty error && error=='NoFormChosen' }">No form is chosen</c:if>
-			<br/>
-			<a href="${pageContext.request.contextPath}/module/atd/configurationManager.form"><input style="padding: 0px 10px 0px 0px, margin:0px 200px 0px 0px" type="button" value="back to manager page"/></a>
 		</form>
 	</div>
-	
-	<div id= "formValue_div">
-		<table border="1px">
-			<tr style="padding: 5px">
-				<td style="padding: 0px 10px 0px 0px">formName</td>
-				<td style="padding: 0px 10px 0px 0px">formDescription</td>
-				<td style="padding: 0px 10px 0px 0px">fieldName</td>
-				<td style="padding: 0px 10px 0px 0px">fieldType</td>
-				<td style="padding: 0px 10px 0px 0px">conceptName</td>
-				<td style="padding: 0px 10px 0px 0px">defaultValue</td>
-				<td style="padding: 0px 10px 0px 0px">fieldNumber</td>
-				<td style="padding: 0px 10px 0px 0px">parentFieldName</td>
-			</tr>
-			<c:forEach var="fdd" items="${fddList}" varStatus="status">
-				<tr style="padding: 5px">
-					<td style="padding: 0px 10px 0px 0px">${fdd.formName}</td>
-					<td style="padding: 0px 10px 0px 0px">${fdd.formDescription}</td>
-					<td style="padding: 0px 10px 0px 0px">${fdd.fieldName}</td>
-					<td style="padding: 0px 10px 0px 0px">${fdd.fieldType}</td>
-					<td style="padding: 0px 10px 0px 0px">${fdd.conceptName}</td>
-					<td style="padding: 0px 10px 0px 0px">${fdd.defaultValue}</td>
-					<td style="padding: 0px 10px 0px 0px">${fdd.fieldNumber}</td>
-					<td style="padding: 0px 10px 0px 0px">${fdd.parentFieldName}</td>
-				</tr>
-			</c:forEach>
-		</table>
-	</div>
 </body>
+
+<openmrs:htmlInclude file="/scripts/jquery/dataTables/js/jquery.dataTables.min.js" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/js/jquery-ui.custom.min.js" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/css/redmond/jquery-ui-1.7.2.custom.css" />
+<openmrs:htmlInclude file="/scripts/jquery/dataTables/css/dataTables.css" />
+<openmrs:htmlInclude file="/scripts/jquery/dataTables/css/dataTables_jui.css" />
+
+<script type="text/javascript">
+	var definitionsTable;
+	
+	$j(document).ready(function() {
+		definitionsTable = $j('#formDefinitionTable').dataTable(
+				{"aoColumns": [  { "sName": "formName", "bSortable": false},
+				                 { "sName": "formDesc", "bSortable": false},
+				                 { "sName": "fieldName", "bSortable": false},
+				                 { "sName": "fieldType", "bSortable": false},
+				                 { "sName": "conceptName", "bSortable": false},
+				                 { "sName": "defaultValue", "bSortable": false},
+				                 { "sName": "fieldNumber", "bSortable": false},
+				                 { "sName": "parentFieldName", "bSortable": false}
+				              ],
+					"bJQueryUI": true,
+					"sPaginationType": "full_numbers", 
+					"bFilter": false});
+	} );
+	
+	function backToConfigManager()
+	{
+		window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
+	}
+</script>
+
 </html>
 <%@ include file="/WEB-INF/template/footer.jsp"%>

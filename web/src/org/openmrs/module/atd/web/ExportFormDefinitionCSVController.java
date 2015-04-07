@@ -1,6 +1,6 @@
 package org.openmrs.module.atd.web;
 
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
@@ -17,7 +19,7 @@ import org.openmrs.module.atd.util.Util;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
-import org.springframework.web.servlet.view.RedirectView;
+
 /**
  * 
  * @author wang417
@@ -25,6 +27,10 @@ import org.springframework.web.servlet.view.RedirectView;
  */
 public class ExportFormDefinitionCSVController extends SimpleFormController {
 
+	protected final static String CHOOSE_FORMS_OPTION = "-1";
+	protected final static String ALL_FORMS_OPTION = "-999";
+	protected final Log log = LogFactory.getLog(getClass());
+	
 	@Override
 	protected Object formBackingObject(HttpServletRequest request) throws Exception {
 		return "testing";
@@ -33,71 +39,98 @@ public class ExportFormDefinitionCSVController extends SimpleFormController {
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		List<FormDefinitionDescriptor> fddList=null;
-		try{
+		
+		// DWE CHICA-280 4/1/15 Reworked most of this method, but also reused a lot of the existing logic
+		String view = getFormView();
+		String selectedFormId = request.getParameter("formNameSelect");
+		if(selectedFormId != null)
+		{
 			FormService fs = Context.getFormService();
-			String purpose = request.getParameter("purpose");
-			if(purpose.equals("showForm")){
-				String formName = request.getParameter("formName");
-				request.setAttribute("checkedFormName", formName);
-				if(formName==null || formName.equals("")){
-					map.put("error", "formNameEmpty");
-					return new ModelAndView(getFormView(), map);
-				}
-				Form form = fs.getForm(formName);
-				if(form==null){
-					map.put("error", "formNameNonexist");
-					return new ModelAndView(getFormView(), map);
-				}
+			request.setAttribute("selectedFormId", selectedFormId);
+			
+			try
+			{
+				int formId = Integer.parseInt(selectedFormId); 
+				
+				List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
 				ATDService atdService = Context.getService(ATDService.class);
-
-				fddList = atdService.getFormDefinition(form.getFormId());
-
-				request.setAttribute("fddList", fddList);
-				return new ModelAndView(getFormView());
-			}else if(purpose.equals("showAllForms")){
-				request.setAttribute("checkedAllForm", "true");
-				ATDService atdService = Context.getService(ATDService.class);
-				fddList = atdService.getAllFormDefinitions();
-				request.setAttribute("fddList", fddList);
-				return new ModelAndView(getFormView());
-			}else{
-				String checkedFormName = request.getParameter("checkedFormName");
-				String checkedAllForm = request.getParameter("checkedAllForm");
-				if(checkedFormName==null && !"true".equals(checkedAllForm)){
-					map.put("error", "NoFormChosen");
-					return new ModelAndView(getFormView(), map);
-				}
-				String csvFileName = "form definitions.csv";
-				response.setContentType("text/csv");
-				String headerKey = "Content-Disposition";
-				String headerValue = String.format("attachment; filename=\"%s\"", csvFileName);
-				response.setHeader(headerKey, headerValue);
-				if(checkedFormName!=null && !checkedFormName.equals("")){
-					/*some form name chosen*/
-					Form form = fs.getForm(checkedFormName);
-					ATDService atdService = Context.getService(ATDService.class);
+				
+				if(formId > -1) // Not showing all form definitions
+				{
+					Form form = fs.getForm(formId);
+					
 					fddList = atdService.getFormDefinition(form.getFormId());
-				}else{
-					/*choose to show all form*/
-					ATDService atdService = Context.getService(ATDService.class);
+				}
+				else
+				{
+					// Show all form definitions
+					// Using -999 as the id for the "- All Forms -" option
 					fddList = atdService.getAllFormDefinitions();
 				}
-				Util.exportAllFormDefinitionCSV(response.getWriter(), fddList);
-				map.put("operationType", "export form definition as csv file");
-				return new ModelAndView(new RedirectView(getSuccessView()), map);
+				
+				request.setAttribute("fddList", fddList);
+				
+				if(request.getParameter("exportToCSV") != null) // "Export to CSV" button
+				{
+					response.setContentType("text/csv");
+					response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "formDefinitions.csv"));
+					
+					// Export the list that was populated above, 
+					// which will contain either a selected form or all form definitions
+					Util.exportAllFormDefinitionCSV(response.getWriter(), fddList);
+					map.put("operationType", "export form definition as csv file");
+					
+					return new ModelAndView(view, map);
+				}
 			}
-		}catch(SQLException e){
-			map.put("error", "serverError");
-			return new ModelAndView(getFormView(), map);
+			catch(Exception e)
+			{
+				log.error("Error in processFormSubmission().", e);
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
+			}
+			
+			reloadValues(request, map);
+			return new ModelAndView(view, map);
+		}
+		else
+		{
+			reloadValues(request, map);
+			return new ModelAndView(view, map);
 		}
 	}
-/*
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		fddList = null;
-		return super.referenceData(request);
-	}
-	*/
 
+	/**
+	 * DWE CHICA-280 4/1/15
+	 */
+	@Override
+	protected Map<String, Object> referenceData(HttpServletRequest request) throws Exception
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		request.setAttribute("selectedFormId", CHOOSE_FORMS_OPTION);
+		
+		reloadValues(request, map);
+		
+		return map;
+	}
+	
+	/**
+	 * DWE CHICA-280 4/1/15
+	 * 
+	 * Currently only used to reload the values for the "Form name" drop-down
+	 */
+	private void reloadValues(HttpServletRequest request, Map<String, Object> map)
+	{
+		// Reload the values for the "Form name" drop-down
+		FormService formService = Context.getFormService();
+		List<Form> forms = formService.getAllForms(false);
+		
+		forms.add(0, new Form()); // Add a place holder for the "- All Forms -" option
+		
+		map.put("forms", forms);
+		
+		request.setAttribute("chooseFormOptionConstant", CHOOSE_FORMS_OPTION);
+		request.setAttribute("allFormsOptionConstant", ALL_FORMS_OPTION);
+	}
 }
