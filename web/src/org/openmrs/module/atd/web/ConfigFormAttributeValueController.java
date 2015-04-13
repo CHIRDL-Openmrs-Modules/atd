@@ -115,6 +115,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		//get attribute value enumeration info for each attribute
 		Map<String, List<String>> formAttributesValueEnumMap = getFormAttributesValueEnumMap(editableFormAttributes,cubService);
 		String[] positionStrs = request.getParameterValues("positions");
+		
 		map.put("positionStrs", positionStrs);
 		map.put("locationsList", locationsList);
 		map.put("locationTagsMap", locationTagsMap);

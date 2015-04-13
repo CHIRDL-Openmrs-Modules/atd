@@ -17,50 +17,89 @@
 	ArrayList<ArrayList<Object>> positions = (ArrayList<ArrayList<Object>>)(request.getAttribute("positions"));
 %>
 
+<style>
+
+	table.location_table{
+		padding: 0px 0px 0px 5px;
+		border-spacing: 0px;
+		width: 40%;
+	}
+	
+	td.locationSelect{
+		padding: 5px 5px 5px 5px;
+		color: white;
+		align: left;
+	}
+	
+	
+</style>
 
 </head>
 <body>
 	<p>
-	<h2>Choose the location and location tag you want to apply:</h2>
+	<h3>Select Location and Location Tags</h3>
 	</p>
 	<c:if test="${NoPositionSelected == 'true'}">
   		<p>You have to choose at least one location</p>
 	</c:if>
 	
 	
-	<p></p>
+	<button id="selectAllButton" onclick="checkTags('ALL#$#ALL');">Select All</button>
+	<br/>
+	<br/>
 	<form action="chooseLocation.form" method="post" id="location_form">
 		<input type="hidden" name = "formIdStr" value="${formIdStr}"/>
-		<table class="location_table">
-					<tr style="padding: 5px">
-						<td>
-							<input type="checkbox" name="positions_applicable" id= "ALL#$#ALL" onchange="checkSubClass('ALL#$#ALL')"/>
-						</td>
-						<td style="padding: 0px 0px 10px 0px">
-							For all locations
-						</td>				
-					</tr>
-					<c:forEach items = "${locationsList}" var = "location" varStatus = "locsStatus">
-						<tr style="padding: 5px">
-							<td style="padding: 0px 0px 10px 0px"> 
-								<input type="checkbox" id ="${location.id}#$#ALL" class="ALL" onchange="checkSubClass('${location.id}#$#ALL'); uncheckSuperClass('${location.id}#$#ALL')"/>
+		
+		
+		<c:forEach items = "${locationsList}" var = "location" varStatus = "locsStatus">
+			<table class="location_table">
+				<tr class="boxHeader" >
+					<td colspan="2" class="locationSelect">
+						<a style="color: white;" onclick="checkTags('${location.id}')" href="#">Select</a> all tags of ${location.name} 
+					</td>
+				</tr>
+			</table>
+			
+				<table style="padding: 10px" cellspacing="0">
+					<c:forEach items = "${locationTagsMap[location.id]}" var = "tag" varStatus = "tagStatus">
+						<tr>
+							<td style="padding: 0px 0px 5px 0px"> 
+								<input type="checkbox" name = "positions_applicable"   value="${location.id}#$#${tag.id}" id="${location.id}#$#${tag.id}" class="${location.id}"/>
 							</td>
-							<td style="padding: 0px 0px 10px 0px">for all tags of ${location.name}</td>
+							<td style="padding: 0px 0px 5px 5px">${tag.name}</td>
 						</tr>
-						<c:forEach items = "${locationTagsMap[location.id]}" var = "tag" varStatus = "tagStatus">
-							<tr style="padding: 5px">
-								<td style="padding: 0px 0px 10px 0px"> 
-									<input type="checkbox" name = "positions_applicable"   value="${location.id}#$#${tag.id}" id="${location.id}#$#${tag.id}" class="${location.id}"  onchange="uncheckSuperClass('${location.id}#$#${tag.id}')"/>
-								</td>
-								<td style="padding: 0px 0px 10px 0px">location Tag: ${tag.name}</td>
-							</tr>
-						</c:forEach>
-					
 					</c:forEach>
+					<c:if test="${empty locationTagsMap[location.id]}">
+						<tr>
+							<td colspan="2">No tags for ${location.name}</td>
+						</tr>
+					</c:if>
+				</table>
+			
+		</c:forEach>
+		
+		<hr size="3" color="black"/>
+			
+		<table align="right">
+			<tr><td><input type="button" value="Next" onclick="if(validateSelected()){this.form.submit();}"/></td>
+				<td><input type="button" value="Back" onclick="chooseLocationBack();"/></td>
+			</tr>
 		</table>
-		<input type="submit" value="submit"/>
+		<br/>
+		<br/>
 	</form>
 </body>
+
+
+<script>
+
+function chooseLocationBack()
+{
+	window.location = '${pageContext.request.contextPath}/module/atd/getFormByName.form';
+}
+
+</script>
+
 </html>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

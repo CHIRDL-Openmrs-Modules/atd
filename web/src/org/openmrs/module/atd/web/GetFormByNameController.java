@@ -31,6 +31,7 @@ import org.springframework.web.servlet.view.RedirectView;
  */
 public class GetFormByNameController extends SimpleFormController {
 	protected final Log log = LogFactory.getLog(getClass());
+	protected final static String CHOOSE_FORMS_OPTION = "-1";
 	
 	@Override
 	protected Object formBackingObject(HttpServletRequest request)
@@ -44,27 +45,58 @@ public class GetFormByNameController extends SimpleFormController {
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) throws Exception {
 		String editType = request.getParameter("editType");
 		Map<String, Object> map = new HashMap<String, Object>();
-		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-		FormService fs =Context.getFormService();
-		List<FormAttributeValueDescriptor> favdList=null;
+		
+		// DWE CHICA-280 4/1/15 Made a few minor changes to this method, mainly to handle the formNameSelect drop-down
+		// Also cleaned up some of the code to keep the scope of the variables so they are only available if needed
 		String view = null;
 		String backView = getFormView();
 		if(editType==null || editType.equals("")){
 			map.put("typeNotChosen", "true");
 			return new ModelAndView(backView, map);
 		}
+		map.put("selectedOption", editType);
 		if(editType.equals("manual")){
 			view = "chooseLocation.form";
-			String formName = request.getParameter("formName");
-			Form form = fs.getForm(formName);
-			if(form==null){
-				map.put("noSuchName", "true");
+			String selectedFormId = request.getParameter("formNameSelect");
+			if(selectedFormId != null)
+			{
+				try
+				{
+					int formId = Integer.parseInt(selectedFormId);
+					
+					// Verify that this is a valid formId
+					FormService fs =Context.getFormService();
+					Form form = fs.getForm(formId);
+					
+					if(form != null)
+					{
+						map.put("formId", form.getId());
+						return new ModelAndView(new RedirectView(view),map);
+					}
+					else
+					{
+						map.put("noSuchName", "true");
+						reloadValues(request, map);
+						return new ModelAndView(backView, map);
+					}
+					
+				}
+				catch(Exception e)
+				{
+					log.error("Error in processFormSubmission().", e);
+					reloadValues(request, map);
+					return new ModelAndView(backView, map);
+				}	  
+			}
+			else
+			{
+				reloadValues(request, map);
 				return new ModelAndView(backView, map);
 			}
-			map.put("formId", form.getId());
-			return new ModelAndView(new RedirectView(view),map);  
 		}else{
 			if(request instanceof MultipartHttpServletRequest){
+				ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
+				List<FormAttributeValueDescriptor> favdList=null;
 				MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 				MultipartFile csvFile = multipartRequest.getFile("csvFile");
 				if(csvFile!=null && !csvFile.isEmpty()){
@@ -73,24 +105,27 @@ public class GetFormByNameController extends SimpleFormController {
 					int index = filename.lastIndexOf(".");
 					if (index < 0) {
 						map.put("csvFileError", "typeError");
+						reloadValues(request, map);
 						return new ModelAndView(backView, map);
 					}
 					String extension = filename.substring(index + 1, filename.length());
 					if (!extension.equalsIgnoreCase("csv")) {
 						map.put("csvFileError", "typeError");
+						reloadValues(request, map);
 						return new ModelAndView(backView, map);
 					}
 					try{
 						favdList = Util.getFormAttributeValueDescriptorFromCSV(input);
 					}catch(Exception e){
 						map.put("ioError", true);
+						reloadValues(request, map);
 						return new ModelAndView(backView, map);
 					}
-					//mv.addObject("favdList", favdList);
-					//request.getSession().setAttribute("favdList", favdList);
+					
 					List<FormAttributeValue>  favList = Util.getFormAttributeValues(favdList);
 					if(favdList.size()!=0 && favList.size()==0){
 						map.put("csvFileError", "notFAV");
+						reloadValues(request, map);
 						return new ModelAndView(backView, map);
 					}
 					if(favList!=null){
@@ -102,13 +137,47 @@ public class GetFormByNameController extends SimpleFormController {
 					return new ModelAndView(new RedirectView(getSuccessView()),map);
 				}else{
 					map.put("csvFileError", "csvFileEmpty");
+					reloadValues(request, map);
 					return new ModelAndView(backView, map);
 				}
 				
 			}else{
 				map.put("csvFileError", "notMultipart");
+				reloadValues(request, map);
 				return new ModelAndView(backView, map);
 			}
 		}
+	}
+	
+	/**
+	 * DWE CHICA-331 4/10/15
+	 */
+	@Override
+	protected Map<String, Object> referenceData(HttpServletRequest request) throws Exception
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		request.setAttribute("selectedFormId", CHOOSE_FORMS_OPTION);
+		request.setAttribute("selectedOption", "manual");
+		
+		reloadValues(request, map);
+		
+		return map;
+	}
+	
+	/**
+	 * DWE CHICA-331 4/10/15
+	 * 
+	 * Currently only used to reload the values for the "Form name" drop-down
+	 */
+	private void reloadValues(HttpServletRequest request, Map<String, Object> map)
+	{
+		// Reload the values for the "Form name" drop-down
+		FormService formService = Context.getFormService();
+		List<Form> forms = formService.getAllForms(false);
+		
+		map.put("forms", forms);
+		
+		request.setAttribute("chooseFormOptionConstant", CHOOSE_FORMS_OPTION);
 	}
 }

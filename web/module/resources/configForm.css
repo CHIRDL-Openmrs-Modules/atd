@@ -46,24 +46,40 @@ div.div_popup_form {
 	margin-left:auto;
 	margin-right:auto;
 }
-
-h3{
-	margin-left:35%;
-}
-
+ 
 .location_attri_change{
 	margin-left:270px;
 }
 
 .blockColor1{
-	background-color: #C3FC91;
+	background-color: #9FAFD1;
 }
 
 .blockColor2{
-	background-color: #F9D8F4;
+	background-color: #D4D4FF;
 }
 
 .div_table{
 	width: 100%;
 	height: auto;
 }
+
+td.locationText{
+	font-size: 14px;
+	font-weight: normal;
+	vertical-align: middle;
+}
+	
+td.attributeNameSection{
+	padding-left: 5px;
+	vertical-align: middle;
+}
+	
+div.divApplyToAllLocations{
+	display: none;
+}
+	
+div.locationsAndTagsClass{
+	display: none;
+}
+
