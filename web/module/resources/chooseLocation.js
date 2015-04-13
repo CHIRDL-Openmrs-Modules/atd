@@ -31,3 +31,42 @@ function uncheckSuperClass(checkbox_id){
 		document.getElementById("ALL#$#ALL").checked=false;
 	}
 }
+
+function checkTags(locationId)
+{
+	if(locationId == "ALL#$#ALL")
+	{
+		$j(':checkbox').each(function(){ this.checked = true});
+	}
+	else
+	{
+		// This will select/unselect all location tags
+		// If the first tag checkbox is already checked, it will uncheck all, 
+		// if the first tag is unchecked, it will check all
+		var $cbs = $j("." + locationId + ":checkbox:enabled");
+		var checked = $cbs.filter(":first").attr('checked');
+		$j('.' + locationId).each(function(){ this.checked = !checked});	
+	}	
+}
+
+function validateSelected()
+{
+	 if($j("input:checked").length > 0)
+	 {
+		return true;	 
+	 }
+	 else
+	 {
+		 $j('<div id="errorMsg" title="Select Location and Tags">You must select at least one location tag.</div>').dialog({
+				modal: true,
+				height: "auto",
+				width: 300,
+				resizable: false,
+				buttons: {
+			        OK: function() {
+			          $j( this ).dialog( "close" );
+			        }
+			      }
+			});
+	 }
+}

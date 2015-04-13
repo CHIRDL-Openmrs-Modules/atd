@@ -61,7 +61,7 @@ function assignValueSubClass(inpt_id) {
 			}
 		}
 	}
-	var thisComboBox = $(inpt_id).data("kendoComboBox");
+	var thisComboBox = $("#"+inpt_id).data("kendoComboBox");
 	thisComboBox.text(value);
 }
 
