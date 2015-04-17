@@ -1,6 +1,7 @@
 package org.openmrs.module.atd.web;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.openmrs.FormField;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
@@ -173,8 +175,37 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 			this.log.error(Util.getStackTrace(e));
 		}
 		
-		String view = getSuccessView();
-		return new ModelAndView(new RedirectView(view + "?formId=" + replaceFormIdString + "&newFormId=" + formIdString));
+		// DWE CHICA-332 4/16/15 
+		// Determine the locations and location tags that the form was previously configured for
+		// so that the configFormAttributeValue.form can be displayed
+		ATDService atdService = Context.getService(ATDService.class);
+		HashMap<Integer, ArrayList<Integer>> locAndTagIdsMap = atdService.getFormAttributeValueLocationsAndTagsMap(formId); // This is the new form Id
+		
+		// Now build the list of location ids and location tag ids separated by "#$#" 
+		// as expected by the existing functionality in ConfigFormAttributeValueController
+		ArrayList<String> locationIdsAndTagIdsList = new ArrayList<String>();
+		Set<Integer> locationIds = locAndTagIdsMap.keySet();
+		Iterator<Integer> it = locationIds.iterator();
+		while(it.hasNext())
+		{
+			Integer locationId = it.next();
+			ArrayList<Integer> tagIds = locAndTagIdsMap.get(locationId);
+			if(tagIds != null)
+			{
+				for(Integer tagId : tagIds)
+				{
+					locationIdsAndTagIdsList.add(String.valueOf(locationId) + "#$#" + String.valueOf(tagId));
+				}
+			}
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("formId", replaceFormIdString);
+		map.put("newFormId", formIdString);
+		map.put("positions", locationIdsAndTagIdsList.toArray(new String[0]));
+		map.put("successViewName", "replaceRetireForm.form");
+		
+		return new ModelAndView(new RedirectView(getSuccessView()), map);
 	}
 	
 	private List<Boolean> getNewFieldIndicators(List<FormField> formFields, Form origForm) {

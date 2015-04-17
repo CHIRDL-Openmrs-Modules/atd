@@ -6,6 +6,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -214,4 +215,15 @@ public interface ATDService
 	 * @throws SQLException
 	 */
 	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException;
+	
+	/**
+	 * DWE CHICA-332 4/16/15
+	 * 
+	 * Given a formId, return a HashMap containing location ids and location tag ids
+	 * key: locationId, value: list of location tag ids
+	 * 
+	 * @param formId
+	 * @return the HashMap
+	 */
+	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
 }
