@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
@@ -40,7 +41,9 @@ public class ChooseLocationController extends SimpleFormController {
 		}
 		map.put("positions", positionStrs);
 		map.put("formId", request.getParameter("formIdStr"));
-		String successViewName = this.getSuccessView();
+		
+		String successViewName = this.getSuccessView(); ;
+		map.put("successViewName", "operationSuccess.form"); // Success view will depend on which page the user came from
 		return new ModelAndView(new RedirectView(successViewName), map);
 	}
 

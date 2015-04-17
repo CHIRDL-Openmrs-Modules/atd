@@ -1007,4 +1007,15 @@ public class ATDServiceImpl implements ATDService
 	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException {
 		return this.dao.getFormDefinition(formId);
 	}
+	
+	/**
+	 * DWE CHICA-332 4/16/15
+	 * 
+	 * @see org.openmrs.module.atd.service.ATDService#getFormAttributeValueLocationsAndTagsMap(Integer)
+	 */
+	@Override
+	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
+	{
+		return this.dao.getFormAttributeValueLocationsAndTagsMap(formId);
+	}
 }

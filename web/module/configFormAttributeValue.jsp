@@ -41,6 +41,9 @@
 	<c:forEach items="${positionStrs}" var="ps" varStatus="status">
 		<input type="hidden" name="positions" value="${ps}" />
 	</c:forEach>
+	<input type="hidden" name="successViewName" value="${successViewName}" />
+	<input type="hidden" name="replaceFormId" value="${replaceFormId}" />
+	<input type="hidden" id="cancelProcess" name="cancelProcess" value="false" />
 	
 	<c:forEach items="${editableFormAttributes}" var="fa" varStatus="status">
 		<script>
@@ -215,8 +218,8 @@
 			
 <table align="right">
 	<tr>
-		<td><button onclick="document.forms['attribute_form'].submit()">Save</button></td>
-		<td><input type="button" value="Back to Configuration Manager" onclick="backToConfigManager();"/></td>
+		<td><button onclick="document.forms['attribute_form'].submit()">Next</button></td>
+		<td><input type="button" value="Cancel" onclick="displayConfirmCancel();"/></td>
 	</tr>
 </table>
 
@@ -242,10 +245,26 @@ function showHideValues(divFormAttributeId)
 	}	 
 }
 
-function backToConfigManager()
+function displayConfirmCancel()
 {
-	window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
+	$j('<div id="confirmCancel" title="Cancel Edit?">Are you sure you want to cancel?</div>').dialog({
+		 height: "auto",
+		 width: "auto",
+		 modal: true,
+		 resizable: false,
+		 buttons: {
+		    "OK": function() {
+		    	$j('#cancelProcess').val('true');
+	            $j('#attribute_form').submit();
+		    	$j(this).dialog("close");
+		     },
+		     Cancel: function() {
+		     $j(this).dialog("close");
+		     }
+		  }
+	});	
 }
+
 </script>
 
 </html>

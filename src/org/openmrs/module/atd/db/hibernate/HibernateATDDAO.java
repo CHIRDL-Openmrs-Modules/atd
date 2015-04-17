@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -1378,5 +1379,60 @@ public class HibernateATDDAO implements ATDDAO
 			con.close();
 		}
 		return fddList;
+	}
+	
+	/**
+	 * DWE CHICA-332 4/16/15
+	 * 
+	 * @see org.openmrs.module.atd.db.ATDDAO#getFormAttributeValueLocationsAndTagsMap(Integer)
+	 */
+	@Override
+	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
+	{
+		try
+		{
+			HashMap<Integer, ArrayList<Integer>> returnMap = new HashMap<Integer, ArrayList<Integer>>();
+			
+			// Query for "editable" form attribute values that have been previously configured
+			// Just need the location id and location tag id
+			String sql = "SELECT DISTINCT b.location_tag_id, b.location_id " + 
+						 "FROM chirdlutilbackports_form_attribute_value b " + 
+			             "WHERE b.form_id = ? " +
+			             "AND b.form_attribute_id IN " + 							
+			             							"(SELECT form_attribute_id " +
+			             							 "FROM chirdlutilbackports_form_attribute " +
+			             							 "WHERE name NOT IN('defaultMergeDirectory','defaultExportDirectory','formInstanceIdTag','formInstanceIdTag2','medRecNumberTag','medRecNumberTag2','imageDirectory','numQuestions')) " +
+			             "ORDER BY b.location_tag_id, b.location_id";
+			
+			SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+			qry.setInteger(0, formId);
+			
+			List<Object[]> list = qry.list();
+			
+			if (list != null && list.size() > 0) 
+			{
+				ArrayList<Integer> locTagIds = new ArrayList<Integer>();
+				for(Object[] objArray : list)
+				{
+					Integer locationId = (Integer)objArray[1];
+					locTagIds = returnMap.get(locationId);
+					if(locTagIds == null) // This is the first location tag Id that is being added to the list, create a new list
+					{
+						locTagIds = new ArrayList<Integer>();
+					}
+					
+					locTagIds.add((Integer)objArray[0]);
+					returnMap.put(locationId, locTagIds);
+				}
+			}
+			
+			return returnMap;
+		}
+		catch(Exception e)
+		{
+			log.error("Error in method getFormAttributeValueLocationsAndTagsMap. Error loading location ids and location tag ids (form_id = " + formId + ").", e);
+		}
+		
+		return new HashMap<Integer, ArrayList<Integer>>();
 	}
 }

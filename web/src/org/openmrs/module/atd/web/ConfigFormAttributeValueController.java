@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
@@ -17,6 +18,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
@@ -48,17 +50,22 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 	 * */
 	@Override
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, BindException errors) throws Exception {
-		String cancel = request.getParameter("cancelProcess");
-		if ("true".equalsIgnoreCase(cancel)) {
-			return new ModelAndView(new RedirectView("configurationManager.form"));
-		}
 		String formId = request.getParameter("formId");
 		Integer iFormId = Integer.parseInt(formId);
+		// DWE CHICA-332 The success view needs to be different depending on which page the user came from
+		String successViewName = request.getParameter("successViewName");
+		String cancel = request.getParameter("cancelProcess");
+		if ("true".equalsIgnoreCase(cancel)) {
+			// Delete the form when coming from the create/replace form pages
+			if(successViewName.equalsIgnoreCase("replaceRetireForm.form") || successViewName.equalsIgnoreCase("mlmForm.form"))
+			{
+				ConfigManagerUtil.deleteForm(iFormId);
+			}
+			return new ModelAndView(new RedirectView("configurationManager.form"));
+		}
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-
-		String successViewName = getSuccessView();
 		List<Location> locationsList = new ArrayList<Location>();
 		Set<Integer> locationsIdSet = new HashSet<Integer>();
 		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
@@ -88,7 +95,18 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 			}
 		}
 		
-		map.put("formId", iFormId.toString());
+		
+		if(successViewName.equalsIgnoreCase("replaceRetireForm.form"))
+		{
+			// Need to switch the parameters back around to what this page is expecting
+			map.put("formId", request.getParameter("replaceFormId"));
+			map.put("newFormId", request.getParameter("formId"));
+		}
+		else
+		{
+			map.put("formId", iFormId.toString());
+		}
+		
 		map.put("operationType", "Editing form attributes value");
 		return new ModelAndView(new RedirectView(successViewName), map);
 		
@@ -102,10 +120,26 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
 		Map<String, Object> map = new HashMap<String, Object>();
+		
+		// DWE CHICA-332 4/16/15 Making the configFormAttributeValue.form available from the Replace Form page
+		// When this page is displayed from the Replace Form page, use newFormId parameter
+		String formId = request.getParameter("newFormId");
+		if(formId != null)
+		{
+			// Need to keep track of the "replaceFormId" so that it is available on the retire form page
+			map.put("replaceFormId", request.getParameter("formId")); 
+		}
+		
+		if(formId == null)
+		{
+			// Coming from chooseLocations.form or configForm.form
+			formId = request.getParameter("formId");
+		}
+		
 		configPositionInfo(locationsList, locationsIdSet, locationTagsMap, request);
-		String formId = request.getParameter("formId");
+		
 		Integer iFormId = Integer.parseInt(formId);
-		//this.iFormId = iFormId;
+		
 		//get editable attribute
 		List<FormAttribute> editableFormAttributes = getEditableFormAttributes();
 		
@@ -125,6 +159,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		map.put("formId", formId);
 		map.put("formName", request.getParameter("formName"));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
+		map.put("successViewName", request.getParameter("successViewName")); // Success view will depend on which page the user came from
 		return map;
 	}
 	

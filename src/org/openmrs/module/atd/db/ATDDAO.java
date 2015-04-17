@@ -1,7 +1,9 @@
 package org.openmrs.module.atd.db;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.openmrs.PatientIdentifier;
@@ -146,4 +148,15 @@ public interface ATDDAO {
 	 * @throws SQLException
 	 */
 	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException;
+	
+	/**
+	 * DWE CHICA-332 4/16/15
+	 * 
+	 * Given a formId, return a HashMap containing location ids and location tag ids
+	 * key: locationId, value: list of location tag ids
+	 * 
+	 * @param formId
+	 * @return the HashMap
+	 */
+	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
 }
