@@ -179,7 +179,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		// Determine the locations and location tags that the form was previously configured for
 		// so that the configFormAttributeValue.form can be displayed
 		ATDService atdService = Context.getService(ATDService.class);
-		HashMap<Integer, ArrayList<Integer>> locAndTagIdsMap = atdService.getFormAttributeValueLocationsAndTagsMap(formId); // This is the new form Id
+		HashMap<Integer, List<Integer>> locAndTagIdsMap = atdService.getFormAttributeValueLocationsAndTagsMap(formId); // This is the new form Id
 		
 		// Now build the list of location ids and location tag ids separated by "#$#" 
 		// as expected by the existing functionality in ConfigFormAttributeValueController
@@ -189,7 +189,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		while(it.hasNext())
 		{
 			Integer locationId = it.next();
-			ArrayList<Integer> tagIds = locAndTagIdsMap.get(locationId);
+			List<Integer> tagIds = locAndTagIdsMap.get(locationId);
 			if(tagIds != null)
 			{
 				for(Integer tagId : tagIds)

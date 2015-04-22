@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.db.DAOException;
@@ -158,5 +159,5 @@ public interface ATDDAO {
 	 * @param formId
 	 * @return the HashMap
 	 */
-	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
+	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
 }
