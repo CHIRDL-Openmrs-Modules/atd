@@ -8,15 +8,26 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.CriteriaSpecification;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
+import org.openmrs.FormField;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.PatientIdentifier;
@@ -1387,21 +1398,17 @@ public class HibernateATDDAO implements ATDDAO
 	 * @see org.openmrs.module.atd.db.ATDDAO#getFormAttributeValueLocationsAndTagsMap(Integer)
 	 */
 	@Override
-	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
+	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
 	{
 		try
 		{
-			HashMap<Integer, ArrayList<Integer>> returnMap = new HashMap<Integer, ArrayList<Integer>>();
+			HashMap<Integer, List<Integer>> returnMap = new HashMap<Integer, List<Integer>>();
 			
 			// Query for "editable" form attribute values that have been previously configured
-			// Just need the location id and location tag id
 			String sql = "SELECT DISTINCT b.location_tag_id, b.location_id " + 
-						 "FROM chirdlutilbackports_form_attribute_value b " + 
+						 "FROM chirdlutilbackports_form_attribute_value b " +
+						 "INNER JOIN (SELECT form_attribute_id FROM chirdlutilbackports_form_attribute WHERE name NOT IN('defaultMergeDirectory','defaultExportDirectory','formInstanceIdTag','formInstanceIdTag2','medRecNumberTag','medRecNumberTag2','imageDirectory','numQuestions')) av ON b.form_attribute_id = av.form_attribute_id " +
 			             "WHERE b.form_id = ? " +
-			             "AND b.form_attribute_id IN " + 							
-			             							"(SELECT form_attribute_id " +
-			             							 "FROM chirdlutilbackports_form_attribute " +
-			             							 "WHERE name NOT IN('defaultMergeDirectory','defaultExportDirectory','formInstanceIdTag','formInstanceIdTag2','medRecNumberTag','medRecNumberTag2','imageDirectory','numQuestions')) " +
 			             "ORDER BY b.location_tag_id, b.location_id";
 			
 			SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
@@ -1411,7 +1418,7 @@ public class HibernateATDDAO implements ATDDAO
 			
 			if (list != null && list.size() > 0) 
 			{
-				ArrayList<Integer> locTagIds = new ArrayList<Integer>();
+				List<Integer> locTagIds = new ArrayList<Integer>();
 				for(Object[] objArray : list)
 				{
 					Integer locationId = (Integer)objArray[1];
@@ -1433,6 +1440,6 @@ public class HibernateATDDAO implements ATDDAO
 			log.error("Error in method getFormAttributeValueLocationsAndTagsMap. Error loading location ids and location tag ids (form_id = " + formId + ").", e);
 		}
 		
-		return new HashMap<Integer, ArrayList<Integer>>();
+		return new HashMap<Integer,List<Integer>>();
 	}
 }

@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -1014,7 +1015,7 @@ public class ATDServiceImpl implements ATDService
 	 * @see org.openmrs.module.atd.service.ATDService#getFormAttributeValueLocationsAndTagsMap(Integer)
 	 */
 	@Override
-	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
+	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
 	{
 		return this.dao.getFormAttributeValueLocationsAndTagsMap(formId);
 	}

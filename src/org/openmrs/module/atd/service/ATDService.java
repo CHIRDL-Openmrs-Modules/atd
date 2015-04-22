@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openmrs.Form;
 import org.openmrs.FormField;
@@ -225,5 +226,5 @@ public interface ATDService
 	 * @param formId
 	 * @return the HashMap
 	 */
-	public HashMap<Integer, ArrayList<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
+	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
 }
