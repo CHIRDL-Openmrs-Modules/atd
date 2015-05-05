@@ -535,6 +535,7 @@ public class Util {
 				item[5] = cd.getUnits();
 				item[6] = cd.getParentConcept();
 				csvWriter.writeNext(item);
+				csvWriter.flush();
 			}
 			csvWriter.close();
 			

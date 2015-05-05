@@ -3,31 +3,19 @@ package org.openmrs.module.atd.db.hibernate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.CriteriaSpecification;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.openmrs.FormField;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.PatientIdentifier;
@@ -1441,5 +1429,177 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		
 		return new HashMap<Integer,List<Integer>>();
+	}
+	
+	/**
+	 * DWE CHICA-330 4/22/15 
+	 *
+	 * @see org.openmrs.module.atd.db.ATDDAO#getConceptDescriptorList(int, int, String, boolean, int, String, String)
+	 * 
+	 */
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc) 
+	{
+		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
+		try
+		{
+			SQLQuery qry = getConceptQuery(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc);
+			List<Object[]> list = qry.list();
+			
+			if (list != null && list.size() > 0) 
+			{
+				for(Object[] objArray : list)
+				{
+					Integer id = objArray[0] == null ? -1 : (Integer)objArray[0];
+					String name = objArray[1] == null ? "" : (String)objArray[1];
+					String conceptClass = objArray[2] == null ? "" : (String)objArray[2];
+					String datatype = objArray[3] == null ? "" : (String)objArray[3];
+					String description = objArray[4] == null ? "" : (String)objArray[4];
+					String parentConcept = objArray[7] == null ? "" : (String)objArray[7];
+					String units = objArray[6] == null ? "" : (String)objArray[6];
+					Integer parentId = objArray[5] == null ? -1 : (Integer)objArray[5];
+					Timestamp dateCreatedStamp = (Timestamp)objArray[10];
+					
+					cdList.add(new ConceptDescriptor(name, conceptClass, datatype, description, parentConcept, units, id, parentId, dateCreatedStamp));
+				}
+			}
+			
+			return cdList;
+		}
+		catch(Exception e)
+		{
+			log.error("Error in method getAllConcepts.", e);
+		}
+		
+		return new ArrayList<ConceptDescriptor>();
+	}
+	
+	/**
+	 * DWE CHICA-330 4/23/15 
+	 * 
+	 * @see org.openmrs.module.atd.db.ATDDAO#getCountConcepts(String, boolean, int)
+	 */
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId)
+	{
+		try
+		{
+			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", "ASC");
+			return qry.list().size();
+		}
+		catch(Exception e)
+		{
+			log.error("Error in method getCountConcepts.", e);
+			return -1;
+		}
+	}
+	
+	/**
+	 * DWE CHICA-330 4/23/15
+	 * Creates a SQLQuery object for use with counting and finding concept records
+	 * 
+	 * @param start - first result record to start with for paging
+	 * @param length - max number of results to return for paging
+	 * @param searchValue - search by concept name or parent concept name
+	 * @param includeRetired - true to include retired concepts
+	 * @param conceptClassId - filter by concept class
+	 * @param orderByColumn - order by column
+	 * @param ascDesc - ASC or DESC
+	 * @return
+	 */
+	private SQLQuery getConceptQuery(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc)
+	{
+		String whereClause = "";
+		boolean needsAnd = false;
+		
+		if(!searchValue.isEmpty() || !includeRetired || conceptClassId > -1)
+		{
+			whereClause = " WHERE ";
+			if(!searchValue.isEmpty())
+			{
+				whereClause += "(a.name LIKE '%" + searchValue + "%' OR b.name LIKE '%" + searchValue + "%')";
+				needsAnd = true;
+			}
+			
+			if(!includeRetired)
+			{
+				if(needsAnd){whereClause += " AND ";}
+				whereClause += "a.retired = 0";
+				needsAnd = true;
+			}
+			
+			if(conceptClassId > -1)
+			{
+				if(needsAnd){whereClause += " AND ";}
+				whereClause += "a.conceptClassId = " + conceptClassId;
+				needsAnd = true;
+			}
+		}
+		
+		String orderBy = " ORDER BY ";
+		if(orderByColumn.equalsIgnoreCase("name"))
+		{
+			orderBy += "a.name ";
+		}
+		else if(orderByColumn.equalsIgnoreCase("parentConcept"))
+		{ 
+			orderBy += "b.name ";
+		}
+		else if(orderByColumn.equalsIgnoreCase("formattedDateCreated"))
+		{
+			orderBy += "a.dateCreated ";
+		}
+		else
+		{
+			orderBy += "a.conceptId ";
+		}
+		orderBy += ascDesc;
+		
+		String sqlString = "SELECT distinct a.*, b.name AS \"parentConcept\" "
+                + "FROM    (SELECT a.concept_id AS conceptId, "
+                + "	               a.name AS name, "
+                + "                c.name AS \"conceptClass\", "
+                + "                d.name AS \"datatype\", "
+                + "                e.description AS description, "
+                + "                g.concept_id AS parentConceptId, "
+                + "                f.units AS units, "
+                + "				   con.retired AS retired, "
+                + "				   c.concept_class_id AS conceptClassId, "
+                + "                con.date_created AS dateCreated  "
+                + "           FROM concept_name a "
+                + "                INNER JOIN concept con "
+                + "                    ON a.concept_id = con.concept_id "
+                + "                INNER JOIN concept_class c "
+                + "                    ON con.class_id = c.concept_class_id "
+                + "                INNER JOIN concept_datatype d "
+                + "                    ON con.datatype_id = d.concept_datatype_id "
+                + "                LEFT JOIN concept_description e "
+                + "                    ON e.concept_id = con.concept_id "
+                + "                LEFT JOIN concept_numeric f "
+                + "                    ON f.concept_id = con.concept_id "
+                + "                LEFT JOIN concept_answer g "
+                + "                    ON g.answer_concept = con.concept_id) a "
+                + "          LEFT JOIN "
+                + "               concept_name b "
+                + "               ON a.parentConceptId = b.concept_id " + whereClause + orderBy;
+		
+		SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sqlString);
+		qry.addScalar("conceptId", Hibernate.INTEGER);
+		qry.addScalar("name", Hibernate.STRING);
+		qry.addScalar("conceptClass", Hibernate.STRING);
+		qry.addScalar("datatype", Hibernate.STRING);
+		qry.addScalar("description", Hibernate.STRING);
+		qry.addScalar("parentConceptId", Hibernate.INTEGER);
+		qry.addScalar("units",  Hibernate.STRING);
+		qry.addScalar("parentConcept", Hibernate.STRING);
+		qry.addScalar("retired", Hibernate.BOOLEAN);
+		qry.addScalar("conceptClassId", Hibernate.INTEGER);
+		qry.addScalar("dateCreated", Hibernate.TIMESTAMP);
+		
+		if(start > -1 && length > -1)
+		{
+			qry.setFirstResult(start);
+			qry.setMaxResults(length);
+		}
+		
+		return qry;
 	}
 }

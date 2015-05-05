@@ -11,6 +11,7 @@
 <html>
 <head>
 <link href="${pageContext.request.contextPath}/moduleResources/atd/atd.css" type="text/css" rel="stylesheet" />
+
 <title>Choose Location</title>
 <script src="${pageContext.request.contextPath}/moduleResources/atd/chooseLocation.js"></script>
 <%  
