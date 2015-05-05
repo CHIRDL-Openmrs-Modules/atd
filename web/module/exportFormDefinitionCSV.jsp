@@ -89,18 +89,22 @@
 	</div>
 </body>
 
-<openmrs:htmlInclude file="/scripts/jquery/dataTables/js/jquery.dataTables.min.js" />
-<openmrs:htmlInclude file="/scripts/jquery-ui/js/jquery-ui.custom.min.js" />
-<openmrs:htmlInclude file="/scripts/jquery-ui/css/redmond/jquery-ui-1.7.2.custom.css" />
-<openmrs:htmlInclude file="/scripts/jquery/dataTables/css/dataTables.css" />
-<openmrs:htmlInclude file="/scripts/jquery/dataTables/css/dataTables_jui.css" />
+
+<!-- DWE CHICA-330 4/23/15 Updated datatables version in the ATD module -->
+<script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables_themeroller-1.10.6.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery-ui-1.11.4.min.css">
 
 <script type="text/javascript">
 	var definitionsTable;
 	
-	$j(document).ready(function() {
-		definitionsTable = $j('#formDefinitionTable').dataTable(
-				{"aoColumns": [  { "sName": "formName", "bSortable": false},
+	$(document).ready(function() {
+		definitionsTable = $('#formDefinitionTable').dataTable(
+				{
+					// Table options have been updated for DataTables version 1.10
+					"columns": [  { "sName": "formName", "bSortable": false},
 				                 { "sName": "formDesc", "bSortable": false},
 				                 { "sName": "fieldName", "bSortable": false},
 				                 { "sName": "fieldType", "bSortable": false},
@@ -109,9 +113,9 @@
 				                 { "sName": "fieldNumber", "bSortable": false},
 				                 { "sName": "parentFieldName", "bSortable": false}
 				              ],
-					"bJQueryUI": true,
-					"sPaginationType": "full_numbers", 
-					"bFilter": false});
+					"jQueryUI": true,
+					"pagingType": "full_numbers", 
+					"filter": false});
 	} );
 	
 	function backToConfigManager()

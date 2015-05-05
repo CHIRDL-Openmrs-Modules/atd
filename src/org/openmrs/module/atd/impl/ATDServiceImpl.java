@@ -1019,4 +1019,24 @@ public class ATDServiceImpl implements ATDService
 	{
 		return this.dao.getFormAttributeValueLocationsAndTagsMap(formId);
 	}
+	
+	/**
+	 * DWE CHICA-330 4/22/15 
+	 * 
+	 * @see org.openmrs.module.atd.service.ATDService#getConceptDescriptorList(int, int, String, boolean, int, String, String)
+	 */
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc)
+	{
+		return this.dao.getConceptDescriptorList(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc);
+	}
+	
+	/**
+	 * DWE CHICA-330 4/23/15 
+	 * 
+	 * @see org.openmrs.module.atd.service.ATDService#getCountConcepts(String)
+	 */
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId)
+	{
+		return this.dao.getCountConcepts(searchValue, includeRetired, conceptClassId);
+	}
 }

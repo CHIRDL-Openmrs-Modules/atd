@@ -221,7 +221,7 @@
         <property name="commandName"><value>exportConceptCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportConceptCSV</value></property> 
         <property name="successView"><value>operationSuccess.form</value></property>
-	</bean>	
+	</bean>
 	<bean id="exportFormDefinitionCSV" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSVController">
         <property name="commandName"><value>exportFormDefinitionCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV</value></property> 

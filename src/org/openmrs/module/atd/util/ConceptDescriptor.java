@@ -13,6 +13,10 @@
  */
 package org.openmrs.module.atd.util;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.openmrs.Concept;
 
 /**
@@ -36,6 +40,10 @@ public class ConceptDescriptor {
 		
 	private int conceptId;
 	
+	// DWE CHICA-330 4/30/15 Added parentConceptId for use with data table selected rows, conceptId was not unique enough
+	private int parentConceptId;
+	private Timestamp dateCreatedStamp;
+	
 	
 	/**
 	 * Constructor Method
@@ -57,6 +65,31 @@ public class ConceptDescriptor {
 		this.parentConcept = parentConcept;
 		this.units = units;
 		this.conceptId = conceptId;
+	}
+	
+	/**
+	 * Constructor Method
+	 * Create a ConceptDescriptor with name, concept class, data type, description, parent concept, units, concept Id
+	 * @param name concept name
+	 * @param conceptClass the class of concept
+	 * @param datatype datatype
+	 * @param description description of this concept
+	 * @param parentConcept parent concept
+	 * @param units measurement unit
+	 * @param conceptId the id of concept
+	 * @param dateCreated the date the concept was created
+	 */
+	public ConceptDescriptor(String name, String conceptClass, String datatype, String description, String parentConcept, String units, int conceptId, int parentConceptId, Timestamp dateCreatedStamp) {
+		super();
+		this.name = name;
+		this.conceptClass = conceptClass;
+		this.datatype = datatype;
+		this.description = description;
+		this.parentConcept = parentConcept;
+		this.units = units;
+		this.conceptId = conceptId;
+		this.parentConceptId = parentConceptId;
+		this.dateCreatedStamp = dateCreatedStamp;
 	}
 
 	/**
@@ -157,6 +190,44 @@ public class ConceptDescriptor {
 	public void setConceptId(int conceptId) {
 		this.conceptId = conceptId;
 	}
+	
+	/**
+	 * @return the parent concept Id
+	 */
+	public int getParentConceptId(){
+		return this.parentConceptId;
+	}
+	
+	/**
+	 * @param parentConceptId the parent concept Id to set
+	 */
+	public void setParentConceptId(int parentConceptId){
+		this.parentConceptId = parentConceptId;
+	}
+	
+	/**
+	 * @return the date created
+	 */
+	public Timestamp getDateCreatedStamp(){
+		return this.dateCreatedStamp;
+	}
+	
+	/**
+	 * @param dateCreated
+	 */
+	public void setDateCreatedStamp(Timestamp dateCreatedStamp){
+		this.dateCreatedStamp = dateCreatedStamp;
+	}
+	
+	/**
+	 * @return dateCreated in a formatted string for the data table display
+	 */
+	public String getFormattedDateCreated()
+	{
+		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+		Date date = new Date(dateCreatedStamp.getTime());
+		return format.format(date);
+	}
 
 	@Override
 	public int hashCode() {
@@ -169,6 +240,7 @@ public class ConceptDescriptor {
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((parentConcept == null) ? 0 : parentConcept.hashCode());
 		result = prime * result + ((units == null) ? 0 : units.hashCode());
+		result = prime * result + parentConceptId;
 		return result;
 	}
 
@@ -218,7 +290,7 @@ public class ConceptDescriptor {
 
 	@Override
 	public String toString() {
-		return "ConceptDescriptor [name=" + name + ", conceptClass=" + conceptClass + ", datatype=" + datatype + ", description=" + description + ", parentConcept=" + parentConcept + ", units=" + units + ", conceptId=" + conceptId + "]";
+		return "ConceptDescriptor [name=" + name + ", conceptClass=" + conceptClass + ", datatype=" + datatype + ", description=" + description + ", parentConcept=" + parentConcept + ", units=" + units + ", conceptId=" + conceptId + ", parentConceptId=" + parentConceptId + ", dateCreatedStamp=" + dateCreatedStamp +"]";
 	}
 	
 

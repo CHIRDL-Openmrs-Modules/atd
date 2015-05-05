@@ -227,4 +227,32 @@ public interface ATDService
 	 * @return the HashMap
 	 */
 	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
+	
+	/**
+	 * DWE CHICA-330 4/22/15 
+	 * 
+	 * Return concepts to populate data table, start and length parameters are used for paging
+	 * 
+	 * @param start - page number
+	 * @param length - number of rows to display in the data table
+	 * @param searchValue - search by concept name
+	 * @param includeRetired - flag to include retired concepts
+	 * @param conceptClassId - filter by concept class
+	 * @param orderByColumns - order by column
+	 * @param ascDesc - order by ASC or DESC
+	 * @return
+	 */
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc);
+	
+	/**
+	 * DWE CHICA-330 4/23/15 
+	 * 
+	 * Used for jquery data table server-side processing to return a count of Concept records with filter applied
+	 * 
+	 * @param searchValue - pass in an empty string to return the count without the filter
+	 * @param includeRetired - flag to include retired concepts
+	 * @param conceptClassId - filter by concept class
+	 * @return the total number of concept records
+	 */
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId);
 }
