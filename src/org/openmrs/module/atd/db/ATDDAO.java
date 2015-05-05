@@ -173,9 +173,10 @@ public interface ATDDAO {
 	 * @param conceptClassId - filter by concept class
 	 * @param orderByColumns - order by column
 	 * @param ascDesc - order by ASC or DESC
+	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
 	 * @return
 	 */
-	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc);
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch);
 	
 	/**
 	 * DWE CHICA-330 4/23/15 
@@ -185,7 +186,8 @@ public interface ATDDAO {
 	 * @param searchValue - pass in an empty string to return the count without the filter
 	 * @param includeRetired - flag to include retired concepts
 	 * @param conceptClassId - filter by concept class
+	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
 	 * @return the total number of concept records
 	 */
-	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId);
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch);
 }

@@ -28,6 +28,8 @@ public class ExportConceptCSVController extends SimpleFormController {
 	private static final String CONCEPTS_FILENAME = "concepts.csv";
 	private static final String CONTENT_TYPE_CSV = "text/csv";
 	protected final static String ALL_CONCEPT_CLASSES_OPTION = "-1";
+	private static final String EXPORT_ALL_PARAM = "exportAll";
+	private static final String SELECTED_IDS_PARAM = "selectedIdsField";
 	
 	@Override
 	protected Object formBackingObject(HttpServletRequest request)
@@ -44,16 +46,16 @@ public class ExportConceptCSVController extends SimpleFormController {
 		ATDService atdService = Context.getService(ATDService.class);
 		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
 
-		if(request.getParameter("exportAll") != null) // Exporting all records
+		if(request.getParameter(EXPORT_ALL_PARAM) != null) // Exporting all records
 		{
-			cdList = atdService.getConceptDescriptorList(-1, -1, "", true, Integer.parseInt(ALL_CONCEPT_CLASSES_OPTION), "", "ASC");	
+			cdList = atdService.getConceptDescriptorList(-1, -1, "", true, Integer.parseInt(ALL_CONCEPT_CLASSES_OPTION), "", "ASC", false);	
 		}
-		else if(request.getParameter("selectedIdsField") != null) // Exporting specifically selected records
+		else if(request.getParameter(SELECTED_IDS_PARAM) != null) // Exporting specifically selected records
 		{
 			// Get a list of all concept descriptors and create a map
 			// Then loop over the selected Ids and locate it in the map
 			// This may seem inefficient but is significantly faster than looking each one up individually 
-			List<ConceptDescriptor> tempList = atdService.getConceptDescriptorList(-1, -1, "", true, Integer.parseInt(ALL_CONCEPT_CLASSES_OPTION), "", "ASC");
+			List<ConceptDescriptor> tempList = atdService.getConceptDescriptorList(-1, -1, "", true, Integer.parseInt(ALL_CONCEPT_CLASSES_OPTION), "", "ASC", false);
 			Map<String, ConceptDescriptor> conceptMap = new HashMap<String, ConceptDescriptor>();
 			for(ConceptDescriptor cd : tempList)
 			{
@@ -63,7 +65,7 @@ public class ExportConceptCSVController extends SimpleFormController {
 
 			// Split the string to get an array of combined Ids,
 			// which is the conceptId_parentConceptId
-			String selectedIdString = request.getParameter("selectedIdsField");
+			String selectedIdString = request.getParameter(SELECTED_IDS_PARAM);
 			String [] selectedIds = selectedIdString.split(","); 
 			for(String combinedId : selectedIds)
 			{

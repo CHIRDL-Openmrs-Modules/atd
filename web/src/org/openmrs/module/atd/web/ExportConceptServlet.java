@@ -56,9 +56,9 @@ public class ExportConceptServlet extends HttpServlet
 			int totalRecordsWithFilter = 0;
 			try
 			{
-				results = atdService.getConceptDescriptorList(Integer.parseInt(start), Integer.parseInt(length), searchValue, includeRetired, Integer.parseInt(conceptClass), orderByColumn, ascDesc);
-				total = atdService.getCountConcepts("", includeRetired, -1);
-				totalRecordsWithFilter = atdService.getCountConcepts(searchValue, includeRetired, Integer.parseInt(conceptClass));
+				results = atdService.getConceptDescriptorList(Integer.parseInt(start), Integer.parseInt(length), searchValue, includeRetired, Integer.parseInt(conceptClass), orderByColumn, ascDesc, false);
+				total = atdService.getCountConcepts("", includeRetired, -1, false);
+				totalRecordsWithFilter = atdService.getCountConcepts(searchValue, includeRetired, Integer.parseInt(conceptClass), false);
 				
 				// Make sure an error didn't occur in the query
 				if(total == -1 || totalRecordsWithFilter == -1)

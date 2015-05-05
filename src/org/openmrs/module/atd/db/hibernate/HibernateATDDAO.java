@@ -1434,15 +1434,15 @@ public class HibernateATDDAO implements ATDDAO
 	/**
 	 * DWE CHICA-330 4/22/15 
 	 *
-	 * @see org.openmrs.module.atd.db.ATDDAO#getConceptDescriptorList(int, int, String, boolean, int, String, String)
+	 * @see org.openmrs.module.atd.db.ATDDAO#getConceptDescriptorList(int, int, String, boolean, int, String, String, boolean)
 	 * 
 	 */
-	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc) 
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch) 
 	{
 		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
 		try
 		{
-			SQLQuery qry = getConceptQuery(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc);
+			SQLQuery qry = getConceptQuery(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc, exactMatchSearch);
 			List<Object[]> list = qry.list();
 			
 			if (list != null && list.size() > 0) 
@@ -1476,13 +1476,13 @@ public class HibernateATDDAO implements ATDDAO
 	/**
 	 * DWE CHICA-330 4/23/15 
 	 * 
-	 * @see org.openmrs.module.atd.db.ATDDAO#getCountConcepts(String, boolean, int)
+	 * @see org.openmrs.module.atd.db.ATDDAO#getCountConcepts(String, boolean, int, boolean)
 	 */
-	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId)
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch)
 	{
 		try
 		{
-			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", "ASC");
+			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", "ASC", exactMatchSearch);
 			return qry.list().size();
 		}
 		catch(Exception e)
@@ -1503,9 +1503,10 @@ public class HibernateATDDAO implements ATDDAO
 	 * @param conceptClassId - filter by concept class
 	 * @param orderByColumn - order by column
 	 * @param ascDesc - ASC or DESC
+	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
 	 * @return
 	 */
-	private SQLQuery getConceptQuery(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc)
+	private SQLQuery getConceptQuery(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch)
 	{
 		String whereClause = "";
 		boolean needsAnd = false;
@@ -1515,7 +1516,15 @@ public class HibernateATDDAO implements ATDDAO
 			whereClause = " WHERE ";
 			if(!searchValue.isEmpty())
 			{
-				whereClause += "(a.name LIKE '%" + searchValue + "%' OR b.name LIKE '%" + searchValue + "%')";
+				if(exactMatchSearch)
+				{
+					whereClause += "(a.name = '" + searchValue + "' OR b.name = '" + searchValue + "')";
+				}
+				else
+				{
+					whereClause += "(a.name LIKE '%" + searchValue + "%' OR b.name LIKE '%" + searchValue + "%')";
+				}
+				
 				needsAnd = true;
 			}
 			
