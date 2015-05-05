@@ -1023,20 +1023,20 @@ public class ATDServiceImpl implements ATDService
 	/**
 	 * DWE CHICA-330 4/22/15 
 	 * 
-	 * @see org.openmrs.module.atd.service.ATDService#getConceptDescriptorList(int, int, String, boolean, int, String, String)
+	 * @see org.openmrs.module.atd.service.ATDService#getConceptDescriptorList(int, int, String, boolean, int, String, String, boolean)
 	 */
-	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc)
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch)
 	{
-		return this.dao.getConceptDescriptorList(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc);
+		return this.dao.getConceptDescriptorList(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc, exactMatchSearch);
 	}
 	
 	/**
 	 * DWE CHICA-330 4/23/15 
 	 * 
-	 * @see org.openmrs.module.atd.service.ATDService#getCountConcepts(String)
+	 * @see org.openmrs.module.atd.service.ATDService#getCountConcepts(String, boolean, int, boolean)
 	 */
-	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId)
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch)
 	{
-		return this.dao.getCountConcepts(searchValue, includeRetired, conceptClassId);
+		return this.dao.getCountConcepts(searchValue, includeRetired, conceptClassId, exactMatchSearch);
 	}
 }

@@ -69,6 +69,7 @@ import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 public class Util {
 	
 	private static Log log = LogFactory.getLog(Util.class);
+	protected static final String ESCAPE_BACKSLASH = "&#092";
 	
 	public static int getMaxDssElements(Integer formId, Integer locationTagId, Integer locationId) {
 		String propertyValue = null;
@@ -530,7 +531,11 @@ public class Util {
 				item[0] = cd.getName();
 				item[1] = cd.getConceptClass();
 				item[2] = cd.getDatatype();  
-				item[3] = cd.getDescription();
+				
+				// DWE CHICA-330 Replace special character that will cause the import to fail
+				String description = cd.getDescription();
+				item[3] = description.replace("\\", ESCAPE_BACKSLASH);
+				
 				item[4] = Integer.toString(cd.getConceptId());
 				item[5] = cd.getUnits();
 				item[6] = cd.getParentConcept();
