@@ -106,8 +106,6 @@ public class CreateClinicFormController extends SimpleFormController {
 				map.put(locationAttribute.getName(), value);
 			}
 		}
-		
-		map.put("locationAttributes", getAllLocationAttributes());
 	}
 	
 	private void createClinic(HttpServletRequest request, String clinicName) 
