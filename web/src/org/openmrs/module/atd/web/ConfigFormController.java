@@ -181,6 +181,10 @@ public class ConfigFormController extends SimpleFormController
         }
         
         try {
+        	// DWE CHICA-332 4/15/15 Create a list of locations and tags so that the
+        	// configFormAttributeValue.jsp can be incorporated into the create form process
+        	ArrayList<String> locationsAndTags = new ArrayList<String>();
+        	
         	ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
         	LocationTagAttribute locTagAttr = new LocationTagAttribute();
         	locTagAttr.setName(formName);
@@ -197,12 +201,16 @@ public class ConfigFormController extends SimpleFormController
         			attrVal.setLocationTagId(tag.getLocationTagId());
         			attrVal.setValue(String.valueOf(formId));
         			chirdlutilbackportsService.saveLocationTagAttributeValue(attrVal);
+        			locationsAndTags.add(loc.getLocationId() + "#$#" + tag.getLocationTagId()); // Separating the location id and the tag id by "#$#" to match existing functionality
         		}
         		
         		LoggingUtil.logEvent(loc.getLocationId(), formId, null, LoggingConstants.EVENT_MODIFY_FORM_PROPERTIES, 
         			Context.getUserContext().getAuthenticatedUser().getUserId(), 
         			"Form configuration modified.  Class: " + ConfigFormController.class.getCanonicalName());
         	}
+        	
+        	map.put("positions", locationsAndTags.toArray(new String[0]));
+        	
         } catch (Exception e) {
         	log.error("Error while creating data for the Chirdl location tag tables", e);
         	map.put("failedChirdlUpdate", true);
@@ -214,6 +222,7 @@ public class ConfigFormController extends SimpleFormController
         }
 		
 		view = getSuccessView();
+		map.put("successViewName", "mlmForm.form"); // Success view will depend on which page the user came from
 		return new ModelAndView(
 			new RedirectView(view), map);
 	}

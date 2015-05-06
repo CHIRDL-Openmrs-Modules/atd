@@ -85,6 +85,8 @@
 	<classpathentry kind="lib" path="lib-common/zxing/zxing-javase-2.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/opencsv/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="lib-common/dss-2.29.0.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/json/jackson-core-asl-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/json/jackson-mapper-asl-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.1.2.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +49,8 @@ import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.BadScansFileFilter;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
@@ -992,4 +996,47 @@ public class ATDServiceImpl implements ATDService
     public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
+
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
+		return this.dao.getAllConcepts();
+	}
+
+	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
+		return this.dao.getAllFormDefinitions();
+	}
+
+	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException {
+		return this.dao.getFormDefinition(formId);
+	}
+	
+	/**
+	 * DWE CHICA-332 4/16/15
+	 * 
+	 * @see org.openmrs.module.atd.service.ATDService#getFormAttributeValueLocationsAndTagsMap(Integer)
+	 */
+	@Override
+	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
+	{
+		return this.dao.getFormAttributeValueLocationsAndTagsMap(formId);
+	}
+	
+	/**
+	 * DWE CHICA-330 4/22/15 
+	 * 
+	 * @see org.openmrs.module.atd.service.ATDService#getConceptDescriptorList(int, int, String, boolean, int, String, String, boolean)
+	 */
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch)
+	{
+		return this.dao.getConceptDescriptorList(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc, exactMatchSearch);
+	}
+	
+	/**
+	 * DWE CHICA-330 4/23/15 
+	 * 
+	 * @see org.openmrs.module.atd.service.ATDService#getCountConcepts(String, boolean, int, boolean)
+	 */
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch)
+	{
+		return this.dao.getCountConcepts(searchValue, includeRetired, conceptClassId, exactMatchSearch);
+	}
 }
