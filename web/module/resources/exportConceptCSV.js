@@ -94,8 +94,3 @@ $(document).ready(function() {
 	$("#selectAllConcepts").click(function(){toggleSelectedConcepts();return false});
 	
 } );
-
-function backToConfigManager()
-{
-	window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
-}
