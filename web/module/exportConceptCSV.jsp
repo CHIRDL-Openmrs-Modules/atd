@@ -95,5 +95,12 @@
 	
 </body>
 
+<script>
+function backToConfigManager()
+{
+	window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
+}
+</script>
+
 </html>
 <%@ include file="/WEB-INF/template/footer.jsp"%>
