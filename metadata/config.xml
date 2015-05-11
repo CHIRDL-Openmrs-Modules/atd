@@ -118,12 +118,6 @@
         </description>
     </globalProperty>
     <globalProperty>
-        <property>atd.showBadScans</property>
-        <defaultValue>true</defaultValue>
-        <description>Whether or not to display a notice on the greaseboard of bad scans.  Valid values are 'true' and 'false'.
-        </description>
-    </globalProperty>
-    <globalProperty>
         <property>atd.outgoingFaxFrom</property>
         <defaultValue>CHICA</defaultValue>
         <description>The user to place in the from section of outgoing faxes that are sent.
