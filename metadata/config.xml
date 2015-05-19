@@ -137,14 +137,6 @@
 	</messages>
 	<!-- /Internationalization -->
 	
-	
-	<!-- Servlets -->
-    <!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> -->
-   <servlet>
-       <servlet-name>importConceptsFromFile</servlet-name>
-       <servlet-class>@MODULE_PACKAGE@.web.ImportConceptsFromFileServlet</servlet-class>
-   </servlet>
-   
 	<mappingFiles>
 	patient_atd.hbm.xml
 	statistics.hbm.xml
