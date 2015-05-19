@@ -36,8 +36,10 @@ import org.openmrs.ConceptDatatype;
 import org.openmrs.ConceptDescription;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptNumeric;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.UserContext;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -48,21 +50,144 @@ import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
  * Utility class for importing concepts from a csv file
  * 
  * @author Tammy Dugan
+ * 
+ * DWE CHICA-426 Implemented Runnable interface 
+ * and added supporting code to allow the import to be run in a separate thread
  */
-public class ImportConceptsUtil {
+public class ImportConceptsUtil implements Runnable{
 	
 	private static Log log = LogFactory.getLog(ImportConceptsUtil.class);
+	private InputStream inputStream;
+	private boolean isImportComplete = false;
+	private boolean importStarted = false;
+	private boolean errorOccurred = false;
+	private int conceptsCreated = 0;
+	private int conceptAnswersCreated = 0;
+	private int totalRowsFound = 0;
+	private int currentRow = 0;
+	private boolean isImportCancelled = false;
 	
-	public static void createConceptsFromFile(InputStream inputStream) {
-		int conceptsCreated = 0;
+	/**
+	 * Constructor for ImportConcepts
+	 * @param inputStream
+	 */
+	public ImportConceptsUtil(InputStream inputStream)
+	{
+		this.inputStream = inputStream;
+	}
+	
+	/**
+	 * @return - true if the import has completed
+	 */
+	public boolean getIsImportComplete()
+	{
+		return isImportComplete;
+	}
+	
+	/**
+	 * @return - true if an error occurred that prevented the import from starting
+	 */
+	public boolean getErrorOccurred()
+	{
+		return errorOccurred;
+	}
+	
+	/**
+	 * @return the total number of rows found in the import file
+	 */
+	public int getTotalRowsFound()
+	{
+		return totalRowsFound;
+	}
+	
+	/**
+	 * @return the current row that is being processed, this number is incremented before any processing 
+	 * and will be incremented regardless of any errors that occur. This is simply a value 
+	 * to give the user an indication of how far along in the import file the thread is
+	 */
+	public int getCurrentRow()
+	{
+		return currentRow;
+	}
+	
+	/**
+	 * @return true if the user cancelled the import
+	 */
+	public boolean getIsImportCancelled()
+	{
+		return isImportCancelled;
+	}
+	
+	/**
+	 * @return true if the import has been started
+	 */
+	public boolean getImportStarted()
+	{
+		return importStarted;
+	}
+	
+	/**
+	 * Set to true to cancel the import
+	 */
+	public void setIsImportCancelled(boolean cancelImport)
+	{
+		this.isImportCancelled = cancelImport;
+	}
+	
+	/**
+	 * @return the number of concepts that were successfully created
+	 */
+	public int getConceptsCreated()
+	{
+		return conceptsCreated;
+	}
+	
+	/**
+	 * @return the number of concept answers that were successfully created
+	 */
+	public int getConceptAnswersCreated()
+	{
+		return conceptAnswersCreated;
+	}
+	
+	public void run()
+	{
+		importStarted = true;
+		createConceptsFromFile();
+		isImportComplete = true;
+	}
+	
+	/**
+	 * Create or update concept records
+	 * @param inputStream
+	 * 
+	 * DWE CHICA-426 Made this private and removed static
+	 * Also updated with necessary code to open a new session, keep track of which row in the file is 
+	 * currently being processed, track any errors that occur, 
+	 * and allow the user to cancel the import 
+	 */ 
+	private void createConceptsFromFile() {
+		Context.openSession();
+		try
+		{
 		List<ConceptDescriptor> conceptDescriptorsToLink = new ArrayList<ConceptDescriptor>();
 		ConceptService conceptService = Context.getConceptService();
+		AdministrationService adminService = Context.getAdministrationService();
+		Context.authenticate(adminService.getGlobalProperty("scheduler.username"), // NOTE: There are now constants for these, but this branch hasn't been updated yet
+				adminService.getGlobalProperty("scheduler.password"));
 		
 		try {
 			
 			List<ConceptDescriptor> conceptDescriptors = getConcepts(inputStream);
 			
+			totalRowsFound = conceptDescriptors.size();
+			
 			for (ConceptDescriptor currTerm : conceptDescriptors) {
+				if(isImportCancelled)
+				{
+					break;
+				}
+				currentRow++;
 				Concept newConcept = null;
 				
 				if (currTerm.getDatatype().equalsIgnoreCase("Numeric")) {
@@ -145,62 +270,92 @@ public class ImportConceptsUtil {
 		}
 		catch (Exception e) {
 			log.error("Error creating concepts from file", e);
+			errorOccurred = true;
 		}
-		int conceptAnswersCreated = 0;
 		
 		//link all the answers to the parent
-		for (ConceptDescriptor currDescriptor : conceptDescriptorsToLink) {
-			String parentName = currDescriptor.getParentConcept();
-			
-			if (parentName != null) {
-				parentName = parentName.trim();
-				Concept parentConcept = conceptService.getConceptByName(parentName);
-				if (parentConcept != null) {
-					UserContext context = Context.getUserContext();
-					Concept childConcept = conceptService.getConceptByName(currDescriptor.getName());
-					boolean foundMatch = false;
-					Collection<ConceptAnswer> answers = parentConcept.getAnswers();
-					for (ConceptAnswer answer : answers) {
-						if (answer.getAnswerConcept().getName().getName().equalsIgnoreCase(childConcept.getName().getName())) {
-							foundMatch = true;
-							break;//don't create a duplicate answer
+		if(!isImportCancelled)
+		{
+			try
+			{
+				totalRowsFound =  conceptDescriptorsToLink.size();
+				currentRow = 0;
+				for (ConceptDescriptor currDescriptor : conceptDescriptorsToLink) {
+					currentRow++;
+					if(isImportCancelled)
+					{
+						break;
+					}
+					String parentName = currDescriptor.getParentConcept();
+
+					if (parentName != null) {
+						parentName = parentName.trim();
+						Concept parentConcept = conceptService.getConceptByName(parentName);
+						if (parentConcept != null) {
+							UserContext context = Context.getUserContext();
+							Concept childConcept = conceptService.getConceptByName(currDescriptor.getName());
+							boolean foundMatch = false;
+							Collection<ConceptAnswer> answers = parentConcept.getAnswers();
+							for (ConceptAnswer answer : answers) {
+								if (answer.getAnswerConcept().getName().getName().equalsIgnoreCase(childConcept.getName().getName())) {
+									foundMatch = true;
+									break;//don't create a duplicate answer
+								}
+							}
+
+							if (!foundMatch) {
+								ConceptAnswer conceptAnswer = new ConceptAnswer();
+								conceptAnswer.setAnswerConcept(childConcept);
+								conceptAnswer.setConcept(parentConcept);
+								conceptAnswer.setCreator(context.getAuthenticatedUser());
+								conceptAnswer.setUuid(UUID.randomUUID().toString());
+								conceptAnswer.setDateCreated(new java.util.Date());
+
+								parentConcept.addAnswer(conceptAnswer);
+								conceptService.saveConcept(parentConcept);
+							}
+
+							conceptAnswersCreated++;
+
+							if (conceptAnswersCreated % 500 == 0) {
+								log.info("Context.clear session");
+								Context.clearSession();
+							}
 						}
-					}
-					
-					if (!foundMatch) {
-						ConceptAnswer conceptAnswer = new ConceptAnswer();
-						conceptAnswer.setAnswerConcept(childConcept);
-						conceptAnswer.setConcept(parentConcept);
-						conceptAnswer.setCreator(context.getAuthenticatedUser());
-						conceptAnswer.setUuid(UUID.randomUUID().toString());
-						conceptAnswer.setDateCreated(new java.util.Date());
-						
-						parentConcept.addAnswer(conceptAnswer);
-						conceptService.saveConcept(parentConcept);
-					}
-					
-					conceptAnswersCreated++;
-					
-					if (conceptAnswersCreated % 500 == 0) {
-						log.info("Context.clear session");
-						Context.clearSession();
 					}
 				}
 			}
-		}
-		
+			catch(Exception e)
+			{
+				log.error("Error creating concept answers from file", e);
+				errorOccurred = true;
+			}
+		} 
 		log.info("Number concepts created: " + conceptsCreated);
+		
+		}
+		catch(ContextAuthenticationException e)
+		{
+			errorOccurred = true;
+			log.error("Error authenticating context.", e);
+		}
+		finally
+		{
+			Context.closeSession();
+		}
 		
 	}
 	
 	/**
-	 * Get the list of appointments for the next business day.
+	 * Get the list of ConceptDescriptor objects from the import file
 	 * 
-	 * @return List of Appointment objects
+	 * @param inputStream
+	 * @return List of ConceptDescriptor objects
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private static List<ConceptDescriptor> getConcepts(InputStream inputStream) throws FileNotFoundException, IOException {
+	// DWE CHICA-426 Made public so that the progress bar can be initialized with the number of rows found
+	public static List<ConceptDescriptor> getConcepts(InputStream inputStream) throws FileNotFoundException, IOException {
 		
 		List<ConceptDescriptor> list = null;
 		try {
