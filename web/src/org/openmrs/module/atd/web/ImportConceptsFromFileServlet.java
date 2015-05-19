@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.module.atd.util.ConceptDescriptor;
-import org.openmrs.module.atd.util.ImportConceptsUtil;
+import org.openmrs.module.atd.util.ImportConcepts;
 import org.apache.commons.fileupload.*;
 import org.apache.commons.fileupload.servlet.*;
 import org.apache.commons.fileupload.disk.*;
@@ -40,13 +40,12 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 	private static final String IS_COMPLETE = "isComplete";
 	private static final String IS_IMPORT_CANCELLED = "isImportCancelled";
 	private static final String ERROR_OCCURRED = "errorOccurred";
-	private static final String PARSE_ERROR = "fileParseError";
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		HttpSession session = request.getSession();
 		Map<String, Object> returnMap = new HashMap<String, Object>();
-		ImportConceptsUtil importConcepts = (ImportConceptsUtil)session.getAttribute(IMPORT_CONCEPTS_ATTRIB);
+		ImportConcepts importConcepts = (ImportConcepts)session.getAttribute(IMPORT_CONCEPTS_ATTRIB);
 		
 		if(request.getParameter(BEGIN_IMPORT_PARAM) != null)
 		{
@@ -83,35 +82,29 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 						returnMap.put("incorrectExtension", true);						
 					}
 
-					if(index >= 0) 
+					String extension = filename.substring(index + 1, filename.length());
+					if (!extension.equalsIgnoreCase("csv")) {
+						returnMap.put("incorrectExtension", true);						
+					}
+
+					if(returnMap.isEmpty()) // No errors have occurred, start the import
 					{
-						String extension = filename.substring(index + 1, filename.length());
-						if (!extension.equalsIgnoreCase("csv")) {
-							returnMap.put("incorrectExtension", true);						
+						// Determine the number of rows so that the progress bar can be initialized properly
+						// This also allows us to make sure an error didn't occur while parsing the file
+						List<ConceptDescriptor> list = ImportConcepts.getConcepts(file.getInputStream()); 
+						
+						if(list != null && list.size() > 0)
+						{
+							importConcepts = new ImportConcepts(file.getInputStream());
+							Thread thread = new Thread(importConcepts);
+							thread.start();
+
+							session.setAttribute(IMPORT_CONCEPTS_ATTRIB, importConcepts);
+							returnMap.put(IMPORT_STARTED, true);
+							returnMap.put(CURRENT_ROW, importConcepts.getCurrentRow());
 						}
 						
-						if(returnMap.isEmpty()) // No errors have occurred, start the import
-						{
-							// Determine the number of rows so that the progress bar can be initialized properly
-							// This also allows us to make sure an error didn't occur while parsing the file
-							List<ConceptDescriptor> list = ImportConceptsUtil.getConcepts(file.getInputStream());
-							
-							if(list != null && list.size() > 0)
-							{
-								importConcepts = new ImportConceptsUtil(file.getInputStream());
-								Thread thread = new Thread(importConcepts);
-								thread.start();
-
-								session.setAttribute(IMPORT_CONCEPTS_ATTRIB, importConcepts);
-								returnMap.put(IMPORT_STARTED, true);
-								returnMap.put(CURRENT_ROW, importConcepts.getCurrentRow());
-								returnMap.put(TOTAL_ROWS_FOUND, list.size());
-							}
-							else
-							{
-								returnMap.put(PARSE_ERROR, true);
-							}
-						}		
+						returnMap.put(TOTAL_ROWS_FOUND, list != null ? list.size() : 0);
 					}
 				}
 			}
@@ -123,7 +116,7 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 		}
 		else if(request.getParameter(CANCEL_IMPORT_PARAM) != null)
 		{
-			if(importConcepts != null && !importConcepts.getIsImportComplete())
+			if(importConcepts != null)
 			{
 				importConcepts.setIsImportCancelled(true);
 			}
