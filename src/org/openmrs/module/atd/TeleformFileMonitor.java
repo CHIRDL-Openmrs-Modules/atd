@@ -31,6 +31,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicService;
 import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.FileExt;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
@@ -597,6 +598,16 @@ public class TeleformFileMonitor extends AbstractTask
 			if(filename == null){
 				log.error("Filename name for formInstanceId: "+instance.getFormInstanceId()+" and formId: "+instance.getFormId()+" is null.");
 				continue;
+			}
+			
+			// Check to see if a PDF file was created
+			if (filename.toLowerCase().endsWith(ChirdlUtilConstants.FILE_EXTENSION_PDF)) {
+				File pdfFilename = new File(filename);
+				if (pdfFilename.exists()) {
+					iterator.remove();
+					atdService.fileProcessed(tfState);
+					continue;
+				}
 			}
 			
 			int index = filename.lastIndexOf(".");

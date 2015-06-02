@@ -3,6 +3,7 @@
  */
 package org.openmrs.module.atd.action;
 
+import java.io.File;
 import java.util.HashMap;
 
 import org.openmrs.Patient;
@@ -14,10 +15,12 @@ import org.openmrs.module.atd.TeleformFileMonitor;
 import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 
 /**
@@ -44,15 +47,15 @@ public class WaitForPrint implements ProcessStateAction
 		FormInstance formInstance = (FormInstance) parameters.get("formInstance");
 		if(formInstance == null){
 		
-		Integer sessionId = patientState.getSessionId();
-		PatientState stateWithFormId = Util.getPrevProducePatientStateByAction(patientState, sessionId);
-		
-		formInstance = patientState.getFormInstance();
-
-		if(formInstance == null&&stateWithFormId != null)
-		{
-			formInstance = stateWithFormId.getFormInstance();
-		}
+			Integer sessionId = patientState.getSessionId();
+			PatientState stateWithFormId = Util.getPrevProducePatientStateByAction(patientState, sessionId);
+			
+			formInstance = patientState.getFormInstance();
+	
+			if(formInstance == null&&stateWithFormId != null)
+			{
+				formInstance = stateWithFormId.getFormInstance();
+			}
 		}
 		patientState.setFormInstance(formInstance);
 		chirdlutilbackportsService.updatePatientState(patientState);
@@ -62,9 +65,31 @@ public class WaitForPrint implements ProcessStateAction
 						.getFormAttributeValue(formInstance.getFormId(),
 								"defaultMergeDirectory", locationTagId,
 								formInstance.getLocationId()));
-		TeleformFileState teleformFileState = TeleformFileMonitor
-				.addToPendingStatesWithFilename(formInstance, mergeDirectory
-						+ formInstance.toString() + ".20");
+		
+		// Check the output type
+		FormAttributeValue fav = chirdlutilbackportsService.getFormAttributeValue(
+			formInstance.getFormId(), ChirdlUtilConstants.FORM_ATTR_OUTPUT_TYPE, locationTagId, formInstance.getLocationId());
+		String outputType = null;
+		if (fav == null || fav.getValue() == null || fav.getValue().trim().length() == 0) {
+			outputType = Context.getAdministrationService().getGlobalProperty(
+				ChirdlUtilConstants.GLOBAL_PROP_DEFAULT_OUTPUT_TYPE);
+		} else {
+			String[] outputTypes = fav.getValue().split(ChirdlUtilConstants.GENERAL_INFO_COMMA);
+			outputType = outputTypes[0].trim();
+		}
+		
+		String mergeFilename = "";
+		if (ChirdlUtilConstants.FORM_ATTR_VAL_PDF.equalsIgnoreCase(outputType) || 
+				ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_PDF.equalsIgnoreCase(outputType)) {
+			File pdfDir = new File(mergeDirectory, ChirdlUtilConstants.FILE_PDF);
+			File mergeFile = new File(pdfDir, formInstance.toString() + ChirdlUtilConstants.FILE_EXTENSION_PDF);
+			mergeFilename = mergeFile.getAbsolutePath();
+		} else if (ChirdlUtilConstants.FORM_ATTR_VAL_TELEFORM_XML.equalsIgnoreCase(outputType)) {
+			File mergeFile = new File(mergeDirectory, formInstance.toString() + ".20");
+			mergeFilename = mergeFile.getAbsolutePath();
+		}
+		
+		TeleformFileState teleformFileState = TeleformFileMonitor.addToPendingStatesWithFilename(formInstance, mergeFilename);
 		teleformFileState.addParameter("patientState", patientState);
 	}
 
