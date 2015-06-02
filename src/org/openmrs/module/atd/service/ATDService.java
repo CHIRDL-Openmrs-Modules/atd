@@ -51,7 +51,19 @@ public interface ATDService
 			Integer locationTagId,Integer sessionId);
 	
 	public boolean produce(Patient patient,
-			FormInstance formInstance, OutputStream customOutput, 
+	           			FormInstance formInstance, Map<String,OutputStream> outputs, 
+	           			DssManager dssManager,Integer encounterId,
+	           			Map<String,Object> baseParameters,
+	           			Integer locationTagId,Integer sessionId);
+	           	
+	public boolean produce(Patient patient,
+	           			FormInstance formInstance, OutputStream customOutput, 
+	           			Integer encounterId,
+	           			Map<String,Object> baseParameters,
+	           			Integer locationTagId,Integer sessionId);
+	           	
+	public boolean produce(Patient patient,
+			FormInstance formInstance, Map<String,OutputStream> outputs, 
 			Integer encounterId,
 			Map<String,Object> baseParameters,
 			Integer locationTagId,Integer sessionId);
@@ -158,6 +170,10 @@ public interface ATDService
 	public void createStatistics(Statistics statistics);
 	
 	public void produce(OutputStream output, PatientState state,
+	        			Patient patient, Integer encounterId, String dssType,
+	        			int maxDssElements,Integer sessionId);
+	
+	public void produce(Map<String,OutputStream> outputs, PatientState state,
 	        			Patient patient, Integer encounterId, String dssType,
 	        			int maxDssElements,Integer sessionId);
 	

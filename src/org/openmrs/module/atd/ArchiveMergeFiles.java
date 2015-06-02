@@ -16,13 +16,13 @@ package org.openmrs.module.atd;
 import java.io.File;
 import java.io.FileFilter;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.chirdlutil.util.FileAgeFilter;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
@@ -77,7 +77,7 @@ public class ArchiveMergeFiles extends AbstractTask {
 		try {
 			daysToKeep = Integer.parseInt(days);
 		} catch (NumberFormatException e) {}
-		FileFilter oldFilesFilter = new OldFilesFilter(daysToKeep);
+		FileFilter oldFilesFilter = new FileAgeFilter(daysToKeep);
 		for (String mergeDirectoryStr : mergeDirectories) {
 			File mergeDirectory = new File(mergeDirectoryStr);
 			if (!mergeDirectory.exists()) {
@@ -160,48 +160,5 @@ public class ArchiveMergeFiles extends AbstractTask {
         
         log.info("Successfully archived " + filesMoved + " files from " + sourceDirectory.getAbsolutePath() + 
         	" to " + targetDirectory.getAbsolutePath());
-	}
-	
-	/**
-	 * File filter class used to return any files (not directories) outside the "daysToKeep" property set for this 
-	 * scheduled task.
-	 *
-	 * @author Steve McKee
-	 */
-	protected class OldFilesFilter implements FileFilter {
-		
-		int daysToKeep = 1;
-		
-		/**
-		 * Constructor method
-		 */
-		public OldFilesFilter(int daysToKeep) {
-			this.daysToKeep = daysToKeep;
-		}
-
-		/**
-		 * @see java.io.FileFilter#accept(java.io.File)
-		 */
-		public boolean accept(File pathname) {
-			// Directories do not get moved.
-			if (pathname.isDirectory()) {
-				return false;
-			}
-			
-			// Create a Calendar to hold the last modified date/time of the file.
-	        Calendar fileCal = Calendar.getInstance();
-	        fileCal.setTime(new Date(pathname.lastModified()));
-	        
-	        // Create a Calendar that is the current date/time minus the number of days we keep.
-	        Calendar compareCal = Calendar.getInstance();
-	        compareCal.add(Calendar.DAY_OF_MONTH, -daysToKeep);
-	        // Accept the file if its last modified date/time is outside the number of days we want to keep.
-	        if (fileCal.compareTo(compareCal) < 0) {
-	        	return true;
-	        }
-	        
-	        return false;
-        }
-		
 	}
 }
