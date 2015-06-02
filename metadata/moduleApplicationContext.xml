@@ -29,7 +29,6 @@
 				<prop key="/module/@MODULE_ID@/enableLocationsForm.form">enableLocationsForm</prop>
 				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
 				<prop key="/module/@MODULE_ID@/configurationManagerSuccess.form">configurationManagerSuccess</prop>
-				<prop key="/module/@MODULE_ID@/displayBadScans.form">displayBadScans</prop>
 				<prop key="/module/@MODULE_ID@/faxableForm.form">faxableForm</prop>
 				<prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
 				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
@@ -157,11 +156,6 @@
         <property name="commandName"><value>configurationManagerSuccessObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configurationManagerSuccess</value></property>
         <property name="successView"><value>configurationManager.form</value></property>
-    </bean>
-    <bean id="displayBadScans" class="@MODULE_PACKAGE@.web.DisplayBadScansController">
-        <property name="commandName"><value>displayBadScansObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/displayBadScans</value></property>
-        <property name="successView"><value>displayBadScans.form</value></property>
     </bean>
     <bean id="faxableForm" class="@MODULE_PACKAGE@.web.FaxableFormController">
         <property name="commandName"><value>faxableFormObject</value></property>

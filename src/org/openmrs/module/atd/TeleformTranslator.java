@@ -1,7 +1,5 @@
 package org.openmrs.module.atd;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -40,9 +38,13 @@ import org.openmrs.module.atd.datasource.FormDatasource;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
+import org.openmrs.module.chirdlutil.xmlBeans.serverconfig.ImageForm;
+import org.openmrs.module.chirdlutil.xmlBeans.serverconfig.ImageMerge;
+import org.openmrs.module.chirdlutil.xmlBeans.serverconfig.ServerConfig;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
@@ -51,6 +53,13 @@ import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
 import org.openmrs.util.OpenmrsUtil;
+
+import com.itextpdf.text.Image;
+import com.itextpdf.text.pdf.AcroFields;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
+
 
 /**
  * Converts teleform xml to openmrs forms and
@@ -192,42 +201,188 @@ public class TeleformTranslator
 	}
 
 	/**
-	 * Pulls an OpenMRS form from the database based on a formId
+	 * Takes an instance of a form and serializes as XML to an output stream.
 	 * 
-	 * @param formId unique identifier for OpenMRS form definition in the
-	 *        database
-	 * @return Form OpenMRS form from the database matching the formId
+	 * @param formInstance The form instance to serialize.
+	 * @param output The output stream where the XML will be written.
+	 * @param patient The patient owner of the form.
+	 * @param dssManager DssManager containing all the form field information to be written.
+	 * @param encounterId The patient's encounter ID.
+	 * @param baseParameters Map containing parameters.
+	 * @param locationTagId The location tag ID.
+	 * @param sessionId The session ID.
 	 */
-	private Form databaseToForm(int formId)
-	{
-		FormService formService = Context.getFormService();
-
-		return formService.getForm(formId);
+	public void formToTeleformXML(FormInstance formInstance, OutputStream output, Patient patient, DssManager dssManager,
+	                              Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId,
+	                              Integer sessionId) {
+		
+		LinkedHashMap<String, String> fieldNameResult = getMergeFieldResults(formInstance, patient, dssManager, 
+			encounterId, baseParameters, locationTagId, sessionId);
+		String resultString = null;
+		//create xml
+		Record record = new Record();
+		Records records = new Records(record);
+		
+		for (String fieldName : fieldNameResult.keySet()) {
+			org.openmrs.module.atd.xmlBeans.Field currXMLField = null;
+			currXMLField = new org.openmrs.module.atd.xmlBeans.Field(fieldName);
+			record.addField(currXMLField);
+			resultString = fieldNameResult.get(fieldName);
+			currXMLField.setValue(resultString);
+		}
+		
+		try {
+			XMLUtil.serializeXML(records, output);
+		}
+		catch (Exception e) {
+			this.log.error(e.getMessage());
+			this.log.error(Util.getStackTrace(e));
+		}
+		finally {
+			try {
+				output.flush();
+				output.close();
+			}
+			catch (IOException e) {
+				log.error("Error generated", e);
+			}
+		}
+	}
+	
+	/**
+	 * Merges form field information to a PDF file.
+	 * 
+	 * @param templatePDF The location of the PDF template file.
+	 * @param formInstance The instance of a form that will have its metadata written to the PDF file.
+	 * @param output The output stream where the merged PDF file will be written.
+	 * @param patient The patient owner of the form.
+	 * @param dssManager DssManager containing all the information for the merge fields.
+	 * @param encounterId The encounter ID.
+	 * @param baseParameters Map containing parameters.
+	 * @param locationTagId The location tag ID.
+	 * @param sessionId The session ID.
+	 */
+	public void formToPDF(String templatePDF, FormInstance formInstance, OutputStream output,
+	                      Patient patient, DssManager dssManager, Integer encounterId, Map<String, Object> baseParameters,
+	                      Integer locationTagId, Integer sessionId) {
+		try {
+	        PdfReader reader = new PdfReader(templatePDF);
+	        PdfStamper stamper = new PdfStamper(reader, output);
+	        AcroFields form = stamper.getAcroFields();
+	        LinkedHashMap<String, String> fieldNameResult = getMergeFieldResults(formInstance, patient, dssManager, 
+	        	encounterId, baseParameters, locationTagId, sessionId);
+	        String resultString = null;
+	        
+	        for (String fieldName : fieldNameResult.keySet()) {
+	        	resultString = fieldNameResult.get(fieldName);			
+	        	form.setField(fieldName, resultString);
+	        }
+	        
+	        postProcessPDF(reader, formInstance, stamper, locationTagId);
+	        
+	        stamper.close();
+	        reader.close();
+        }
+        catch (Exception e) {
+	        log.error("Error generating PDF version of form: " + formInstance, e);
+        }
+	}
+	
+	/**
+	 * Performs any post-processing on a PDF merge form.
+	 * 
+	 * @param reader The PdfReader object created from the template PDF file.
+	 * @param formInstance FormInstance object containing the form instance information for the form being merged.
+	 * @param stamper The PdfStamper used to place objects in the PDF file.
+	 * @param locationTagId The location tag identifier.
+	 */
+	private void postProcessPDF(PdfReader reader, FormInstance formInstance, PdfStamper stamper, Integer locationTagId) {
+		Integer formId = formInstance.getFormId();
+		Form form = Context.getFormService().getForm(formId);
+		mergePDFImages(form, formInstance, locationTagId, stamper);
+	}
+	
+	/**
+	 * Merges any needed images to the PDF form.
+	 * 
+	 * @param form The database form containing the information about the PDF form.
+	 * @param formInstance The instance of the form to have data merged.
+	 * @param locationTagId The locationTagId of the location tag requesting the merge.
+	 * @param stamper The PDF stamper used to merge the images.
+	 */
+	private void mergePDFImages(Form form, FormInstance formInstance, Integer locationTagId, PdfStamper stamper) {
+		try {
+			// Merge any images need to the form.
+			FormAttributeValue fav = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
+				form.getFormId(), ChirdlUtilConstants.FORM_ATTR_REQUIRES_PDF_IMAGE_MERGE, locationTagId, 
+				formInstance.getLocationId());
+			if (fav == null || fav.getValue() == null || 
+					!ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(fav.getValue())) {
+				return;
+			}
+			
+			ServerConfig serverConfig = Util.getServerConfig();
+			if (serverConfig == null) {
+				log.warn("Server config file cannot be found.  No PDF image processing will take place.");
+				return;
+			}
+			
+			ImageForm imageForm = serverConfig.getPDFImageForm(form.getName());
+			if (imageForm == null) {
+				return;
+			}
+			
+			AcroFields fields = stamper.getAcroFields();
+			List<ImageMerge> imageMerges = imageForm.getImageMerges();
+			if (imageMerges == null) {
+				return;
+			}
+			
+			for (ImageMerge imageMerge : imageMerges) {
+				String fieldName = imageMerge.getFieldName();
+				String filePath = fields.getField(fieldName);
+				if (filePath == null || filePath.trim().length() == 0) {
+					continue;
+				}
+				
+				Image image = Image.getInstance(filePath);
+				image.setRotationDegrees(imageMerge.getRotation());
+				image.setAbsolutePosition(imageMerge.getPositionX(), imageMerge.getPositionY());
+				PdfContentByte content = stamper.getUnderContent(imageMerge.getPageNumber());
+				content.addImage(image);
+			}
+		} catch (Exception e) {
+			log.error("Error post-processing PDF form: " + form.getName(), e);
+		}
 	}
 
 	/**
-	 * Turns an OpenMRS form into teleform merge xml
-	 * @param form openmrs Form
-	 * @param output where to write teleform xml
+	 * Merges results into the form fields.
+	 * 
+	 * @param formInstance FormInstance used to identify the form.
 	 * @param patient Patient who goes with the form
-	 * @param formInstanceId unique id for the specific instance of the form
 	 * @param dssManager manages prioritized rule evaluation
 	 * @param encounterId id for the encounter that goes with this form instance
+	 * @param baseParameters An optional map with additional parameters for rule execution.
+	 * @param locationTagId The location tag identifier.
+	 * @param sessionId The session identifier.
+	 * @return LinkedHashMap with the form field name as the key and a String as the value being the value for the form 
+	 * field.
 	 */
-	public void formToTeleformOutputStream(FormInstance formInstance, OutputStream output,
-			Patient patient,DssManager dssManager,
-			Integer encounterId,Map<String,Object> baseParameters,
-			Integer locationTagId,Integer sessionId)
+	public LinkedHashMap<String,String> getMergeFieldResults(FormInstance formInstance, Patient patient,
+			DssManager dssManager, Integer encounterId,Map<String,Object> baseParameters, Integer locationTagId,
+			Integer sessionId)
 	{
+		FormService formService = Context.getFormService();
 		String threadName = Thread.currentThread().getName();
 		long startTime = System.currentTimeMillis();
-		Form form = databaseToForm(formInstance.getFormId());
+		Form form = formService.getForm(formInstance.getFormId());
 		if(form == null) 
 		{
 			log.error("Could not convert database form "+formInstance.getFormId()+
 					" to teleform merge xml. The form does not exist in the database.");
 
-			return;
+			return null;
 		}
 		String resultString = null;
 
@@ -260,7 +415,6 @@ public class TeleformTranslator
 		List<FormField> formFields = form.getOrderedFormFields();//get all fields for the form
 		System.out.println("formToTeleformOutputStream(" + threadName + "): get ordered form fields: "+
 			(System.currentTimeMillis()-startTime));
-		FormService formService = Context.getFormService();
 		startTime = System.currentTimeMillis();
 		//iterate through all the form fields
 		long totalPopulateDssElementTime = 0;
@@ -527,38 +681,7 @@ public class TeleformTranslator
 		(System.currentTimeMillis()-startTime));
 		startTime = System.currentTimeMillis();
 		
-		//create xml
-		Record record = new Record();
-		Records records = new Records(record);
-		
-		for(String fieldName:fieldNameResult.keySet()){
-			org.openmrs.module.atd.xmlBeans.Field currXMLField = null;
-			currXMLField = new org.openmrs.module.atd.xmlBeans.Field(fieldName);
-			record.addField(currXMLField);
-			resultString = fieldNameResult.get(fieldName);
-			currXMLField.setValue(resultString);
-		}
-		
-		try
-		{
-			XMLUtil.serializeXML(records, output);
-			
-		} catch (Exception e)
-		{
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
-		}finally{
-			try {
-	            output.flush();
-	            output.close();
-            }
-            catch (IOException e) {
-	            log.error("Error generated", e);
-            }
-		}
-		
-		System.out.println("formToTeleformOutputStream(" + threadName + "): serialize XML: "+
-			(System.currentTimeMillis()-startTime));
+		return fieldNameResult;
 	}
 	
 	private void mapResult(String resultString,
@@ -660,52 +783,5 @@ public class TeleformTranslator
 		}
 		form.setDescription(records.getTitle());
 		return form;
-	}
-	
-	/**
-	 * Turns teleform xml into a table that is readable by
-	 * teleforms merge utility
-	 * @param inputXML teleform xml
-	 * @param xsltFilename xslt file to convert xml to statements
-	 * to create/populate database table
-	 * @param formName name of the form
-	 * @param formInstanceId unique id for the specific instance of the form
-	 * @throws IOException
-	 */
-	public void teleformXMLToTable(String inputXML,
-			String xsltFilename, String formName, Integer formInstanceId)
-			throws IOException
-	{
-		ByteArrayOutputStream transformOutput = null;
-		String tableName = "TFORM_" + formName;
-
-		// Check if table exists
-		ChirdlUtilService chirdlutilService = Context.getService(ChirdlUtilService.class);
-		boolean tableExists = chirdlutilService.tableExists(tableName);
-		
-		//if the table doesn't exist, create it
-		if (!tableExists)
-		{
-			transformOutput = new ByteArrayOutputStream();
-			HashMap<String, Object> parameters = new HashMap<String, Object>();
-			parameters.put("table_name", tableName);
-			parameters.put("form_instance_id", formInstanceId);
-			parameters.put("create_table", "true");
-			XMLUtil.transformXML(new ByteArrayInputStream(inputXML.toString().getBytes()),
-					transformOutput, new FileInputStream(xsltFilename),
-					parameters);
-			chirdlutilService.executeSql(transformOutput.toString());
-		}
-		
-		//insert the data rows
-		transformOutput = new ByteArrayOutputStream();
-		HashMap<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("table_name", tableName);
-		parameters.put("form_instance_id", formInstanceId);
-		parameters.put("create_insert", "true");
-		XMLUtil.transformXML(new ByteArrayInputStream(inputXML.toString().getBytes()),
-				transformOutput, new FileInputStream(xsltFilename),
-				parameters);
-		chirdlutilService.executeSql(transformOutput.toString());
 	}
 }

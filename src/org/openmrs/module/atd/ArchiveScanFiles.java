@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.openmrs.api.context.Context;
+import org.openmrs.module.chirdlutil.util.FileAgeFilter;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
@@ -68,7 +69,7 @@ public class ArchiveScanFiles extends ArchiveMergeFiles {
 		try {
 			daysToKeep = Integer.parseInt(days);
 		} catch (NumberFormatException e) {}
-		FileFilter oldFilesFilter = new OldFilesFilter(daysToKeep);
+		FileFilter oldFilesFilter = new FileAgeFilter(daysToKeep);
 		for (String scanDirectoryStr : scanDirectories) {
 			File scanDirectory = new File(scanDirectoryStr);
 			if (!scanDirectory.exists()) {

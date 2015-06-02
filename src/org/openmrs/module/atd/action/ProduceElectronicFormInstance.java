@@ -39,7 +39,7 @@ public class ProduceElectronicFormInstance extends ProduceFormInstance {
 	 */
 	protected void produceForm(Integer formId, Integer locationId, Integer locationTagId, Integer encounterId, 
 	                           Integer sessionId, FormInstance formInstance, PatientState patientState, Patient patient, 
-	                           String formName, ATDService atdService) {
+	                           String formName, ATDService atdService, Boolean autoPrint) {
 		// We don't won't a physical file on the file system.
 		// Just save that the form is electronic.
 		if (formInstance == null) {
