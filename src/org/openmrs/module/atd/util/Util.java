@@ -30,6 +30,7 @@ import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
+import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
@@ -343,5 +344,27 @@ public class Util {
 		}
 		
 		return patdMap;
+	}
+	
+	/**
+	 * DWE CHICA-430 This was missing in the atd module
+	 * @param concept
+	 * @param encounterId
+	 */
+	public static void voidObsForConcept(Concept concept,Integer encounterId){
+		EncounterService encounterService = Context.getService(EncounterService.class);
+		Encounter encounter = (Encounter) encounterService.getEncounter(encounterId);
+		ObsService obsService = Context.getObsService();
+		List<org.openmrs.Encounter> encounters = new ArrayList<org.openmrs.Encounter>();
+		encounters.add(encounter);
+		List<Concept> questions = new ArrayList<Concept>();
+		
+		questions.add(concept);
+		List<Obs> obs = obsService.getObservations(null, encounters, questions, null, null, null, null,
+				null, null, null, null, false);
+		
+		for(Obs currObs:obs){
+			obsService.voidObs(currObs, "voided due to rescan");
+		}
 	}
 }
