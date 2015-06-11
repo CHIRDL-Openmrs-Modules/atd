@@ -94,7 +94,7 @@ public class storeObs implements Rule
 		Concept currConcept = conceptService.getConceptByName(conceptName);
 
 		Obs obs = org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, currConcept, encounterId, value, formInstance,
-				ruleId,locationTagId,false);
+				ruleId,locationTagId,false, null); // TODO CHICA-437
 
 		if (obs == null) {
 			return Result.emptyResult();

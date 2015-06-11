@@ -141,7 +141,7 @@ public class consumeTwoPartNonNumber implements Rule
 		{
 			org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, conceptService.getConceptByName(conceptName),
 					encounterId, fullResult,formInstance,
-					ruleId,locationTagId,false);
+					ruleId,locationTagId,false, null); // TODO CHICA-437
 		}
 		
 		return Result.emptyResult();

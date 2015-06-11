@@ -25,6 +25,7 @@ import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Location;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.APIException;
@@ -965,5 +966,14 @@ public class ATDServiceImpl implements ATDService
 	 */
     public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
+    }
+    
+    /**
+     * DWE CHICA-437
+     * @see org.openmrs.module.atd.service.ATDService#getObsWithStatistics(Integer, Integer, Integer, boolean)
+     */
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    {
+    	return getATDDAO().getObsWithStatistics(encounterId, conceptId, formFieldId, includeVoidedObs);
     }
 }

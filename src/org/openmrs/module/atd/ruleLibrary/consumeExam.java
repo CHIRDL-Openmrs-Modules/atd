@@ -125,7 +125,7 @@ public class consumeExam implements Rule
 			
 			if(answer != null){
 				org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, conceptService.getConceptByName(conceptName),
-						encounterId, answer,formInstance,ruleId,locationTagId,false);
+						encounterId, answer,formInstance,ruleId,locationTagId,false, null); // TODO CHICA-437
 			}
 		}
 		

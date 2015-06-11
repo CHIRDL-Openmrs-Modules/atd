@@ -132,7 +132,7 @@ public class consumeDate implements Rule
 			if(date != null){
 				Long dateInMilliseconds = date.getTime();
 				org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, conceptService.getConceptByName(conceptName),
-						encounterId, String.valueOf(dateInMilliseconds),formInstance,ruleId,locationTagId,false);
+						encounterId, String.valueOf(dateInMilliseconds),formInstance,ruleId,locationTagId,false, null); // TODO CHICA-437
 			}
 		}
 		

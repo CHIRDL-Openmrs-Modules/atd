@@ -159,7 +159,7 @@ public class consumeHeight implements Rule
 		if(fullResult != null&&fullResult.length()>0)
 		{
 			org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, conceptService.getConceptByName(conceptName),
-					encounterId, fullResult,formInstance,ruleId,locationTagId,false);
+					encounterId, fullResult,formInstance,ruleId,locationTagId,false, null); // TODO CHICA-437
 		}
 		
 		return Result.emptyResult();

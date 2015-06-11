@@ -70,7 +70,7 @@ public class storeObsWithAttributes implements Rule {
 		String value = (String)parameters.get("param2");
 		Patient patient = Context.getPatientService().getPatient(patientId);
 		Obs obs = org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, concept, encounterId, value, formInstance,
-			ruleId, locationTagId, false);
+			ruleId, locationTagId, false, null); // TODO CHICA-437
 		if (obs == null) {
 			return Result.emptyResult();
 		}
