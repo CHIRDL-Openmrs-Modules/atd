@@ -64,7 +64,7 @@
 		</tr>
 		<tr>
 			<td style="padding-top: 5px"></td>
-			<td style="padding-top: 5px">Upload csv file:&nbsp;<input type=file id="csvFile" name="csvFile" accept="text/xml" ${selectedOption == "csv" ? "" : "disabled"}/>
+			<td style="padding-top: 5px">Upload csv file:&nbsp;<input type=file id="csvFile" name="csvFile" accept=".csv" ${selectedOption == "csv" ? "" : "disabled"}/>
 			</td>
 			</tr>
 	</table>
