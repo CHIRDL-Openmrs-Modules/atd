@@ -41,6 +41,7 @@ public class ChooseLocationController extends SimpleFormController {
 		}
 		map.put("positions", positionStrs);
 		map.put("formId", request.getParameter("formIdStr"));
+		map.put("selectedFormName", request.getParameter("selectedFormName"));
 		
 		String successViewName = this.getSuccessView(); ;
 		map.put("successViewName", "operationSuccess.form"); // Success view will depend on which page the user came from
@@ -59,7 +60,9 @@ public class ChooseLocationController extends SimpleFormController {
 		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		String formIdStr = (String)request.getParameter("formId");
+		String selectedFormName = request.getParameter("selectedFormName");
 		map.put("formIdStr", formIdStr);
+		map.put("selectedFormName", selectedFormName);
 		LocationService locationService = Context.getLocationService();
 		List<Location> locations = locationService.getAllLocations(false);
 		for (Location currLoc : locations){

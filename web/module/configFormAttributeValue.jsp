@@ -33,9 +33,9 @@
 <body>
 
 <div>
-	<h3>Edit Form Attribute Values</h3>
+	<h3>Edit Form Attribute Values (${selectedFormName})</h3>
 </div>
-<button id="showAll" onclick="showHideValues(this.id);">Show All</button>
+<button id="showAll" onclick="showHideValues(this.id);">Show/Hide All</button>
 <form action="configFormAttributeValue.form" method="post" id="attribute_form" class="the_form">
 	<input type="hidden" name="formId" value="${formId }" />
 	<c:forEach items="${positionStrs}" var="ps" varStatus="status">
@@ -61,11 +61,26 @@
 						<table>
 							<tr>
 								<td><h5>${fa.name}</h5></td><td class="attributeNameSection"><a href="javascript:showHideValues('${fa.formAttributeId}');">hide/show</a></td>
-							</tr>	
+							</tr>
 						</table>
 					</td>
 				</tr>
 				
+				<!-- DESCRIPTION OF THE ATTRIBUTE -->
+            <tr>
+                 <td>
+                     <div id="div_formAttribute_Description_${fa.formAttributeId}">
+                         <table style="width:500px">
+                             <tr style="padding-left: 15px;">
+                                 <td>
+                                    - ${fa.description}
+                                 </td>
+                                 <td>&nbsp;</td>
+                             </tr>
+                         </table>
+                     </div>
+                 </td>
+            </tr>
 			<!-- APPLY TO ALL LOCATIONS FOR THIS ATTRIBUTE -->
 					<tr>
 						<td>
@@ -234,8 +249,18 @@ function showHideValues(divFormAttributeId)
 {
 	if(divFormAttributeId === 'showAll')
 	{
-		$j("[id^=div_formAttribute_]").show();
-		$j("[id^=div_locationsAndTags_]").show();
+		if($j("#"+divFormAttributeId).hasClass("showingAll"))
+		{
+			$j("[id^=div_formAttribute_]").hide();
+	        $j("[id^=div_locationsAndTags_]").hide();
+	        $j("#"+divFormAttributeId).removeClass("showingAll");
+		}
+		else
+		{
+			$j("[id^=div_formAttribute_]").show();
+	        $j("[id^=div_locationsAndTags_]").show();
+	        $j("#"+divFormAttributeId).addClass("showingAll");
+		}	
 	}
 	else
 	{

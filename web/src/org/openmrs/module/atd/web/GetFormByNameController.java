@@ -71,6 +71,7 @@ public class GetFormByNameController extends SimpleFormController {
 					if(form != null)
 					{
 						map.put("formId", form.getId());
+						map.put("selectedFormName", form.getName());
 						return new ModelAndView(new RedirectView(view),map);
 					}
 					else

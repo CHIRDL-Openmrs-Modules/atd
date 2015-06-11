@@ -157,7 +157,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		map.put("editableFormAttributes", editableFormAttributes);
 		map.put("formAttributesValueMap", formAttributesValueMap);
 		map.put("formId", formId);
-		map.put("formName", request.getParameter("formName"));
+		map.put("selectedFormName", request.getParameter("selectedFormName"));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
 		map.put("successViewName", request.getParameter("successViewName")); // Success view will depend on which page the user came from
 		return map;

@@ -38,7 +38,7 @@
 </head>
 <body>
 	<p>
-	<h3>Select Location and Location Tags</h3>
+	<h3>Select Location and Location Tags (${selectedFormName})</h3>
 	</p>
 	<c:if test="${NoPositionSelected == 'true'}">
   		<p>You have to choose at least one location</p>
@@ -50,6 +50,7 @@
 	<br/>
 	<form action="chooseLocation.form" method="post" id="location_form">
 		<input type="hidden" name = "formIdStr" value="${formIdStr}"/>
+		<input type="hidden" name="selectedFormName" value="${selectedFormName}" />
 		
 		
 		<c:forEach items = "${locationsList}" var = "location" varStatus = "locsStatus">
