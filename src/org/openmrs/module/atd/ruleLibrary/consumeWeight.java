@@ -82,6 +82,7 @@ public class consumeWeight implements Rule
 		Integer encounterId = null;
 		Integer ruleId = null;
 		Integer locationTagId = null;
+		Integer formFieldId = null;
 
 		if (parameters != null)
 		{
@@ -97,6 +98,7 @@ public class consumeWeight implements Rule
 			
 			encounterId = (Integer) parameters.get("encounterId");
 			locationTagId = (Integer) parameters.get("locationTagId");
+			formFieldId = (Integer)parameters.get("formFieldId"); // DWE CHICA-437
 		}
 
 		if (formInstance == null)
@@ -162,7 +164,7 @@ public class consumeWeight implements Rule
 		{
 			org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, conceptService.getConceptByName(conceptName),
 					encounterId, fullResult,formInstance,
-					ruleId,locationTagId,false, null); // TODO CHICA-437
+					ruleId,locationTagId,false, formFieldId); // DWE CHICA-437 Added formFieldId
 		}
 		
 		return Result.emptyResult();

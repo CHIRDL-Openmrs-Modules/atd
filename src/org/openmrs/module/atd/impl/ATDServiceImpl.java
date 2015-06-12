@@ -249,11 +249,13 @@ public class ATDServiceImpl implements ATDService
 				}
 			}
 			String lookupFieldName = null;
-			
+			Integer formFieldId = null; // DWE CHICA-437 Get the form field id here so that it can be used to determine if obs records should be voided when rules are evaluated
 			if(parentField != null){
 				lookupFieldName = parentField.getField().getName();
+				formFieldId = parentField.getFormFieldId();
 			}else{
 				lookupFieldName = fieldName;
+				formFieldId = currField.getFormFieldId();
 			}
 			if(ruleName != null)
 			{
@@ -323,6 +325,12 @@ public class ATDServiceImpl implements ATDService
 			if(fieldName != null)
 			{
 				parameters.put("fieldName", lookupFieldName);
+			}
+			
+			// DWE CHICA-437 
+			if(formFieldId != null)
+			{
+				parameters.put("formFieldId", formFieldId);
 			}
 			//----------end set rule parameters
 		}
