@@ -90,6 +90,7 @@ public class ConfigFormController extends SimpleFormController
 		
 		map.put("locations", locNames);
 		map.put("formId", formIdStr);
+		map.put("selectedFormName", request.getParameter("formName"));
 		
 		boolean faxableForm = false;
 		String faxChoice = request.getParameter("faxableForm");

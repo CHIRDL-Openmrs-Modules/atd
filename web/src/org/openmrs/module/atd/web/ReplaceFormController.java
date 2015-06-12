@@ -161,6 +161,7 @@ public class ReplaceFormController extends SimpleFormController {
 		view = getSuccessView();
 		map.put("formId", newForm.getFormId());
 		map.put("replaceFormId", replaceFormIdStr);
+		map.put("selectedFormName", newForm.getName());
 		return new ModelAndView(new RedirectView(view), map);
 	}
 	

@@ -36,7 +36,17 @@ function checkTags(locationId)
 {
 	if(locationId == "ALL#$#ALL")
 	{
-		$j(':checkbox').each(function(){ this.checked = true});
+		if($j("#selectAllButton").hasClass("showingAll"))
+		{
+			$j(':checkbox').each(function(){ this.checked = false});
+			$j("#selectAllButton").removeClass("showingAll");
+		}
+		else
+		{
+			$j(':checkbox').each(function(){ this.checked = true});
+			$j("#selectAllButton").addClass("showingAll");
+		}
+		
 	}
 	else
 	{

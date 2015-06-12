@@ -104,13 +104,13 @@
 		definitionsTable = $('#formDefinitionTable').dataTable(
 				{
 					// Table options have been updated for DataTables version 1.10
-					"columns": [  { "sName": "formName", "bSortable": false},
+					"columns": [  { "sName": "formName", "bSortable": true},
 				                 { "sName": "formDesc", "bSortable": false},
-				                 { "sName": "fieldName", "bSortable": false},
-				                 { "sName": "fieldType", "bSortable": false},
+				                 { "sName": "fieldName", "bSortable": true},
+				                 { "sName": "fieldType", "bSortable": true},
 				                 { "sName": "conceptName", "bSortable": false},
 				                 { "sName": "defaultValue", "bSortable": false},
-				                 { "sName": "fieldNumber", "bSortable": false},
+				                 { "sName": "fieldNumber", "bSortable": true},
 				                 { "sName": "parentFieldName", "bSortable": false}
 				              ],
 					"jQueryUI": true,

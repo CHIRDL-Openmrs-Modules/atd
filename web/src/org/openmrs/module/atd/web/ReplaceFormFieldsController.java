@@ -55,6 +55,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		String formIdString = request.getParameter("formId");
 		String replaceFormIdString = request.getParameter("replaceFormId");
 		map.put("replaceFormId", replaceFormIdString);
+		map.put("selectedFormName", request.getParameter("selectedFormName"));
 		
 		if (formIdString != null) {
 			try {
@@ -92,8 +93,10 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		
 		ConceptService conceptService = Context.getConceptService();
 		String replaceFormIdString = request.getParameter("replaceFormId");
+		String formNameToEdit = "";
 		try {
 			Form formToEdit = formService.getForm(formId);
+			formNameToEdit = formToEdit.getName();
 			List<FormField> formFields = formToEdit.getOrderedFormFields();
 			
 			for (FormField currFormField : formFields) {
@@ -165,7 +168,6 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 				formService.saveField(currField);
 				timeInMilliseconds += (System.currentTimeMillis() - startTime);
 			}
-			
 			LoggingUtil.logEvent(null, formId, null, LoggingConstants.EVENT_MODIFY_FORM_FIELDS, 
 				Context.getUserContext().getAuthenticatedUser().getUserId(), 
 				"Form fields modified.  Class: " + ReplaceFormFieldsController.class.getCanonicalName());
@@ -203,7 +205,9 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		map.put("formId", replaceFormIdString);
 		map.put("newFormId", formIdString);
 		map.put("positions", locationIdsAndTagIdsList.toArray(new String[0]));
+		map.put("selectedFormName", formNameToEdit);
 		map.put("successViewName", "replaceRetireForm.form");
+		
 		
 		return new ModelAndView(new RedirectView(getSuccessView()), map);
 	}
