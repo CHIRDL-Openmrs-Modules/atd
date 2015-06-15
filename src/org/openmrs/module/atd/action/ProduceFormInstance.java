@@ -3,6 +3,7 @@
  */
 package org.openmrs.module.atd.action;
 
+import java.awt.print.PrinterException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,8 +11,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import javax.print.PrintException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -309,12 +308,12 @@ public class ProduceFormInstance implements ProcessStateAction
 		}
 		
 		try {
-	        PrintServices.printFile(printerName, formToPrint);
+	        PrintServices.printPDFFile(printerName, formToPrint);
         }
         catch (IOException e) {
 	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
         }
-        catch (PrintException e) {
+        catch (PrinterException e) {
 	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
         }
 	}
