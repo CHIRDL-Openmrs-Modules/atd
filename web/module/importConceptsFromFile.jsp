@@ -4,20 +4,28 @@
 <link
     href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
     type="text/css" rel="stylesheet" />
-<script LANGUAGE="JavaScript">
-	<!--
-	// Nannette Thacker http://www.shiningstar.net
-	function confirmCancel()
-	{
-	    var agree=confirm("Are you sure you want to stop importing concepts?");
-	    if (agree) {
-	    	   window.location = '${pageContext.request.contextPath}/module/atd/importConceptsFromFile.form';
-	    }
-	}
-    // -->
-</script>
+<script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery-ui-1.11.4.min.js"></script>
+
+<style>
+  .ui-progressbar {
+    position: relative;
+    display: none;
+    height: 25px;
+  }
+  .progress-label {
+    text-shadow: 1px 1px 0 #fff;
+    display: none;
+    height: 25px;
+  }
+  
+  .errorMsg{
+  	display: none;
+  	padding: 0px, 0px, 10px, 0px;
+  }
+  </style>
 <html>
-    <body OnLoad="document.input.formName.focus();">
+    <body>
 		<p><h3>Import Concepts:</h3></p>
 		<form name="input" action="importConceptsFromFile.form" method="post" enctype="multipart/form-data">
 		<table>
@@ -25,30 +33,30 @@
 		    <tr style="padding: 5px">
 		        <td style="padding: 0px 0px 10px 0px">Concept csv file:</td>
 		        <td style="padding: 0px 0px 10px 0px">
-		            <input type="file" name="dataFile" value="${dataFile}">
+		            <input type="file" name="dataFile" id="dataFile" accept=".csv" value="${dataFile}">
 		        </td>         
 		    </tr>
-		    <c:if test="${failedFileUpload == 'true'}">
+		    
 			    <tr style="padding: 5px">
-				    <td colspan="3" style="padding: 0px 0px 10px 0px">
+				    <td colspan="3" id="uploadError" class="errorMsg">
 				        <font color="red">Error uploading data file.  Check server log for details!</font>
 				    </td>
 			    </tr>
-		    </c:if>
-		    <c:if test="${missingFile == 'true'}">
+		    
+		    
+      
                 <tr style="padding: 5px">
-                    <td colspan="3" style="padding: 0px 0px 10px 0px">
-                        <font color="red">Please specify a file.</font>
-                    </td>
-                </tr>
-            </c:if>
-            <c:if test="${incorrectExtension == 'true'}">
-                <tr style="padding: 5px">
-                    <td colspan="3" style="padding: 0px 0px 10px 0px">
+                    <td colspan="3" id="incorrectExtension" class="errorMsg">
                         <font color="red">Incorrect file extension found.  Only .csv is allowed.</font>
                     </td>
                 </tr>
-            </c:if>
+            
+            <tr>
+            	<td colspan="3">
+	            	<div class="progress-label">Starting import...</div>
+					<div id="progressbar"></div>
+				</td>
+            </tr>
             
 		    <tr style="padding: 5px">
 		        <td colspan="3" align="center"><hr size="3" color="black"/></td>
@@ -58,12 +66,14 @@
 		           <input type="reset" name="Clear" value="Clear" style="width:70px">
 		       </td>
 		       <td align="right">
-		          <input type="Submit" name="Next" value="Next" style="width:70px">&nbsp;
-		           <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel()" style="width:70px">
+		          <input type="button" name="import" id="import" value="Import" onclick="validateSelected();" style="width:70px">&nbsp;
+		           <input type="button" name="Cancel" value="Cancel" onclick="confirmCancel();" style="width:70px">
 		       </td>
 		    </tr>
 		</table>
 		</form>
     </body>
+    
+    <script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/importConceptsFromFile.js"></script>
 </html>
 <%@ include file="/WEB-INF/template/footer.jsp"%>
