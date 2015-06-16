@@ -3,7 +3,6 @@
  */
 package org.openmrs.module.atd.action;
 
-import java.awt.print.PrinterException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -308,7 +307,7 @@ public class ProduceFormInstance implements ProcessStateAction
 		}
 		
 		try {
-	        PrintServices.printPDFFile(printerName, formToPrint);
+	        PrintServices.printPDFFileAsynchronous(printerName, formToPrint);
         }
         catch (IllegalArgumentException e) {
 	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
