@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.print.PrintException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
@@ -309,12 +307,9 @@ public class ProduceFormInstance implements ProcessStateAction
 		}
 		
 		try {
-	        PrintServices.printFile(printerName, formToPrint);
+	        PrintServices.printPDFFileAsynchronous(printerName, formToPrint);
         }
-        catch (IOException e) {
-	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
-        }
-        catch (PrintException e) {
+        catch (IllegalArgumentException e) {
 	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
         }
 	}
