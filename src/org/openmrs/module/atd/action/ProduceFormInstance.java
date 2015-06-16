@@ -310,10 +310,7 @@ public class ProduceFormInstance implements ProcessStateAction
 		try {
 	        PrintServices.printPDFFile(printerName, formToPrint);
         }
-        catch (IOException e) {
-	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
-        }
-        catch (PrinterException e) {
+        catch (IllegalArgumentException e) {
 	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
         }
 	}
