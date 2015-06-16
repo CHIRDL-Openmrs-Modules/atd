@@ -3,10 +3,13 @@ package org.openmrs.module.atd.service;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openmrs.Form;
 import org.openmrs.FormField;
@@ -20,6 +23,8 @@ import org.openmrs.module.atd.TeleformFileState;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
@@ -205,4 +210,67 @@ public interface ATDService
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
+
+	/**
+	 * Get all concept information in system as list of ConceptDescriptor
+	 * @return A list of ConceptDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException;
+	
+	/**
+	 * Get all form definition in system as list of FormDefinitionDescriptor
+	 * @return A list of FormDefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException;
+	
+	/**
+	 * get the form definition in database with the form that has id as formId. 
+	 * @param form id
+	 * @return A list of DefinitionDescriptor objects
+	 * @throws SQLException
+	 */
+	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException;
+	
+	/**
+	 * DWE CHICA-332 4/16/15
+	 * 
+	 * Given a formId, return a HashMap containing location ids and location tag ids
+	 * key: locationId, value: list of location tag ids
+	 * 
+	 * @param formId
+	 * @return the HashMap
+	 */
+	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
+	
+	/**
+	 * DWE CHICA-330 4/22/15 
+	 * 
+	 * Return concepts to populate data table, start and length parameters are used for paging
+	 * 
+	 * @param start - page number
+	 * @param length - number of rows to display in the data table
+	 * @param searchValue - search by concept name
+	 * @param includeRetired - flag to include retired concepts
+	 * @param conceptClassId - filter by concept class
+	 * @param orderByColumn - order by column
+	 * @param ascDesc - order by ASC or DESC
+	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
+	 * @return
+	 */
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch);
+	
+	/**
+	 * DWE CHICA-330 4/23/15 
+	 * 
+	 * Used for jquery data table server-side processing to return a count of Concept records with filter applied
+	 * 
+	 * @param searchValue - pass in an empty string to return the count without the filter
+	 * @param includeRetired - flag to include retired concepts
+	 * @param conceptClassId - filter by concept class
+	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
+	 * @return the total number of concept records
+	 */
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch);
 }

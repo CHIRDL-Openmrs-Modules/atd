@@ -89,14 +89,14 @@ public class ImportConceptsUtil {
 				newConcept.setDatatype(conceptDatatype);
 				newConcept.setDateCreated(new java.util.Date());
 				ConceptDescription conceptDescription = new ConceptDescription();
-				conceptDescription.setDescription(currTerm.getDescription());
+				conceptDescription.setDescription(currTerm.getDescription().replace(Util.ESCAPE_BACKSLASH, "\\")); // DWE CHICA-330 Replace special character that was escaped during the export
 				conceptDescription.setLocale(new Locale("en"));
 				newConcept.addDescription(conceptDescription);
 				conceptDescriptorsToLink.add(currTerm);
 				Concept concept = conceptService.getConceptByName(conceptName.getName());
 				
 				if (concept != null) {
-					currTerm.setConcept(concept);
+					currTerm.setConceptId(concept.getConceptId());
 					log.error("Could not create concept: " + conceptName.getName() + ". It already exists.");
 					
 					//update the description, units, or class if they have changed
@@ -130,10 +130,9 @@ public class ImportConceptsUtil {
 					
 					conceptService.saveConcept(concept);
 					continue;
-				}else{				
+				}else{			
 					conceptService.saveConcept(newConcept);
-					currTerm.setConcept(newConcept);
-				
+					currTerm.setConceptId(newConcept.getConceptId());
 					conceptsCreated++;
 				}
 				
