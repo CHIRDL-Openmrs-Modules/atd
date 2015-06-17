@@ -9,10 +9,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.openmrs.Form;
 import org.openmrs.FormField;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.APIException;
@@ -273,4 +272,16 @@ public interface ATDService
 	 * @return the total number of concept records
 	 */
 	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch);
+
+	/**
+     * DWE CHICA-437 
+     * Gets a list of obs records where there is a related atd_statistics record with the formFieldId
+     * 
+     * @param encounterId
+     * @param conceptId
+     * @param formFieldId
+     * @param includeVoidedObs
+     * @return
+     */
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs);
 }

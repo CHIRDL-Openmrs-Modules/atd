@@ -27,7 +27,7 @@
 		<property name="ageAtVisit" type="java.lang.String" column="age_at_visit" />
 		<property name="locationTagId" type="java.lang.Integer" column="location_tag_id" />
 		<property name="locationId" type="java.lang.Integer" column="location_id" />
-		
+		<property name="formFieldId" type="java.lang.Integer" column="form_field_id" />
 	</class>
 	
 </hibernate-mapping>

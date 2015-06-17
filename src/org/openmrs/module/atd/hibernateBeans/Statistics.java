@@ -28,6 +28,7 @@ public class Statistics implements java.io.Serializable {
 	private String ageAtVisit=null;
 	private Integer locationTagId = null;
 	private Integer locationId = null;
+	private Integer formFieldId = null; // DWE CHICA-437
 	
 	// Constructors
 
@@ -53,6 +54,7 @@ public class Statistics implements java.io.Serializable {
 		this.languageResponse = stat.getLanguageResponse();
 		this.ageAtVisit = stat.getAgeAtVisit();
 		this.locationId = stat.getLocationId();
+		this.formFieldId = stat.getFormFieldId();
 	}
 
 	public Integer getStatisticsId()
@@ -223,5 +225,24 @@ public class Statistics implements java.io.Serializable {
 	public void setLocationId(Integer locationId)
 	{
 		this.locationId = locationId;
+	}
+	
+	/**
+	 * DWE CHICA-437
+	 * @return the formFieldId that this statistic was created for
+	 */
+	public Integer getFormFieldId()
+	{
+		return this.formFieldId;
+	}
+	
+	/**
+	 * DWE CHICA-437
+	 * Set the formFieldId that this statistic is for
+	 * @param formFieldId
+	 */
+	public void setFormFieldId(Integer formFieldId)
+	{
+		this.formFieldId = formFieldId;
 	}
 }

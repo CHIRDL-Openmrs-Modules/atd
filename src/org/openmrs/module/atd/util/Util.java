@@ -86,9 +86,22 @@ public class Util {
 		return maxDssElements;
 	}
 	
+	/**
+	 * 
+	 * @param patient
+	 * @param currConcept
+	 * @param encounterId
+	 * @param value
+	 * @param formInstance
+	 * @param ruleId
+	 * @param locationTagId
+	 * @param usePrintedTimestamp
+	 * @param formFieldId - DWE CHICA-437 the form field id, pass null if the id is not available
+	 * @return
+	 */
 	public static Obs saveObsWithStatistics(Patient patient, Concept currConcept, int encounterId, String value,
 	                                         FormInstance formInstance, Integer ruleId, Integer locationTagId,
-	                                         boolean usePrintedTimestamp) {
+	                                         boolean usePrintedTimestamp, Integer formFieldId) {
 		
 		String formName = null;
 		if (formInstance != null) {
@@ -153,10 +166,12 @@ public class Util {
 					
 					if (stat.getObsvId() == null) {
 						stat.setObsvId(obsId);
+						stat.setFormFieldId(formFieldId);
 						atdService.updateStatistics(stat);
 					} else {
 						stat = new Statistics(stat);
 						stat.setObsvId(obsId);
+						stat.setFormFieldId(formFieldId);
 						atdService.createStatistics(stat);
 					}
 				}
@@ -173,6 +188,7 @@ public class Util {
 				stat.setPatientId(patient.getPatientId());
 				stat.setRuleId(ruleId);
 				stat.setLocationId(locationId);
+				stat.setFormFieldId(formFieldId);
 				if (statistics != null && statistics.size() > 0) {
 					Statistics oldStat = statistics.get(0);
 					stat.setPrintedTimestamp(oldStat.getPrintedTimestamp());

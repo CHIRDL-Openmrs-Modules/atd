@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +26,7 @@ import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Location;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.APIException;
@@ -1013,4 +1013,13 @@ public class ATDServiceImpl implements ATDService
 	{
 		return this.dao.getCountConcepts(searchValue, includeRetired, conceptClassId, exactMatchSearch);
 	}
+	
+	/**
+     * DWE CHICA-437
+     * @see org.openmrs.module.atd.service.ATDService#getObsWithStatistics(Integer, Integer, Integer, boolean)
+     */
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    {
+    	return getATDDAO().getObsWithStatistics(encounterId, conceptId, formFieldId, includeVoidedObs);
+    }
 }
