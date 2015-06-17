@@ -141,7 +141,14 @@
 		<file>messages.properties</file>
 	</messages>
 	<!-- /Internationalization -->
-	
+
+    <!-- Servlets -->
+    <!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> -->
+    <servlet>
+        <servlet-name>exportConceptServlet</servlet-name>
+        <servlet-class>@MODULE_PACKAGE@.web.ExportConceptServlet</servlet-class>
+    </servlet>
+    
 	<mappingFiles>
 	patient_atd.hbm.xml
 	statistics.hbm.xml
