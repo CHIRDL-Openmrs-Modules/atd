@@ -7,6 +7,7 @@ var checkProgressTimer;
 var ajaxURL = '/openmrs/moduleServlet/atd/importConceptsFromFile';
 var changeEventText = 'Import Progress: ';
 var completeEventText = 'Import Complete!';
+var canceledEventText = 'Import Canceled: ';
 
 
     $j(function(){
@@ -93,7 +94,7 @@ var completeEventText = 'Import Complete!';
 				}
 				else
 				{
-					if(data.isComplete)
+					if(data.isComplete && !data.isImportCancelled)
 					{
 						// Set the progress bar to the max value in case not all concepts were imported so that the complete event will be triggered
 						progressbar.progressbar("value", progressbar.progressbar("option", "max"));
@@ -104,6 +105,11 @@ var completeEventText = 'Import Complete!';
 						{
 							displayError("The import is complete, but one or more errors occurred. Check the server log for details.")
 						}
+					}
+					else if(data.isComplete && data.isImportCancelled)
+					{
+						progressLabel.text(canceledEventText + data.currentRow + " of " + progressbar.progressbar("option", "max"));
+						clearTimeout(checkProgressTimer);
 					}
 					else
 					{
