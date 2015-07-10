@@ -86,6 +86,6 @@
 	<classpathentry kind="lib" path="lib-common/dss-2.29.1.jar"/>
 	<classpathentry kind="lib" path="lib-common/itextpdf-5.1.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.2.0.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutil-1.8.2.jar"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutil-1.8.4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
