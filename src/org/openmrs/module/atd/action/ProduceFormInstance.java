@@ -267,7 +267,7 @@ public class ProduceFormInstance implements ProcessStateAction
 		}
 		
 		if (Boolean.TRUE == autoPrint && pdfFile != null && pdfFile.exists()) {
-			autoPrintForm(formId, locationId, locationTagId, pdfFile, formName);
+			autoPrintForm(formId, locationId, locationTagId, pdfFile);
 		}
 	}
 	
@@ -278,9 +278,8 @@ public class ProduceFormInstance implements ProcessStateAction
 	 * @param locationId The location identifier.
 	 * @param locationTagId The location tag identifier.
 	 * @param formToPrint The form to print.
-	 * @param formName The name of the form to print
 	 */
-	protected void autoPrintForm (Integer formId, Integer locationId, Integer locationTagId, File formToPrint, String formName) {
+	protected void autoPrintForm (Integer formId, Integer locationId, Integer locationTagId, File formToPrint) {
 		String printerName = null;
 		FormAttributeValue altPrinterVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
 			formId, ChirdlUtilConstants.FORM_ATTR_USE_ALTERNATE_PRINTER, locationTagId, locationId);
@@ -308,7 +307,7 @@ public class ProduceFormInstance implements ProcessStateAction
 		}
 		
 		try {
-	        PrintServices.printPDFFileAsynchronous(printerName, formName, formToPrint);
+	        PrintServices.printPDFFileAsynchronous(printerName, formToPrint);
         }
         catch (IllegalArgumentException e) {
 	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
