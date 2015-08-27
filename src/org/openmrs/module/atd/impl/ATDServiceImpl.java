@@ -25,6 +25,7 @@ import org.openmrs.FieldType;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Location;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.APIException;
@@ -248,11 +249,13 @@ public class ATDServiceImpl implements ATDService
 				}
 			}
 			String lookupFieldName = null;
-			
+			Integer formFieldId = null; // DWE CHICA-437 Get the form field id here so that it can be used to determine if obs records should be voided when rules are evaluated
 			if(parentField != null){
 				lookupFieldName = parentField.getField().getName();
+				formFieldId = parentField.getFormFieldId();
 			}else{
 				lookupFieldName = fieldName;
+				formFieldId = currField.getFormFieldId();
 			}
 			if(ruleName != null)
 			{
@@ -322,6 +325,12 @@ public class ATDServiceImpl implements ATDService
 			if(fieldName != null)
 			{
 				parameters.put("fieldName", lookupFieldName);
+			}
+			
+			// DWE CHICA-437 
+			if(formFieldId != null)
+			{
+				parameters.put("formFieldId", formFieldId);
 			}
 			//----------end set rule parameters
 		}
@@ -965,5 +974,14 @@ public class ATDServiceImpl implements ATDService
 	 */
     public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
+    }
+    
+    /**
+     * DWE CHICA-437
+     * @see org.openmrs.module.atd.service.ATDService#getObsWithStatistics(Integer, Integer, Integer, boolean)
+     */
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    {
+    	return getATDDAO().getObsWithStatistics(encounterId, conceptId, formFieldId, includeVoidedObs);
     }
 }

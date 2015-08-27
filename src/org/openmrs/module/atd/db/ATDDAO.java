@@ -3,6 +3,7 @@ package org.openmrs.module.atd.db;
 import java.util.Date;
 import java.util.List;
 
+import org.openmrs.Obs;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.atd.FormPrinterConfig;
@@ -122,4 +123,16 @@ public interface ATDDAO {
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
+	
+	/**
+     * DWE CHICA-437 
+     * Gets a list of obs records where there is a related atd_statistics record with the formFieldId
+     * 
+     * @param encounterId
+     * @param conceptId
+     * @param formFieldId
+     * @param includeVoidedObs
+     * @return
+     */
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs);
 }

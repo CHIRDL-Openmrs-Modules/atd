@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -16,6 +17,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
+import org.openmrs.Obs;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
@@ -1238,5 +1240,43 @@ public class HibernateATDDAO implements ATDDAO
 			this.log.error(Util.getStackTrace(e));
 		}
 		return new ArrayList<PSFQuestionAnswer>();
+    }
+    
+    /**
+     * DWE CHICA-437 
+     * Gets a list of obs records where there is a related atd_statistics record with the formFieldId
+     * 
+     * @param encounterId
+     * @param conceptId
+     * @param formFieldId
+     * @param includeVoidedObs
+     * @return
+     */
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    {
+    	String voidedString = "";
+    	if(!includeVoidedObs)
+    	{
+    		voidedString = " and a.voided=false";
+    	}
+    	
+		try
+		{
+			String sql = "select a.* from obs a "+
+				"inner join atd_statistics b on a.obs_id=b.obsv_id "+
+				"where a.encounter_id=? and a.concept_id=? and b.form_field_id=?" + voidedString;
+			SQLQuery qry = this.sessionFactory.getCurrentSession()
+					.createSQLQuery(sql);
+			qry.setInteger(0, encounterId);
+			qry.setInteger(1, conceptId);
+			qry.setInteger(2, formFieldId);
+			qry.addEntity(Obs.class);
+			return qry.list();
+		} 
+		catch (Exception e)
+		{
+			this.log.error(Util.getStackTrace(e));
+			return new ArrayList<Obs>();
+		}
     }
 }
