@@ -3,6 +3,7 @@ package org.openmrs.module.atd.ruleLibrary;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmrs.Concept;
 import org.openmrs.Patient;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
@@ -119,6 +120,9 @@ public class consumeNoTest implements Rule
 				answer = "yes";
 			}
 			
+			// DWE CHICA-430 Allow the checkbox to be unchecked by voiding the obs for this concept
+			Concept concept = conceptService.getConceptByName(conceptName);
+			org.openmrs.module.atd.util.Util.voidObsForConcept(concept, encounterId);
 			
 			if(answer != null){
 				org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, conceptService.getConceptByName(conceptName),
