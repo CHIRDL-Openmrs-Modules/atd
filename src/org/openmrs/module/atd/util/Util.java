@@ -71,6 +71,7 @@ public class Util {
 	
 	private static Log log = LogFactory.getLog(Util.class);
 	protected static final String ESCAPE_BACKSLASH = "&#092";
+	protected static final String ESCAPE_BACKSLASH_EXPORT = "\\\\";
 	
 	public static int getMaxDssElements(Integer formId, Integer locationTagId, Integer locationId) {
 		String propertyValue = null;
@@ -512,7 +513,7 @@ public class Util {
 				item[1] = favd.getLocationName();
 				item[2] = favd.getLocationTagName();  
 				item[3] = favd.getAttributeName();
-				item[4] = favd.getAttributeValue();
+				item[4] = favd.getAttributeValue().replace("\\", ESCAPE_BACKSLASH_EXPORT);
 				csvWriter.writeNext(item);
 			}
 			csvWriter.close();

@@ -36,6 +36,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
+	protected static final String ESCAPE_BACKSLASH = "\\\\";
 
 
 	@Override
@@ -182,6 +183,10 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 					for(FormAttribute efa: editableFormAttributes){
 						FormAttributeValue theValue = cubService.getFormAttributeValue(iFormId, efa.getName(), tag.getId(), currLoc.getId());
 						//formAttributesValueMap key is ids of formAttributeValue, Location, locationTag
+						if(theValue != null && theValue.getValue() != null)
+						{
+							theValue.setValue(theValue.getValue().replace("\\", ESCAPE_BACKSLASH));
+						}
 						formAttributesValueMap.put(efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId(), theValue);
 					}
 				}
@@ -194,7 +199,13 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		//get attribute value enumeration info for each attribute
 		Map<String, List<String>> formAttributesValueEnumMap = new HashMap<String, List<String>>();
 		for(FormAttribute efa: editableFormAttributes){
-			formAttributesValueEnumMap.put(efa.getFormAttributeId().toString(), cubService.getCurrentFormAttributeValueStrCollection(efa));
+			List<String> valueList = cubService.getCurrentFormAttributeValueStrCollection(efa);
+			for(int i = 0; i <= valueList.size() -1; i++)
+			{
+				String temp = valueList.get(i);
+				valueList.set(i, temp.replace("\\", ESCAPE_BACKSLASH));
+			}
+			formAttributesValueEnumMap.put(efa.getFormAttributeId().toString(), valueList);
 		}
 		return formAttributesValueEnumMap;
 	}

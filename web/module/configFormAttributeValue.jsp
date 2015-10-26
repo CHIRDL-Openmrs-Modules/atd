@@ -51,7 +51,7 @@
 		</script>
 		<c:set var="formAttributeId">${fa.formAttributeId}</c:set>
 		<c:set var="valueEnumList" value="${formAttributesValueEnumMap[formAttributeId]}" />
-		
+
 		<div>
 			<table>
 			
@@ -69,7 +69,7 @@
 				<!-- DESCRIPTION OF THE ATTRIBUTE -->
             <tr>
                  <td>
-                     <div id="div_formAttribute_Description_${fa.formAttributeId}">
+                     <div id="div_description_formAttribute_${fa.formAttributeId}">
                          <table style="width:500px">
                              <tr style="padding-left: 15px;">
                                  <td>
@@ -176,7 +176,7 @@
 								                        dataSource: [
 								                                <c:if test = "${not empty valueEnumList}">
 								                                	<c:forEach items = "${valueEnumList}" var = "enumStr" varStatus="comboxStatus">
-								                                		{text: "${enumStr}" , value: "${enumStr}"},
+								                                		{text: "{enumStr}" , value: "{enumStr}"},
 								                                	</c:forEach>
 								                                </c:if>
 								                        ],
