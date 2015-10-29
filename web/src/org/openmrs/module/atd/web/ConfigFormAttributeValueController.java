@@ -81,11 +81,8 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 					String inputName = "inpt_" + fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
 					String favId = fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
 					String feedbackValueStr = request.getParameter(inputName);
-					if (feedbackValueStr != null && !feedbackValueStr.equals("")) {
-						if (!feedbackValueStr.equals(formAttributesValueMap.get(favId))) {
-							log.info(fa.getFormAttributeId() + " " + currLoc.getLocationId() + " " + tag.getLocationTagId() + "  value is: " + feedbackValueStr);
-						}
-						cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackValueStr);
+					if (feedbackValueStr != null && !feedbackValueStr.equals("")) {						
+						cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackValueStr.replace(ESCAPE_BACKSLASH, "\\"));
 					} else {
 						FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId());
 						if (currentStoredValue != null && !currentStoredValue.equals("")) {
