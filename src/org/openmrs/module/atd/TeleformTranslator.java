@@ -791,7 +791,9 @@ public class TeleformTranslator
 	 * @return String representing the result object provided.
 	 */
 	private String getResultString(Result result) {
-		if (result.size() < 1) {
+		if (result == null) {
+			return "";
+		} else if (result.size() < 1) {
 			return result.toString();
 		}
 		
