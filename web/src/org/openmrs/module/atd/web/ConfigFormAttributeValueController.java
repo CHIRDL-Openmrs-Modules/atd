@@ -1,5 +1,6 @@
 package org.openmrs.module.atd.web;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,15 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
-import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
@@ -36,7 +35,6 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
-	protected static final String ESCAPE_BACKSLASH = "\\\\";
 
 
 	@Override
@@ -73,6 +71,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		configPositionInfo(locationsList, locationsIdSet, locationTagsMap, request);
 		//get editable attribute
 		List<FormAttribute> editableFormAttributes = getEditableFormAttributes();
+		
 		Map<String, Object> formAttributesValueMap=getFormAttributesValueMap(locationsList,locationTagsMap, editableFormAttributes,iFormId, request,cubService);
 		for (FormAttribute fa: editableFormAttributes){
 			/*for storing values with each position */
@@ -81,14 +80,19 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 					String inputName = "inpt_" + fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
 					String favId = fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
 					String feedbackValueStr = request.getParameter(inputName);
-					if (feedbackValueStr != null && !feedbackValueStr.equals("")) {						
-						cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackValueStr.replace(ESCAPE_BACKSLASH, "\\"));
-					} else {
-						FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId());
-						if (currentStoredValue != null && !currentStoredValue.equals("")) {
-							cubService.deleteFormAttributeValue((FormAttributeValue) currentStoredValue);
-						}
-					}
+					if (feedbackValueStr != null){
+						FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(favId);
+						if(currentStoredValue == null || (currentStoredValue != null && !feedbackValueStr.equals(currentStoredValue.getValue()))){
+							cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackValueStr);
+						}					
+					} //else {
+						// DWE CHICA-596 Commenting this out, but leaving this here 
+						// in case we decide it is necessary to delete records when the user leaves the value empty
+						//FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId());
+						//if (currentStoredValue != null && !currentStoredValue.getValue().equals("")) {
+							//cubService.deleteFormAttributeValue((FormAttributeValue) currentStoredValue);
+						//}
+					//}
 				}
 			}
 		}
@@ -141,23 +145,33 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		//get editable attribute
 		List<FormAttribute> editableFormAttributes = getEditableFormAttributes();
 		
-		//get current attributes value info for each position and attributes
+		//get current attributes value info for each position and attributes 
 		Map<String, Object> formAttributesValueMap = getFormAttributesValueMap(locationsList,locationTagsMap, editableFormAttributes,iFormId, request,cubService);
-
+	
 		//get attribute value enumeration info for each attribute
-		Map<String, List<String>> formAttributesValueEnumMap = getFormAttributesValueEnumMap(editableFormAttributes,cubService);
 		String[] positionStrs = request.getParameterValues("positions");
 		
 		map.put("positionStrs", positionStrs);
 		map.put("locationsList", locationsList);
 		map.put("locationTagsMap", locationTagsMap);
-		map.put("formAttributesValueEnumMap", formAttributesValueEnumMap);
 		map.put("editableFormAttributes", editableFormAttributes);
 		map.put("formAttributesValueMap", formAttributesValueMap);
 		map.put("formId", formId);
 		map.put("selectedFormName", request.getParameter("selectedFormName"));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
 		map.put("successViewName", request.getParameter("successViewName")); // Success view will depend on which page the user came from
+		
+		// DWE CHICA-596 Added logging so that we know what is sent back to the client
+		// Trying to track down why the page does not display any of the existing values in production
+		try{
+		StringWriter w = new StringWriter();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValue(w, formAttributesValueMap);
+		log.info("Edit form attribute values: " + w.toString());
+		}catch(Exception e){
+			log.error("Error logging form attribute values map.", e);
+		}
+		
 		return map;
 	}
 	
@@ -180,10 +194,6 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 					for(FormAttribute efa: editableFormAttributes){
 						FormAttributeValue theValue = cubService.getFormAttributeValue(iFormId, efa.getName(), tag.getId(), currLoc.getId());
 						//formAttributesValueMap key is ids of formAttributeValue, Location, locationTag
-						if(theValue != null && theValue.getValue() != null)
-						{
-							theValue.setValue(theValue.getValue().replace("\\", ESCAPE_BACKSLASH));
-						}
 						formAttributesValueMap.put(efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId(), theValue);
 					}
 				}
@@ -197,11 +207,6 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		Map<String, List<String>> formAttributesValueEnumMap = new HashMap<String, List<String>>();
 		for(FormAttribute efa: editableFormAttributes){
 			List<String> valueList = cubService.getCurrentFormAttributeValueStrCollection(efa);
-			for(int i = 0; i <= valueList.size() -1; i++)
-			{
-				String temp = valueList.get(i);
-				valueList.set(i, temp.replace("\\", ESCAPE_BACKSLASH));
-			}
 			formAttributesValueEnumMap.put(efa.getFormAttributeId().toString(), valueList);
 		}
 		return formAttributesValueEnumMap;
