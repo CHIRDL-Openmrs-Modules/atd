@@ -7,7 +7,6 @@
 <%@ page import="java.util.*"%>
 <%@ page
 	import="org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue"%>
-<%@ page import="org.openmrs.module.atd.util.Util"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
@@ -98,7 +97,7 @@
 								<tr>
 								<td align="right">
 									<div class="${className } div_table">
-										<table class="">
+										<table>
 											<c:forEach items="${locationTagsMap[currLoc.id]}" var="lTag"
 												varStatus="tagStatus">
 												<c:set var="theId"
