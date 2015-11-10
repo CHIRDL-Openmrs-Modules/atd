@@ -73,7 +73,23 @@
                      </div>
                  </td>
             </tr>
-							
+            
+            <!-- APPLY TO ALL LOCATIONS FOR THIS ATTRIBUTE -->
+            
+            <tr>
+            	<td>
+            		<table class="tableApplyToAllLocations" id="div_formAttribute_${fa.formAttributeId}">
+            			<tr>
+            			<td class="locationText">Apply to all locations and tags&nbsp;<input type="text"
+								name="inpt_${fa.formAttributeId}#$#ALL#$#ALL"
+								id="inpt_${fa.formAttributeId}_ALL_ALL"
+								onchange="assignValueSubClass('inpt_${fa.formAttributeId}_ALL_ALL')" size="40"/>
+							</td>
+            			</tr>
+            		</table>
+            	</td>
+            </tr>
+            	
 			<!-- VALUE FOR LOCATIONS AND TAGS FOR THIS ATTRIBUTE  -->			
 							<tr>
 							<td>
@@ -98,6 +114,14 @@
 								<td align="right">
 									<div class="${className } div_table">
 										<table>
+										<tr style="padding: 5px">
+												<td class="locationText" align="right">Apply to all location tags
+													at ${currLoc.name}</td>
+												<td align="right"><input type="text"
+													id="${allInptId}" class="${fa.formAttributeId} ALL"
+													onchange="assignValueAll('${allInptId}'); removeValueSuper('${allInptId}')" size="40"/>
+												</td>
+											</tr>
 											<c:forEach items="${locationTagsMap[currLoc.id]}" var="lTag"
 												varStatus="tagStatus">
 												<c:set var="theId"
@@ -115,7 +139,10 @@
 														${currLoc.name}:</td>
 													<td align="right" style="padding: 0px 0px 10px 0px"><input type="text"
 														name="inpt_${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}"
-														value="${currentValueStr}" id="${inptId}" size="40" />
+														value="${currentValueStr}" id="${inptId}" size="40" 
+														class="${fa.formAttributeId} ${currLoc.id}"
+														onchange="removeValueSuper('${inptId}')"
+														/>
 													</td>
 												</tr>
 												

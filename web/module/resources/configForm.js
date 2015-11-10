@@ -36,6 +36,43 @@ function jqSelector(str) {
 	return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
 }
 
+function assignValueAll(inpt_id) {
+	var idContent = inpt_id.split("_");
+	var attributeId = idContent[1];
+	var locationId = idContent[2];
+	var value = $("#" + inpt_id).val();
+	if (value != null && value != "") {
+		if (locationId != "ALL") {
+			var inputBoxes = document.getElementsByClassName(attributeId + " "
+					+ locationId);
+			for (var i = 0; i < inputBoxes.length; i++) {
+				if (inputBoxes[i].id != null) {
+					var subInput = $("#" + inputBoxes[i].id);
+					if (subInput != null) {
+						subInput.val(value);
+					}
+				}
+			}
+		} else {
+			var inputBoxes = document.getElementsByClassName(attributeId);
+			for (var i = 0; i < inputBoxes.length; i++) {
+				inputBoxes[i].value = value;
+			}
+		}
+	}
+}
+
+function removeValueSuper(inpt_id) {
+	var idContent = inpt_id.split("_");
+	var attributeId = idContent[1];
+	var locationId = idContent[2];
+	var superClass = $("#inpt_" + attributeId + "_" + locationId + "_ALL");
+	var superSuperClass = $("#inpt_" + attributeId + "_" + "ALL_ALL");
+	superClass.val("");
+	superSuperClass.val("");
+}
+
+//This is the old code for use with the kendo combobox
 function assignValueSubClass(inpt_id) {
 	var idContent = inpt_id.split("_");
 	var attributeId = idContent[1];
@@ -65,6 +102,7 @@ function assignValueSubClass(inpt_id) {
 	thisComboBox.text(value);
 }
 
+// This is the old code for use with the kendo combobox
 function removeValueSuperClass(inpt_id) {
 	var idContent = inpt_id.split("_");
 	var attributeId = idContent[1];
