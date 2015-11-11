@@ -80,19 +80,18 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 					String inputName = "inpt_" + fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
 					String favId = fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
 					String feedbackValueStr = request.getParameter(inputName);
-					if (feedbackValueStr != null){
+					if (feedbackValueStr != null && !feedbackValueStr.equals("")){ 
 						FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(favId);
 						if(currentStoredValue == null || (currentStoredValue != null && !feedbackValueStr.equals(currentStoredValue.getValue()))){
 							cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackValueStr);
 						}					
-					} //else {
-						// DWE CHICA-596 Commenting this out, but leaving this here 
-						// in case we decide it is necessary to delete records when the user leaves the value empty
-						//FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId());
-						//if (currentStoredValue != null && !currentStoredValue.getValue().equals("")) {
-							//cubService.deleteFormAttributeValue((FormAttributeValue) currentStoredValue);
-						//}
-					//}
+					} else {
+						// We need to delete form attribute value records if the value from the UI is null or empty 					
+						FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId());
+						if (currentStoredValue != null && !currentStoredValue.getValue().equals("")) {
+							cubService.deleteFormAttributeValue((FormAttributeValue) currentStoredValue);
+						}
+					}
 				}
 			}
 		}
