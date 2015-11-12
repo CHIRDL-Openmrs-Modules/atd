@@ -105,7 +105,7 @@
     <bean id="configForm" class="@MODULE_PACKAGE@.web.ConfigFormController">
         <property name="commandName"><value>configFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/configForm</value></property>
-        <property name="successView"><value>configFormAttributeValue.form</value></property>
+        <property name="successView"><value>mlmForm.form</value></property>
     </bean> 
     
     <bean id="configFormAttributeValue" class="@MODULE_PACKAGE@.web.ConfigFormAttributeValueController">
@@ -138,7 +138,7 @@
     <bean id="replaceFormFields" class="@MODULE_PACKAGE@.web.ReplaceFormFieldsController">
         <property name="commandName"><value>replaceFormFieldsObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/replaceFormFields</value></property>
-        <property name="successView"><value>configFormAttributeValue.form</value></property>
+        <property name="successView"><value>replaceRetireForm.form</value></property>
     </bean>
     <bean id="replaceRetireForm" class="@MODULE_PACKAGE@.web.ReplaceRetireFormController">
         <property name="commandName"><value>replaceRetireFormObject</value></property>
