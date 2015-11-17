@@ -26,11 +26,11 @@
         }
     }
 // End </script>
-<p>
-<h3>Populate Form Fields:</h3>
-</p>
+
 <form id="input" method="post" action="popFormFields.form">
-<p>Fields for form ${form.name}: </p>
+<p>
+<h3>Populate Form Fields (${form.name})</h3>
+</p>
 <p><font color="red"><b>Caution</b></font>: Data for the fields below are pre-populated by the Configuration Manager for convenience.  Please verify all data is correct before proceeding.</p>
 <input type="hidden" name="processFields" value="true" /> <input
 	type="hidden" name="formToEdit" value="${form.formId}" />
@@ -114,6 +114,7 @@ selected
 <input type="hidden" name="formId" value="${formId}" /> 
 <input type="hidden" name="formName" value="${formName}" />
 <input type="hidden" id="cancelProcess" name="cancelProcess" value="false" />
+<input type="hidden" name="selectedFormName" value="${formName}" />
 </form>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

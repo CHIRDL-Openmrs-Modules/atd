@@ -50,6 +50,7 @@ public class FormWriter implements ChirdlRunnable {
 	private FormInstance formInstance;
 	private Integer locationTagId;
 	private List<Field> fieldsToAdd;
+	private List<String> fieldsToRemove; // DWE CHICA-430
 	
 	/**
 	 * Constructor method.
@@ -57,11 +58,13 @@ public class FormWriter implements ChirdlRunnable {
 	 * @param formInstance FormInstance object containing form ID, location ID, and form instance ID.
 	 * @param locationTagId The location tag ID.
 	 * @param fieldsToAdd The fields to add to the scan XML file.
+	 * @param fieldsToRemove - DWE CHICA-430 The fields to remove from the scan XML file.
 	 */
-	public FormWriter(FormInstance formInstance, Integer locationTagId, List<Field> fieldsToAdd) {
+	public FormWriter(FormInstance formInstance, Integer locationTagId, List<Field> fieldsToAdd, List<String> fieldsToRemove) {
 		this.formInstance = formInstance;
 		this.locationTagId = locationTagId;
 		this.fieldsToAdd = fieldsToAdd;
+		this.fieldsToRemove = fieldsToRemove;
 	}
 	
 	/**
@@ -90,7 +93,7 @@ public class FormWriter implements ChirdlRunnable {
 			Records records = null;
 			if (file.exists()) {
 				records = parseTeleformXmlFormat(file);
-				records = addFields(records, fieldsToAdd);
+				records = addFields(records, fieldsToAdd, fieldsToRemove); // DWE CHICA-430 Added fieldsToRemove
 			} else {
 				Record record = new Record();
 				records = new Records(record);
@@ -131,9 +134,10 @@ public class FormWriter implements ChirdlRunnable {
 	 * 
 	 * @param records The Records object that the new fields will added/updated.
 	 * @param fields The fields to add or update.
+	 * @param fieldsToRemove - DWE CHICA-430 The fields to remove
 	 * @return A new Records object with the added/updated fields.
 	 */
-	private Records addFields(Records records, List<Field> fields) {
+	private Records addFields(Records records, List<Field> fields, List<String> fieldsToRemove) {
 		Map<String, Field> fieldIdToFieldMap = new HashMap<String, Field>();
 		Record record = records.getRecord();
 		if (record == null) {
@@ -148,7 +152,12 @@ public class FormWriter implements ChirdlRunnable {
 		// Index the current fields.
 		for (Field field : currentFields) {
 			String id = field.getId();
-			fieldIdToFieldMap.put(id, field);
+			// DWE CHICA-430 Check to see if the field is in the remove list, 
+			// don't add it to the map if it is in the remove list
+			if(!fieldsToRemove.contains(id))
+			{
+				fieldIdToFieldMap.put(id, field);
+			}
 		}
 		
 		// Add the new fields.  Replace the values of existing fields as needed.

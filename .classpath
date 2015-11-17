@@ -82,10 +82,12 @@
 	<classpathentry kind="lib" path="lib-common/web-openmrs-api-1.7.2.19959-dev.jar"/>
 	<classpathentry kind="lib" path="lib-common/zxing/zxing-core-2.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/zxing/zxing-javase-2.2.jar"/>
+	<classpathentry kind="lib" path="lib-common/json/jackson-core-asl-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/json/jackson-mapper-asl-1.5.0.jar"/>
 	<classpathentry kind="lib" path="lib-common/opencsv/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="lib-common/itextpdf-5.1.2.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutil-1.9.0.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib-common/dss-2.30.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutil-1.9.4.jar"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.4.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/dss-2.30.1.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
