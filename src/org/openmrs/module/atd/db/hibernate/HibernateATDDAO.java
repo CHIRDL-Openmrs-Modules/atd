@@ -2,11 +2,13 @@ package org.openmrs.module.atd.db.hibernate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -16,6 +18,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
+import org.openmrs.Obs;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
@@ -26,6 +29,8 @@ import org.openmrs.module.atd.db.ATDDAO;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
+import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
@@ -1238,5 +1243,411 @@ public class HibernateATDDAO implements ATDDAO
 			this.log.error(Util.getStackTrace(e));
 		}
 		return new ArrayList<PSFQuestionAnswer>();
+    }
+
+/**
+ * @see org.openmrs.module.atd.db.ATDDAO#getAllConcept()
+ */
+	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
+		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		String sql = "SELECT distinct a.*, b.name AS \"parent concept\""
+                   + "FROM    (SELECT a.name AS name,"
+                   + "                c.name AS \"concept class\","
+                   + "                d.name AS \"datatype\","
+                   + "                e.description AS description,"
+                   + "                g.concept_id,"
+                   + "                f.units AS units"
+                   + "           FROM concept_name a"
+                   + "                INNER JOIN concept b"
+                   + "                    ON a.concept_id = b.concept_id"
+                   + "                INNER JOIN concept_class c"
+                   + "                    ON b.class_id = c.concept_class_id"
+                   + "                INNER JOIN concept_datatype d"
+                   + "                    ON b.datatype_id = d.concept_datatype_id"
+                   + "                LEFT JOIN concept_description e"
+                   + "                    ON e.concept_id = b.concept_id"
+                   + "                LEFT JOIN concept_numeric f"
+                   + "                    ON f.concept_id = b.concept_id"
+                   + "                LEFT JOIN concept_answer g"
+                   + "                    ON g.answer_concept = b.concept_id) a"
+                   + "          LEFT JOIN"
+                   + "               concept_name b"
+                   + "               ON a.concept_id = b.concept_id";
+		try {
+			java.sql.Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				String name = rs.getString("name");
+				String conceptClass = rs.getString("concept class");
+				String dataType = rs.getString("datatype");
+				String description = rs.getString("description");
+				Integer conceptId = rs.getInt("concept_id");
+				String units = rs.getString("units");
+				String parentConcept = rs.getString("parent concept");
+				ConceptDescriptor cd = new ConceptDescriptor();
+				cd.setName(name);
+				cd.setConceptClass(conceptClass);
+				cd.setDatatype(dataType);
+				cd.setDescription(description);
+				cd.setUnits(units);
+				cd.setParentConcept(parentConcept);
+				cd.setConceptId(conceptId);
+				cdList.add(cd);
+			}
+		}finally{
+			con.close();
+			
+		}
+		
+		return cdList;
+	}
+	
+	/**
+	 *  @see org.openmrs.module.atd.db.ATDDAO#getAllFormDefinitions()
+	 */
+	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
+       + " INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id LEFT JOIN (SELECT b.*, a.name FROM    field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id WHERE a.retired = 0";
+		try {
+			java.sql.Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				String formName = rs.getString("form_name");
+				String formDescription = rs.getString("form_description");
+				String fieldName = rs.getString("field_name");
+				String fieldType = rs.getString("field_type");
+				String conceptName = rs.getString("concept_name");
+				String defaultValue = rs.getString("default_value");
+				int fieldNumber = rs.getInt("field_number");
+				String parentFieldName = rs.getString("parent_field_name");
+				FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
+				fdd.setFormName(formName);
+				fdd.setFormDescription(formDescription);
+				fdd.setFieldName(fieldName);
+				fdd.setFieldType(fieldType);
+				fdd.setConceptName(conceptName);
+				fdd.setDefaultValue(defaultValue);
+				fdd.setFieldNumber(fieldNumber);
+				fdd.setParentFieldName(parentFieldName);
+				fddList.add(fdd);
+			}
+		}finally{
+			con.close();
+		}
+		
+		return fddList;
+	}
+	/**
+	 * @see org.openmrs.module.atd.db.ATDDAO#getFormDefinition()
+	 */
+	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException{
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>(); 
+		Connection con = this.sessionFactory.getCurrentSession().connection();
+		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
+				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
+				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id IN (?)";
+		PreparedStatement ps = null;
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, formId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()){
+				String formName = rs.getString("form_name");
+				String formDescription = rs.getString("form_description");
+				String fieldName = rs.getString("field_name");
+				String fieldType = rs.getString("field_type");
+				String conceptName = rs.getString("concept_name");
+				String defaultValue = rs.getString("default_value");
+				int fieldNumber = rs.getInt("field_number");
+				String parentFieldName = rs.getString("parent_field_name");
+				FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
+				fdd.setFormName(formName);
+				fdd.setFormDescription(formDescription);
+				fdd.setFieldName(fieldName);
+				fdd.setFieldType(fieldType);
+				fdd.setConceptName(conceptName);
+				fdd.setDefaultValue(defaultValue);
+				fdd.setFieldNumber(fieldNumber);
+				fdd.setParentFieldName(parentFieldName);
+				fddList.add(fdd);
+			}
+			
+		} finally{
+			con.close();
+		}
+		return fddList;
+	}
+	
+	/**
+	 * DWE CHICA-332 4/16/15
+	 * 
+	 * @see org.openmrs.module.atd.db.ATDDAO#getFormAttributeValueLocationsAndTagsMap(Integer)
+	 */
+	@Override
+	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId)
+	{
+		try
+		{
+			HashMap<Integer, List<Integer>> returnMap = new HashMap<Integer, List<Integer>>();
+			
+			// Query for "editable" form attribute values that have been previously configured
+			String sql = "SELECT DISTINCT b.location_tag_id, b.location_id " + 
+						 "FROM chirdlutilbackports_form_attribute_value b " +
+						 "INNER JOIN (SELECT form_attribute_id FROM chirdlutilbackports_form_attribute WHERE name NOT IN('defaultMergeDirectory','defaultExportDirectory','formInstanceIdTag','formInstanceIdTag2','medRecNumberTag','medRecNumberTag2','imageDirectory','numQuestions')) av ON b.form_attribute_id = av.form_attribute_id " +
+			             "WHERE b.form_id = ? " +
+			             "ORDER BY b.location_tag_id, b.location_id";
+			
+			SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+			qry.setInteger(0, formId);
+			
+			List<Object[]> list = qry.list();
+			
+			if (list != null && list.size() > 0) 
+			{
+				List<Integer> locTagIds = new ArrayList<Integer>();
+				for(Object[] objArray : list)
+				{
+					Integer locationId = (Integer)objArray[1];
+					locTagIds = returnMap.get(locationId);
+					if(locTagIds == null) // This is the first location tag Id that is being added to the list, create a new list
+					{
+						locTagIds = new ArrayList<Integer>();
+					}
+					
+					locTagIds.add((Integer)objArray[0]);
+					returnMap.put(locationId, locTagIds);
+				}
+			}
+			
+			return returnMap;
+		}
+		catch(Exception e)
+		{
+			log.error("Error in method getFormAttributeValueLocationsAndTagsMap. Error loading location ids and location tag ids (form_id = " + formId + ").", e);
+		}
+		
+		return new HashMap<Integer,List<Integer>>();
+	}
+	
+	/**
+	 * DWE CHICA-330 4/22/15 
+	 *
+	 * @see org.openmrs.module.atd.db.ATDDAO#getConceptDescriptorList(int, int, String, boolean, int, String, String, boolean)
+	 * 
+	 */
+	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch) 
+	{
+		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
+		try
+		{
+			SQLQuery qry = getConceptQuery(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc, exactMatchSearch);
+			List<Object[]> list = qry.list();
+			
+			if (list != null && list.size() > 0) 
+			{
+				for(Object[] objArray : list)
+				{
+					Integer id = objArray[0] == null ? -1 : (Integer)objArray[0];
+					String name = objArray[1] == null ? "" : (String)objArray[1];
+					String conceptClass = objArray[2] == null ? "" : (String)objArray[2];
+					String datatype = objArray[3] == null ? "" : (String)objArray[3];
+					String description = objArray[4] == null ? "" : (String)objArray[4];
+					String parentConcept = objArray[7] == null ? "" : (String)objArray[7];
+					String units = objArray[6] == null ? "" : (String)objArray[6];
+					Integer parentId = objArray[5] == null ? -1 : (Integer)objArray[5];
+					Timestamp dateCreatedStamp = (Timestamp)objArray[10];
+					
+					cdList.add(new ConceptDescriptor(name, conceptClass, datatype, description, parentConcept, units, id, parentId, dateCreatedStamp));
+				}
+			}
+			
+			return cdList;
+		}
+		catch(Exception e)
+		{
+			log.error("Error in method getAllConcepts.", e);
+		}
+		
+		return new ArrayList<ConceptDescriptor>();
+	}
+	
+	/**
+	 * DWE CHICA-330 4/23/15 
+	 * 
+	 * @see org.openmrs.module.atd.db.ATDDAO#getCountConcepts(String, boolean, int, boolean)
+	 */
+	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch)
+	{
+		try
+		{
+			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", "ASC", exactMatchSearch);
+			return qry.list().size();
+		}
+		catch(Exception e)
+		{
+			log.error("Error in method getCountConcepts.", e);
+			return -1;
+		}
+	}
+	
+	/**
+	 * DWE CHICA-330 4/23/15
+	 * Creates a SQLQuery object for use with counting and finding concept records
+	 * 
+	 * @param start - first result record to start with for paging
+	 * @param length - max number of results to return for paging
+	 * @param searchValue - search by concept name or parent concept name
+	 * @param includeRetired - true to include retired concepts
+	 * @param conceptClassId - filter by concept class
+	 * @param orderByColumn - order by column
+	 * @param ascDesc - ASC or DESC
+	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
+	 * @return
+	 */
+	private SQLQuery getConceptQuery(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch)
+	{
+		String whereClause = "";
+		boolean needsAnd = false;
+		
+		if(!searchValue.isEmpty() || !includeRetired || conceptClassId > -1)
+		{
+			whereClause = " WHERE ";
+			if(!searchValue.isEmpty())
+			{
+				if(exactMatchSearch)
+				{
+					whereClause += "(a.name = '" + searchValue + "' OR b.name = '" + searchValue + "')";
+				}
+				else
+				{
+					whereClause += "(a.name LIKE '%" + searchValue + "%' OR b.name LIKE '%" + searchValue + "%')";
+				}
+				
+				needsAnd = true;
+			}
+			
+			if(!includeRetired)
+			{
+				if(needsAnd){whereClause += " AND ";}
+				whereClause += "a.retired = 0";
+				needsAnd = true;
+			}
+			
+			if(conceptClassId > -1)
+			{
+				if(needsAnd){whereClause += " AND ";}
+				whereClause += "a.conceptClassId = " + conceptClassId;
+				needsAnd = true;
+			}
+		}
+		
+		String orderBy = " ORDER BY ";
+		if(orderByColumn.equalsIgnoreCase("name"))
+		{
+			orderBy += "a.name ";
+		}
+		else if(orderByColumn.equalsIgnoreCase("parentConcept"))
+		{ 
+			orderBy += "b.name ";
+		}
+		else if(orderByColumn.equalsIgnoreCase("formattedDateCreated"))
+		{
+			orderBy += "a.dateCreated ";
+		}
+		else
+		{
+			orderBy += "a.conceptId ";
+		}
+		orderBy += ascDesc;
+		
+		String sqlString = "SELECT distinct a.*, b.name AS \"parentConcept\" "
+                + "FROM    (SELECT a.concept_id AS conceptId, "
+                + "	               a.name AS name, "
+                + "                c.name AS \"conceptClass\", "
+                + "                d.name AS \"datatype\", "
+                + "                e.description AS description, "
+                + "                g.concept_id AS parentConceptId, "
+                + "                f.units AS units, "
+                + "				   con.retired AS retired, "
+                + "				   c.concept_class_id AS conceptClassId, "
+                + "                con.date_created AS dateCreated  "
+                + "           FROM concept_name a "
+                + "                INNER JOIN concept con "
+                + "                    ON a.concept_id = con.concept_id "
+                + "                INNER JOIN concept_class c "
+                + "                    ON con.class_id = c.concept_class_id "
+                + "                INNER JOIN concept_datatype d "
+                + "                    ON con.datatype_id = d.concept_datatype_id "
+                + "                LEFT JOIN concept_description e "
+                + "                    ON e.concept_id = con.concept_id "
+                + "                LEFT JOIN concept_numeric f "
+                + "                    ON f.concept_id = con.concept_id "
+                + "                LEFT JOIN concept_answer g "
+                + "                    ON g.answer_concept = con.concept_id) a "
+                + "          LEFT JOIN "
+                + "               concept_name b "
+                + "               ON a.parentConceptId = b.concept_id " + whereClause + orderBy;
+		
+		SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sqlString);
+		qry.addScalar("conceptId", Hibernate.INTEGER);
+		qry.addScalar("name", Hibernate.STRING);
+		qry.addScalar("conceptClass", Hibernate.STRING);
+		qry.addScalar("datatype", Hibernate.STRING);
+		qry.addScalar("description", Hibernate.STRING);
+		qry.addScalar("parentConceptId", Hibernate.INTEGER);
+		qry.addScalar("units",  Hibernate.STRING);
+		qry.addScalar("parentConcept", Hibernate.STRING);
+		qry.addScalar("retired", Hibernate.BOOLEAN);
+		qry.addScalar("conceptClassId", Hibernate.INTEGER);
+		qry.addScalar("dateCreated", Hibernate.TIMESTAMP);
+		
+		if(start > -1 && length > -1)
+		{
+			qry.setFirstResult(start);
+			qry.setMaxResults(length);
+		}
+		
+		return qry;
+	}
+	
+	/**
+     * DWE CHICA-437 
+     * Gets a list of obs records where there is a related atd_statistics record with the formFieldId
+     * 
+     * @param encounterId
+     * @param conceptId
+     * @param formFieldId
+     * @param includeVoidedObs
+     * @return
+     */
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    {
+    	String voidedString = "";
+    	if(!includeVoidedObs)
+    	{
+    		voidedString = " and a.voided=false";
+    	}
+    	
+		try
+		{
+			String sql = "select a.* from obs a "+
+				"inner join atd_statistics b on a.obs_id=b.obsv_id "+
+				"where a.encounter_id=? and a.concept_id=? and b.form_field_id=?" + voidedString;
+			SQLQuery qry = this.sessionFactory.getCurrentSession()
+					.createSQLQuery(sql);
+			qry.setInteger(0, encounterId);
+			qry.setInteger(1, conceptId);
+			qry.setInteger(2, formFieldId);
+			qry.addEntity(Obs.class);
+			return qry.list();
+		} 
+		catch (Exception e)
+		{
+			this.log.error(Util.getStackTrace(e));
+			return new ArrayList<Obs>();
+		}
     }
 }
