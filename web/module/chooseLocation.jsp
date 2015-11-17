@@ -45,7 +45,7 @@
 	</c:if>
 	
 	
-	<button id="selectAllButton" onclick="checkTags('ALL#$#ALL');">Select All</button>
+	<button id="selectAllButton" onclick="checkTags('ALL_ALL');">Select All</button>
 	<br/>
 	<br/>
 	<form action="chooseLocation.form" method="post" id="location_form">
@@ -66,7 +66,7 @@
 					<c:forEach items = "${locationTagsMap[location.id]}" var = "tag" varStatus = "tagStatus">
 						<tr>
 							<td style="padding: 0px 0px 5px 0px"> 
-								<input type="checkbox" name = "positions_applicable"   value="${location.id}#$#${tag.id}" id="${location.id}#$#${tag.id}" class="${location.id}"/>
+								<input type="checkbox" name = "positions_applicable"   value="${location.id}_${tag.id}" id="${location.id}_${tag.id}" class="${location.id}"/>
 							</td>
 							<td style="padding: 0px 0px 5px 5px">${tag.name}</td>
 						</tr>
