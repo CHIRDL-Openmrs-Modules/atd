@@ -3,6 +3,7 @@ package org.openmrs.module.atd.ruleLibrary;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmrs.Concept;
 import org.openmrs.Patient;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
@@ -75,6 +76,7 @@ public class consumeOnePart implements Rule
 		Integer encounterId = null;
 		Integer ruleId = null;
 		Integer locationTagId = null;
+		Integer formFieldId = null;
 
 		if (parameters != null)
 		{
@@ -90,6 +92,7 @@ public class consumeOnePart implements Rule
 			
 			encounterId = (Integer) parameters.get("encounterId");
 			locationTagId = (Integer) parameters.get("locationTagId");
+			formFieldId = (Integer)parameters.get("formFieldId"); // DWE CHICA-437
 		}
 
 		if (formInstance == null)
@@ -111,9 +114,12 @@ public class consumeOnePart implements Rule
 		if(ruleResult != null&&ruleResult.toString()!=null&&
 				ruleResult.toString().length()>0)
 		{
-			org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, conceptService.getConceptByName(conceptName),
+			// DWE CHICA-430 This was missing in the atd module
+			Concept concept = conceptService.getConceptByName(conceptName);
+			org.openmrs.module.atd.util.Util.voidObsForConcept(concept, encounterId, formFieldId);
+			org.openmrs.module.atd.util.Util.saveObsWithStatistics(patient, concept,
 					encounterId, ruleResult.toString(),formInstance,
-					ruleId,locationTagId,false);
+					ruleId,locationTagId,false, formFieldId); // DWE CHICA-437 Added formFieldId
 		}
 		
 		return Result.emptyResult();

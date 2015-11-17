@@ -26,10 +26,13 @@
         }
     }
 // End </script>
-<p><h3>Populate Form Fields:</h3></p>
+
 <form id="input" method="post" action="replaceFormFields.form">
+<p><h3>Populate Form Fields (${selectedFormName})</h3></p>
 <input type="hidden" name="processFields" value="true" /> <input
     type="hidden" name="formToEdit" value="${form.formId}" />
+    
+    <input type="hidden" name="selectedFormName" value="${selectedFormName}" />
 <p><font color="red"><b>*</b></font> Indicates a field not found in the form being replaced.</p>
 <p><font color="red"><b>Caution</b></font>: Data for the new fields below are pre-populated by the Configuration Manager for convenience.  Please verify all data is correct before proceeding.</p>
 <table>
