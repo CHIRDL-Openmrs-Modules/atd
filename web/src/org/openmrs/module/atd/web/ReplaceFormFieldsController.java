@@ -1,6 +1,7 @@
 package org.openmrs.module.atd.web;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.openmrs.FormField;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
@@ -53,6 +55,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		String formIdString = request.getParameter("formId");
 		String replaceFormIdString = request.getParameter("replaceFormId");
 		map.put("replaceFormId", replaceFormIdString);
+		map.put("selectedFormName", request.getParameter("selectedFormName"));
 		
 		if (formIdString != null) {
 			try {
@@ -90,8 +93,10 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		
 		ConceptService conceptService = Context.getConceptService();
 		String replaceFormIdString = request.getParameter("replaceFormId");
+		String formNameToEdit = "";
 		try {
 			Form formToEdit = formService.getForm(formId);
+			formNameToEdit = formToEdit.getName();
 			List<FormField> formFields = formToEdit.getOrderedFormFields();
 			
 			for (FormField currFormField : formFields) {
@@ -163,7 +168,6 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 				formService.saveField(currField);
 				timeInMilliseconds += (System.currentTimeMillis() - startTime);
 			}
-			
 			LoggingUtil.logEvent(null, formId, null, LoggingConstants.EVENT_MODIFY_FORM_FIELDS, 
 				Context.getUserContext().getAuthenticatedUser().getUserId(), 
 				"Form fields modified.  Class: " + ReplaceFormFieldsController.class.getCanonicalName());
@@ -173,8 +177,39 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 			this.log.error(Util.getStackTrace(e));
 		}
 		
-		String view = getSuccessView();
-		return new ModelAndView(new RedirectView(view + "?formId=" + replaceFormIdString + "&newFormId=" + formIdString));
+		// DWE CHICA-332 4/16/15 
+		// Determine the locations and location tags that the form was previously configured for
+		// so that the configFormAttributeValue.form can be displayed
+		ATDService atdService = Context.getService(ATDService.class);
+		HashMap<Integer, List<Integer>> locAndTagIdsMap = atdService.getFormAttributeValueLocationsAndTagsMap(formId); // This is the new form Id
+		
+		// Now build the list of location ids and location tag ids separated by "#$#" 
+		// as expected by the existing functionality in ConfigFormAttributeValueController
+		ArrayList<String> locationIdsAndTagIdsList = new ArrayList<String>();
+		Set<Integer> locationIds = locAndTagIdsMap.keySet();
+		Iterator<Integer> it = locationIds.iterator();
+		while(it.hasNext())
+		{
+			Integer locationId = it.next();
+			List<Integer> tagIds = locAndTagIdsMap.get(locationId);
+			if(tagIds != null)
+			{
+				for(Integer tagId : tagIds)
+				{
+					locationIdsAndTagIdsList.add(String.valueOf(locationId) + "#$#" + String.valueOf(tagId));
+				}
+			}
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("formId", replaceFormIdString);
+		map.put("newFormId", formIdString);
+		map.put("positions", locationIdsAndTagIdsList.toArray(new String[0]));
+		map.put("selectedFormName", formNameToEdit);
+		map.put("successViewName", "replaceRetireForm.form");
+		
+		
+		return new ModelAndView(new RedirectView(getSuccessView() + "?formId=" + replaceFormIdString + "&newFormId=" + formIdString)); // DWE 11/12/15 Replace map with previously existing code due to a bug in the new Edit Form Attribute Values page
 	}
 	
 	private List<Boolean> getNewFieldIndicators(List<FormField> formFields, Form origForm) {

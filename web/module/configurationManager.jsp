@@ -39,6 +39,19 @@
                 </td>
             </tr>
         </table></center>
+        <center><table>
+        	<tr style="padding: 5px">
+        		<td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/getFormByName.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/editFormAttributes.gif"/></a>
+                </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/exportFormCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormAttributes.gif"/></a>
+                </td>
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/exportFormDefinitionCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportFormDefinition.gif"/></a>
+                </td>
+        	</tr>
+        </table></center>
         <br/>
         <br/>
         <center><h3>Printer Configuration</h3></center>
@@ -62,6 +75,14 @@
                 </td>
                 <td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/createClinicTagForm.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/createClinicTagButton.gif"/></a>
+                </td>
+            </tr>
+        </table></center>
+        <center><h3>Concept Definition</h3></center>
+        <center><table>
+            <tr style="padding: 5px">
+                <td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/exportConceptCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportConcepts.gif"/></a>
                 </td>
             </tr>
         </table></center>

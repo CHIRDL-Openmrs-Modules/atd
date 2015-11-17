@@ -440,6 +440,9 @@ public class TeleformTranslator
 			{
 				parameters.putAll(baseParameters);
 			}
+			
+			parameters.put("formFieldId", currFormField.getFormFieldId()); // DWE CHICA-437 Get the form field id here so that it can be used to determine if obs records should be voided when rules are evaluated
+			
 			//-----------end set rule parameters
 
 

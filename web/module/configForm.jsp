@@ -17,8 +17,9 @@
 // End </script>
 <html>
     <body>
-        <p><h3>Configure Form Properties:</h3></p>
+        
         <form id="input" name="input" action="configForm.form" method="post" enctype="multipart/form-data">
+        <p><h3>Configure Form Properties (${formName})</h3></p>
         <table>
             <tr style="padding: 5px">
                <td style="padding: 0px 0px 10px 0px">Locations:</td>
