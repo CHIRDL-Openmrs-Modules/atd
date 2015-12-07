@@ -15,6 +15,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
@@ -1650,4 +1652,29 @@ public class HibernateATDDAO implements ATDDAO
 			return new ArrayList<Obs>();
 		}
     }
+    
+    /**
+     * DWE CHICA-612
+     * Gets a sorted list of all atd_statistics with the encounterId and formName
+     * @param encounterId
+     * @param formName
+     * @param orderAscDesc - ASC or DESC
+     * @return sorted list of Statistics
+     */
+    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc)
+	{
+    	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
+    	criteria.add(Expression.eq("encounterId", encounterId));
+    	criteria.add(Expression.eq("formName", formName));
+    	
+    	if(orderAscDesc.equals("ASC"))
+    	{
+    		criteria.addOrder(Order.asc("statisticsId"));
+    	}
+    	else if(orderAscDesc.equals("DESC"))
+    	{
+    		criteria.addOrder(Order.desc("statisticsId"));
+    	}
+		return criteria.list();
+	}
 }

@@ -284,4 +284,14 @@ public interface ATDService
      * @return
      */
     public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs);
+    
+    /**
+     * DWE CHICA-612
+     * Gets a sorted list of all atd_statistics with the encounterId and formName
+     * @param encounterId
+     * @param formName
+     * @param orderAscDesc - ASC or DESC
+     * @return sorted list of Statistics
+     */
+    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc);
 }

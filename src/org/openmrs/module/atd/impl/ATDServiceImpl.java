@@ -1022,4 +1022,13 @@ public class ATDServiceImpl implements ATDService
     {
     	return getATDDAO().getObsWithStatistics(encounterId, conceptId, formFieldId, includeVoidedObs);
     }
+    
+    /**
+     * DWE CHICA-612
+     * @see org.openmrs.module.atd.service.ATDService#getAllStatsByEncounterForm(Integer, String, String)
+     */
+    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc)
+    {
+    	return getATDDAO().getAllStatsByEncounterForm(encounterId, formName, orderAscDesc);
+    }
 }
