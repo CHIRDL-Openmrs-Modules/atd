@@ -136,17 +136,6 @@ public class ReplaceFormController extends SimpleFormController {
 		}
 		
 		try {
-			atdService.populateEmtptyFormFields(newForm.getFormId());
-		} catch (Exception e) {
-			log.error("Error pre-populating form fields", e);
-			map.put("failedPopulate", true);
-			map.put("forms", formService.getAllForms(false));
-			map.put("selectedForm", replaceFormIdStr);
-			ConfigManagerUtil.deleteForm(newForm.getFormId());
-			return new ModelAndView(view, map);
-		}
-		
-		try {
 			atdService.copyFormAttributeValues(replaceFormId, newForm.getFormId());
 		}
 		catch (Exception e) {
