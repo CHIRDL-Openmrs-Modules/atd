@@ -1667,11 +1667,11 @@ public class HibernateATDDAO implements ATDDAO
     	criteria.add(Expression.eq("encounterId", encounterId));
     	criteria.add(Expression.eq("formName", formName));
     	
-    	if(orderAscDesc.equals("ASC"))
+    	if("ASC".equals(orderAscDesc))
     	{
     		criteria.addOrder(Order.asc("statisticsId"));
     	}
-    	else if(orderAscDesc.equals("DESC"))
+    	else if("DESC".equals(orderAscDesc))
     	{
     		criteria.addOrder(Order.desc("statisticsId"));
     	}
