@@ -124,18 +124,6 @@ public class ReplaceFormController extends SimpleFormController {
 		
 		ATDService atdService = Context.getService(ATDService.class);
 		try {
-			copyFormFields(formService, newForm, replaceForm);
-		}
-		catch (Exception e) {
-			log.error("Error copying form fields", e);
-			map.put("failedFieldCopy", true);
-			map.put("forms", formService.getAllForms(false));
-			map.put("selectedForm", replaceFormIdStr);
-			ConfigManagerUtil.deleteForm(newForm.getFormId());
-			return new ModelAndView(view, map);
-		}
-		
-		try {
 			atdService.copyFormAttributeValues(replaceFormId, newForm.getFormId());
 		}
 		catch (Exception e) {
@@ -152,48 +140,5 @@ public class ReplaceFormController extends SimpleFormController {
 		map.put("replaceFormId", replaceFormIdStr);
 		map.put("selectedFormName", newForm.getName());
 		return new ModelAndView(new RedirectView(view), map);
-	}
-	
-	private void copyFormFields(FormService formService, Form form, Form copiedForm) throws Exception {
-		Set<FormField> formFields = form.getFormFields();
-		Iterator<FormField> i = formFields.iterator();
-		Map<String,FormField> formFieldsMap = mapFormFields(form);
-		Map<String,FormField> copyFormFieldsMap = mapFormFields(copiedForm);
-		while (i.hasNext()) {
-			FormField formField = i.next();
-			Field field = formField.getField();
-			FormField copyFormField = copyFormFieldsMap.get(field.getName());
-			if (copyFormField != null) {
-				Field copyField = copyFormField.getField();
-				field.setConcept(copyField.getConcept());
-				field.setDefaultValue(copyField.getDefaultValue());
-				field.setFieldType(copyField.getFieldType());
-				formField.setFieldNumber(copyFormField.getFieldNumber());
-				FormField copyParentFormField = copyFormField.getParent();
-				if (copyParentFormField != null) {
-					Field copyParentField = copyParentFormField.getField();
-					String name = copyParentField.getName();
-					FormField parentField = formFieldsMap.get(name);
-					formField.setParent(parentField);
-				}
-				
-				formService.saveFormField(formField);
-				formService.saveField(field);
-			}
-		}
-	}
-	
-	private Map<String,FormField> mapFormFields(Form form) {
-		Map<String,FormField> returnMap = new HashMap<String,FormField>();
-		Set<FormField> formFields = form.getFormFields();
-		Iterator<FormField> i = formFields.iterator();
-		while (i.hasNext()) {
-			FormField formField = i.next();
-			Field field = formField.getField();
-			String name = field.getName();
-			returnMap.put(name, formField);
-		}
-		
-		return returnMap;
 	}
 }
