@@ -11,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
@@ -125,17 +124,6 @@ public class CreateFormController extends SimpleFormController {
 		catch (Exception e) {
 			log.error("Error while processing uploaded file from request", e);
 			map.put("failedFileUpload", true);
-			map.put("forms", formService.getAllForms(false));
-			return new ModelAndView(view, map);
-		}
-		
-		try {
-			ATDService atdService = Context.getService(ATDService.class);
-			atdService.prePopulateNewFormFields(newForm.getFormId());
-		} catch (Exception e) {
-			log.error("Error pre-populating form fields", e);
-			formService.purgeForm(newForm);
-			map.put("failedPopulate", true);
 			map.put("forms", formService.getAllForms(false));
 			return new ModelAndView(view, map);
 		}

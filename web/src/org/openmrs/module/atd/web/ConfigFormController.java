@@ -27,6 +27,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -202,7 +203,7 @@ public class ConfigFormController extends SimpleFormController
         			attrVal.setLocationTagId(tag.getLocationTagId());
         			attrVal.setValue(String.valueOf(formId));
         			chirdlutilbackportsService.saveLocationTagAttributeValue(attrVal);
-        			locationsAndTags.add(loc.getLocationId() + "#$#" + tag.getLocationTagId()); // Separating the location id and the tag id by "#$#" to match existing functionality
+        			locationsAndTags.add(loc.getLocationId() + ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE + tag.getLocationTagId()); // Separating the location id and the tag id by "_" to match existing functionality
         		}
         		
         		LoggingUtil.logEvent(loc.getLocationId(), formId, null, LoggingConstants.EVENT_MODIFY_FORM_PROPERTIES, 
