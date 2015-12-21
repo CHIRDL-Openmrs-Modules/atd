@@ -83,7 +83,7 @@
 								<div class="locationsAndTagsClass" id="div_locationsAndTags_${fa.formAttributeId}">
 								<table>
 									<c:forEach items="${locationsList}" var="currLoc" varStatus="locStatus">
-										<c:set var="allId" value="${fa.formAttributeId}#$#${currLoc.id}#$#ALL" />
+										<c:set var="allId" value="${fa.formAttributeId}_${currLoc.id}_ALL" />
 										<c:set var="allInptId" value="inpt_${fa.formAttributeId}_${currLoc.id}_ALL" />
 										<c:choose>
 											<c:when test = "${locStatus.index mod 2 eq 0 }">
@@ -101,7 +101,7 @@
 											<c:forEach items="${locationTagsMap[currLoc.id]}" var="lTag"
 												varStatus="tagStatus">
 												<c:set var="theId"
-													value="${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}" />
+													value="${fa.formAttributeId}_${currLoc.id}_${lTag.id}" />
 												<c:set var="inptId"
 													value="inpt_${fa.formAttributeId}_${currLoc.id}_${lTag.id}" />
 												<c:set var="currentValue"
@@ -114,7 +114,7 @@
 													<td align="right" style="padding: 0px 0px 10px 0px" class="">${lTag.name} at 
 														${currLoc.name}:</td>
 													<td align="right" style="padding: 0px 0px 10px 0px"><input type="text"
-														name="inpt_${fa.formAttributeId}#$#${currLoc.id}#$#${lTag.id}"
+														name="${inptId}"
 														value="${currentValueStr}" id="${inptId}" size="40" />
 													</td>
 												</tr>

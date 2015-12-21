@@ -70,6 +70,7 @@ import com.itextpdf.text.pdf.PdfStamper;
 public class TeleformTranslator
 {
 
+	private static final String RESULT_DELIM = "^^";
 	protected final Log log = LogFactory.getLog(getClass());
 	
 	/**
@@ -632,8 +633,7 @@ public class TeleformTranslator
 									
 					for(int i=1;i<results.size();i++){
 						Result currResult = results.get(i);
-						resultString = currResult.toString();
-						mapResult(resultString,fieldNameResult);
+						mapResult(currResult,fieldNameResult);
 					}
 					
 				}	
@@ -674,8 +674,7 @@ public class TeleformTranslator
 				totalRunRule+=(System.currentTimeMillis()-startTime1);
 				for (Result currResult : result)
 				{
-					resultString = currResult.toString();
-					mapResult(resultString,fieldNameResult);
+					mapResult(currResult,fieldNameResult);
 				}
 			}
 		}
@@ -687,10 +686,10 @@ public class TeleformTranslator
 		return fieldNameResult;
 	}
 	
-	private void mapResult(String resultString,
+	private void mapResult(Result result,
 	                       LinkedHashMap<String, String> fieldNameResult){
-		
-		StringTokenizer tokenizer = new StringTokenizer(resultString, ",");
+		String resultString = getResultString(result);
+		StringTokenizer tokenizer = new StringTokenizer(resultString, RESULT_DELIM);
 		while (tokenizer.hasMoreTokens()) {
 			String currResult = tokenizer.nextToken();
 
@@ -786,5 +785,30 @@ public class TeleformTranslator
 		}
 		form.setDescription(records.getTitle());
 		return form;
+	}
+	
+	/**
+	 * Method to build a result string with "^^" as the delimiter.
+	 * 
+	 * @param result The Result object to transform to a String.
+	 * @return String representing the result object provided.
+	 */
+	private String getResultString(Result result) {
+		if (result == null) {
+			return "";
+		} else if (result.size() < 1) {
+			return result.toString();
+		}
+		
+		StringBuffer s = new StringBuffer();
+		for (Result r : result) {
+			if (s.length() > 0) {
+				s.append(RESULT_DELIM);
+			}
+			
+			s.append(getResultString(r));
+		}
+		
+		return s.toString();
 	}
 }

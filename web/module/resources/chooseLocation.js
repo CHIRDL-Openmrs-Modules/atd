@@ -5,7 +5,7 @@
 function checkSubClass(checkbox_id){
 	var me = document.getElementById(checkbox_id);
 	if(me.checked==true){
-		var locAndTag = checkbox_id.split("#$#");
+		var locAndTag = checkbox_id.split("_");
 		var locName = locAndTag[0];
 		if(locName=="ALL"){
 			var targetBoxes = document.getElementsByClassName("ALL");
@@ -25,16 +25,16 @@ function checkSubClass(checkbox_id){
 function uncheckSuperClass(checkbox_id){
 	var me = document.getElementById(checkbox_id);
 	if(me.checked==false){
-		var locAndTag = checkbox_id.split("#$#");
+		var locAndTag = checkbox_id.split("_");
 		var locName = locAndTag[0];
-		document.getElementById(locName+"#$#ALL").checked=false;
-		document.getElementById("ALL#$#ALL").checked=false;
+		document.getElementById(locName+"_ALL").checked=false;
+		document.getElementById("ALL_ALL").checked=false;
 	}
 }
 
 function checkTags(locationId)
 {
-	if(locationId == "ALL#$#ALL")
+	if(locationId == "ALL_ALL")
 	{
 		if($j("#selectAllButton").hasClass("showingAll"))
 		{
