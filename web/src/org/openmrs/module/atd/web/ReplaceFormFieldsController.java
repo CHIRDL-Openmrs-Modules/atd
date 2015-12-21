@@ -25,6 +25,7 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -183,7 +184,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		ATDService atdService = Context.getService(ATDService.class);
 		HashMap<Integer, List<Integer>> locAndTagIdsMap = atdService.getFormAttributeValueLocationsAndTagsMap(formId); // This is the new form Id
 		
-		// Now build the list of location ids and location tag ids separated by "#$#" 
+		// Now build the list of location ids and location tag ids separated by "_" 
 		// as expected by the existing functionality in ConfigFormAttributeValueController
 		ArrayList<String> locationIdsAndTagIdsList = new ArrayList<String>();
 		Set<Integer> locationIds = locAndTagIdsMap.keySet();
@@ -196,7 +197,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 			{
 				for(Integer tagId : tagIds)
 				{
-					locationIdsAndTagIdsList.add(String.valueOf(locationId) + "#$#" + String.valueOf(tagId));
+					locationIdsAndTagIdsList.add(String.valueOf(locationId) + ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE + String.valueOf(tagId));
 				}
 			}
 		}
