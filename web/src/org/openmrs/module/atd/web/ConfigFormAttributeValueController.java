@@ -18,6 +18,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
@@ -77,22 +78,21 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 			/*for storing values with each position */
 			for (Location currLoc : locationsList) {
 				for (LocationTag tag : locationTagsMap.get(currLoc.getId())) {
-					String inputName = "inpt_" + fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
-					String favId = fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId();
+					String inputName = "inpt_" + fa.getFormAttributeId() + ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE + currLoc.getId() + ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE + tag.getId();
+					String favId = fa.getFormAttributeId() + ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE + currLoc.getId() + ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE + tag.getId();
 					String feedbackValueStr = request.getParameter(inputName);
-					if (feedbackValueStr != null){
+					if (feedbackValueStr != null && !feedbackValueStr.equals("")){ 
 						FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(favId);
 						if(currentStoredValue == null || (currentStoredValue != null && !feedbackValueStr.equals(currentStoredValue.getValue()))){
 							cubService.saveFormAttributeValue(iFormId, fa.getName(), tag.getId(), currLoc.getId(), feedbackValueStr);
 						}					
-					} //else {
-						// DWE CHICA-596 Commenting this out, but leaving this here 
-						// in case we decide it is necessary to delete records when the user leaves the value empty
-						//FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(fa.getFormAttributeId() + "#$#" + currLoc.getId() + "#$#" + tag.getId());
-						//if (currentStoredValue != null && !currentStoredValue.getValue().equals("")) {
-							//cubService.deleteFormAttributeValue((FormAttributeValue) currentStoredValue);
-						//}
-					//}
+					} else {
+						// We need to delete form attribute value records if the value from the UI is null or empty 					
+						FormAttributeValue currentStoredValue = (FormAttributeValue) formAttributesValueMap.get(favId);
+						if (currentStoredValue != null && !currentStoredValue.getValue().equals("")) {
+							cubService.deleteFormAttributeValue((FormAttributeValue) currentStoredValue);
+						}
+					}
 				}
 			}
 		}
@@ -183,7 +183,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 			for (Location currLoc: locationsList) {
 				for(LocationTag tag: locationTagsMap.get(currLoc.getId())){
 					for(FormAttribute efa: editableFormAttributes){
-						String favId = efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId();
+						String favId = efa.getFormAttributeId()+ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE+currLoc.getId()+ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE+tag.getId();
 						formAttributesValueMap.put(favId, request.getParameter(favId));
 					}
 				}
@@ -194,7 +194,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 					for(FormAttribute efa: editableFormAttributes){
 						FormAttributeValue theValue = cubService.getFormAttributeValue(iFormId, efa.getName(), tag.getId(), currLoc.getId());
 						//formAttributesValueMap key is ids of formAttributeValue, Location, locationTag
-						formAttributesValueMap.put(efa.getFormAttributeId()+"#$#"+currLoc.getId()+"#$#"+tag.getId(), theValue);
+						formAttributesValueMap.put(efa.getFormAttributeId()+ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE+currLoc.getId()+ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE+tag.getId(), theValue);
 					}
 				}
 			}
@@ -234,13 +234,13 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 	
 	private void configPositionInfo(List<Location> locationsList, Set<Integer> locationsIdSet,Map<Integer, List<LocationTag>> locationTagsMap, HttpServletRequest request){
 		// positionStrs are position array. for position string, it is composed
-		// of locationId + "#$#"+ locationTagId
+		// of locationId + "_"+ locationTagId
 		String[] positionStrs = request.getParameterValues("positions");
 		LocationService locationService = Context.getLocationService();
 		if (positionStrs != null) {
 			StringTokenizer st = null;
 			for (String p : positionStrs) {
-				st = new StringTokenizer(p,"#$#");
+				st = new StringTokenizer(p,ChirdlUtilConstants.GENERAL_INFO_UNDERSCORE);
 				try {
 					Location loc = null;
 					LocationTag locTag = null;
