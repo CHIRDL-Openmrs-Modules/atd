@@ -81,7 +81,7 @@
             		<table class="tableApplyToAllLocations" id="div_formAttribute_${fa.formAttributeId}">
             			<tr>
             			<td class="locationText">Apply to all locations and tags&nbsp;<input type="text"
-								name="inpt_${fa.formAttributeId}#$#ALL#$#ALL"
+								name="inpt_${fa.formAttributeId}_ALL_ALL"
 								id="inpt_${fa.formAttributeId}_ALL_ALL"
 								onchange="assignValueSubClass('inpt_${fa.formAttributeId}_ALL_ALL')" size="40"/>
 							</td>
