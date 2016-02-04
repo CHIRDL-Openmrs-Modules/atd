@@ -210,7 +210,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		map.put("successViewName", "replaceRetireForm.form");
 		
 		
-		return new ModelAndView(new RedirectView(getSuccessView() + "?formId=" + replaceFormIdString + "&newFormId=" + formIdString)); // DWE 11/12/15 Replace map with previously existing code due to a bug in the new Edit Form Attribute Values page
+		return new ModelAndView(new RedirectView(getSuccessView()), map);
 	}
 	
 	private List<Boolean> getNewFieldIndicators(List<FormField> formFields, Form origForm) {
