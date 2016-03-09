@@ -118,7 +118,7 @@
 												<td class="locationText" align="right">Apply to all location tags
 													at ${currLoc.name}</td>
 												<td align="right"><input type="text"
-													id="${allInptId}" class="${fa.formAttributeId} ALL"
+													id="${allInptId}" class="${fa.formAttributeId}_ALL"
 													onchange="assignValueAll('${allInptId}'); removeValueSuper('${allInptId}')" size="40"/>
 												</td>
 											</tr>
@@ -140,7 +140,7 @@
 													<td align="right" style="padding: 0px 0px 10px 0px"><input type="text"
 														name="${inptId}"
 														value="${currentValueStr}" id="${inptId}" size="40" 
-														class="${fa.formAttributeId} ${currLoc.id}"
+														class="${fa.formAttributeId}_${currLoc.id} tags_${fa.formAttributeId}"
 														onchange="removeValueSuper('${inptId}')"
 														/>
 													</td>
