@@ -75,6 +75,10 @@ td.attributeNameSection{
 div.divApplyToAllLocations{
 	display: none;
 }
+
+table.tableApplyToAllLocations{
+	display: none;
+}
 	
 div.locationsAndTagsClass{
 	display: none;
