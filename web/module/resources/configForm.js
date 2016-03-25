@@ -36,35 +36,60 @@ function jqSelector(str) {
 	return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
 }
 
-function assignValueSubClass(inpt_id) {
+function assignValueAll(inpt_id) {
 	var idContent = inpt_id.split("_");
 	var attributeId = idContent[1];
 	var locationId = idContent[2];
-	var value = document.getElementById(inpt_id).value;
+	var value = $("#" + inpt_id).val();
 	if (value != null && value != "") {
 		if (locationId != "ALL") {
-			var subBoxes = document.getElementsByClassName(attributeId + " "
+			var inputBoxes = document.getElementsByClassName(attributeId + "_"
 					+ locationId);
-			for (var i = 0; i < subBoxes.length; i++) {
-				if (subBoxes[i].id != null) {
-					var subBoxAsComboBox = $("#" + subBoxes[i].id).data(
-							"kendoComboBox");
-					if (subBoxAsComboBox != null) {
-						subBoxAsComboBox.text(value);
+			for (var i = 0; i < inputBoxes.length; i++) {
+				if (inputBoxes[i].id != null) {
+					var subInput = $("#" + inputBoxes[i].id);
+					if (subInput != null) {
+						subInput.val(value);
 					}
 				}
 			}
 		} else {
-			var subBoxes = document.getElementsByClassName(attributeId);
-			for (var i = 0; i < subBoxes.length; i++) {
-				subBoxes[i].value = value;
+			var inputBoxes = document.getElementsByClassName(attributeId + "_ALL");
+			for (var i = 0; i < inputBoxes.length; i++) {
+				inputBoxes[i].value = value;
 			}
 		}
 	}
-	var thisComboBox = $("#"+inpt_id).data("kendoComboBox");
-	thisComboBox.text(value);
 }
 
+function removeValueSuper(inpt_id) {
+	var idContent = inpt_id.split("_");
+	var attributeId = idContent[1];
+	var locationId = idContent[2];
+	var superClass = $("#inpt_" + attributeId + "_" + locationId + "_ALL");
+	var superSuperClass = $("#inpt_" + attributeId + "_" + "ALL_ALL");
+	superClass.val("");
+	superSuperClass.val("");
+}
+
+//This is the old code for use with the kendo combobox
+function assignValueSubClass(inpt_id) {
+	var idContent = inpt_id.split("_");
+	var attributeId = idContent[1];
+	var locationId = idContent[2];
+	var value = $("#" + inpt_id).val();
+	if (value != null && value != "") {
+		var subBoxes = document.getElementsByClassName("tags_" + attributeId);
+		for (var i = 0; i < subBoxes.length; i++) {
+			if (subBoxes[i].id != null) {
+				var subBoxAsComboBoxId = subBoxes[i].id
+				$("#" + subBoxAsComboBoxId).val(value);
+			}
+		}
+	}
+}
+
+// This is the old code for use with the kendo combobox
 function removeValueSuperClass(inpt_id) {
 	var idContent = inpt_id.split("_");
 	var attributeId = idContent[1];
