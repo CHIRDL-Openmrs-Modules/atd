@@ -133,6 +133,34 @@
         <defaultValue>teleformXML</defaultValue>
         <description>The default output for creating merge documents.  The current possible values are teleformXML and pdf</description>
     </globalProperty>
+    <globalProperty>
+        <property>atd.atd.outgoingFaxWsdlLocation</property>
+        <description>The wsdl location for the fax web service.</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxUsername</property>
+        <description>Username for the FAX COM web service</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxPassword</property>
+        <description>Password for the FAX COM web service</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxResolution</property>
+        <defaultValue>1</defaultValue>
+        <description>The fax document resolution. 1 = high, 0 = low</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxPriority</property>
+        <defaultValue>2</defaultValue>
+        <description>The fax request priority. 3 = urgent, 2 = high, 1 = normal, 0 = low</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxSendTime</property>
+        <defaultValue>0.0</defaultValue>
+        <description>The fax request send time. 0.0 = immediate, 1.0 = off-peak</description>
+    </globalProperty>
+    
     
 	<!-- Internationalization -->
 	<!-- All message codes should start with moduleId.* -->
