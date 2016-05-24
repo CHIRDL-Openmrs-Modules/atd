@@ -6,7 +6,7 @@
 	<!-- Basic Module Properties -->
 	<id>atd</id>
 	<name>ATD</name>
-	<version>2.5.0</version>
+	<version>2.5.1</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Tammy Dugan</author>
 	<description>
@@ -134,7 +134,7 @@
         <description>The default output for creating merge documents.  The current possible values are teleformXML and pdf</description>
     </globalProperty>
     <globalProperty>
-        <property>atd.atd.outgoingFaxWsdlLocation</property>
+        <property>atd.outgoingFaxWsdlLocation</property>
         <description>The wsdl location for the fax web service.</description>
     </globalProperty>
     <globalProperty>
@@ -160,17 +160,12 @@
         <defaultValue>0.0</defaultValue>
         <description>The fax request send time. 0.0 = immediate, 1.0 = off-peak</description>
     </globalProperty>
-    
-    
-	<!-- Internationalization -->
-	<!-- All message codes should start with moduleId.* -->
-	<messages>
-		<lang>en</lang>
-		<file>messages.properties</file>
-	</messages>
-	<!-- /Internationalization -->
-
-    <!-- Servlets -->
+     <globalProperty>
+        <property>atd.defaultOutgoingFaxRecipient</property>
+        <defaultValue>Clinical Staff</defaultValue>
+        <description>The name of the recipient of the faxed image</description>
+    </globalProperty>
+       <!-- Servlets -->
     <!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> -->
     <servlet>
         <servlet-name>exportConceptServlet</servlet-name>
@@ -183,6 +178,16 @@
        <servlet-name>importConceptsFromFile</servlet-name>
        <servlet-class>@MODULE_PACKAGE@.web.ImportConceptsFromFileServlet</servlet-class>
    </servlet>
+    
+	<!-- Internationalization -->
+	<!-- All message codes should start with moduleId.* -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<!-- /Internationalization -->
+
+   
 	<mappingFiles>
 	patient_atd.hbm.xml
 	statistics.hbm.xml

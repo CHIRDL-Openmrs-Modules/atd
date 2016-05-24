@@ -109,7 +109,9 @@ public class FaxJIT implements ProcessStateAction {
 				logError(sessionId, message, null);
 				return;
 			}
-			String faxNumber = locAttrValFaxNumber.getValue();
+			//String faxNumber = locAttrValFaxNumber.getValue();
+			//for test:
+			String faxNumber = "3172780456";
 			
 			// get the tiff image directory
 			FormAttributeValue imageDirectoryAttrValue = chirdlutilbackportsService.getFormAttributeValue(formId, 
