@@ -46,6 +46,7 @@ public class FaxJIT implements ProcessStateAction {
 	private static final int FAX_PRIORITY_HIGH = 2;
 	private static final int FAX_RESOLUTION_HIGH = 1;
 	private static Log log = LogFactory.getLog(FaxJIT.class);
+	private static final String EMPTY_STRING = ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING;
 	
 	
 	/**
@@ -111,9 +112,10 @@ public class FaxJIT implements ProcessStateAction {
 			}
 			//String faxNumber = locAttrValFaxNumber.getValue();
 			//for test:
-			String faxNumber = "3172780456";
+			String faxNumber = "(317)278-0456";
 			
-			// get the tiff image directory
+			
+			// get the image directory
 			FormAttributeValue imageDirectoryAttrValue = chirdlutilbackportsService.getFormAttributeValue(formId, 
 					ChirdlUtilConstants.FORM_ATTRIBUTE_IMAGE_DIRECTORY, locationTagId, locationId);
 			if (imageDirectoryAttrValue == null || StringUtils.isBlank(imageDirectoryAttrValue.getValue())){
@@ -124,7 +126,8 @@ public class FaxJIT implements ProcessStateAction {
 			}
 			
 			// check to see if the file exists
-			File imageFile = IOUtil.searchForImageFile(formInstance.toString(), imageDirectoryAttrValue.getValue());
+			//File imageFile = IOUtil.searchForImageFile(formInstance.toString(), imageDirectoryAttrValue.getValue());
+			File imageFile = IOUtil.searchForFile(formInstance.toString(), imageDirectoryAttrValue.getValue(),"pdf");
 		
 			if (imageFile.exists()) {
 							
@@ -137,6 +140,15 @@ public class FaxJIT implements ProcessStateAction {
 				if (!(result instanceof EmptyResult)) {
 					recipient = result.toString();
 				}
+				
+				// get the clinic name
+				LocationAttributeValue locAttrValueClinicDisplayName = chirdlutilbackportsService.getLocationAttributeValue(locationId,
+						ChirdlUtilConstants.LOCATION_ATTR_CLINIC_DISPLAY_NAME);
+				String clinic = EMPTY_STRING;
+				if (locAttrValueClinicDisplayName != null && !StringUtils.isBlank(locAttrValueClinicDisplayName.getValue())){
+					clinic = locAttrValueClinicDisplayName.getValue();
+				}
+				
 							
 				// get the form display name
 				FormAttributeValue displayNameVal = chirdlutilbackportsService.getFormAttributeValue(formId, 
@@ -159,9 +171,10 @@ public class FaxJIT implements ProcessStateAction {
 				if (StringUtils.isNumeric(priorityProperty) && !StringUtils.isWhitespace(priorityProperty)) {
 					priority = Integer.valueOf(priorityProperty);
 				}
+				
 							
 				FaxUtil.faxFileByWebService(imageFile, wsdlLocation, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
-						faxNumber, username, password, sender, recipient, patient, formName, resolution, priority, sendTime);
+						faxNumber, username, password, sender, recipient, clinic, patient, formName, resolution, priority, sendTime);
 							
 			}
 		}
