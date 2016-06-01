@@ -6,6 +6,7 @@ package org.openmrs.module.atd.action;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -127,7 +128,11 @@ public class FaxJIT implements ProcessStateAction {
 			
 			// check to see if the file exists
 			//File imageFile = IOUtil.searchForImageFile(formInstance.toString(), imageDirectoryAttrValue.getValue());
-			File imageFile = IOUtil.searchForFile(formInstance.toString(), imageDirectoryAttrValue.getValue(),"pdf");
+			HashSet<String> extensions = new HashSet<String>();
+			extensions.add(ChirdlUtilConstants.FILE_PDF);
+			extensions.add(ChirdlUtilConstants.FILE_TIF);
+			extensions.add(ChirdlUtilConstants.FILE_TIFF);
+			File imageFile = IOUtil.searchForFile(formInstance.toString(), imageDirectoryAttrValue.getValue(), extensions);
 		
 			if (imageFile.exists()) {
 							
@@ -164,6 +169,9 @@ public class FaxJIT implements ProcessStateAction {
 					}
 				}
 				
+				//isNumeric() returns true if empty string.  
+				//Add check for whitespace to make sure it is truly numeric.
+				//Newer version of Apache Commons will fix this.
 				if (StringUtils.isNumeric(resolutionPropterty) && !StringUtils.isWhitespace(resolutionPropterty)) {
 					resolution = Integer.valueOf(resolutionPropterty);
 				}
