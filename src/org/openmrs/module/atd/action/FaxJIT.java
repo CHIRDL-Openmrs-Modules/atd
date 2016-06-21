@@ -7,8 +7,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,26 +34,22 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
-
-
 /**
  * @author Steve McKee
  */
 public class FaxJIT implements ProcessStateAction {
-	
 	
 	private static final int FAX_PRIORITY_HIGH = 2;
 	private static final int FAX_RESOLUTION_HIGH = 1;
 	private static Log log = LogFactory.getLog(FaxJIT.class);
 	private static final String EMPTY_STRING = ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING;
 	
-	
 	/**
 	 * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#processAction(org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction, org.openmrs.Patient, org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState, java.util.HashMap)
 	 */
 	public void processAction(StateAction stateAction, Patient patient, PatientState patientState,
 	                          HashMap<String, Object> parameters) {
-		
+
 		// lookup the patient again to avoid lazy initialization errors
 		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		PatientService patientService = Context.getPatientService();
@@ -64,8 +58,8 @@ public class FaxJIT implements ProcessStateAction {
 		patient = patientService.getPatient(patientId);
 		State currState = patientState.getState();
 		Integer sessionId = patientState.getSessionId();
-		int priority = FAX_PRIORITY_HIGH;
-		int resolution = FAX_RESOLUTION_HIGH;
+		int priority = ChirdlUtilConstants.FAX_PRIORITY_NORMAL; //Default
+		int resolution = ChirdlUtilConstants.FAX_RESOLUTION_HIGH; //Default
 		
 		String password = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_PASSWORD);
 		String username = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_USERNAME); 
@@ -111,10 +105,7 @@ public class FaxJIT implements ProcessStateAction {
 				logError(sessionId, message, null);
 				return;
 			}
-			//String faxNumber = locAttrValFaxNumber.getValue();
-			//for test:
-			String faxNumber = "(317)278-0456";
-			
+			String faxNumber = locAttrValFaxNumber.getValue();
 			
 			// get the image directory
 			FormAttributeValue imageDirectoryAttrValue = chirdlutilbackportsService.getFormAttributeValue(formId, 
@@ -129,9 +120,9 @@ public class FaxJIT implements ProcessStateAction {
 			// check to see if the file exists
 			//File imageFile = IOUtil.searchForImageFile(formInstance.toString(), imageDirectoryAttrValue.getValue());
 			HashSet<String> extensions = new HashSet<String>();
-			extensions.add(ChirdlUtilConstants.FILE_PDF);
-			extensions.add(ChirdlUtilConstants.FILE_TIF);
-			extensions.add(ChirdlUtilConstants.FILE_TIFF);
+			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_PDF);
+			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_TIF);
+			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_TIFF);
 			File imageFile = IOUtil.searchForFile(formInstance.toString(), imageDirectoryAttrValue.getValue(), extensions);
 		
 			if (imageFile.exists()) {
@@ -153,8 +144,7 @@ public class FaxJIT implements ProcessStateAction {
 				if (locAttrValueClinicDisplayName != null && !StringUtils.isBlank(locAttrValueClinicDisplayName.getValue())){
 					clinic = locAttrValueClinicDisplayName.getValue();
 				}
-				
-							
+						
 				// get the form display name
 				FormAttributeValue displayNameVal = chirdlutilbackportsService.getFormAttributeValue(formId, 
 									ChirdlUtilConstants.FORM_ATTR_DISPLAY_NAME, locationTagId, locationId);
@@ -179,8 +169,7 @@ public class FaxJIT implements ProcessStateAction {
 				if (StringUtils.isNumeric(priorityProperty) && !StringUtils.isWhitespace(priorityProperty)) {
 					priority = Integer.valueOf(priorityProperty);
 				}
-				
-							
+					
 				FaxUtil.faxFileByWebService(imageFile, wsdlLocation, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
 						faxNumber, username, password, sender, recipient, clinic, patient, formName, resolution, priority, sendTime);
 							

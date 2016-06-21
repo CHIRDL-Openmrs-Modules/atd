@@ -165,7 +165,16 @@
         <defaultValue>Clinical Staff</defaultValue>
         <description>The name of the recipient of the faxed image</description>
     </globalProperty>
-       <!-- Servlets -->
+        
+	<!-- Internationalization -->
+	<!-- All message codes should start with moduleId.* -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<!-- /Internationalization -->
+
+    <!-- Servlets -->
     <!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> -->
     <servlet>
         <servlet-name>exportConceptServlet</servlet-name>
@@ -178,16 +187,6 @@
        <servlet-name>importConceptsFromFile</servlet-name>
        <servlet-class>@MODULE_PACKAGE@.web.ImportConceptsFromFileServlet</servlet-class>
    </servlet>
-    
-	<!-- Internationalization -->
-	<!-- All message codes should start with moduleId.* -->
-	<messages>
-		<lang>en</lang>
-		<file>messages.properties</file>
-	</messages>
-	<!-- /Internationalization -->
-
-   
 	<mappingFiles>
 	patient_atd.hbm.xml
 	statistics.hbm.xml
