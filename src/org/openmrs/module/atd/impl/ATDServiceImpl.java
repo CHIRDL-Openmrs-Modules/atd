@@ -290,6 +290,8 @@ public class ATDServiceImpl implements ATDService
 			parameters.put("sessionId", sessionId);
 			parameters.put("formInstance", formInstance);
 			parameters.put("locationTagId",locationTagId);
+			Integer formfieldId = currField.getFormFieldId();
+			parameters.put("formFieldId", formfieldId); // CHICA-765 added form field id
 			EncounterService encounterService = Context.getEncounterService();
 			Encounter encounter = encounterService.getEncounter(encounterId);
 			locationId = encounter.getLocation().getLocationId();
