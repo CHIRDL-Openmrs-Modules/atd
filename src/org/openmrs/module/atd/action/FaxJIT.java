@@ -65,6 +65,7 @@ public class FaxJIT implements ProcessStateAction {
 		String username = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_USERNAME); 
 		String sender = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_SENDER); 
 		String defaultRecipient = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_RECIPIENT); 
+		
 		String wsdlLocation = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_WSDL_LOCATION); 
 		String priorityProperty= Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_PRIORITY); 
 		String resolutionPropterty= Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_RESOLUTION); 
@@ -74,8 +75,7 @@ public class FaxJIT implements ProcessStateAction {
 		Integer encounterId = session.getEncounterId();
 		
 		FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
-		Integer formId = formInstance.getFormId();
-		
+		Integer formId = formInstance.getFormId();	
 		Integer locationTagId = patientState.getLocationTagId();
 		Integer locationId = patientState.getLocationId();
 		
@@ -87,11 +87,11 @@ public class FaxJIT implements ProcessStateAction {
 				return;
 			}
 			
-			// see if the form needs to be faxed
+			// verify form needs to be faxed
 			FormAttributeValue formAttrVal = chirdlutilbackportsService.getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTRIBUTE_AUTO_FAX, 
 				locationTagId, locationId);
 			if (formAttrVal == null || !StringUtils.equalsIgnoreCase(formAttrVal.getValue(), ChirdlUtilConstants.GENERAL_INFO_TRUE)){
-				String message = "Error auto-faxing form - Location: " + locationId + " Form: " + formId;
+				String message = "Form " + formId + " is not set to auto-fax.  Location: " + locationId;
 				logError(sessionId, message, null);
 				return;
 			}
@@ -101,7 +101,7 @@ public class FaxJIT implements ProcessStateAction {
 					ChirdlUtilConstants.LOCATION_ATTR_CLINIC_FAX_NUMBER);
 			if (locAttrValFaxNumber == null || StringUtils.isBlank(locAttrValFaxNumber.getValue())){
 				String message = "Location: " + locationId + " Form: " + formId
-				        + " is set to auto-fax, but no clinicFaxNumber exists.";
+				        + " no clinicFaxNumber exists as a location attribute for this form.";
 				logError(sessionId, message, null);
 				return;
 			}
@@ -112,13 +112,12 @@ public class FaxJIT implements ProcessStateAction {
 					ChirdlUtilConstants.FORM_ATTRIBUTE_IMAGE_DIRECTORY, locationTagId, locationId);
 			if (imageDirectoryAttrValue == null || StringUtils.isBlank(imageDirectoryAttrValue.getValue())){
 				String message = "Location: " + locationId + " Form: " + formId
-				        + " is set to auto-fax, but the image directory cannot be found for the form.";
+				        + " fax image directory cannot be found for this form.";
 				logError(sessionId, message, null);
 				return;
 			}
 			
-			// check to see if the file exists
-			//File imageFile = IOUtil.searchForImageFile(formInstance.toString(), imageDirectoryAttrValue.getValue());
+			//Check to see if the image file exists
 			HashSet<String> extensions = new HashSet<String>();
 			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_PDF);
 			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_TIF);
