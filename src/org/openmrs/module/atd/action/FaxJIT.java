@@ -171,6 +171,7 @@ public class FaxJIT implements ProcessStateAction {
 					
 				FaxUtil.faxFileByWebService(imageFile, wsdlLocation, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
 						faxNumber, username, password, sender, recipient, clinic, patient, formName, resolution, priority, sendTime);
+				log.info("Form sent to fax web service for patient_id: " + patient.getPatientId() + " clinic: " + clinic);
 							
 			}
 		}
