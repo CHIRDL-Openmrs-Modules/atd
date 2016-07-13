@@ -87,7 +87,7 @@ public class FaxJIT implements ProcessStateAction {
 		try {
 			//check wsdl location property
 			if (StringUtils.isBlank(wsdlLocation)){
-				String message = "Wsdl location global property for the fax web service is null or empty.";
+				String message = "Global property for the fax web service wsdl location is null or empty.";
 				logError(sessionId, message, null);
 				return;
 			}
@@ -172,13 +172,13 @@ public class FaxJIT implements ProcessStateAction {
 					
 				FaxUtil.faxFileByWebService(imageFile, wsdlLocation, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
 						faxNumber, username, password, sender, recipient, clinic, patient, formName, resolution, priority, sendTime);
-				log.info("Form " + formName + " was sent to the fax web service for patient_id: " 
-						+ patient.getPatientId() + " clinic: " + clinic + "recipient: " + recipient);
+				log.info("Form " + formName + " was submitted to the fax web service for patient_id: " 
+						+ patient.getPatientId() + " clinic: " + clinic + " recipient: " + recipient);
 							
 			}
 		}
 		catch (Exception e) {
-			String message = "Error auto-faxing form - Location: " + locationId + " Form: " + formId;
+			String message = "Exception auto-faxing form - Location: " + locationId + " Form: " + formId;
 			logError(sessionId, message, e);
 		}
 		finally {
@@ -189,9 +189,15 @@ public class FaxJIT implements ProcessStateAction {
 	}
 	
 	private void logError(Integer sessionId, String message, Throwable e) {
-		log.error("Error auto-faxing form");
-		log.error(message);
-		Error Error = new Error("Error", "General Error", message, null, new Date(), sessionId);
+		String stack = null;
+		if (e != null){
+			log.error(message, e );
+			stack = org.openmrs.module.chirdlutil.util.Util.getStackTrace((Exception) e);
+		}
+		else {
+			log.error(message);
+		} 
+		Error Error = new Error("Error", "General Error", message, stack, new Date(), sessionId);
 		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		chirdlutilbackportsService.saveError(Error);
 	}
