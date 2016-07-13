@@ -7,11 +7,13 @@ import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.Patient;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
@@ -37,12 +39,15 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
 /**
  * @author Steve McKee
  */
+/**
+ * Faxes JIT form images using an online fax webservice. 
+ * Forms must be designated as auto-fax.
+ * @author msheley
+ *
+ */
 public class FaxJIT implements ProcessStateAction {
 	
-	private static final int FAX_PRIORITY_HIGH = 2;
-	private static final int FAX_RESOLUTION_HIGH = 1;
 	private static Log log = LogFactory.getLog(FaxJIT.class);
-	private static final String EMPTY_STRING = ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING;
 	
 	/**
 	 * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#processAction(org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction, org.openmrs.Patient, org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState, java.util.HashMap)
@@ -51,29 +56,29 @@ public class FaxJIT implements ProcessStateAction {
 	                          HashMap<String, Object> parameters) {
 
 		// lookup the patient again to avoid lazy initialization errors
-		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
-		PatientService patientService = Context.getPatientService();
+		
 		ATDService atdService = Context.getService(ATDService.class);
-		Integer patientId = patient.getPatientId();
-		patient = patientService.getPatient(patientId);
+		FormService formService = Context.getFormService();
+		
 		State currState = patientState.getState();
 		Integer sessionId = patientState.getSessionId();
 		int priority = ChirdlUtilConstants.FAX_PRIORITY_NORMAL; //Default
 		int resolution = ChirdlUtilConstants.FAX_RESOLUTION_HIGH; //Default
 		
-		String password = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_PASSWORD);
-		String username = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_USERNAME); 
-		String sender = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_SENDER); 
-		String defaultRecipient = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_RECIPIENT); 
+		AdministrationService administrationService = Context.getAdministrationService();
+		String password = administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_PASSWORD);
+		String username = administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_USERNAME); 
+		String sender = administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_SENDER); 
+		String defaultRecipient = administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_RECIPIENT); 
 		
-		String wsdlLocation = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_WSDL_LOCATION); 
-		String priorityProperty= Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_PRIORITY); 
-		String resolutionPropterty= Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_RESOLUTION); 
-		String sendTime = Context.getAdministrationService().getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_SEND_TIME); 
+		String wsdlLocation = administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_WSDL_LOCATION); 
+		String priorityProperty= administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_PRIORITY); 
+		String resolutionPropterty= administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_RESOLUTION); 
+		String sendTime = administrationService.getGlobalProperty(ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_SEND_TIME); 
 		
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Session session = chirdlutilbackportsService.getSession(sessionId);
 		Integer encounterId = session.getEncounterId();
-		
 		FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
 		Integer formId = formInstance.getFormId();	
 		Integer locationTagId = patientState.getLocationTagId();
@@ -82,7 +87,7 @@ public class FaxJIT implements ProcessStateAction {
 		try {
 			//check wsdl location property
 			if (StringUtils.isBlank(wsdlLocation)){
-				String message = "Unable to fax form instance: " + formInstance.toString() + ", because wsdl location property for fax web service is null or empty.";
+				String message = "Wsdl location global property for the fax web service is null or empty.";
 				logError(sessionId, message, null);
 				return;
 			}
@@ -90,8 +95,12 @@ public class FaxJIT implements ProcessStateAction {
 			// verify form needs to be faxed
 			FormAttributeValue formAttrVal = chirdlutilbackportsService.getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTRIBUTE_AUTO_FAX, 
 				locationTagId, locationId);
+			
+			Form form = formService.getForm(formId);
+			String formName = (form != null) ? form.getName() : "";
+			
 			if (formAttrVal == null || !StringUtils.equalsIgnoreCase(formAttrVal.getValue(), ChirdlUtilConstants.GENERAL_INFO_TRUE)){
-				String message = "Form " + formId + " is not set to auto-fax.  Location: " + locationId;
+				String message = "Form " + formName + " is not designated as auto-fax in form attributes.";
 				logError(sessionId, message, null);
 				return;
 			}
@@ -100,8 +109,7 @@ public class FaxJIT implements ProcessStateAction {
 			LocationAttributeValue locAttrValFaxNumber = chirdlutilbackportsService.getLocationAttributeValue(locationId,
 					ChirdlUtilConstants.LOCATION_ATTR_CLINIC_FAX_NUMBER);
 			if (locAttrValFaxNumber == null || StringUtils.isBlank(locAttrValFaxNumber.getValue())){
-				String message = "Location: " + locationId + " Form: " + formId
-				        + " no clinicFaxNumber exists as a location attribute for this form.";
+				String message = "No clinic fax number exists as a location attribute for location: " + locationId;
 				logError(sessionId, message, null);
 				return;
 			}
@@ -111,13 +119,12 @@ public class FaxJIT implements ProcessStateAction {
 			FormAttributeValue imageDirectoryAttrValue = chirdlutilbackportsService.getFormAttributeValue(formId, 
 					ChirdlUtilConstants.FORM_ATTRIBUTE_IMAGE_DIRECTORY, locationTagId, locationId);
 			if (imageDirectoryAttrValue == null || StringUtils.isBlank(imageDirectoryAttrValue.getValue())){
-				String message = "Location: " + locationId + " Form: " + formId
-				        + " fax image directory cannot be found for this form.";
+				String message = "Fax image directory attribute does not exist for formId: " + formId + " Form Name: " + formName;
 				logError(sessionId, message, null);
 				return;
 			}
 			
-			//Check to see if the image file exists
+			//Check that image file exists.
 			HashSet<String> extensions = new HashSet<String>();
 			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_PDF);
 			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_TIF);
@@ -128,7 +135,7 @@ public class FaxJIT implements ProcessStateAction {
 							
 				String recipient = defaultRecipient;
 				
-				// try to get the provider's name
+				// get the provider's name
 				HashMap<String, Object> params = new HashMap<String, Object>();
 				params.put(ChirdlUtilConstants.PARAMETER_ENCOUNTER_ID,encounterId);
 				Result result = atdService.evaluateRule(ChirdlUtilConstants.RULE_PROVIDER_NAME, patient, params);
@@ -139,7 +146,7 @@ public class FaxJIT implements ProcessStateAction {
 				// get the clinic name
 				LocationAttributeValue locAttrValueClinicDisplayName = chirdlutilbackportsService.getLocationAttributeValue(locationId,
 						ChirdlUtilConstants.LOCATION_ATTR_CLINIC_DISPLAY_NAME);
-				String clinic = EMPTY_STRING;
+				String clinic = ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING;
 				if (locAttrValueClinicDisplayName != null && !StringUtils.isBlank(locAttrValueClinicDisplayName.getValue())){
 					clinic = locAttrValueClinicDisplayName.getValue();
 				}
@@ -147,18 +154,12 @@ public class FaxJIT implements ProcessStateAction {
 				// get the form display name
 				FormAttributeValue displayNameVal = chirdlutilbackportsService.getFormAttributeValue(formId, 
 									ChirdlUtilConstants.FORM_ATTR_DISPLAY_NAME, locationTagId, locationId);
-				String formName = null;
+				
 				if (displayNameVal != null && !StringUtils.isBlank(displayNameVal.getValue())) {
 					formName = displayNameVal.getValue();
-				} else {
-					FormService formService = Context.getFormService();
-					Form form = formService.getForm(formId);
-					if (form != null) {
-						formName = form.getName();
-					}
 				}
 				
-				//isNumeric() returns true if empty string.  
+				//Method isNumeric() returns true if empty string.  
 				//Add check for whitespace to make sure it is truly numeric.
 				//Newer version of Apache Commons will fix this.
 				if (StringUtils.isNumeric(resolutionPropterty) && !StringUtils.isWhitespace(resolutionPropterty)) {
@@ -171,7 +172,8 @@ public class FaxJIT implements ProcessStateAction {
 					
 				FaxUtil.faxFileByWebService(imageFile, wsdlLocation, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
 						faxNumber, username, password, sender, recipient, clinic, patient, formName, resolution, priority, sendTime);
-				log.info("Form sent to fax web service for patient_id: " + patient.getPatientId() + " clinic: " + clinic);
+				log.info("Form " + formName + " was sent to the fax web service for patient_id: " 
+						+ patient.getPatientId() + " clinic: " + clinic + "recipient: " + recipient);
 							
 			}
 		}
