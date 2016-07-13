@@ -90,5 +90,6 @@
 	<classpathentry kind="lib" path="lib-common/chirdlutil-1.9.7.jar"/>
 	<classpathentry kind="lib" path="lib-common/dss-2.31.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/faxws-client.jar"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutil-1.9.8.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
