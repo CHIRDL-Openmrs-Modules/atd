@@ -87,7 +87,7 @@ public class FaxJIT implements ProcessStateAction {
 		try {
 			//check wsdl location property
 			if (StringUtils.isBlank(wsdlLocation)){
-				String message = "Global property for the fax web service wsdl location is null or empty.";
+				String message = "Global property '" + ChirdlUtilConstants.GLOBAL_PROP_OUTGOING_FAX_WSDL_LOCATION + "', for the fax web service wsdl location is null or empty.";
 				logError(sessionId, message, null);
 				return;
 			}
@@ -119,7 +119,7 @@ public class FaxJIT implements ProcessStateAction {
 			FormAttributeValue imageDirectoryAttrValue = chirdlutilbackportsService.getFormAttributeValue(formId, 
 					ChirdlUtilConstants.FORM_ATTRIBUTE_IMAGE_DIRECTORY, locationTagId, locationId);
 			if (imageDirectoryAttrValue == null || StringUtils.isBlank(imageDirectoryAttrValue.getValue())){
-				String message = "Fax image directory attribute does not exist for formId: " + formId + " Form Name: " + formName;
+				String message = "Fax image directory attribute, '" + ChirdlUtilConstants.FORM_ATTRIBUTE_IMAGE_DIRECTORY + "', is null or empty for formId: " + formId + " Form Name: " + formName;
 				logError(sessionId, message, null);
 				return;
 			}
