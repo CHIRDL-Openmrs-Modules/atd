@@ -87,7 +87,6 @@
 	<classpathentry kind="lib" path="lib-common/opencsv/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="lib-common/itextpdf-5.1.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.4.1.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutil-1.9.7.jar"/>
 	<classpathentry kind="lib" path="lib-common/dss-2.31.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/faxws-client.jar"/>
 	<classpathentry kind="lib" path="lib-common/chirdlutil-1.9.8.jar"/>

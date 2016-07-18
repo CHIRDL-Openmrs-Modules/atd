@@ -99,9 +99,8 @@ public class FaxJIT implements ProcessStateAction {
 			Form form = formService.getForm(formId);
 			String formName = (form != null) ? form.getName() : "";
 			
+			//check if auto-fax form attribute value is true
 			if (formAttrVal == null || !StringUtils.equalsIgnoreCase(formAttrVal.getValue(), ChirdlUtilConstants.GENERAL_INFO_TRUE)){
-				String message = "Form " + formName + " is not designated as auto-fax in form attributes.";
-				logError(sessionId, message, null);
 				return;
 			}
 			
