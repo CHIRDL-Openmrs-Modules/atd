@@ -151,10 +151,12 @@ public class HibernateATDDAO implements ATDDAO
 		qry.executeUpdate();
 		
 		//retire all the other states for the encounters of the retired states
-		sql = "update chirdlutilbackports_patient_state a, (select session_id from chirdlutilbackports_session "+
-		"where encounter_id in (select encounter_id from chirdlutilbackports_session where session_id "+
-		"in (select session_id from chirdlutilbackports_patient_state where retired=?)))b "+
-		"set a.retired=?,date_retired=NOW() where a.session_id=b.session_id and retired=?";
+		sql = "UPDATE chirdlutilbackports_patient_state a,"+
+				"       (SELECT session_id"+
+				"          FROM chirdlutilbackports_patient_state"+
+				"         WHERE retired = ?) b"+
+				"   SET a.retired = ?, date_retired = NOW()"+
+				" WHERE a.session_id = b.session_id AND retired = ?";
 		
 		qry = this.sessionFactory.getCurrentSession()
 		.createSQLQuery(sql);
