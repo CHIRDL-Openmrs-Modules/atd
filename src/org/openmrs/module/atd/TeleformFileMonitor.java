@@ -188,8 +188,8 @@ public class TeleformFileMonitor extends AbstractTask
 		}}}
 		
 		//TODO: Make the following two lines dependent on a new global property to control them.
-//		Thread thread = new Thread(new InitializeOldStates());
-//		thread.start();
+		Thread thread = new Thread(new InitializeOldStates());
+		thread.start();
 //		ThreadManager threadManager = ThreadManager.getInstance();
 //		threadManager.execute(new InitializeOldStates(), ThreadManager.NO_LOCATION);
 	}
