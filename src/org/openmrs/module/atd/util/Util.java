@@ -659,6 +659,15 @@ public class Util {
 	 */
 	public static void voidObsForConcept(Concept concept,Integer encounterId, Integer formFieldId)
 	{
+		List<Obs> obs = findObsToVoid(concept,encounterId, formFieldId);
+		ObsService obsService = Context.getObsService();
+		
+		for(Obs currObs:obs){
+			obsService.voidObs(currObs, "voided due to rescan");
+		}
+	}
+	
+	private static List<Obs> findObsToVoid(Concept concept,Integer encounterId, Integer formFieldId){
 		EncounterService encounterService = Context.getService(EncounterService.class);
 		Encounter encounter = (Encounter) encounterService.getEncounter(encounterId);
 		ObsService obsService = Context.getObsService();
@@ -687,9 +696,16 @@ public class Util {
 			obs = obsService.getObservations(null, encounters, questions, null, null, null, null,
 					null, null, null, null, false);
 		}
+		return obs;
+	}
+	
+	public static void voidObsForConcept(Concept concept,Integer encounterId, Integer formFieldId, String voidReason)
+	{
+		List<Obs> obs = findObsToVoid(concept,encounterId, formFieldId);
+		ObsService obsService = Context.getObsService();
 		
 		for(Obs currObs:obs){
-			obsService.voidObs(currObs, "voided due to rescan");
+			obsService.voidObs(currObs, voidReason);
 		}
 	}
 }
