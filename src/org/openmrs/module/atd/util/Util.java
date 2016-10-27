@@ -659,12 +659,7 @@ public class Util {
 	 */
 	public static void voidObsForConcept(Concept concept,Integer encounterId, Integer formFieldId)
 	{
-		List<Obs> obs = findObsToVoid(concept,encounterId, formFieldId);
-		ObsService obsService = Context.getObsService();
-		
-		for(Obs currObs:obs){
-			obsService.voidObs(currObs, "voided due to rescan");
-		}
+		voidObsForConcept(concept,encounterId, formFieldId,"voided due to rescan");
 	}
 	
 	private static List<Obs> findObsToVoid(Concept concept,Integer encounterId, Integer formFieldId){
