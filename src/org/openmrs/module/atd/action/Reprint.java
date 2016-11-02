@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
@@ -101,26 +102,35 @@ public class Reprint implements ProcessStateAction
 			FormAttributeValue fav = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
 				formInstance.getFormId(), "mobileOnly", locationTagId, locationId);
 			if (fav == null || !"true".equalsIgnoreCase(fav.getValue())) {
-				String mergeDirectory = IOUtil
-						.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
-								.getFormAttributeValue(formInstance.getFormId(),
-										"defaultMergeDirectory",locationTagId,formInstance.getLocationId()));
+
+				// DWE CHICA-821 Made changes below to check both the merge and pending directory. Previous functionality only checked the merge directory
+				String mergeDirectory = org.openmrs.module.chirdlutilbackports.util.Util.getFormAttributeValue(formInstance.getFormId(),
+						ChirdlUtilConstants.FORM_ATTR_DEFAULT_MERGE_DIRECTORY, locationTagId, formInstance.getLocationId());
+				
 				if (mergeDirectory != null)
 				{
-					File dir = new File(mergeDirectory);
-					for (String fileName : dir.list())
+					File[] fileDirectories = {new File(mergeDirectory), new File(mergeDirectory, ChirdlUtilConstants.FILE_PENDING + File.separator)};
+					
+					outerLoop:
+					for(File fileDirectory : fileDirectories) // Check the merge and pending directory
 					{
-						if (fileName.startsWith(formInstance.toString() + "."))
+						if(fileDirectory.exists())
 						{
-							fileName = mergeDirectory + "/" + fileName;
-							IOUtil.renameFile(fileName, fileName.substring(0,
-									fileName.lastIndexOf("."))
-									+ ".xml");
-							StateManager.endState(patientState);
-							State currState = patientState.getState();
-							BaseStateActionHandler.changeState(patient, sessionId, currState,
-								stateAction,parameters,locationTagId,locationId);
-							break;
+							for (String fileName : fileDirectory.list())
+							{
+								if (fileName.startsWith(formInstance.toString() + "."))
+								{
+									fileName = fileDirectory.getAbsolutePath() + File.separator + fileName;
+									IOUtil.renameFile(fileName, fileName.substring(0,
+											fileName.lastIndexOf("."))
+											+ ChirdlUtilConstants.FILE_EXTENSION_XML);
+									StateManager.endState(patientState);
+									State currState = patientState.getState();
+									BaseStateActionHandler.changeState(patient, sessionId, currState,
+										stateAction,parameters,locationTagId,locationId);
+									break outerLoop;
+								}
+							}
 						}
 					}
 				} else
