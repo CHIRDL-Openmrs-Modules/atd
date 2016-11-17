@@ -8,6 +8,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.Patient;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.FormService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicContext;
@@ -81,11 +83,13 @@ public class CREATE_JIT implements Rule
 			Map<String, Object> parameters) throws LogicException
 	{
 		PatientService patientService = Context.getPatientService();
+		FormService formService = Context.getFormService();
 		Patient patient = patientService.getPatient(patientId);
 		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
 		Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_2);
 		Object param3Object = parameters.get(ChirdlUtilConstants.PARAMETER_3);
 		Object param4Object = parameters.get(ChirdlUtilConstants.PARAMETER_3); 
+		Integer encounterId = (Integer)parameters.get(ChirdlUtilConstants.PARAMETER_ENCOUNTER_ID);
 		
 		if (formName != null && formName instanceof String){
 			log.error(formName.toString());
@@ -99,7 +103,6 @@ public class CREATE_JIT implements Rule
 		if (param4Object != null && param4Object instanceof String){
 			log.error(param4Object.toString());
 		}
-		
 		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
@@ -116,6 +119,7 @@ public class CREATE_JIT implements Rule
 		}
 			
 		try {
+			
 			HashMap<String,Object> actionParameters = new HashMap<String,Object>();
 			if (param2Object != null && param2Object instanceof String){
 				String trigger = (String) param2Object;
@@ -128,14 +132,17 @@ public class CREATE_JIT implements Rule
 				
 				if (autoPrint.trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
 					
-					//Request duplicate check
+					//Request for duplicate check
 					if (param4Object != null && param4Object instanceof String){
 						String checkJITParam = (String) param4Object;
-						if (checkJITParam != null 
-								&& (checkJITParam.equalsIgnoreCase(PERFORM_CHECK_IF_JIT_CREATED)
+					
+						if (checkJITParam != null && (checkJITParam.equalsIgnoreCase(PERFORM_CHECK_IF_JIT_CREATED)
 										||checkJITParam.equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)  )){
-							if (!hasJITBeenCreated()){
-								
+							
+							PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(
+										encounterId, formService.getForm(formName).getFormId());
+							
+							if (patientState != null){
 								actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
 							}
 							
