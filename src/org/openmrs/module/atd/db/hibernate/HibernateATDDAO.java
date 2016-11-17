@@ -1679,4 +1679,29 @@ public class HibernateATDDAO implements ATDDAO
     	}
 		return criteria.list();
 	}
+    
+    /**
+     * Checks to see if at least one box is checked for this rule and encounter 
+     * in the atd_statistics table
+     * 
+     * @param encounterId
+     * @param ruleId
+     * @return
+     */
+    public boolean oneBoxChecked(Integer encounterId, Integer ruleId)
+	{
+    	boolean oneBoxChecked = false;
+    	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
+    	criteria.add(Expression.eq("encounterId", encounterId));
+    	criteria.add(Expression.eq("ruleId", ruleId));
+    	criteria.add(Expression.like("answer", "%Y%"));
+    	
+		List results = criteria.list();
+		
+		if(results != null && results.size()>0){
+			oneBoxChecked = true;
+		}
+		
+		return oneBoxChecked;
+	}
 }
