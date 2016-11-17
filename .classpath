@@ -77,7 +77,7 @@
 	<classpathentry kind="lib" path="lib-common/jibx/xmlpull_1_1_4.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xpp3.jar"/>
 	<classpathentry kind="lib" path="lib-common/logic-0.5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib-common/openmrs-api-1.7.3.0-dev.jar"/>
+	<classpathentry kind="lib" path="lib-common/openmrs-api-1.7.3.0-dev.jar" sourcepath="/openmrs-1.7.x"/>
 	<classpathentry kind="lib" path="lib-common/tests-openmrs-api-1.7.2.19959-dev.jar"/>
 	<classpathentry kind="lib" path="lib-common/web-openmrs-api-1.7.2.19959-dev.jar"/>
 	<classpathentry kind="lib" path="lib-common/zxing/zxing-core-2.2.jar"/>
@@ -88,7 +88,7 @@
 	<classpathentry kind="lib" path="lib-common/itextpdf-5.1.2.jar"/>
 	<classpathentry kind="lib" path="lib-common/faxws-client.jar"/>
 	<classpathentry kind="lib" path="lib-common/chirdlutil-1.11.0.jar"/>
-	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.5.0.jar"/>
-	<classpathentry kind="lib" path="lib-common/dss-2.31.3.jar"/>
+	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.5.0.jar" sourcepath="/chirdlutilbackports/src"/>
+	<classpathentry kind="lib" path="lib-common/dss-2.31.3.jar" sourcepath="/dss/src"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

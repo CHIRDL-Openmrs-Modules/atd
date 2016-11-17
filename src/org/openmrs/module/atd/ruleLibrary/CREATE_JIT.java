@@ -28,6 +28,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
 
 public class CREATE_JIT implements Rule
 {
+	private static final String PERFORM_CHECK_IF_JIT_CREATED = "checkIfJITCreated";
 	private Log log = LogFactory.getLog(this.getClass());
 
 	/**
@@ -84,45 +85,79 @@ public class CREATE_JIT implements Rule
 		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
 		Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_2);
 		Object param3Object = parameters.get(ChirdlUtilConstants.PARAMETER_3);
+		Object param4Object = parameters.get(ChirdlUtilConstants.PARAMETER_3); 
+		
+		if (formName != null && formName instanceof String){
+			log.error(formName.toString());
+		}
+		if (param2Object != null && param2Object instanceof String){
+			log.error(param2Object.toString());
+		}
+		if (param3Object != null && param3Object instanceof String){
+			log.error(param3Object.toString());
+		}
+		if (param4Object != null && param4Object instanceof String){
+			log.error(param4Object.toString());
+		}
+		
 		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
-		if(sessionId != null){
-			Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
-			FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
-			Integer locationId = formInstance.getLocationId();
-			State currState = getCreateState(formName, locationTagId, locationId);
-			if (currState == null) {
-				return Result.emptyResult();
+		if (sessionId == null) {
+			return Result.emptyResult();
+		}
+		
+		Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
+		FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
+		Integer locationId = formInstance.getLocationId();
+		State currState = getCreateState(formName, locationTagId, locationId);
+		if (currState == null) {
+			return Result.emptyResult();
+		}
+			
+		try {
+			HashMap<String,Object> actionParameters = new HashMap<String,Object>();
+			if (param2Object != null && param2Object instanceof String){
+				String trigger = (String) param2Object;
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
 			}
 			
-			try {
-				HashMap<String,Object> actionParameters = new HashMap<String,Object>();
-				if (param2Object != null && param2Object instanceof String){
-					String trigger = (String) param2Object;
-					actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
-				}
+			//Check autoprint
+			if (param3Object != null && param3Object instanceof String){
+				String autoPrint = (String) param3Object;
 				
-				if (param3Object != null && param3Object instanceof String){
-					String autoPrint = (String) param3Object;
-					actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
+				if (autoPrint.trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
+					
+					//Request duplicate check
+					if (param4Object != null && param4Object instanceof String){
+						String checkJITParam = (String) param4Object;
+						if (checkJITParam != null 
+								&& (checkJITParam.equalsIgnoreCase(PERFORM_CHECK_IF_JIT_CREATED)
+										||checkJITParam.equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)  )){
+							if (!hasJITBeenCreated()){
+								
+								actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
+							}
+							
+						}
+					}	
 				}
-				
-				actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
-            	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
-            		locationTagId,
-            		locationId,
-            		BaseStateActionHandler.getInstance());
-            	FormInstance formInst = patientState.getFormInstance();
-            	if (formInst != null) {
-            		formInstTag = new FormInstanceTag(formInst, locationTagId);
-            	}
-            }
-            catch (Exception e) {
-	            log.error("Error creating JIT",e);
-            }
-		}	
-		
+			}
+			
+			actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
+        	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
+        		locationTagId,
+        		locationId,
+        		BaseStateActionHandler.getInstance());
+        	FormInstance formInst = patientState.getFormInstance();
+        	if (formInst != null) {
+        		formInstTag = new FormInstanceTag(formInst, locationTagId);
+        	}
+        }
+        catch (Exception e) {
+            log.error("Error creating JIT",e);
+        }
+	
 		if (formInstTag != null) {
 			return new Result(formInstTag.toString());
 		}
@@ -130,6 +165,11 @@ public class CREATE_JIT implements Rule
 		return Result.emptyResult();
 	}
 	
+	private boolean hasJITBeenCreated() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	protected State getCreateState(String formName, Integer locationTagId, Integer locationId) 
 	{
 		String stateName = ChirdlUtilConstants.STATE_JIT_CREATE;
