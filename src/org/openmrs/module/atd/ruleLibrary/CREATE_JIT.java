@@ -30,7 +30,6 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
 
 public class CREATE_JIT implements Rule
 {
-	private static final String PERFORM_CHECK_IF_JIT_CREATED = "checkIfJITCreated";
 	private Log log = LogFactory.getLog(this.getClass());
 
 	/**
@@ -86,23 +85,24 @@ public class CREATE_JIT implements Rule
 		FormService formService = Context.getFormService();
 		Patient patient = patientService.getPatient(patientId);
 		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
-		Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_2);
-		Object param3Object = parameters.get(ChirdlUtilConstants.PARAMETER_3);
-		Object param4Object = parameters.get(ChirdlUtilConstants.PARAMETER_3); 
+		Object triggerObject = parameters.get(ChirdlUtilConstants.PARAMETER_2);
+		Object autoPrintObject = parameters.get(ChirdlUtilConstants.PARAMETER_3);
+		Object ignoreJitCreatedObject = parameters.get(ChirdlUtilConstants.PARAMETER_4); 
 		Integer encounterId = (Integer)parameters.get(ChirdlUtilConstants.PARAMETER_ENCOUNTER_ID);
 		
 		if (formName != null && formName instanceof String){
 			log.error(formName.toString());
 		}
-		if (param2Object != null && param2Object instanceof String){
-			log.error(param2Object.toString());
+		if (triggerObject != null && triggerObject instanceof String){
+			log.error(triggerObject.toString());
 		}
-		if (param3Object != null && param3Object instanceof String){
-			log.error(param3Object.toString());
+		if (autoPrintObject != null && autoPrintObject instanceof String){
+			log.error(autoPrintObject.toString());
 		}
-		if (param4Object != null && param4Object instanceof String){
-			log.error(param4Object.toString());
+		if (ignoreJitCreatedObject != null && autoPrintObject instanceof String){
+			log.error(autoPrintObject.toString());
 		}
+		
 		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
@@ -121,36 +121,34 @@ public class CREATE_JIT implements Rule
 		try {
 			
 			HashMap<String,Object> actionParameters = new HashMap<String,Object>();
-			if (param2Object != null && param2Object instanceof String){
-				String trigger = (String) param2Object;
+			if (triggerObject != null && triggerObject instanceof String){
+				String trigger = (String) triggerObject;
 				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
 			}
 			
 			//Check autoprint
-			if (param3Object != null && param3Object instanceof String){
-				String autoPrint = (String) param3Object;
+			if (autoPrintObject != null && autoPrintObject instanceof String){
+				String autoPrint = (String) autoPrintObject;
 				
 				if (autoPrint.trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
-					
-					//Request for duplicate check
-					if (param4Object != null && param4Object instanceof String){
-						String checkJITParam = (String) param4Object;
-					
-						if (checkJITParam != null && (checkJITParam.equalsIgnoreCase(PERFORM_CHECK_IF_JIT_CREATED)
-										||checkJITParam.equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)  )){
+					boolean doAutoprint = true;
+					if (ignoreJitCreatedObject == null || !(ignoreJitCreatedObject instanceof String)
+							|| !((String)ignoreJitCreatedObject).trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
+						
+						PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(encounterId, formService.getForm(formName).getFormId());
 							
-							PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(
-										encounterId, formService.getForm(formName).getFormId());
-							
-							if (patientState != null){
-								actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
-							}
-							
+						if (patientState != null){
+							doAutoprint = false;
 						}
-					}	
+					}
+					
+					if (doAutoprint){
+						actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
+					}
+						
 				}
 			}
-			
+						
 			actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
         	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
         		locationTagId,
