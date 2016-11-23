@@ -90,20 +90,6 @@ public class CREATE_JIT implements Rule
 		Object ignoreJitCreatedObject = parameters.get(ChirdlUtilConstants.PARAMETER_4); 
 		Integer encounterId = (Integer)parameters.get(ChirdlUtilConstants.PARAMETER_ENCOUNTER_ID);
 		
-		if (formName != null && formName instanceof String){
-			log.error(formName.toString());
-		}
-		if (triggerObject != null && triggerObject instanceof String){
-			log.error(triggerObject.toString());
-		}
-		if (autoPrintObject != null && autoPrintObject instanceof String){
-			log.error(autoPrintObject.toString());
-		}
-		if (ignoreJitCreatedObject != null && autoPrintObject instanceof String){
-			log.error(autoPrintObject.toString());
-		}
-		
-		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
 		if (sessionId == null) {
@@ -126,7 +112,6 @@ public class CREATE_JIT implements Rule
 				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
 			}
 			
-			//Check autoprint
 			if (autoPrintObject != null && autoPrintObject instanceof String){
 				String autoPrint = (String) autoPrintObject;
 				
