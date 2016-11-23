@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.Patient;
-import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
@@ -153,11 +152,6 @@ public class CREATE_JIT implements Rule
 		}
 		
 		return Result.emptyResult();
-	}
-	
-	private boolean hasJITBeenCreated() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	protected State getCreateState(String formName, Integer locationTagId, Integer locationId) 
