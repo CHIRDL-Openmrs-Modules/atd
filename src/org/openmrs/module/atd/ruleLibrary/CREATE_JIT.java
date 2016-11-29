@@ -24,6 +24,7 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.Session;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
@@ -82,12 +83,13 @@ public class CREATE_JIT implements Rule
 	{
 		PatientService patientService = Context.getPatientService();
 		FormService formService = Context.getFormService();
+		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Patient patient = patientService.getPatient(patientId);
 		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
 		Object triggerObject = parameters.get(ChirdlUtilConstants.PARAMETER_2);
 		Object autoPrintObject = parameters.get(ChirdlUtilConstants.PARAMETER_3);
 		Object ignoreJitCreatedObject = parameters.get(ChirdlUtilConstants.PARAMETER_4); 
-		Integer encounterId = (Integer)parameters.get(ChirdlUtilConstants.PARAMETER_ENCOUNTER_ID);
+		//Integer encounterId = (Integer)parameters.get(ChirdlUtilConstants.PARAMETER_ENCOUNTER_ID);
 		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
@@ -107,30 +109,23 @@ public class CREATE_JIT implements Rule
 			
 			HashMap<String,Object> actionParameters = new HashMap<String,Object>();
 			if (triggerObject != null && triggerObject instanceof String){
-				String trigger = (String) triggerObject;
-				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, (String) triggerObject);
 			}
 			
 			if (autoPrintObject != null && autoPrintObject instanceof String){
-				String autoPrint = (String) autoPrintObject;
-				
-				if (autoPrint.trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
-					boolean doAutoprint = true;
-					if (ignoreJitCreatedObject == null || !(ignoreJitCreatedObject instanceof String)
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, (String) autoPrintObject);
+			}
+			
+			if (ignoreJitCreatedObject == null || !(ignoreJitCreatedObject instanceof String)
 							|| !((String)ignoreJitCreatedObject).trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
 						
-						PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(encounterId, formService.getForm(formName).getFormId());
+				Session session = chirdlUtilBackportsService.getSession(sessionId);
+				PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(session.getEncounterId(), formService.getForm(formName).getFormId());
 							
-						if (patientState != null){
-							doAutoprint = false;
-						}
-					}
-					
-					if (doAutoprint){
-						actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
-					}
-						
+				if (patientState != null){
+					Result.emptyResult();;
 				}
+						
 			}
 						
 			actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
