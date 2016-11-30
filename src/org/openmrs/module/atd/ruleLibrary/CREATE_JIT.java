@@ -89,7 +89,6 @@ public class CREATE_JIT implements Rule
 		Object triggerObject = parameters.get(ChirdlUtilConstants.PARAMETER_2);
 		Object autoPrintObject = parameters.get(ChirdlUtilConstants.PARAMETER_3);
 		Object ignoreJitCreatedObject = parameters.get(ChirdlUtilConstants.PARAMETER_4); 
-		//Integer encounterId = (Integer)parameters.get(ChirdlUtilConstants.PARAMETER_ENCOUNTER_ID);
 		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
