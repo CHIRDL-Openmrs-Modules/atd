@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
@@ -294,4 +295,14 @@ public interface ATDService
      * @return sorted list of Statistics
      */
     public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc);
+    
+    /**
+     * Checks to see if at least one box is checked for this rule and encounter 
+     * in the atd_statistics table
+     * 
+     * @param encounterId
+     * @param ruleId
+     * @return
+     */
+    public boolean oneBoxChecked(Integer encounterId, Integer ruleId);
 }

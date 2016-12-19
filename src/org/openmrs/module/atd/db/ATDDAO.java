@@ -211,4 +211,14 @@ public interface ATDDAO {
      * @return sorted list of Statistics
      */
     public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc);
+    
+    /**
+     * Checks to see if at least one box is checked for this rule and encounter 
+     * in the atd_statistics table
+     * 
+     * @param encounterId
+     * @param ruleId
+     * @return
+     */
+    public boolean oneBoxChecked(Integer encounterId, Integer ruleId);
 }

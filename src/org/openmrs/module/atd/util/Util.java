@@ -650,14 +650,26 @@ public class Util {
 	}
 	
 	/**
+	 * 
+	 * 
+	 * @param concept
+	 * @param encounterId
+	 * @param formFieldId
+	 */
+	public static void voidObsForConcept(Concept concept,Integer encounterId, Integer formFieldId){
+		voidObsForConcept(concept,encounterId, formFieldId, "voided due to rescan");
+	}
+	
+	/**
 	 * DWE CHICA-430 This was missing in the atd module
 	 * This has also been updated to match the voidObsForConcept() method that was 
 	 * modified as part of CHICA-437 in the chica module
+	 * This method is in the atd module in case an atd rule needs it.
 	 * @param concept
 	 * @param encounterId
 	 * @param formFieldId - the form field id or null if one is not used
 	 */
-	public static void voidObsForConcept(Concept concept,Integer encounterId, Integer formFieldId)
+	public static void voidObsForConcept(Concept concept,Integer encounterId, Integer formFieldId, String voidReason)
 	{
 		EncounterService encounterService = Context.getService(EncounterService.class);
 		Encounter encounter = (Encounter) encounterService.getEncounter(encounterId);
@@ -689,7 +701,7 @@ public class Util {
 		}
 		
 		for(Obs currObs:obs){
-			obsService.voidObs(currObs, "voided due to rescan");
+			obsService.voidObs(currObs,voidReason);
 		}
 	}
 }

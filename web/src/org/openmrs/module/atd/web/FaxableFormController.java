@@ -112,11 +112,11 @@ public class FaxableFormController extends SimpleFormController {
 						locationTagId, locationId);
 					if (value != null && value.getValue() != null) {
 						// Create and save the new scan value.
-						setupFormAttributeValue(chirdlutilBackportsService, value, installationDirectory, form, locationId, locationTagId, 
+						setupFormAttributeValue(chirdlutilBackportsService, form, locationId, locationTagId, 
 							exportAttr, newExportValue);
 						
 						// Create and save the new image value.
-						setupFormAttributeValue(chirdlutilBackportsService, value, serverName, form, locationId, locationTagId, 
+						setupFormAttributeValue(chirdlutilBackportsService, form, locationId, locationTagId, 
 							imageAttr, newImageValue);
 					}
 				}
@@ -127,27 +127,10 @@ public class FaxableFormController extends SimpleFormController {
 		createFaxDirectories(formId, installationDirectory, currentFormName);
 	}
 	
-	private void setupFormAttributeValue(ChirdlUtilBackportsService chirdlutilBackportsService, FormAttributeValue mergeValue,String installationDirectory, 
+	private void setupFormAttributeValue(ChirdlUtilBackportsService chirdlutilBackportsService, 
 	                                  Form form, Integer locationId, Integer locationTagId, FormAttribute formAttr, 
 	                                  String newValue) {
-
-		FormAttributeValue exportValue = chirdlutilBackportsService.getFormAttributeValue(mergeValue.getFormId(), formAttr.getName(), 
-			mergeValue.getLocationTagId(), mergeValue.getLocationId());
-		if (exportValue != null && exportValue.getValue() != null) {
-			// A value already exists...we need to replace it.
-			exportValue.setValue(newValue);
-		} else {
-			// A value does not exist...we need to create it.
-			exportValue = new FormAttributeValue();
-			exportValue.setFormAttributeId(formAttr.getFormAttributeId());
-			exportValue.setFormId(form.getFormId());
-			exportValue.setLocationId(locationId);
-			exportValue.setLocationTagId(locationTagId);
-			exportValue.setValue(newValue);
-		}
-		
-		// Save the value
-		chirdlutilBackportsService.saveFormAttributeValue(exportValue);
+		chirdlutilBackportsService.saveFormAttributeValue(form.getFormId(), formAttr.getName(), locationTagId, locationId, newValue);
 	}
 	
 	private List<Form> findAllVersionsOfForm(Form matchForm) {
