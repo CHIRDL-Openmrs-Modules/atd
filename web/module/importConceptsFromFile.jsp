@@ -24,6 +24,7 @@
   	padding: 0px, 0px, 10px, 0px;
   }
   </style>
+  <script>var ctx = "${pageContext.request.contextPath}"</script>
 <html>
     <body>
 		<p><h3>Import Concepts:</h3></p>

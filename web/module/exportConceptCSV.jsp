@@ -24,6 +24,7 @@
 	}
 	
 </style>
+<script>var ctx = "${pageContext.request.contextPath}"</script>
 </head>
 
 <body>

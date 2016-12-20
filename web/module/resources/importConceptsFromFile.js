@@ -4,7 +4,7 @@
 var progressbar = $( "#progressbar" );
 var progressLabel = $( ".progress-label" );
 var checkProgressTimer;
-var ajaxURL = '/openmrs/moduleServlet/atd/importConceptsFromFile';
+var ajaxURL = ctx + '/moduleServlet/atd/importConceptsFromFile';
 var changeEventText = 'Import Progress: ';
 var completeEventText = 'Import Complete!';
 var canceledEventText = 'Import Canceled: ';
