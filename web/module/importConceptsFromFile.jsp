@@ -6,6 +6,7 @@
     type="text/css" rel="stylesheet" />
 <script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery-ui-1.11.4.min.js"></script>
+<script>var ctx = "${pageContext.request.contextPath}";</script>
 
 <style>
   .ui-progressbar {
@@ -24,7 +25,6 @@
   	padding: 0px, 0px, 10px, 0px;
   }
   </style>
-  <script>var ctx = "${pageContext.request.contextPath}"</script>
 <html>
     <body>
 		<p><h3>Import Concepts:</h3></p>
