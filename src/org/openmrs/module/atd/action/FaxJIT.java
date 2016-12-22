@@ -29,7 +29,7 @@ import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.Error;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.ChirdlLocationAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.Session;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
@@ -105,7 +105,7 @@ public class FaxJIT implements ProcessStateAction {
 			}
 			
 			// get the clinic fax number
-			LocationAttributeValue locAttrValFaxNumber = chirdlutilbackportsService.getLocationAttributeValue(locationId,
+			ChirdlLocationAttributeValue locAttrValFaxNumber = chirdlutilbackportsService.getLocationAttributeValue(locationId,
 					ChirdlUtilConstants.LOCATION_ATTR_CLINIC_FAX_NUMBER);
 			if (locAttrValFaxNumber == null || StringUtils.isBlank(locAttrValFaxNumber.getValue())){
 				String message = "No clinic fax number exists as a location attribute for location: " + locationId;
@@ -144,7 +144,7 @@ public class FaxJIT implements ProcessStateAction {
 				}
 				
 				// get the clinic name
-				LocationAttributeValue locAttrValueClinicDisplayName = chirdlutilbackportsService.getLocationAttributeValue(locationId,
+				ChirdlLocationAttributeValue locAttrValueClinicDisplayName = chirdlutilbackportsService.getLocationAttributeValue(locationId,
 						ChirdlUtilConstants.LOCATION_ATTR_CLINIC_DISPLAY_NAME);
 				String clinic = ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING;
 				if (locAttrValueClinicDisplayName != null && !StringUtils.isBlank(locAttrValueClinicDisplayName.getValue())){
