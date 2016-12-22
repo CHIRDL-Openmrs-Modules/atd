@@ -63,7 +63,7 @@ value="${fieldType.fieldTypeId}">${fieldType.name}</option>
 <table>
 <tr>
 <td><input type="text" name="concept_${formField.field.fieldId}" value="${formField.field.concept.name.name}" size="20"></td>
-<td><input type=button value="..." onClick="javascript:popUp('http://localhost:8080/openmrs/dictionary/index.htm')"></td>
+<td><input type=button value="..." onClick="javascript:popUp('${pageContext.request.contextPath}/dictionary/index.htm')"></td>
 </tr>
 </table>
 </td>
