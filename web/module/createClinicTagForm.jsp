@@ -21,6 +21,7 @@
 <form name="input" action="createClinicTagForm.form" method="post" enctype="multipart/form-data">
 <table>
 <tbody>
+<input type="hidden" name="form" value="createClinicTagForm" />
 <c:if test="${failedCreation != null}">
     <tr style="padding: 5px">
       <td colspan="2" style="padding: 0px 0px 10px 0px">
