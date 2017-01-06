@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <openmrs:require allPrivileges="Edit Users, Manage Location Tags, View Locations" otherwise="/login.htm" redirect="/module/atd/createClinicForm.form" />
-<link rel="stylesheet" type="text/css" href="$%7BpageContext.request.contextPath%7D/moduleResources/atd/atd.css"/>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"/>
 <script LANGUAGE="JavaScript">
     <!--
     // Nannette Thacker http://www.shiningstar.net

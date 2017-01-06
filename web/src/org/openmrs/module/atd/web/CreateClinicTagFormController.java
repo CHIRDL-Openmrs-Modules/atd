@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,17 +69,17 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		String tagName = request.getParameter(ChirdlUtilConstants.PARAMETER_TAG_NAME);
 		String view = getFormView();
 		
-		String form = request.getParameter("form");
-		map.put("form", form);
+		String form = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM);
+		map.put(ChirdlUtilConstants.PARAMETER_FORM, form);
 		LocationService locationService = Context.getLocationService();
 
-		if (form.equals(ChirdlUtilConstants.EDIT_LOC_TAG_ATTR_FORM) ) {
-			String submitAddLocTagAtt = request.getParameter("hiddenSubmit");
-			String submitLocTagAttr = request.getParameter("Finish");
+		if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) ) {
+			String submitAddLocTagAtt = request.getParameter(ChirdlUtilConstants.PARAMETER_HIDDEN_SUBMIT);
+			String submitLocTagAttr = request.getParameter(ChirdlUtilConstants.PARAMETER_FINISH);
 			
 			if (submitAddLocTagAtt != null && submitAddLocTagAtt.trim().length() > 0) {
 				try {
-					String tagAttrName = request.getParameter("name");
+					String tagAttrName = request.getParameter(ChirdlUtilConstants.PARAMETER_NAME);
 					String tagAttrDescription = request.getParameter(ChirdlUtilConstants.PARAMETER_DESCRIPTION);
 					
 					LocationTagAttribute locTagAttribute = 
@@ -93,7 +94,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 					return new ModelAndView(view, map);
 				} catch (Exception e) {
 					log.error("Error updating clinic location tag attribute values", e);
-					map.put("failedUpdation", "Failed updating clinic location tag attribute values: " + e.getMessage());
+					map.put("UpdateFailed", "Failed updating clinic location tag attribute values: " + e.getMessage());
 					return new ModelAndView(view, map);
 				}
 			} 
@@ -112,7 +113,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		String existingLocProp = null;
 		String existingLocTagProp = null;
 		
-		if (form.equals(ChirdlUtilConstants.CREATE_LOC_TAG_FORM) ) {
+		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) {
 			// Check to see if clinic tag name was specified.
 			if (tagName == null || tagName.trim().length() == 0) {
 				map.put("missingName", true);
@@ -136,7 +137,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 				return new ModelAndView(view, map);
 			}
 			
-			String username = request.getParameter("username");
+			String username = request.getParameter(ChirdlUtilConstants.PARAMETER_USERNAME);
 			// Check to see if username was specified.
 			if (username == null || username.trim().length() == 0) {
 				map.put("missingUsername", true);
@@ -153,7 +154,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 			}
 			
 			// Check to make sure a password was specified.
-			password = request.getParameter("password");
+			password = request.getParameter(ChirdlUtilConstants.PARAMETER_PASSWORD);
 			if (password == null || password.length() == 0) {
 				map.put("invalidPassword", true);
 				reloadValues(request, map);
@@ -198,15 +199,15 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		try {
 			createOrUpdateClinicTag(request, location, tagName);
 		} catch (Exception e) {
-			if (form.equals(ChirdlUtilConstants.CREATE_LOC_TAG_FORM) ) {
+			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) {
 				log.error("Error creating new clinic location", e);
 				map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
-			} else if (form.equals(ChirdlUtilConstants.EDIT_LOC_TAG_ATTR_FORM) ) {
+			} else if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) ) {
 				log.error("Error updating clinic location tag attribute values", e);
-				map.put("failedUpdation", "Failed updating clinic location tag attribute values: " + e.getMessage());
+				map.put("UpdateFailed", "Failed updating clinic location tag attribute values: " + e.getMessage());
 			}
 			reloadValues(request, map);
-			if (form.equals(ChirdlUtilConstants.CREATE_LOC_TAG_FORM)) {
+			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form)) {
 				if (existingLocProp == null) {
 					user.removeUserProperty("location");
 				} else {
@@ -223,7 +224,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 			} 
 			return new ModelAndView(view, map);
 		}
-		if (form.equals(ChirdlUtilConstants.CREATE_LOC_TAG_FORM) ) { 
+		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) { 
 			map.put("application", "Create Clinic Tag");
 		} else {
 			map.put("application", "Edit Clinic Tag Attribute Values");
@@ -235,24 +236,27 @@ public class CreateClinicTagFormController extends SimpleFormController {
 	
 	private void reloadValues(HttpServletRequest request, Map<String, Object> map) {
 		ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
-		String form = (String)map.get("form");
+		String form = (String)map.get(ChirdlUtilConstants.PARAMETER_FORM);
 		map.put("tagName", request.getParameter(ChirdlUtilConstants.PARAMETER_TAG_NAME));
 		map.put("description", request.getParameter(ChirdlUtilConstants.PARAMETER_DESCRIPTION));
-		map.put("username", request.getParameter("username"));
-		map.put("selectedProgram", request.getParameter("program"));
-		map.put("selectedTag", request.getParameter("establishedTag"));
+		map.put("username", request.getParameter(ChirdlUtilConstants.PARAMETER_USERNAME));
+		map.put("selectedProgram", request.getParameter(ChirdlUtilConstants.PARAMETER_PROGRAM));
+		map.put("selectedTag", request.getParameter(ChirdlUtilConstants.PARAMETER_ESTABLISHED_TAG));
 		map.put("selectedLocation", request.getParameter(ChirdlUtilConstants.PARAMETER_LOCATION));
 		map.put("programs", backportsService.getAllPrograms());
 		map.put("currentTags", Context.getLocationService().getAllLocationTags(false));
 		map.put("locations", Context.getLocationService().getAllLocations(false));
 		
 		Integer locationId = null;
-		if (form.equals(ChirdlUtilConstants.EDIT_LOC_TAG_ATTR_FORM)) {
+		if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form)) {
 			String locationIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_LOCATION);
 			if (locationIdStr != null && locationIdStr.trim().length() > 0) {
 				locationId = Integer.parseInt(locationIdStr);
-				List<LocationTag> locationTags = backportsService.getLocationTagById(locationId); 
-				map.put("locationTags", locationTags);
+				LocationService locationService = Context.getLocationService();
+				Location location = locationService.getLocation(locationId);
+				Set<LocationTag> locationTagTreeSet = new TreeSet<LocationTag>(new LocationIdComp());
+				locationTagTreeSet.addAll(location.getTags());
+				map.put("locationTags", locationTagTreeSet);
 			}
 		}
 		String tagName = request.getParameter(ChirdlUtilConstants.PARAMETER_TAG_NAME);
@@ -260,13 +264,13 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		map.put("locationTagAttributes", locationTagAttributes);
 		List<LocationTagAttributeValue> locationTagAttributeValues = new ArrayList<LocationTagAttributeValue>();
 		for (LocationTagAttribute locationTagAttribute : locationTagAttributes) {
-			if (form.equals(ChirdlUtilConstants.CREATE_LOC_TAG_FORM)) {
+			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form)) {
 				String value = request.getParameter(locationTagAttribute.getName());
 				if (value != null && value.trim().length() > 0) {
 					map.put(locationTagAttribute.getName(), value);
 				}
 			}
-			else if (form.equals(ChirdlUtilConstants.EDIT_LOC_TAG_ATTR_FORM) && tagName != null && tagName.trim().length() > 0 ) {
+			else if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) && tagName != null && tagName.trim().length() > 0 ) {
 				LocationService locationService = Context.getLocationService();
 				LocationTag locationTag = locationService.getLocationTagByName(tagName);
 				LocationTagAttributeValue locationTagAttributeValue = backportsService.getLocationTagAttributeValue(locationTag.getLocationTagId(), locationTagAttribute.getName(), locationId);
@@ -275,13 +279,18 @@ public class CreateClinicTagFormController extends SimpleFormController {
 				map.put("locationTagAttributeValues", locationTagAttributeValues);
 			}
 		}
+		HashMap<Integer,String> locTagAttValMap = new HashMap<Integer, String>();
+		for (LocationTagAttributeValue locationTagAttributeValue : locationTagAttributeValues) {
+			locTagAttValMap.put(locationTagAttributeValue.getLocationTagAttributeId(), locationTagAttributeValue.getValue());
+			map.put("locTagAttValMap", locTagAttValMap);
+		}
 	}
 	
 	private boolean createOrUpdateClinicTag(HttpServletRequest request, Location location, String tagName) 
 	throws Exception {
-		String form = request.getParameter("form");
+		String form = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM);
 		LocationTag locationTag = null; 
-		if (form.equals(ChirdlUtilConstants.CREATE_LOC_TAG_FORM) ) { 
+		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) { 
 			locationTag = createLocationTag(request, location, tagName);
 			addNonFormLocationTagAttributes(request, location, locationTag);
 			addFormAttributeValues(request, location, locationTag);
@@ -304,7 +313,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		location.addTag(locationTag);
 		locationService.saveLocation(location);
 		
-		String programIdStr = request.getParameter("program");
+		String programIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_PROGRAM);
 		if (programIdStr != null && programIdStr.trim().length() > 0) {
 			Integer programId = Integer.parseInt(programIdStr.trim());
 			ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
@@ -325,7 +334,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Integer locationId = location.getLocationId();
 		Integer locationTagId = locationTag.getLocationTagId();
-		String form = request.getParameter("form");
+		String form = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM);
 		List<LocationTagAttribute> locationTagAttributes = getNonFormLocationTagAttributes();
 		for (LocationTagAttribute locationTagAttribute : locationTagAttributes) {
 			String locTagAttrName = locationTagAttribute.getName();
@@ -333,11 +342,11 @@ public class CreateClinicTagFormController extends SimpleFormController {
 			if (value != null && value.trim().length() > 0) {
 				addLocationTagAttribute(request, backportsService, locationId, locationTagId, locationTagAttribute, 
 					value.trim());
-			} else if (form.equals(ChirdlUtilConstants.EDIT_LOC_TAG_ATTR_FORM) ) {
+			} else if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) ) {
 				LocationTagAttributeValue existingLtav = backportsService.getLocationTagAttributeValue(locationTagId, 
 					locationTagAttribute.getName(), locationId);
 				if (existingLtav!=null && (value == null || value.trim().length() == 0 )) {
-					deleteLocationTagAttributeValue(backportsService, locationId, locationTagId, locationTagAttribute);
+					backportsService.deleteLocationTagAttributeValue(existingLtav);
 				}
 			}
 		}
@@ -346,27 +355,23 @@ public class CreateClinicTagFormController extends SimpleFormController {
 	private void addLocationTagAttribute(HttpServletRequest request, ChirdlUtilBackportsService backportsService, 
 	                                  Integer locationId, Integer locationTagId, LocationTagAttribute locationTagAttr, 
 	                                  String value) {
-		LocationTagAttributeValue ltav = new LocationTagAttributeValue();
+		LocationTagAttributeValue existingLtav = backportsService.getLocationTagAttributeValue(locationTagId, 
+			locationTagAttr.getName(), locationId);
+		LocationTagAttributeValue ltav;
+		if (existingLtav != null) {
+			ltav = existingLtav;			
+		} else {
+			ltav = new LocationTagAttributeValue();
+		}
 		ltav.setLocationTagAttributeId(locationTagAttr.getLocationTagAttributeId());
 		ltav.setLocationId(locationId);
 		ltav.setLocationTagId(locationTagId);
 		ltav.setValue(value);
-		String form = request.getParameter("form");
-		if (form.equals(ChirdlUtilConstants.EDIT_LOC_TAG_ATTR_FORM)) {
-			LocationTagAttributeValue existingLtav = backportsService.getLocationTagAttributeValue(locationTagId, 
-				locationTagAttr.getName(), locationId);
-			if (existingLtav != null) {
-				Integer locTagAttrValId = existingLtav.getLocationTagAttributeValueId();
-				ltav.setLocationTagAttributeValueId(locTagAttrValId);
-			}
-			backportsService.updateLocationTagAttributeValue(ltav);
-		} else {
-			backportsService.saveLocationTagAttributeValue(ltav);
-		}
-	}
+		backportsService.saveLocationTagAttributeValue(ltav);
+}
 	
 	private void addFormAttributeValues(HttpServletRequest request, Location location, LocationTag locationTag) {
-		String copyTagIdStr = request.getParameter("establishedTag");
+		String copyTagIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_ESTABLISHED_TAG);
 		if (copyTagIdStr == null || copyTagIdStr.trim().length() == 0) {
 			return;
 		}
@@ -472,17 +477,11 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		return locTagAttrs;
 	}
 	
-	private void deleteLocationTagAttributeValue(ChirdlUtilBackportsService backportsService, 
-		      	                                  Integer locationId, Integer locationTagId, LocationTagAttribute locationTagAttr) {
-		if (locationTagAttr != null) {
-			LocationTagAttributeValue existingLtav = backportsService.getLocationTagAttributeValue(locationTagId, 
-				locationTagAttr.getName(), locationId);
-			if (existingLtav != null) {
-				backportsService.deleteLocationTagAttributeValue(existingLtav);
-			}
-		}
-	}
-	
+	/*
+	 * Saves Location Tag Attribute to the database
+	 * @param name
+	 * @param description
+	 */
 	private boolean saveLocationTagAttribute(String name, String description) {
 		
 		if (name == null || name.trim().length() == 0) {
@@ -495,5 +494,16 @@ public class CreateClinicTagFormController extends SimpleFormController {
     	backportsService.saveLocationTagAttribute(locTagAttr);
 		return true;
 	}
+	
+	/*
+	 * Sorts the Set LotationTags by location tag id
+	 * 
+	 */
+	private class LocationIdComp implements java.util.Comparator<LocationTag>{
+		public int compare(LocationTag tag1, LocationTag tag2) {
+			return tag1.getId().compareTo(tag2.getId());
+		}
+	}
+	
 }
 
