@@ -221,4 +221,15 @@ public interface ATDDAO {
      * @return
      */
     public boolean oneBoxChecked(Integer encounterId, Integer ruleId);
+    
+    /**
+     * 
+     * Look up the Statistics record by encounter_id and rule_id.
+     * This checks to see if the rule fired for a certain encounter
+     * 
+     * @param encounterId
+     * @param ruleId
+     * @return
+     */
+    public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId);
 }
