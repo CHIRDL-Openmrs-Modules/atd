@@ -1718,8 +1718,8 @@ public class HibernateATDDAO implements ATDDAO
     public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId)
 	{
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
-    	criteria.add(Expression.eq("encounterId", encounterId));
-    	criteria.add(Expression.eq("ruleId", ruleId));
+    	criteria.add(Restrictions.eq("encounterId", encounterId));
+    	criteria.add(Restrictions.eq("ruleId", ruleId));
     	
 		return criteria.list();
 	}
