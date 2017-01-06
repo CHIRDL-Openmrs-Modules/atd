@@ -1706,4 +1706,21 @@ public class HibernateATDDAO implements ATDDAO
 		
 		return oneBoxChecked;
 	}
+    
+   /**
+    * Look up the Statistics record by encounter_id and rule_id.
+    * This checks to see if the rule fired for a certain encounter
+    * 
+    * @param encounterId
+    * @param ruleId
+    * @return
+    */
+    public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId)
+	{
+    	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
+    	criteria.add(Expression.eq("encounterId", encounterId));
+    	criteria.add(Expression.eq("ruleId", ruleId));
+    	
+		return criteria.list();
+	}
 }
