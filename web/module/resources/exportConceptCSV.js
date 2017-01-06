@@ -23,7 +23,7 @@ function toggleSelectedConcepts()
 //and concept class drop-down
 function submitFilter()
 {
-	dtable.ajax.url("/openmrs/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $("#inclRetired").is(':checked') + "&conceptClassSelect=" + $("#conceptClassSelect").val()).load();
+	dtable.ajax.url(ctx + "/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $("#inclRetired").is(':checked') + "&conceptClassSelect=" + $("#conceptClassSelect").val()).load();
 }
 
 // Create the checkbox column
@@ -63,7 +63,7 @@ $(document).ready(function() {
 					"serverSide": true,
 					"stateSave": false,
 					"pagingType": "full_numbers",
-					"ajax": "/openmrs/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $("#inclRetired").is(":checked") + "&conceptClassSelect=" + $("#conceptClassSelect").val(),
+					"ajax": ctx + "/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $("#inclRetired").is(":checked") + "&conceptClassSelect=" + $("#conceptClassSelect").val(),
 					"columns": [
 									{"mData": "conceptId", "bSortable": false, "searchable": false, "mRender": renderCheckbox},
 									{"mData": "name", "bSortable": true, "searchable": true},
