@@ -3,15 +3,13 @@
 <openmrs:require allPrivileges="Edit Users, Manage Location Tags, View Locations" otherwise="/login.htm" redirect="/module/atd/editClinicTagAttributeForm.form" />
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"/>
 <script src="${pageContext.request.contextPath}/moduleResources/atd/editLocationTagAttribute.js"></script>
-
-
 <title>Edit Clinic Tag Attributes</title>
 <p></p>
 <h3>Edit Clinic Tag Attribute Values:</h3>
 <form name="input" action="editClinicTagAttributeForm.form" method="post" onsubmit="return checkform()" enctype="multipart/form-data">
 <table>
 <tbody>
-<input type="hidden" name="form" value="editClinicTagAttributeForm" />
+<tr><td><input type="hidden" name="form" value="editClinicTagAttributeForm"><td><tr>
 <c:if test="${UpdateFailed != null}">
     <tr style="padding: 5px">
       <td colspan="2" style="padding: 0px 0px 10px 0px">
@@ -22,7 +20,7 @@
 <tr style="padding: 5px">
 	<td style="padding: 0px 0px 10px 0px"><label>Clinic: </label></td>
 	<td align="left" style="padding: 0px 0px 10px 0px">
-		<select id="location" name="location" onchange="submit();">
+		<select id="location" name="location" onchange="onChangeSubmit()">
 			<option value="">Select Clinic</option>
 			<c:forEach items="${locations}" var="loc">
 				<c:choose>
@@ -42,7 +40,7 @@
 	<td style="padding: 0px 0px 10px 0px"><label>Tag Name: </label></td>
 	<td align="left" style="padding: 0px 0px 10px 0px">
 
-		<select id="tagName" name="tagName" onchange="submit()">
+		<select id="tagName" name="tagName" onchange="onChangeSubmit()">
 			<option value="">Select Tag Name</option>
 			<c:forEach items="${locationTags}" var="locTagNames">
 				<c:choose>
@@ -96,12 +94,12 @@
 							</c:forEach>
 						</c:when>
 						<c:otherwise>
-							<input id="${locationTagAttribute.name}" maxlength="254" size="40" name="${locationTagAttribute.name}" type="text" value="">
+							<input id="${locationTagAttribute.name}" maxlength="255" size="40" name="${locationTagAttribute.name}" type="text" value="">
 						</c:otherwise>
 					</c:choose>
 				</c:when>
 				<c:otherwise>
-					<input id="" maxlength="256" size="40" name="" type="text" value="">
+					<input id="" maxlength="255" size="40" name="" type="text" value="">
 				</c:otherwise>
 			</c:choose>
 		</td>
