@@ -254,7 +254,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 				locationId = Integer.parseInt(locationIdStr);
 				LocationService locationService = Context.getLocationService();
 				Location location = locationService.getLocation(locationId);
-				Set<LocationTag> locationTagTreeSet = new TreeSet<LocationTag>(new LocationIdComp());
+				Set<LocationTag> locationTagTreeSet = new TreeSet<LocationTag>(new LocationTagIdComp());
 				locationTagTreeSet.addAll(location.getTags());
 				map.put("locationTags", locationTagTreeSet);
 			}
@@ -499,7 +499,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 	 * Sorts the Set LotationTags by location tag id
 	 * 
 	 */
-	private class LocationIdComp implements java.util.Comparator<LocationTag>{
+	private class LocationTagIdComp implements java.util.Comparator<LocationTag>{
 		public int compare(LocationTag tag1, LocationTag tag2) {
 			return tag1.getId().compareTo(tag2.getId());
 		}
