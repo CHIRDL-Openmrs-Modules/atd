@@ -2,12 +2,14 @@ package org.openmrs.module.atd.web;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +22,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.User;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
@@ -63,149 +66,239 @@ public class CreateClinicTagFormController extends SimpleFormController {
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object,
 	                                             BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		String tagName = request.getParameter("tagName");
+		String tagName = request.getParameter(ChirdlUtilConstants.PARAMETER_TAG_NAME);
 		String view = getFormView();
 		
-		// Check to see if clinic tag name was specified.
-		if (tagName == null || tagName.trim().length() == 0) {
-			map.put("missingName", true);
-			reloadValues(request, map);
-			return new ModelAndView(view, map);
-		}
-		
-		tagName = tagName.trim();
-		// Check to see if the clinic name is already specified.
+		String form = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM);
+		map.put(ChirdlUtilConstants.PARAMETER_FORM, form);
 		LocationService locationService = Context.getLocationService();
-		LocationTag locationTag = locationService.getLocationTagByName(tagName);
-		if (locationTag != null) {
-			map.put("duplicateName", true);
-			reloadValues(request, map);
-			return new ModelAndView(view, map);
+
+		if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) ) {
+			String submitAddLocTagAtt = request.getParameter(ChirdlUtilConstants.PARAMETER_HIDDEN_SUBMIT);
+			String submitLocTagAttr = request.getParameter(ChirdlUtilConstants.PARAMETER_FINISH);
+			
+			if (submitAddLocTagAtt != null && submitAddLocTagAtt.trim().length() > 0) {
+				try {
+					String tagAttrName = request.getParameter(ChirdlUtilConstants.PARAMETER_NAME);
+					String tagAttrDescription = request.getParameter(ChirdlUtilConstants.PARAMETER_DESCRIPTION);
+					
+					LocationTagAttribute locTagAttribute = 
+							Context.getService(ChirdlUtilBackportsService.class).getLocationTagAttribute(tagAttrName);
+					if (locTagAttribute != null) {
+						map.put("duplicateName", true);
+						reloadValues(request, map);
+						return new ModelAndView(view, map);
+					}
+					saveLocationTagAttribute(tagAttrName, tagAttrDescription);
+					reloadValues(request, map);
+					return new ModelAndView(view, map);
+				} catch (Exception e) {
+					log.error("Error updating clinic location tag attribute values", e);
+					map.put("UpdateFailed", "Failed updating clinic location tag attribute values: " + e.getMessage());
+					return new ModelAndView(view, map);
+				}
+			} 
+			if (submitLocTagAttr == null || submitLocTagAttr.trim().length() == 0) { 
+					reloadValues(request, map);
+					return new ModelAndView(view, map);
+			}
 		}
 		
-		// Check to see if the clinic name has spaces.
-		if (tagName.contains(" ")) {
-			map.put("spacesInName", true);
-			reloadValues(request, map);
-			return new ModelAndView(view, map);
-		}
-		
-		String username = request.getParameter("username");
-		// Check to see if username was specified.
-		if (username == null || username.trim().length() == 0) {
-			map.put("missingUsername", true);
-			reloadValues(request, map);
-			return new ModelAndView(view, map);
-		}
-		
-		// Check to see if username exists.
-		User user = Context.getUserService().getUserByUsername(username);
-		if (user == null) {
-			map.put("unknownUsername", true);
-			reloadValues(request, map);
-			return new ModelAndView(view, map);
-		}
-		
-		// Check to make sure a password was specified.
-		String password = request.getParameter("password");
-		if (password == null || password.length() == 0) {
-			map.put("invalidPassword", true);
-			reloadValues(request, map);
-			return new ModelAndView(view, map);
-		}
-		
-		String clinicIdStr = request.getParameter("location");
+		String clinicIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_LOCATION);
 		Integer locationId = Integer.parseInt(clinicIdStr);
 		Location location = locationService.getLocation(locationId);
-		String locationName = location.getName();
-		String existingLocProp = user.getUserProperty("location");
-		String existingLocTagProp = user.getUserProperty("locationTags");
-		try {
-			if (existingLocProp == null || existingLocProp.trim().length() == 0) {
-				user.setUserProperty("location", locationName);
-			} else {
-				String[] locations = existingLocProp.split(",");
-				boolean found = false;
-				for (String name : locations) {
-					if (locationName.equalsIgnoreCase(name)) {
-						found = true;
+		
+		User user = null;
+		String password = null;
+		String existingLocProp = null;
+		String existingLocTagProp = null;
+		
+		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) {
+			// Check to see if clinic tag name was specified.
+			if (tagName == null || tagName.trim().length() == 0) {
+				map.put("missingName", true);
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
+			}
+			
+			tagName = tagName.trim();
+			// Check to see if the clinic name is already specified.
+			LocationTag locationTag = locationService.getLocationTagByName(tagName);
+			if (locationTag != null) {
+				map.put("duplicateName", true);
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
+			}
+			
+			// Check to see if the clinic name has spaces.
+			if (tagName.contains(" ")) {
+				map.put("spacesInName", true);
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
+			}
+			
+			String username = request.getParameter(ChirdlUtilConstants.PARAMETER_USERNAME);
+			// Check to see if username was specified.
+			if (username == null || username.trim().length() == 0) {
+				map.put("missingUsername", true);
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
+			}
+			
+			// Check to see if username exists.
+			user = Context.getUserService().getUserByUsername(username);
+			if (user == null) {
+				map.put("unknownUsername", true);
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
+			}
+			
+			// Check to make sure a password was specified.
+			password = request.getParameter(ChirdlUtilConstants.PARAMETER_PASSWORD);
+			if (password == null || password.length() == 0) {
+				map.put("invalidPassword", true);
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
+			}
+			
+			String locationName = location.getName();
+			existingLocProp = user.getUserProperty("location");
+			existingLocTagProp = user.getUserProperty("locationTags");
+			try {
+				if (existingLocProp == null || existingLocProp.trim().length() == 0) {
+					user.setUserProperty("location", locationName);
+				} else {
+					String[] locations = existingLocProp.split(",");
+					boolean found = false;
+					for (String name : locations) {
+						if (locationName.equalsIgnoreCase(name)) {
+							found = true;
+						}
+					}
+					
+					if (!found) {
+						user.setUserProperty("location", existingLocProp + ", " + locationName);
 					}
 				}
 				
-				if (!found) {
-					user.setUserProperty("location", existingLocProp + ", " + locationName);
+				if (existingLocTagProp == null || existingLocTagProp.trim().length() == 0) {
+					user.setUserProperty("locationTags", tagName);
+				} else {
+					user.setUserProperty("locationTags", existingLocTagProp + ", " + tagName);
 				}
+				
+				Context.getUserService().saveUser(user, password);
+			} catch (Exception e) {
+				log.error("Error creating new clinic location", e);
+				map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
+				reloadValues(request, map);
+				return new ModelAndView(view, map);
 			}
 			
-			if (existingLocTagProp == null || existingLocTagProp.trim().length() == 0) {
-				user.setUserProperty("locationTags", tagName);
-			} else {
-				user.setUserProperty("locationTags", existingLocTagProp + ", " + tagName);
-			}
-			
-			Context.getUserService().saveUser(user, password);
-		} catch (Exception e) {
-			log.error("Error creating new clinic location", e);
-			map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
-			reloadValues(request, map);
-			return new ModelAndView(view, map);
 		}
-		
 		try {
-			createClinicTag(request, location, tagName);
+			createOrUpdateClinicTag(request, location, tagName);
 		} catch (Exception e) {
-			log.error("Error creating new clinic location", e);
-			map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
+			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) {
+				log.error("Error creating new clinic location", e);
+				map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
+			} else if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) ) {
+				log.error("Error updating clinic location tag attribute values", e);
+				map.put("UpdateFailed", "Failed updating clinic location tag attribute values: " + e.getMessage());
+			}
 			reloadValues(request, map);
-			if (existingLocProp == null) {
-				user.removeUserProperty("location");
-			} else {
-				user.setUserProperty("location", existingLocProp);
-			}
-			
-			if (existingLocTagProp == null) {
-				user.removeUserProperty("locationTags");
-			} else {
-				user.setUserProperty("locationTags", existingLocTagProp);
-			}
-			
-			Context.getUserService().saveUser(user, password);
+			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form)) {
+				if (existingLocProp == null) {
+					user.removeUserProperty("location");
+				} else {
+					user.setUserProperty("location", existingLocProp);
+				}
+				
+				if (existingLocTagProp == null) {
+					user.removeUserProperty("locationTags");
+				} else {
+					user.setUserProperty("locationTags", existingLocTagProp);
+				}
+				
+				Context.getUserService().saveUser(user, password);
+			} 
 			return new ModelAndView(view, map);
 		}
+		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) { 
+			map.put("application", "Create Clinic Tag");
+		} else {
+			map.put("application", "Edit Clinic Tag Attribute Values");
+		}
 		
-		map.put("application", "Create Clinic Tag");
 		view = getSuccessView();
 		return new ModelAndView(new RedirectView(view), map);
 	}
 	
 	private void reloadValues(HttpServletRequest request, Map<String, Object> map) {
 		ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
-		map.put("tagName", request.getParameter("tagName"));
-		map.put("description", request.getParameter("description"));
-		map.put("username", request.getParameter("username"));
-		map.put("selectedProgram", request.getParameter("program"));
-		map.put("selectedTag", request.getParameter("establishedTag"));
-		map.put("selectedLocation", request.getParameter("location"));
+		String form = (String)map.get(ChirdlUtilConstants.PARAMETER_FORM);
+		map.put("tagName", request.getParameter(ChirdlUtilConstants.PARAMETER_TAG_NAME));
+		map.put("description", request.getParameter(ChirdlUtilConstants.PARAMETER_DESCRIPTION));
+		map.put("username", request.getParameter(ChirdlUtilConstants.PARAMETER_USERNAME));
+		map.put("selectedProgram", request.getParameter(ChirdlUtilConstants.PARAMETER_PROGRAM));
+		map.put("selectedTag", request.getParameter(ChirdlUtilConstants.PARAMETER_ESTABLISHED_TAG));
+		map.put("selectedLocation", request.getParameter(ChirdlUtilConstants.PARAMETER_LOCATION));
 		map.put("programs", backportsService.getAllPrograms());
 		map.put("currentTags", Context.getLocationService().getAllLocationTags(false));
 		map.put("locations", Context.getLocationService().getAllLocations(false));
 		
+		Integer locationId = null;
+		if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form)) {
+			String locationIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_LOCATION);
+			if (locationIdStr != null && locationIdStr.trim().length() > 0) {
+				locationId = Integer.parseInt(locationIdStr);
+				LocationService locationService = Context.getLocationService();
+				Location location = locationService.getLocation(locationId);
+				Set<LocationTag> locationTagTreeSet = new TreeSet<LocationTag>(new LocationTagIdComp());
+				locationTagTreeSet.addAll(location.getTags());
+				map.put("locationTags", locationTagTreeSet);
+			}
+		}
+		String tagName = request.getParameter(ChirdlUtilConstants.PARAMETER_TAG_NAME);
 		List<LocationTagAttribute> locationTagAttributes = getNonFormLocationTagAttributes();
 		map.put("locationTagAttributes", locationTagAttributes);
+		List<LocationTagAttributeValue> locationTagAttributeValues = new ArrayList<LocationTagAttributeValue>();
 		for (LocationTagAttribute locationTagAttribute : locationTagAttributes) {
-			String value = request.getParameter(locationTagAttribute.getName());
-			if (value != null && value.trim().length() > 0) {
-				map.put(locationTagAttribute.getName(), value);
+			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form)) {
+				String value = request.getParameter(locationTagAttribute.getName());
+				if (value != null && value.trim().length() > 0) {
+					map.put(locationTagAttribute.getName(), value);
+				}
 			}
+			else if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) && tagName != null && tagName.trim().length() > 0 ) {
+				LocationService locationService = Context.getLocationService();
+				LocationTag locationTag = locationService.getLocationTagByName(tagName);
+				LocationTagAttributeValue locationTagAttributeValue = backportsService.getLocationTagAttributeValue(locationTag.getLocationTagId(), locationTagAttribute.getName(), locationId);
+				if (locationTagAttributeValue!=null)
+					locationTagAttributeValues.add(locationTagAttributeValue);
+				map.put("locationTagAttributeValues", locationTagAttributeValues);
+			}
+		}
+		HashMap<Integer,String> locTagAttValMap = new HashMap<Integer, String>();
+		for (LocationTagAttributeValue locationTagAttributeValue : locationTagAttributeValues) {
+			locTagAttValMap.put(locationTagAttributeValue.getLocationTagAttributeId(), locationTagAttributeValue.getValue());
+			map.put("locTagAttValMap", locTagAttValMap);
 		}
 	}
 	
-	private boolean createClinicTag(HttpServletRequest request, Location location, String tagName) 
+	private boolean createOrUpdateClinicTag(HttpServletRequest request, Location location, String tagName) 
 	throws Exception {
-		LocationTag locationTag = createLocationTag(request, location, tagName);
-		addNonFormLocationTagAttributes(request, location, locationTag);
-		addFormAttributeValues(request, location, locationTag);
-		
+		String form = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM);
+		LocationTag locationTag = null; 
+		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) { 
+			locationTag = createLocationTag(request, location, tagName);
+			addNonFormLocationTagAttributes(request, location, locationTag);
+			addFormAttributeValues(request, location, locationTag);
+		} else {
+			LocationService locationService = Context.getLocationService();
+			locationTag = locationService.getLocationTagByName(tagName);
+			addNonFormLocationTagAttributes(request, location, locationTag);
+		}
 		return true;
 	}
 	
@@ -220,7 +313,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		location.addTag(locationTag);
 		locationService.saveLocation(location);
 		
-		String programIdStr = request.getParameter("program");
+		String programIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_PROGRAM);
 		if (programIdStr != null && programIdStr.trim().length() > 0) {
 			Integer programId = Integer.parseInt(programIdStr.trim());
 			ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
@@ -241,6 +334,7 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Integer locationId = location.getLocationId();
 		Integer locationTagId = locationTag.getLocationTagId();
+		String form = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM);
 		List<LocationTagAttribute> locationTagAttributes = getNonFormLocationTagAttributes();
 		for (LocationTagAttribute locationTagAttribute : locationTagAttributes) {
 			String locTagAttrName = locationTagAttribute.getName();
@@ -248,6 +342,12 @@ public class CreateClinicTagFormController extends SimpleFormController {
 			if (value != null && value.trim().length() > 0) {
 				addLocationTagAttribute(request, backportsService, locationId, locationTagId, locationTagAttribute, 
 					value.trim());
+			} else if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) ) {
+				LocationTagAttributeValue existingLtav = backportsService.getLocationTagAttributeValue(locationTagId, 
+					locationTagAttribute.getName(), locationId);
+				if (existingLtav!=null && (value == null || value.trim().length() == 0 )) {
+					backportsService.deleteLocationTagAttributeValue(existingLtav);
+				}
 			}
 		}
 	}
@@ -255,16 +355,23 @@ public class CreateClinicTagFormController extends SimpleFormController {
 	private void addLocationTagAttribute(HttpServletRequest request, ChirdlUtilBackportsService backportsService, 
 	                                  Integer locationId, Integer locationTagId, LocationTagAttribute locationTagAttr, 
 	                                  String value) {
-		LocationTagAttributeValue ltav = new LocationTagAttributeValue();
+		LocationTagAttributeValue existingLtav = backportsService.getLocationTagAttributeValue(locationTagId, 
+			locationTagAttr.getName(), locationId);
+		LocationTagAttributeValue ltav;
+		if (existingLtav != null) {
+			ltav = existingLtav;			
+		} else {
+			ltav = new LocationTagAttributeValue();
+		}
 		ltav.setLocationTagAttributeId(locationTagAttr.getLocationTagAttributeId());
 		ltav.setLocationId(locationId);
 		ltav.setLocationTagId(locationTagId);
 		ltav.setValue(value);
 		backportsService.saveLocationTagAttributeValue(ltav);
-	}
+}
 	
 	private void addFormAttributeValues(HttpServletRequest request, Location location, LocationTag locationTag) {
-		String copyTagIdStr = request.getParameter("establishedTag");
+		String copyTagIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_ESTABLISHED_TAG);
 		if (copyTagIdStr == null || copyTagIdStr.trim().length() == 0) {
 			return;
 		}
@@ -369,5 +476,34 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		
 		return locTagAttrs;
 	}
+	
+	/*
+	 * Saves Location Tag Attribute to the database
+	 * @param name
+	 * @param description
+	 */
+	private boolean saveLocationTagAttribute(String name, String description) {
+		
+		if (name == null || name.trim().length() == 0) {
+			return false;
+		}
+		ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
+		LocationTagAttribute locTagAttr = new LocationTagAttribute();
+    	locTagAttr.setName(name);
+    	locTagAttr.setDescription(description);
+    	backportsService.saveLocationTagAttribute(locTagAttr);
+		return true;
+	}
+	
+	/*
+	 * Sorts the Set LotationTags by location tag id
+	 * 
+	 */
+	private class LocationTagIdComp implements java.util.Comparator<LocationTag>{
+		public int compare(LocationTag tag1, LocationTag tag2) {
+			return tag1.getId().compareTo(tag2.getId());
+		}
+	}
+	
 }
 
