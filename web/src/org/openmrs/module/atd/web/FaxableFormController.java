@@ -9,7 +9,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jfree.util.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
@@ -28,6 +29,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 
 public class FaxableFormController extends SimpleFormController {
+	
+	/** Logger for this class and subclasses */
+	protected final Log Log = LogFactory.getLog(getClass());
 
 	/*
 	 * (non-Javadoc)
