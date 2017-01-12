@@ -31,7 +31,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class FaxableFormController extends SimpleFormController {
 	
 	/** Logger for this class and subclasses */
-	protected final Log Log = LogFactory.getLog(getClass());
+	protected final Log log = LogFactory.getLog(getClass());
 
 	/*
 	 * (non-Javadoc)
@@ -56,7 +56,7 @@ public class FaxableFormController extends SimpleFormController {
 				Integer formId = Integer.parseInt(formIdStr);
 				makeFaxableForm(formId);
 			} catch (Exception e) {
-				Log.error("Error making form faxable", e);
+				log.error("Error making form faxable", e);
 				map.put("error", true);
 				map.put("forms", getForms(false));
 				return new ModelAndView(view, map);
