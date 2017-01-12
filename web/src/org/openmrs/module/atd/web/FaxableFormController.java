@@ -9,7 +9,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jfree.util.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
@@ -28,6 +29,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 
 public class FaxableFormController extends SimpleFormController {
+	
+	/** Logger for this class and subclasses */
+	protected final Log log = LogFactory.getLog(getClass());
 
 	/*
 	 * (non-Javadoc)
@@ -52,7 +56,7 @@ public class FaxableFormController extends SimpleFormController {
 				Integer formId = Integer.parseInt(formIdStr);
 				makeFaxableForm(formId);
 			} catch (Exception e) {
-				Log.error("Error making form faxable", e);
+				log.error("Error making form faxable", e);
 				map.put("error", true);
 				map.put("forms", getForms(false));
 				return new ModelAndView(view, map);
