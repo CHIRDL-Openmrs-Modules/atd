@@ -25,7 +25,9 @@ import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
+import org.openmrs.module.atd.xmlBeans.Records;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
@@ -325,4 +327,32 @@ public interface ATDService
      * @return
      */
     public boolean ruleFiredForEncounter(Integer encounterId, Integer ruleId);
+    
+    /**
+     * Returns a Records object containing form field values.  This method will first try to access any form data stored
+     * in the cache.  If no data is present, the form will be loaded from the merge file.
+     * 
+     * @param formInstanceTag FormInstanceTag object used to locate the form data
+     * @return Records object containing form information
+     * @throws APIException
+     */
+    public Records getFormRecords(FormInstanceTag formInstanceTag) throws APIException;
+    
+    /**
+     * Saves a draft of the form records in the cache.
+     * 
+     * @param formInstanceTag FormInstanceTag object used to save the draft of the form records
+     * @param records Records object containing form information
+     * @throws APIException
+     */
+    public void saveFormRecordsDraft(FormInstanceTag formInstanceTag, Records records) throws APIException;
+    
+    /**
+     * Saves the form records.
+     * 
+     * @param formInstanceTag FormInstanceTag object used to save the form records
+     * @param records Records object containing form information
+     * @throws APIException
+     */
+    public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException;
 }
