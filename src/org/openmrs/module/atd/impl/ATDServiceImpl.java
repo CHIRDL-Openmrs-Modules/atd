@@ -1115,10 +1115,10 @@ public class ATDServiceImpl implements ATDService
 					log.error("Error closing input stream", e);
 				}
 			}
-		}
-		
-		if (records != null && cache != null) {
-			cache.put(formInstanceTag, records);
+			
+			if (records != null && cache != null) {
+				cache.put(formInstanceTag, records);
+			}
 		}
 		
 		return records;
@@ -1128,7 +1128,15 @@ public class ATDServiceImpl implements ATDService
 	 * @see org.openmrs.module.atd.service.ATDService#saveFormRecordsDraft(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag, org.openmrs.module.atd.xmlBeans.Records)
 	 */
 	public void saveFormRecordsDraft(FormInstanceTag formInstanceTag, Records records) throws APIException {
-		//TODO
+		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
+				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
+			throw new APIException("Invalid parameters.  A non-null formInstance must be provided with non-null attributes.");
+		}
+		
+		ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
+		Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
+			AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
+		cache.put(formInstanceTag, records);
 	}
 
 	/**
