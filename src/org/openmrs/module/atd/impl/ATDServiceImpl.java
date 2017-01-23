@@ -1098,7 +1098,7 @@ public class ATDServiceImpl implements ATDService
 			mergeFile = IOUtil.getMergeFile(formInstanceTag);
 		}
 		
-		if (mergeFile != null) {
+		if (mergeFile != null && mergeFile.exists()) {
 			InputStream inputStream = null;
 			try {
 				inputStream = new FileInputStream(mergeFile);
