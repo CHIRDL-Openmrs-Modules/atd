@@ -2,6 +2,8 @@ package org.openmrs.module.atd.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1143,6 +1145,72 @@ public class ATDServiceImpl implements ATDService
 	 * @see org.openmrs.module.atd.service.ATDService#saveFormRecords(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag, org.openmrs.module.atd.xmlBeans.Records)
 	 */
 	public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException {
-		//TODO
+		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
+				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
+			throw new APIException("Invalid parameters.  A non-null formInstance must be provided with non-null attributes.");
+		}
+		
+		Integer formId = formInstanceTag.getFormId();
+		Integer formInstanceId = formInstanceTag.getFormInstanceId();
+		Integer locationId = formInstanceTag.getLocationId();
+		Integer locationTagId = formInstanceTag.getLocationTagId();
+		String exportDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
+	        .getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_EXPORT_DIRECTORY, locationTagId, locationId));
+		String defaultMergeDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
+		        .getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_MERGE_DIRECTORY, locationTagId, locationId));
+		
+		FormInstance formInstance = new FormInstance(locationId, formId, formInstanceId);
+		//Write the xml for the export file
+		//Use xmle extension to represent form completion through electronic means.
+		String exportFilename = exportDirectory + formInstance.toString() + ChirdlUtilConstants.FILE_EXTENSION_XMLE;
+		
+		OutputStream output = null;
+		try {
+			output = new FileOutputStream(exportFilename);
+			XMLUtil.serializeXML(records, output);
+			
+			// remove the data from the cache
+			ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
+			Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
+				AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
+			cache.remove(formInstanceTag);
+		} catch (FileNotFoundException e) {
+			String message = "Cannot find export form " + exportFilename + " for form ID: " + formId + " form instance ID: " + 
+					formInstanceId + " location ID: " + locationId + " location tag ID: " + locationTagId;
+			log.error(message, e);
+			throw new APIException(message);
+		} catch (IOException e) {
+			String message = "Error writing export form " + exportFilename + " for form ID: " + formId + " form instance ID: " + 
+					formInstanceId + " location ID: " + locationId + " location tag ID: " + locationTagId;
+			log.error(message, e);
+			throw new APIException(message);
+		} finally {
+			if (output != null) {
+				try {
+					output.flush();
+					output.close();
+				} catch (IOException e) {
+					// This isn't super important.  No need to push the exception up to the client.
+					log.error("Error flushing and closing output stream for form ID: " + formId + " form instance ID: " + formInstanceId + 
+						" location ID: " + locationId + " location tag ID: " + locationTagId, e);
+				}
+			}
+		}
+		
+		//rename the merge file to trigger state change
+		String newMergeFilename = defaultMergeDirectory + formInstance.toString() + ChirdlUtilConstants.FILE_EXTENSION_20;
+		File newFile = new File(newMergeFilename);
+		if (!newFile.exists()) {
+			try {
+				File mergeFile = IOUtil.getMergeFile(formInstanceTag);
+				IOUtil.copyFile(mergeFile.getAbsolutePath(), newMergeFilename);
+				IOUtil.deleteFile(mergeFile.getAbsolutePath());
+			} catch (Exception e) {
+				// No need to push this exception back to the client.  It's just clean up issues.
+				String message = "Error renaming merge file for form ID: " + formId + " form instance ID: " + formInstanceId + 
+						" location ID: " + locationId + " location tag ID: " + locationTagId;
+				log.error(message, e);
+			}
+		}
 	}
 }
