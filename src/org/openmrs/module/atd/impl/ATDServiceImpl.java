@@ -1109,7 +1109,9 @@ public class ATDServiceImpl implements ATDService
 				inputStream = new FileInputStream(mergeFile);
 				records = (Records) XMLUtil.deserializeXML(Records.class, inputStream);
 			} catch (Exception e) {
-				log.error("Error loading merge file for form instance: " + formInstanceTag.toString(), e);
+				String message = "Error loading merge file for form instance: " + formInstanceTag.toString();
+				log.error(message, e);
+				throw new APIException(message);
 			} finally {
 				try {
 					if (inputStream != null) {
@@ -1117,6 +1119,7 @@ public class ATDServiceImpl implements ATDService
 					}
 				}
 				catch (IOException e) {
+					// No need to bother the client with this error
 					log.error("Error closing input stream", e);
 				}
 			}
