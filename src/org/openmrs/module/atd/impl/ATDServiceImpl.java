@@ -1084,7 +1084,10 @@ public class ATDServiceImpl implements ATDService
 	public Records getFormRecords(FormInstanceTag formInstanceTag) throws APIException {
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
-			throw new APIException("Invalid parameters.  A non-null formInstance must be provided with non-null attributes.");
+			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
+					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+			log.error(message);
+			throw new APIException(message);
 		}
 		
 		ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
@@ -1132,13 +1135,22 @@ public class ATDServiceImpl implements ATDService
 	public void saveFormRecordsDraft(FormInstanceTag formInstanceTag, Records records) throws APIException {
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
-			throw new APIException("Invalid parameters.  A non-null formInstance must be provided with non-null attributes.");
+			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
+					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+			log.error(message);
+			throw new APIException(message);
 		}
 		
 		ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
 		Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
 			AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
-		cache.put(formInstanceTag, records);
+		if (cache != null) {
+			cache.put(formInstanceTag, records);
+		} else {
+			String message = "Cache " + AtdConstants.CACHE_FORM_DRAFT + " not configured.  Cannot save form draft.";
+			log.error(message);
+			throw new APIException(message);
+		}
 	}
 
 	/**
@@ -1147,7 +1159,23 @@ public class ATDServiceImpl implements ATDService
 	public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException {
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
-			throw new APIException("Invalid parameters.  A non-null formInstance must be provided with non-null attributes.");
+			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
+					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+			log.error(message);
+			throw new APIException(message);
+		}
+		
+		ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
+		Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
+			AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
+		
+		if (records == null) {
+			// remove the data from the cache
+			if (cache != null) {
+				cache.remove(formInstanceTag);
+			}
+			
+			return;
 		}
 		
 		Integer formId = formInstanceTag.getFormId();
@@ -1160,8 +1188,8 @@ public class ATDServiceImpl implements ATDService
 		        .getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_MERGE_DIRECTORY, locationTagId, locationId));
 		
 		FormInstance formInstance = new FormInstance(locationId, formId, formInstanceId);
-		//Write the xml for the export file
-		//Use xmle extension to represent form completion through electronic means.
+		// write the xml for the export file
+		// use xmle extension to represent form completion through electronic means.
 		String exportFilename = exportDirectory + formInstance.toString() + ChirdlUtilConstants.FILE_EXTENSION_XMLE;
 		
 		OutputStream output = null;
@@ -1170,10 +1198,9 @@ public class ATDServiceImpl implements ATDService
 			XMLUtil.serializeXML(records, output);
 			
 			// remove the data from the cache
-			ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
-			Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
-				AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
-			cache.remove(formInstanceTag);
+			if (cache != null) {
+				cache.remove(formInstanceTag);
+			}
 		} catch (FileNotFoundException e) {
 			String message = "Cannot find export form " + exportFilename + " for form ID: " + formId + " form instance ID: " + 
 					formInstanceId + " location ID: " + locationId + " location tag ID: " + locationTagId;
@@ -1197,7 +1224,7 @@ public class ATDServiceImpl implements ATDService
 			}
 		}
 		
-		//rename the merge file to trigger state change
+		// rename the merge file to trigger state change
 		String newMergeFilename = defaultMergeDirectory + formInstance.toString() + ChirdlUtilConstants.FILE_EXTENSION_20;
 		File newFile = new File(newMergeFilename);
 		if (!newFile.exists()) {
