@@ -1147,7 +1147,9 @@ public class ATDServiceImpl implements ATDService
 		if (cache != null) {
 			cache.put(formInstanceTag, records);
 		} else {
-			String message = "Cache " + AtdConstants.CACHE_FORM_DRAFT + " not configured.  Cannot save form draft.";
+			String message = "Cache " + AtdConstants.CACHE_FORM_DRAFT + " not configured.  Cannot save form draft for form ID: " + 
+					formInstanceTag.getFormId() + " form instance ID: " + formInstanceTag.getFormInstanceId() + " location ID: " + 
+					formInstanceTag.getLocationId() + " location tag ID: " + formInstanceTag.getLocationTagId();
 			log.error(message);
 			throw new APIException(message);
 		}
