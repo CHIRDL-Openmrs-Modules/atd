@@ -3,6 +3,7 @@
  */
 package org.openmrs.module.atd.xmlBeans;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -10,8 +11,9 @@ import java.util.ArrayList;
  *
  * @author Tammy Dugan
  */
-public class Record
+public class Record implements Serializable
 {
+	private static final long serialVersionUID = 1L;
 	private ArrayList<Field> fields = null;
 	
 	/**

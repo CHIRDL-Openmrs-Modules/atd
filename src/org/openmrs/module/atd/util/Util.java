@@ -13,13 +13,9 @@
  */
 package org.openmrs.module.atd.util;
 
-import java.io.DataOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,13 +44,14 @@ import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.xmlBeans.Field;
-import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
 import org.openmrs.module.atd.xmlBeans.Language;
+import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
+import org.openmrs.module.atd.xmlBeans.Record;
+import org.openmrs.module.atd.xmlBeans.Records;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
-import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -703,5 +700,39 @@ public class Util {
 		for(Obs currObs:obs){
 			obsService.voidObs(currObs,voidReason);
 		}
+	}
+	
+	/**
+	 * Utility method creating a field name to Field object map.
+	 * 
+	 * @param records Records object used to build the map
+	 * @return Map containing the field name as the key and Field object as the value
+	 */
+	public static Map<String, Field> createRecordFieldMap(Records records) {
+		Map<String, Field> fieldNameToFieldMap = new HashMap<String, Field>();
+		if (records == null) {
+			return fieldNameToFieldMap;
+		}
+		
+		Record record = records.getRecord();
+		if (record == null) {
+			return fieldNameToFieldMap;
+		}
+		
+		List<Field> fields = record.getFields();
+		if (fields == null) {
+			return fieldNameToFieldMap;
+		}
+		
+		for (Field field : fields) {
+			String fieldName = field.getId();
+			if (fieldName == null) {
+				continue;
+			}
+			
+			fieldNameToFieldMap.put(fieldName, field);
+		}
+		
+		return fieldNameToFieldMap;
 	}
 }

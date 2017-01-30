@@ -1,7 +1,11 @@
 package org.openmrs.module.atd.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -16,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import javax.cache.Cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,14 +53,19 @@ import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.BadScansFileFilter;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.atd.xmlBeans.Field;
+import org.openmrs.module.atd.xmlBeans.Records;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
+import org.openmrs.module.chirdlutil.util.XMLUtil;
+import org.openmrs.module.chirdlutilbackports.cache.ApplicationCacheManager;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
@@ -1066,4 +1077,172 @@ public class ATDServiceImpl implements ATDService
     	}
     	return false;
     }
+
+	/**
+	 * @see org.openmrs.module.atd.service.ATDService#getFormRecords(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag)
+	 */
+	public Records getFormRecords(FormInstanceTag formInstanceTag) throws APIException {
+		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
+				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
+			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
+					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+			log.error(message);
+			throw new APIException(message);
+		}
+		
+		ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
+		Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
+			AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
+		Records records = null;
+		if (cache != null) {
+			records = cache.get(formInstanceTag);
+		}
+		
+		File mergeFile = null;
+		if (records == null) {
+			mergeFile = IOUtil.getMergeFile(formInstanceTag);
+		}
+		
+		if (mergeFile != null && mergeFile.exists()) {
+			InputStream inputStream = null;
+			try {
+				inputStream = new FileInputStream(mergeFile);
+				records = (Records) XMLUtil.deserializeXML(Records.class, inputStream);
+			} catch (Exception e) {
+				String message = "Error loading merge file for form instance: " + formInstanceTag.toString();
+				log.error(message, e);
+				throw new APIException(message);
+			} finally {
+				try {
+					if (inputStream != null) {
+						inputStream.close();
+					}
+				}
+				catch (IOException e) {
+					// No need to bother the client with this error
+					log.error("Error closing input stream", e);
+				}
+			}
+			
+			if (records != null && cache != null) {
+				cache.put(formInstanceTag, records);
+			}
+		}
+		
+		return records;
+	}
+
+	/**
+	 * @see org.openmrs.module.atd.service.ATDService#saveFormRecordsDraft(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag, org.openmrs.module.atd.xmlBeans.Records)
+	 */
+	public void saveFormRecordsDraft(FormInstanceTag formInstanceTag, Records records) throws APIException {
+		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
+				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
+			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
+					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+			log.error(message);
+			throw new APIException(message);
+		}
+		
+		ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
+		Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
+			AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
+		if (cache != null) {
+			cache.put(formInstanceTag, records);
+		} else {
+			String message = "Cache " + AtdConstants.CACHE_FORM_DRAFT + " not configured.  Cannot save form draft for form ID: " + 
+					formInstanceTag.getFormId() + " form instance ID: " + formInstanceTag.getFormInstanceId() + " location ID: " + 
+					formInstanceTag.getLocationId() + " location tag ID: " + formInstanceTag.getLocationTagId();
+			log.error(message);
+			throw new APIException(message);
+		}
+	}
+
+	/**
+	 * @see org.openmrs.module.atd.service.ATDService#saveFormRecords(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag, org.openmrs.module.atd.xmlBeans.Records)
+	 */
+	public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException {
+		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
+				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
+			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
+					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+			log.error(message);
+			throw new APIException(message);
+		}
+		
+		ApplicationCacheManager appCacheManager = ApplicationCacheManager.getInstance();
+		Cache<FormInstanceTag, Records> cache = appCacheManager.getCache(
+			AtdConstants.CACHE_FORM_DRAFT, AtdConstants.CACHE_FORM_DRAFT_KEY_CLASS, AtdConstants.CACHE_FORM_DRAFT_VALUE_CLASS);
+		
+		if (records == null) {
+			// remove the data from the cache
+			if (cache != null) {
+				cache.remove(formInstanceTag);
+			}
+			
+			return;
+		}
+		
+		Integer formId = formInstanceTag.getFormId();
+		Integer formInstanceId = formInstanceTag.getFormInstanceId();
+		Integer locationId = formInstanceTag.getLocationId();
+		Integer locationTagId = formInstanceTag.getLocationTagId();
+		String exportDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
+	        .getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_EXPORT_DIRECTORY, locationTagId, locationId));
+		String defaultMergeDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
+		        .getFormAttributeValue(formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_MERGE_DIRECTORY, locationTagId, locationId));
+		
+		FormInstance formInstance = new FormInstance(locationId, formId, formInstanceId);
+		// write the xml for the export file
+		// use xmle extension to represent form completion through electronic means.
+		String exportFilename = exportDirectory + formInstance.toString() + ChirdlUtilConstants.FILE_EXTENSION_XMLE;
+		
+		OutputStream output = null;
+		try {
+			output = new FileOutputStream(exportFilename);
+			XMLUtil.serializeXML(records, output);
+			
+			// remove the data from the cache
+			if (cache != null) {
+				cache.remove(formInstanceTag);
+			}
+		} catch (FileNotFoundException e) {
+			String message = "Cannot find export form " + exportFilename + " for form ID: " + formId + " form instance ID: " + 
+					formInstanceId + " location ID: " + locationId + " location tag ID: " + locationTagId;
+			log.error(message, e);
+			throw new APIException(message);
+		} catch (IOException e) {
+			String message = "Error writing export form " + exportFilename + " for form ID: " + formId + " form instance ID: " + 
+					formInstanceId + " location ID: " + locationId + " location tag ID: " + locationTagId;
+			log.error(message, e);
+			throw new APIException(message);
+		} finally {
+			if (output != null) {
+				try {
+					output.flush();
+					output.close();
+				} catch (IOException e) {
+					// This isn't super important.  No need to push the exception up to the client.
+					log.error("Error flushing and closing output stream for form ID: " + formId + " form instance ID: " + formInstanceId + 
+						" location ID: " + locationId + " location tag ID: " + locationTagId, e);
+				}
+			}
+		}
+		
+		// rename the merge file to trigger state change
+		String newMergeFilename = defaultMergeDirectory + formInstance.toString() + ChirdlUtilConstants.FILE_EXTENSION_20;
+		File newFile = new File(newMergeFilename);
+		if (!newFile.exists()) {
+			try {
+				File mergeFile = IOUtil.getMergeFile(formInstanceTag);
+				IOUtil.copyFile(mergeFile.getAbsolutePath(), newMergeFilename);
+				IOUtil.deleteFile(mergeFile.getAbsolutePath());
+			} catch (Exception e) {
+				// No need to push this exception back to the client.  It's just clean up issues.
+				String message = "Error renaming merge file for form ID: " + formId + " form instance ID: " + formInstanceId + 
+						" location ID: " + locationId + " location tag ID: " + locationTagId;
+				log.error(message, e);
+			}
+		}
+	}
 }
