@@ -1045,4 +1045,25 @@ public class ATDServiceImpl implements ATDService
     public boolean oneBoxChecked(Integer encounterId, Integer ruleId){
     	return getATDDAO().oneBoxChecked(encounterId, ruleId);
     }
+    
+    /**
+     * 
+     * Look up the Statistics record by encounter_id and rule_id.
+     * This checks to see if the rule fired for a certain encounter
+     * 
+     * @param encounterId
+     * @param ruleId
+     * @return
+     */
+    public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId){
+    	return getATDDAO().getStatsByEncounterRule(encounterId, ruleId);
+    }
+    
+    public boolean ruleFiredForEncounter(Integer encounterId, Integer ruleId){
+    	List<Statistics> stats = getStatsByEncounterRule(encounterId,ruleId);
+    	if(stats != null && stats.size()>0){
+    		return true;
+    	}
+    	return false;
+    }
 }
