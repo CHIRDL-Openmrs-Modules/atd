@@ -3,15 +3,16 @@
  */
 package org.openmrs.module.atd.xmlBeans;
 
-
+import java.io.Serializable;
 
 /**
  * Object representation of <Records> xml
  * 
  * @author Tammy Dugan
  */
-public class Records
+public class Records implements Serializable
 {
+	private static final long serialVersionUID = 1L;
 	private Record record = null;
 	private String title = null;
 	

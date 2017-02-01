@@ -3,14 +3,16 @@
  */
 package org.openmrs.module.atd.xmlBeans;
 
+import java.io.Serializable;
 
 /**
  * Object representation of <Field> xml
  * 
  * @author Tammy Dugan
  */
-public class Field
+public class Field implements Serializable
 {
+	private static final long serialVersionUID = 1L;
 	private String id = null;
 	private String value = null;
 	private String taborder = null;
