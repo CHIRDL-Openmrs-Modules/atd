@@ -122,7 +122,8 @@ public class CREATE_JIT implements Rule
 				PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(session.getEncounterId(), formService.getForm(formName).getFormId());
 							
 				if (patientState != null){
-					Result.emptyResult();;
+					return Result.emptyResult();
+
 				}
 						
 			}
