@@ -12,12 +12,14 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
-import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.BooleanType;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
+import org.hibernate.type.TimestampType;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Obs;
@@ -1219,7 +1221,7 @@ public class HibernateATDDAO implements ATDDAO
 					.createSQLQuery(sql);
 			// Had to do these scalar calls because MySQL is not happy with text types.
 			// The following error will occur if this is not done: No Dialect mapping for JDBC type: -1
-			qry.addScalar("b.text", Hibernate.STRING);
+			qry.addScalar("b.text", new StringType());
 			qry.addScalar("a.answer");
 			qry.addScalar("b.form_instance_id");
 			qry.addScalar("b.form_id");
@@ -1596,17 +1598,17 @@ public class HibernateATDDAO implements ATDDAO
                 + "               ON a.parentConceptId = b.concept_id " + whereClause + orderBy;
 		
 		SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sqlString);
-		qry.addScalar("conceptId", Hibernate.INTEGER);
-		qry.addScalar("name", Hibernate.STRING);
-		qry.addScalar("conceptClass", Hibernate.STRING);
-		qry.addScalar("datatype", Hibernate.STRING);
-		qry.addScalar("description", Hibernate.STRING);
-		qry.addScalar("parentConceptId", Hibernate.INTEGER);
-		qry.addScalar("units",  Hibernate.STRING);
-		qry.addScalar("parentConcept", Hibernate.STRING);
-		qry.addScalar("retired", Hibernate.BOOLEAN);
-		qry.addScalar("conceptClassId", Hibernate.INTEGER);
-		qry.addScalar("dateCreated", Hibernate.TIMESTAMP);
+		qry.addScalar("conceptId", new IntegerType());
+		qry.addScalar("name", new StringType());
+		qry.addScalar("conceptClass", new StringType());
+		qry.addScalar("datatype", new StringType());
+		qry.addScalar("description", new StringType());
+		qry.addScalar("parentConceptId", new IntegerType());
+		qry.addScalar("units",  new StringType());
+		qry.addScalar("parentConcept", new StringType());
+		qry.addScalar("retired", new BooleanType());
+		qry.addScalar("conceptClassId", new IntegerType());
+		qry.addScalar("dateCreated", new TimestampType());
 		
 		if(start > -1 && length > -1)
 		{
@@ -1666,8 +1668,8 @@ public class HibernateATDDAO implements ATDDAO
     public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc)
 	{
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
-    	criteria.add(Expression.eq("encounterId", encounterId));
-    	criteria.add(Expression.eq("formName", formName));
+    	criteria.add(Restrictions.eq("encounterId", encounterId));
+    	criteria.add(Restrictions.eq("formName", formName));
     	
     	if("ASC".equals(orderAscDesc))
     	{
@@ -1692,9 +1694,9 @@ public class HibernateATDDAO implements ATDDAO
 	{
     	boolean oneBoxChecked = false;
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
-    	criteria.add(Expression.eq("encounterId", encounterId));
-    	criteria.add(Expression.eq("ruleId", ruleId));
-    	criteria.add(Expression.like("answer", "%Y%"));
+    	criteria.add(Restrictions.eq("encounterId", encounterId));
+    	criteria.add(Restrictions.eq("ruleId", ruleId));
+    	criteria.add(Restrictions.like("answer", "%Y%"));
     	
 		List results = criteria.list();
 		
@@ -1716,8 +1718,8 @@ public class HibernateATDDAO implements ATDDAO
     public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId)
 	{
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
-    	criteria.add(Expression.eq("encounterId", encounterId));
-    	criteria.add(Expression.eq("ruleId", ruleId));
+    	criteria.add(Restrictions.eq("encounterId", encounterId));
+    	criteria.add(Restrictions.eq("ruleId", ruleId));
     	
 		return criteria.list();
 	}
