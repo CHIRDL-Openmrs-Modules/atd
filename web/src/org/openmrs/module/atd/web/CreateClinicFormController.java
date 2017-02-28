@@ -14,8 +14,8 @@ import org.openmrs.Location;
 import org.openmrs.User;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationAttribute;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationAttributeValue;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.ChirdlLocationAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.ChirdlLocationAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -98,9 +98,9 @@ public class CreateClinicFormController extends SimpleFormController {
 		map.put("city", request.getParameter("city"));
 		map.put("state", request.getParameter("state"));
 		map.put("zip", request.getParameter("zip"));
-		List<LocationAttribute> locationAttributes = getAllLocationAttributes();
+		List<ChirdlLocationAttribute> locationAttributes = getAllLocationAttributes();
 		map.put("locationAttributes", locationAttributes);
-		for (LocationAttribute locationAttribute : locationAttributes) {
+		for (ChirdlLocationAttribute locationAttribute : locationAttributes) {
 			String value = request.getParameter(locationAttribute.getName());
 			if (value != null && value.trim().length() > 0) {
 				map.put(locationAttribute.getName(), value);
@@ -156,7 +156,7 @@ public class CreateClinicFormController extends SimpleFormController {
 	private void addLocationAttributes(HttpServletRequest request, Location location) throws Exception {
 		ChirdlUtilBackportsService backportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Integer locationId = location.getLocationId();
-		for (LocationAttribute locationAttribute : getAllLocationAttributes()) {
+		for (ChirdlLocationAttribute locationAttribute : getAllLocationAttributes()) {
 			String value = request.getParameter(locationAttribute.getName());
 			if (value != null && value.trim().length() > 0) {
 				addLocationAttribute(request, backportsService, locationId, value.trim(), locationAttribute);
@@ -165,15 +165,15 @@ public class CreateClinicFormController extends SimpleFormController {
 	}
 	
 	private void addLocationAttribute(HttpServletRequest request, ChirdlUtilBackportsService backportsService, 
-	                                  Integer locationId, String value, LocationAttribute locationAttr) {
-		LocationAttributeValue lav = new LocationAttributeValue();
+	                                  Integer locationId, String value, ChirdlLocationAttribute locationAttr) {
+		ChirdlLocationAttributeValue lav = new ChirdlLocationAttributeValue();
 		lav.setLocationAttributeId(locationAttr.getLocationAttributeId());
 		lav.setLocationId(locationId);
 		lav.setValue(value.trim());
 		backportsService.saveLocationAttributeValue(lav);
 	}
 	
-	private List<LocationAttribute> getAllLocationAttributes() {
+	private List<ChirdlLocationAttribute> getAllLocationAttributes() {
 		return Context.getService(ChirdlUtilBackportsService.class).getAllLocationAttributes();
 	}
 }

@@ -30,9 +30,7 @@ public class ATDActivator extends BaseModuleActivator {
 			// check that all global properties are set
 			AdministrationService adminService = Context
 					.getAdministrationService();
-			Context.authenticate(adminService
-				.getGlobalProperty("scheduler.username"), adminService
-				.getGlobalProperty("scheduler.password"));
+			
 			Iterator<GlobalProperty> properties = adminService
 					.getAllGlobalProperties().iterator();
 			GlobalProperty currProperty = null;
