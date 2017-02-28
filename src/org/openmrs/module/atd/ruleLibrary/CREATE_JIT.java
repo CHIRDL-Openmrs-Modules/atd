@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.Patient;
+import org.openmrs.api.FormService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicContext;
@@ -23,6 +24,7 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.Session;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
@@ -80,56 +82,73 @@ public class CREATE_JIT implements Rule
 			Map<String, Object> parameters) throws LogicException
 	{
 		PatientService patientService = Context.getPatientService();
+		FormService formService = Context.getFormService();
+		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Patient patient = patientService.getPatient(patientId);
 		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
-		Object param2Object = parameters.get(ChirdlUtilConstants.PARAMETER_2);
-		Object param3Object = parameters.get(ChirdlUtilConstants.PARAMETER_3);
+		Object triggerObject = parameters.get(ChirdlUtilConstants.PARAMETER_2);
+		Object autoPrintObject = parameters.get(ChirdlUtilConstants.PARAMETER_3);
+		Object ignoreJitCreatedObject = parameters.get(ChirdlUtilConstants.PARAMETER_4); 
 		
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
-		if(sessionId != null){
-			Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
-			FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
-			Integer locationId = formInstance.getLocationId();
-			State currState = getCreateState(formName, locationTagId, locationId);
-			if (currState == null) {
-				return Result.emptyResult();
+		if (sessionId == null) {
+			return Result.emptyResult();
+		}
+		
+		Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
+		FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
+		Integer locationId = formInstance.getLocationId();
+		State currState = getCreateState(formName, locationTagId, locationId);
+		if (currState == null) {
+			return Result.emptyResult();
+		}
+			
+		try {
+			
+			HashMap<String,Object> actionParameters = new HashMap<String,Object>();
+			if (triggerObject != null && triggerObject instanceof String){
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, (String) triggerObject);
 			}
 			
-			try {
-				HashMap<String,Object> actionParameters = new HashMap<String,Object>();
-				if (param2Object != null && param2Object instanceof String){
-					String trigger = (String) param2Object;
-					actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
+			if (autoPrintObject != null && autoPrintObject instanceof String){
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, (String) autoPrintObject);
+			}
+			
+			if (ignoreJitCreatedObject == null || !(ignoreJitCreatedObject instanceof String)
+							|| !((String)ignoreJitCreatedObject).trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
+						
+				Session session = chirdlUtilBackportsService.getSession(sessionId);
+				PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(session.getEncounterId(), formService.getForm(formName).getFormId());
+							
+				if (patientState != null){
+					return Result.emptyResult();
+
 				}
-				
-				if (param3Object != null && param3Object instanceof String){
-					String autoPrint = (String) param3Object;
-					actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
-				}
-				
-				actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
-            	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
-            		locationTagId,
-            		locationId,
-            		BaseStateActionHandler.getInstance());
-            	FormInstance formInst = patientState.getFormInstance();
-            	if (formInst != null) {
-            		formInstTag = new FormInstanceTag(formInst, locationTagId);
-            	}
-            }
-            catch (Exception e) {
-	            log.error("Error creating JIT",e);
-            }
-		}	
-		
+						
+			}
+						
+			actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
+        	PatientState patientState = StateManager.runState(patient, sessionId, currState,actionParameters,
+        		locationTagId,
+        		locationId,
+        		BaseStateActionHandler.getInstance());
+        	FormInstance formInst = patientState.getFormInstance();
+        	if (formInst != null) {
+        		formInstTag = new FormInstanceTag(formInst, locationTagId);
+        	}
+        }
+        catch (Exception e) {
+            log.error("Error creating JIT",e);
+        }
+	
 		if (formInstTag != null) {
 			return new Result(formInstTag.toString());
 		}
 		
 		return Result.emptyResult();
 	}
-	
+
 	protected State getCreateState(String formName, Integer locationTagId, Integer locationId) 
 	{
 		String stateName = ChirdlUtilConstants.STATE_JIT_CREATE;
