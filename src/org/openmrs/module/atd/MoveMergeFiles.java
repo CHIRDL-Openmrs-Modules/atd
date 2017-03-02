@@ -41,8 +41,6 @@ public class MoveMergeFiles extends AbstractTask {
 	
 	private static Date lastMoveMergeFiles;
 	
-	private static Date nextLatestMoveMergeFiles;
-	
 	@Override
 	public void initialize(TaskDefinition config) {
 		super.initialize(config);
@@ -239,7 +237,6 @@ public class MoveMergeFiles extends AbstractTask {
 				lastMoveMergeFiles = today.getTime();
 				Calendar threshold = GregorianCalendar.getInstance();
 				threshold.add(GregorianCalendar.MINUTE, 5);
-				nextLatestMoveMergeFiles = threshold.getTime();	
 			}
 		}
 	}
