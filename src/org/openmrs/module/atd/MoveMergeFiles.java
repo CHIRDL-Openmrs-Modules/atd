@@ -41,10 +41,6 @@ public class MoveMergeFiles extends AbstractTask {
 	
 	private static Date lastMoveMergeFiles;
 	
-	private static Date nextLatestMoveMergeFiles;
-	
-	private static Boolean TFAMP_Alert = false;
-	
 	@Override
 	public void initialize(TaskDefinition config) {
 		super.initialize(config);
@@ -235,31 +231,13 @@ public class MoveMergeFiles extends AbstractTask {
 				}
 				
 			}
-			if (i == 0 && lastMoveMergeFiles != null && nextLatestMoveMergeFiles != null) // and there are files to move for any form but 
-			//we did not move any for this form
-			{
-				Calendar now = GregorianCalendar.getInstance();
-				if (now.getTime().after(nextLatestMoveMergeFiles)) {
-					// Log error and alert some problem with TF Merger
-					if (!TFAMP_Alert) //already alerted
-					{
-						TFAMP_Alert = true;
-						log.error("TF AutoMerger NOT RUNNING IT SEEMS!!! ");
-					}
-				}
-			} else if (lastMoveMergeFiles == null || i > 0) // First time or we moved some files
+			if (lastMoveMergeFiles == null || i > 0) // First time or we moved some files
 			{
 				Calendar today = GregorianCalendar.getInstance();
 				lastMoveMergeFiles = today.getTime();
 				Calendar threshold = GregorianCalendar.getInstance();
 				threshold.add(GregorianCalendar.MINUTE, 5);
-				nextLatestMoveMergeFiles = threshold.getTime();
-				if (TFAMP_Alert) {
-					TFAMP_Alert = false;
-					log.error("TF AutoMerger Issue Rectified IT SEEMS!!! ");
-				}
 			}
-			
 		}
 	}
 	
