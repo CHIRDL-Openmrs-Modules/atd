@@ -88,7 +88,6 @@
 	<classpathentry kind="lib" path="lib-common/jibx/wstx-asl.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xmlpull_1_1_4.jar"/>
 	<classpathentry kind="lib" path="lib-common/jibx/xpp3.jar"/>
-	<classpathentry kind="lib" path="lib-common/logic-0.5.0.1.jar"/>
 	<classpathentry kind="lib" path="lib-common/openmrs-api-1.12.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib-common/openmrs-api-1.12.1-SNAPSHOT-tests.jar"/>
 	<classpathentry kind="lib" path="lib-common/openmrs-tests.jar"/>
@@ -105,5 +104,6 @@
 	<classpathentry kind="lib" path="lib-common/chirdlutil-1.13.0.jar"/>
 	<classpathentry kind="lib" path="lib-common/chirdlutilbackports-2.7.0.jar"/>
 	<classpathentry kind="lib" path="lib-common/dss-2.32.0.jar"/>
+	<classpathentry kind="lib" path="lib-common/logic-0.5.1.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
