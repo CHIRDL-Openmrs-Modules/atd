@@ -20,7 +20,7 @@ function validateSelections()
 {
 	if($j("#csv").is(':checked')) // Edit with csv file, show the confirm dialog
 	{
-		if($j("#csvFile").attr("files").length > 0) // Make sure a file has been selected
+		if($j("#csvFile").prop("files").length > 0) // Make sure a file has been selected
 		{
 			$j('<div id="confirmUpload" title="Edit by uploading csv?"><p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Are you sure you want to upload the file? <br/>Form attribute values will be updated and changes cannot be undone.</p></div>').dialog({
 				 height: "auto",

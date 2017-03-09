@@ -12,7 +12,7 @@ function updateAndSubmit()
 function toggleSelectedConcepts()
 {
 	var $cbs = $j(".conceptCheckbox:checkbox:enabled");
-	var checked = $cbs.filter(":first").attr('checked');
+	var checked = $cbs.filter(":first").prop('checked');
 	$j('.conceptCheckbox').each(function(){ 
 		this.checked = !checked; 
 		toggleSelectedObject(this.id);

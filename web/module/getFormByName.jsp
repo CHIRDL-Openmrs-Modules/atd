@@ -37,7 +37,7 @@
 
 	<table>
 		<tr>
-			<td style="vertical-align: top"><input style="vertical-align: top" type="radio" name="editType" id="manual" value="manual" ${selectedOption == "manual" ? "checked" : ""} onclick="$j('#csvFile').attr('disabled', true); $j('#formNameSelect').attr('disabled', false);"/></td>
+			<td style="vertical-align: top"><input style="vertical-align: top" type="radio" name="editType" id="manual" value="manual" ${selectedOption == "manual" ? "checked" : ""} onclick="$j('#csvFile').prop('disabled', true); $j('#formNameSelect').attr('disabled', false);"/></td>
 			<td><label for="manual">Edit manually online</label></td>
 		</tr>
 		<tr>
@@ -59,7 +59,7 @@
 						</select></td>
 		</tr>
 		<tr>
-			<td style="vertical-align: top"><input style="vertical-align: top" type="radio" name="editType" id="csv" value="csv" ${selectedOption == "csv" ? "checked" : ""} onclick="$j('#csvFile').attr('disabled', false); $j('#formNameSelect').attr('disabled', true);"/></td>
+			<td style="vertical-align: top"><input style="vertical-align: top" type="radio" name="editType" id="csv" value="csv" ${selectedOption == "csv" ? "checked" : ""} onclick="$j('#csvFile').prop('disabled', false); $j('#formNameSelect').attr('disabled', true);"/></td>
 			<td><label for="csv">Edit by uploading a csv file</label></td>
 		</tr>
 		<tr>
