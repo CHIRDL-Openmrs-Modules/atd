@@ -54,7 +54,7 @@ function checkTags(locationId)
 		// If the first tag checkbox is already checked, it will uncheck all, 
 		// if the first tag is unchecked, it will check all
 		var $cbs = $j("." + locationId + ":checkbox:enabled");
-		var checked = $cbs.filter(":first").attr('checked');
+		var checked = $cbs.filter(":first").prop('checked');
 		$j('.' + locationId).each(function(){ this.checked = !checked});	
 	}	
 }

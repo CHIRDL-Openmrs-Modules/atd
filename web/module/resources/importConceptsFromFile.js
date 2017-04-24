@@ -4,7 +4,7 @@
 var progressbar = $( "#progressbar" );
 var progressLabel = $( ".progress-label" );
 var checkProgressTimer;
-var ajaxURL = '/openmrs/moduleServlet/atd/importConceptsFromFile';
+var ajaxURL = ctx + '/moduleServlet/atd/importConceptsFromFile';
 var changeEventText = 'Import Progress: ';
 var completeEventText = 'Import Complete!';
 var canceledEventText = 'Import Canceled: ';
@@ -17,7 +17,7 @@ var canceledEventText = 'Import Canceled: ';
     
     function validateSelected()
     {
-    	if($j("#dataFile").attr("files").length > 0) // Make sure a file has been selected
+    	if($j("#dataFile").prop("files").length > 0) // Make sure a file has been selected
     	{
     		startImport();
     	}
