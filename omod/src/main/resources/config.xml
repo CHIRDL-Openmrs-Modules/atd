@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//OpenMRS//DTD OpenMRS Config 1.0//EN" "http://resources.openmrs.org/doctype/config-1.0.dtd">
+
+<module configVersion="1.0">
+	
+	<!-- Basic Module Properties -->
+	<id>@MODULE_ID@</id>
+	<name>@MODULE_NAME@</name>
+	<version>@MODULE_VERSION@</version>
+	<package>@MODULE_PACKAGE@</package>
+	<author>Tammy Dugan</author>
+	<description>
+			Takes a database form and converts it into
+			an Adaptive Turnaround Document (ATD)
+	</description>
+
+	<activator>org.openmrs.module.atd.ATDActivator</activator>
+	
+	<require_version>1.0.0</require_version>
+	<require_database_version>1.0.0</require_database_version>
+	<require_modules>
+   		<require_module version="2.32.0">org.openmrs.module.dss</require_module>
+		<require_module version="1.13.0">org.openmrs.module.chirdlutil</require_module>
+		<require_module version="2.7.0">org.openmrs.module.chirdlutilbackports</require_module>
+	</require_modules>
+	
+	<!-- /Basic Module Properties -->
+	
+	<!-- Extensions -->
+	<extension>
+		<point>org.openmrs.admin.list</point>
+		<class>org.openmrs.module.atd.extension.html.AdminList</class>
+	</extension>
+	
+	<!-- /Extensions -->
+
+	<globalProperty>
+		<property>atd.formLoadDirectory</property>
+   		<description>Directory for new teleform for definitions to load into the openmrs form tables.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.mergeTestCaseXML</property>
+		<defaultValue>false</defaultValue>
+   		<description>Flag telling whether test case form xml should be merged by teleform</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.mergeToTable</property>
+		<defaultValue>false</defaultValue>
+   		<description>Flag telling whether to write a form definition to a table or to xml.</description>
+	</globalProperty>	
+	<globalProperty>
+		<property>atd.convertTeleformToMergeXMLFile</property>
+   		<description>XSLT file that converts teleform form definition xml into teleform merge xml.
+   		There is a file called convertTeleformXML.xslt in the metadata folder of the module.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.convertMergeXMLToTableFile</property>
+   		<description>XSLT file that converts teleform merge xml into a database table with one column per tag.
+   		There is a file called mergeXMLToTable.xslt in the metadata folder of the module.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.defaultPackagePrefix</property>
+		<defaultValue>org.openmrs.module.atd.ruleLibrary</defaultValue>
+   		<description>The package prefix given to a set of precompiled rules.
+   		This package is the default package used for rule tokens.
+   		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.purgeXMLDatasource</property>
+		<defaultValue>1</defaultValue>
+   		<description>Tells when to purge a parsed xml file from the xml datasource.
+   		1 - Purge as soon as possible
+   		2 - Purge at the end of the session
+   		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.retireStatesPeriod</property>
+		<defaultValue>14</defaultValue>
+   		<description>Time period in days before states that are finished or unfinished are retired by a cron job</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.xmlIdTagFront</property>
+		<defaultValue>ID_Barcode</defaultValue>
+   		<description>XML tagname on the front of the form that contains the formId, formInstanceId, and locationId</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atd.xmlIdTagBack</property>
+		<defaultValue>ID_BarcodeBack</defaultValue>
+   		<description>XML tagname on the front of the form that contains the formId, formInstanceId, and locationId</description>
+	</globalProperty>
+		<globalProperty>
+		<property>atd.mergeDirectoryBatchSize</property>
+		<defaultValue>5</defaultValue>
+   		<description>Number of files that can be processed from a Teleform merge directory at a time.</description>
+	</globalProperty>
+    <globalProperty>
+        <property>atd.installationDirectory</property>
+        <defaultValue>C:\chica</defaultValue>
+        <description>Installation directory.</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.serverName</property>
+        <description>Name of the server hosting the application.</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.TeleformFormFileName</property>
+        <defaultValue>Form.XML</defaultValue>
+        <description>The name of the form XML document found in the Teleform fxf file.</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.defaultTifImageDirectory</property>
+        <description>Directory to look for available tif files</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.badScansExcludedExtensions</property>
+        <defaultValue>.db</defaultValue>
+        <description>A comma delimited string of file extensions to ignore when looking for bad scans. Please include the '.' character as well.
+        </description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxFrom</property>
+        <defaultValue>CHICA</defaultValue>
+        <description>The user to place in the from section of outgoing faxes that are sent.
+        </description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.pdfTemplateDirectory</property>
+        <description>Directory containing all form pdf templates.
+        </description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.defaultOutputType</property>
+        <defaultValue>teleformXML</defaultValue>
+        <description>The default output for creating merge documents.  The current possible values are teleformXML and pdf</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxWsdlLocation</property>
+        <description>The wsdl location for the fax web service.</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxUsername</property>
+        <description>Username for the FAX COM web service</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxPassword</property>
+        <description>Password for the FAX COM web service</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxResolution</property>
+        <defaultValue>1</defaultValue>
+        <description>The fax document resolution. 1 = high, 0 = low</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxPriority</property>
+        <defaultValue>2</defaultValue>
+        <description>The fax request priority. 3 = urgent, 2 = high, 1 = normal, 0 = low</description>
+    </globalProperty>
+    <globalProperty>
+        <property>atd.outgoingFaxSendTime</property>
+        <defaultValue>0.0</defaultValue>
+        <description>The fax request send time. 0.0 = immediate, 1.0 = off-peak</description>
+    </globalProperty>
+     <globalProperty>
+        <property>atd.defaultOutgoingFaxRecipient</property>
+        <defaultValue>Clinical Staff</defaultValue>
+        <description>The name of the recipient of the faxed image</description>
+    </globalProperty>
+        
+	<!-- Internationalization -->
+	<!-- All message codes should start with moduleId.* -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<!-- /Internationalization -->
+
+    <!-- Servlets -->
+    <!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> -->
+    <servlet>
+        <servlet-name>exportConceptServlet</servlet-name>
+        <servlet-class>@MODULE_PACKAGE@.web.ExportConceptServlet</servlet-class>
+    </servlet>
+   
+	<!-- Servlets -->
+    <!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> -->
+   <servlet>
+       <servlet-name>importConceptsFromFile</servlet-name>
+       <servlet-class>@MODULE_PACKAGE@.web.ImportConceptsFromFileServlet</servlet-class>
+   </servlet>
+	<mappingFiles>
+	patient_atd.hbm.xml
+	statistics.hbm.xml
+	</mappingFiles>
+</module>
