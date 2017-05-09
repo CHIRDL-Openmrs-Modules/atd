@@ -5,6 +5,7 @@
 
 <hibernate-configuration>
 	<session-factory>
+	    <mapping resource="rule.hbm.xml" />
 		<mapping resource="patient_atd.hbm.xml" />
 		<mapping resource="statistics.hbm.xml" />
 	</session-factory>
