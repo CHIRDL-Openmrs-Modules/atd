@@ -29,6 +29,8 @@ import org.openmrs.module.chirdlutilbackports.action.ProcessStateAction;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.Error;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.ChirdlLocationAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.Session;
@@ -56,7 +58,13 @@ public class FaxJIT implements ProcessStateAction {
 	                          HashMap<String, Object> parameters) {
 
 		// lookup the patient again to avoid lazy initialization errors
-		
+		log.info("this is a test");
+		try {
+			log.info(" This is line 61" + Thread.currentThread().getStackTrace()[0].getLineNumber());
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		ATDService atdService = Context.getService(ATDService.class);
 		FormService formService = Context.getFormService();
 		
@@ -170,8 +178,25 @@ public class FaxJIT implements ProcessStateAction {
 					priority = Integer.valueOf(priorityProperty);
 				}
 					
-				FaxUtil.faxFileByWebService(imageFile, wsdlLocation, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
+				String uniqueId = FaxUtil.faxFileByWebService(imageFile, wsdlLocation, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
 						faxNumber, username, password, sender, recipient, clinic, patient, formName, resolution, priority, sendTime);
+				//save a form_instance attribute
+				//New attribute faxid
+				
+				
+				FormInstanceAttribute attr = chirdlutilbackportsService
+						.getFormInstanceAttributeByName(ChirdlUtilConstants.FORM_INSTANCE_ATTR_FAX_ID);
+				
+				if (attr != null){
+					FormInstanceAttributeValue formInstanceAttrValue = new FormInstanceAttributeValue();
+					formInstanceAttrValue.setFormInstanceAttributeId(attr.getFormInstanceAttributeId());
+					formInstanceAttrValue.setFormId(formInstance.getFormId());
+					formInstanceAttrValue.setFormInstanceId(formInstance.getFormInstanceId());
+					formInstanceAttrValue.setLocationId(locationId);
+					formInstanceAttrValue.setValue(uniqueId);
+					chirdlutilbackportsService.saveFormInstanceAttributeValue(formInstanceAttrValue);
+				}
+				
 				log.info("Form " + formName + " was submitted to the fax web service for patient_id: " 
 						+ patient.getPatientId() + " clinic: " + clinic + " recipient: " + recipient);
 							
