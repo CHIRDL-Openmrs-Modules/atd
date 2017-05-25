@@ -136,7 +136,7 @@ public class FaxJIT implements ProcessStateAction {
 			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_PDF);
 			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_TIF);
 			extensions.add(ChirdlUtilConstants.FILE_EXTENSION_TIFF);
-			String imageFilename = formInstance.getLocationId() + "-" + formInstance.getFormId() + "-" + formInstance.getFormInstanceId();
+			String imageFilename = formInstance.getLocationId() + ChirdlUtilConstants.GENERAL_INFO_DASH + formInstance.getFormId() + ChirdlUtilConstants.GENERAL_INFO_DASH  + formInstance.getFormInstanceId();
 			File imageFile = IOUtil.searchForFile(imageFilename, imageDirectoryAttrValue.getValue(), extensions);
 		
 			if (imageFile.exists()) {
