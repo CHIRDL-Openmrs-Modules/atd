@@ -10,9 +10,6 @@
             <props>
             	<prop key="/module/@MODULE_ID@/editFields.form">editFields</prop>            
 				<prop key="/module/@MODULE_ID@/editForms.form">editForms</prop>            
-				<prop key="/module/@MODULE_ID@/uploadForms.form">uploadForms</prop>
-				<prop key="/module/@MODULE_ID@/ruleBuilder.form">ruleBuilderForm</prop> 
-  				<prop key="/module/@MODULE_ID@/data.form">dataForm</prop>
 				<prop key="/module/@MODULE_ID@/deleteForms.form">deleteForms</prop>
 				<prop key="/module/@MODULE_ID@/createForm.form">createForm</prop>
 				<prop key="/module/@MODULE_ID@/popFormFields.form">popFormFields</prop>
@@ -35,7 +32,6 @@
 				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
 				<prop key="/module/@MODULE_ID@/editClinicTagAttributeForm.form">editClinicTagAttributeForm</prop>
 			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
-			    <prop key="/module/@MODULE_ID@/createFormFromFile.form">createFormFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
 			    <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
 			    <prop key="/module/@MODULE_ID@/exportFormCSV.form">exportFormCSV</prop>
@@ -45,29 +41,7 @@
 			</props>
 		</property>
 	</bean>
-<bean id="ruleBuilderForm" class="org.openmrs.module.atd.web.RuleBuilderFormController" lazy-init="default" autowire="default" dependency-check="default">
-<property name="commandName"><value>rule</value></property>
-<property name="commandClass">
-  <value>org.openmrs.module.atd.RuleBuilderForm</value> 
-  </property>
-<property name="formView"><value>/module/@MODULE_ID@/ruleBuilderForm</value></property>
-<property name="successView"><value>ruleBuilder.form</value></property>
-  </bean>
-  
-<bean id="dataForm" class="org.openmrs.module.atd.web.DataFormController" lazy-init="default" autowire="default" dependency-check="default">
-<property name="commandName"><value>data</value></property>
-<property name="commandClass">
-  <value>org.openmrs.module.atd.DataForm</value> 
-  </property>
-<property name="formView"> <value>/module/@MODULE_ID@/dataForm</value></property>
-<property name="successView"><value>data.form</value></property>
-  </bean>
 	
-	<bean id="uploadForms" class="org.openmrs.module.atd.web.UploadFormsController">
-		<property name="commandName"><value>UploadFormsObject</value></property>
-		<property name="formView"><value>/module/@MODULE_ID@/uploadForms</value></property>
-		<property name="successView"><value>uploadForms.form</value></property>
-	</bean>
 	<bean id="editForms" class="org.openmrs.module.atd.web.EditFormsController">
 		<property name="commandName"><value>EditFormsObject</value></property>
 		<property name="formView"><value>/module/@MODULE_ID@/editForms</value></property>
@@ -206,11 +180,6 @@
         <property name="commandName"><value>importConceptsFromFileObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/importConceptsFromFile</value></property>
         <property name="successView"><value>importConceptsFromFile.form</value></property>
-	</bean>
-	<bean id="createFormFromFile" class="@MODULE_PACKAGE@.web.CreateFormFromFileController">
-        <property name="commandName"><value>createFormFromFileObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/createFormFromFile</value></property>
-        <property name="successView"><value>createFormFromFile.form</value></property>
 	</bean>
 	<bean id="exportFormCSV" class="@MODULE_PACKAGE@.web.ExportFormCSVController">
         <property name="commandName"><value>exportFormCSVObject</value></property>
