@@ -62,7 +62,7 @@ public class ConfigFormController extends SimpleFormController
 		Integer formId = Integer.parseInt(formIdStr);
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {
-			ConfigManagerUtil.deleteForm(formId);
+			ConfigManagerUtil.deleteForm(formId, true); // CHICA-993 Updated to delete based on formId, also pass true to delete LocationTagAttribute record
 			return new ModelAndView(new RedirectView("configurationManager.form"));
 		}
 		String formName = request.getParameter("formName");

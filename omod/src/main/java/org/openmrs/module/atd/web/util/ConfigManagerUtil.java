@@ -199,7 +199,14 @@ public class ConfigManagerUtil {
 		return file.getAbsolutePath();
 	}
 	
-	public static void deleteForm(Integer formId) {
+	/**
+	 * CHICA-993 Updating this method so that it only deletes LocationTagAttributeValue records for this form
+	 * Also only deletes the LocationTagAttribute record if deleteAttribute parameter is true
+	 * 
+	 * @param formId - the formId
+	 * @param deleteAttribute - true if the LocationTagAttribute should also be deleted
+	 */
+	public static void deleteForm(Integer formId, boolean deleteAttribute) {
 		FormService formService = Context.getFormService();
 		ATDService atdService = Context.getService(ATDService.class);
 		//delete the form attribute values
@@ -215,11 +222,17 @@ public class ConfigManagerUtil {
 				formService.purgeField(currFormField.getField());
 			}
 			
-			// delete from Chirdl Util tables
+			// Delete LocationTagAttributeValue records and LocationTagAttribute if needed
 			ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
 			LocationTagAttribute attr = chirdlutilbackportsService.getLocationTagAttribute(form.getName());
 			if (attr != null) {
-				chirdlutilbackportsService.deleteLocationTagAttribute(attr);
+				chirdlutilbackportsService.deleteLocationTagAttributeValueByValue(attr, formId.toString());
+				
+				// Now delete the LocationTagAttribute
+				if(deleteAttribute)
+				{
+					chirdlutilbackportsService.deleteLocationTagAttribute(attr);
+				}
 			}
 		}
 	}
