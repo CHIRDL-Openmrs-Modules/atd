@@ -77,7 +77,7 @@ public class PopulateFormFieldsController extends SimpleFormController {
 		int formId = Integer.parseInt(formIdString);
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {
-			ConfigManagerUtil.deleteForm(formId);
+			ConfigManagerUtil.deleteForm(formId, true); // CHICA-993 Updated to delete based on formId, also pass true to delete LocationTagAttribute record
 			return new ModelAndView(new RedirectView("configurationManager.form"));
 		}
 		

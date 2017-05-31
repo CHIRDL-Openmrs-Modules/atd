@@ -59,7 +59,10 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 			// Delete the form when coming from the create/replace form pages
 			if(successViewName.equalsIgnoreCase("replaceRetireForm.form") || successViewName.equalsIgnoreCase("mlmForm.form"))
 			{
-				ConfigManagerUtil.deleteForm(iFormId);
+				// CHICA-993 Updated to delete based on formId
+				// true when successViewName is mlmForm.form (which happens when using the Create Form tool)
+				// false when successViewName is replaceRetireForm.form (which happens when using the Replace Form tool)
+				ConfigManagerUtil.deleteForm(iFormId, successViewName.equalsIgnoreCase("mlmForm.form"));
 			}
 			return new ModelAndView(new RedirectView("configurationManager.form"));
 		}

@@ -127,7 +127,7 @@ public class ReplaceFormController extends SimpleFormController {
 			map.put("failedAttrValCopy", true);
 			map.put("forms", formService.getAllForms(false));
 			map.put("selectedForm", replaceFormIdStr);
-			ConfigManagerUtil.deleteForm(newForm.getFormId());
+			ConfigManagerUtil.deleteForm(newForm.getFormId(), false); // CHICA-993 Updated to delete based on formId, also pass false so that LocationTagAttribute record is NOT deleted
 			return new ModelAndView(view, map);
 		}
 		
