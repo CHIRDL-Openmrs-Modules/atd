@@ -62,7 +62,7 @@ public class DeleteFormsController extends SimpleFormController
 				try
 				{
 					currFormId = Integer.parseInt(currFormIdString);
-					ConfigManagerUtil.deleteForm(currFormId);
+					ConfigManagerUtil.deleteForm(currFormId, true); // CHICA-993 Updated to delete based on formId, also pass true to delete LocationTagAttribute record
 					LoggingUtil.logEvent(null, currFormId, null, LoggingConstants.EVENT_DELETE_FORM, 
 						Context.getAuthenticatedUser().getUserId(), 
 						"Form Deleted.  Class: " + DeleteFormsController.class.getCanonicalName());
