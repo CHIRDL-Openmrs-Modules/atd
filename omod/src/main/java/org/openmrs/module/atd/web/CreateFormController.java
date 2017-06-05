@@ -38,9 +38,6 @@ public class CreateFormController {
 	
 	@RequestMapping(method = RequestMethod.GET)
 	protected String initForm(ModelMap map) throws Exception{
-		// This doesn't appear to be used in the jsp
-		//FormService formService = Context.getFormService();
-		//map.put("forms", formService.getAllForms(false));
 		return FORM_VIEW;
 	}
 	
@@ -53,7 +50,6 @@ public class CreateFormController {
 		// Check to see if form name was specified.
 		if (formName == null || formName.trim().length() == 0) {
 			map.put("missingName", true);
-			//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
@@ -61,7 +57,6 @@ public class CreateFormController {
 		// Make sure there are no spaces in the form name.
 		if (formName.indexOf(" ") >= 0) {
 			map.put("spacesInName", true);
-			//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
@@ -69,7 +64,6 @@ public class CreateFormController {
 		Form form = formService.getForm(formName);
 		if (form != null) {
 			map.put("duplicateName", true);
-			//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
@@ -84,7 +78,6 @@ public class CreateFormController {
 					int index = filename.lastIndexOf(".");
 					if (index < 0) {
 						map.put("incorrectExtension", true);
-						//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 						return new ModelAndView(FORM_VIEW, map);
 					}
 					
@@ -93,7 +86,6 @@ public class CreateFormController {
 							!extension.equalsIgnoreCase("zip") && !extension.equalsIgnoreCase("jar") &&
 							!extension.equalsIgnoreCase("csv")) {
 						map.put("incorrectExtension", true);
-						//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 						return new ModelAndView(FORM_VIEW, map);
 					}
 					
@@ -105,7 +97,6 @@ public class CreateFormController {
 					
 					if (newForm == null) {
 						map.put("failedCreateForm", true);
-						//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 						return new ModelAndView(FORM_VIEW, map);
 					}
 					
@@ -114,7 +105,6 @@ public class CreateFormController {
 						"New Form Created.  Class: " + CreateFormController.class.getCanonicalName());
 				} else {
 					map.put("missingFile", true);
-					//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 					return new ModelAndView(FORM_VIEW, map);
 				}
 			}
@@ -122,7 +112,6 @@ public class CreateFormController {
 		catch (Exception e) {
 			log.error("Error while processing uploaded file from request", e);
 			map.put("failedFileUpload", true);
-			//map.put("forms", formService.getAllForms(false)); // This doesn't appear to be used in the jsp
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
