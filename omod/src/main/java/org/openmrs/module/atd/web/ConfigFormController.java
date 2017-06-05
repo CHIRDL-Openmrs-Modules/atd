@@ -26,36 +26,32 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribut
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
-import org.springframework.validation.BindException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class ConfigFormController extends SimpleFormController
+@Controller
+@RequestMapping(value = "module/atd/configForm.form")
+public class ConfigFormController
 {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
-	 */
-	@Override
-	protected Object formBackingObject(HttpServletRequest request)
-			throws Exception
-	{
-		return "testing";
-	}
 	
-	@Override
-	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, 
-	                                             BindException errors) throws Exception {
+	/** Form view name */
+	private static final String FORM_VIEW = "/module/atd/configForm";
+	
+	/** Success form view */
+	private static final String SUCCESS_FORM_VIEW = "configFormAttributeValue.form";
+
+	@RequestMapping(method = RequestMethod.POST)
+	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		FormService formService = Context.getFormService();
 		String formIdStr = request.getParameter("formId");
@@ -68,7 +64,6 @@ public class ConfigFormController extends SimpleFormController
 		String formName = request.getParameter("formName");
 		String printerCopy = request.getParameter("printerCopy");
 		map.put("printerCopy", printerCopy);
-		String view = getFormView();
 		
 		// Check to see if the user checked any locations
 		LocationService locService = Context.getLocationService();
@@ -125,7 +120,7 @@ public class ConfigFormController extends SimpleFormController
 		map.put("formName", formName);
 		if (!found) {
 			map.put("noLocationsChecked", true);
-			return new ModelAndView(view, map);
+			return new ModelAndView(FORM_VIEW, map);
 		}
 		
 		AdministrationService adminService = Context.getAdministrationService();
@@ -137,7 +132,7 @@ public class ConfigFormController extends SimpleFormController
 		} catch (Exception e) {			
 			log.error("Error creating directories", e);
 			map.put("failedCreateDirectories", true);
-			return new ModelAndView(view, map);
+			return new ModelAndView(FORM_VIEW, map);
 		}
         
         // Copy form configuration
@@ -154,7 +149,7 @@ public class ConfigFormController extends SimpleFormController
                 	map.put("missingScoringFile", true);
                 	// delete the directories
                 	ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
-        			return new ModelAndView(view, map);
+        			return new ModelAndView(FORM_VIEW, map);
                 }
             }
         	
@@ -179,7 +174,7 @@ public class ConfigFormController extends SimpleFormController
             map.put("failedScoringFileUpload", true);
 			// delete the directories
             ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
-			return new ModelAndView(view, map);
+			return new ModelAndView(FORM_VIEW, map);
         }
         
         try {
@@ -220,18 +215,16 @@ public class ConfigFormController extends SimpleFormController
         	ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
 			// remove attribute values
 			atdService.purgeFormAttributeValues(formId);
-			return new ModelAndView(view, map);
+			return new ModelAndView(FORM_VIEW, map);
         }
 		
-		view = getSuccessView();
 		map.put("successViewName", "mlmForm.form"); // Success view will depend on which page the user came from
 		return new ModelAndView(
-			new RedirectView(view), map);
+			new RedirectView(SUCCESS_FORM_VIEW), map);
 	}
 
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
+	@RequestMapping(method = RequestMethod.GET)
+	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		LocationService locService = Context.getLocationService();
 		List<Location> locations = locService.getAllLocations(false);
 		List<String> locNames = new ArrayList<String>();
@@ -251,16 +244,6 @@ public class ConfigFormController extends SimpleFormController
 		map.put("formName", request.getParameter("formName"));
 		map.put("formId", request.getParameter("formId"));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
-		return map;
-	}
-	
-	private boolean checkParameter(HttpServletRequest request, String parameterName) {
-		boolean positive = false;
-		String parameter = request.getParameter(parameterName);
-		if ("true".equalsIgnoreCase(parameter)) {
-			positive = true;
-		}
-		
-		return positive;
+		return FORM_VIEW;
 	}
 }
