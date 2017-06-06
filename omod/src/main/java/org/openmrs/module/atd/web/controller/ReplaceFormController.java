@@ -1,4 +1,4 @@
-package org.openmrs.module.atd.web;
+package org.openmrs.module.atd.web.controller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,44 +16,41 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
-import org.springframework.validation.BindException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class ReplaceFormController extends SimpleFormController {
+@Controller
+@RequestMapping(value = "module/atd/replaceForm.form")
+public class ReplaceFormController{
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
 	
-	/* (non-Javadoc)
-	 * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
-	 */
-	@Override
-	protected Object formBackingObject(HttpServletRequest request)
-			throws Exception {
-		return "testing";
-	}
+	/** Form view name */
+	private static final String FORM_VIEW = "/module/atd/replaceForm";
+	
+	/** Success form view */
+	private static final String SUCCESS_FORM_VIEW = "replaceFormFields.form";
 
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-
+	@RequestMapping(method = RequestMethod.GET) 
+	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		FormService formService = Context.getFormService();
 		List<Form> forms = formService.getAllForms(false);
 		
 		map.put("forms", forms);
 		
-		return map;
+		return FORM_VIEW;
 	}
 
-	@Override
-	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object,
-	                                             BindException errors) throws Exception {
+	@RequestMapping(method = RequestMethod.POST)
+	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		String view = getFormView();
 		FormService formService = Context.getFormService();
 		
 		Form newForm = null;
@@ -72,7 +69,7 @@ public class ReplaceFormController extends SimpleFormController {
 						map.put("incorrectExtension", true);
 						map.put("forms", formService.getAllForms(false));
 						map.put("selectedForm", replaceFormIdStr);
-						return new ModelAndView(view, map);
+						return new ModelAndView(FORM_VIEW, map);
 					}
 					
 					String extension = filename.substring(index + 1, filename.length());
@@ -82,7 +79,7 @@ public class ReplaceFormController extends SimpleFormController {
 						map.put("incorrectExtension", true);
 						map.put("forms", formService.getAllForms(false));
 						map.put("selectedForm", replaceFormIdStr);
-						return new ModelAndView(view, map);
+						return new ModelAndView(FORM_VIEW, map);
 					}
 					
 					String formName = replaceForm.getName() + "_replace_" + System.currentTimeMillis();
@@ -96,7 +93,7 @@ public class ReplaceFormController extends SimpleFormController {
 						map.put("failedFileUpload", true);
 						map.put("forms", formService.getAllForms(false));
 						map.put("selectedForm", replaceFormIdStr);
-						return new ModelAndView(view, map);
+						return new ModelAndView(FORM_VIEW, map);
 					}
 					
 					LoggingUtil.logEvent(null, newForm.getFormId(), null, LoggingConstants.EVENT_CREATE_FORM, 
@@ -106,7 +103,7 @@ public class ReplaceFormController extends SimpleFormController {
 					map.put("missingFile", true);
 					map.put("forms", formService.getAllForms(false));
 					map.put("selectedForm", replaceFormIdStr);
-					return new ModelAndView(view, map);
+					return new ModelAndView(FORM_VIEW, map);
 				}
 			}
 		}
@@ -115,7 +112,7 @@ public class ReplaceFormController extends SimpleFormController {
 			map.put("failedFileUpload", true);
 			map.put("forms", formService.getAllForms(false));
 			map.put("selectedForm", replaceFormIdStr);
-			return new ModelAndView(view, map);
+			return new ModelAndView(FORM_VIEW, map);
 		}
 		
 		ATDService atdService = Context.getService(ATDService.class);
@@ -128,13 +125,12 @@ public class ReplaceFormController extends SimpleFormController {
 			map.put("forms", formService.getAllForms(false));
 			map.put("selectedForm", replaceFormIdStr);
 			ConfigManagerUtil.deleteForm(newForm.getFormId(), false); // CHICA-993 Updated to delete based on formId, also pass false so that LocationTagAttribute record is NOT deleted
-			return new ModelAndView(view, map);
+			return new ModelAndView(FORM_VIEW, map);
 		}
 		
-		view = getSuccessView();
 		map.put("formId", newForm.getFormId());
 		map.put("replaceFormId", replaceFormIdStr);
 		map.put("selectedFormName", newForm.getName());
-		return new ModelAndView(new RedirectView(view), map);
+		return new ModelAndView(new RedirectView(SUCCESS_FORM_VIEW), map);
 	}
 }

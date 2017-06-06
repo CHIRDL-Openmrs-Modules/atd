@@ -30,4 +30,8 @@ public class AtdConstants {
 	/*
 	 * 
 	 */
+    
+    /** Form views */
+	public static final String FORM_VIEW_CONFIG_MANAGER_SUCCESS = "configurationManagerSuccess.form";
+	public static final String FORM_VIEW_CONFIG_MANAGER = "configurationManager.form";
 }
