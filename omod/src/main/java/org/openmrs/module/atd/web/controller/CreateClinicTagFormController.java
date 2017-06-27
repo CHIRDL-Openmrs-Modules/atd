@@ -259,8 +259,15 @@ public class CreateClinicTagFormController {
 				LocationService locationService = Context.getLocationService();
 				LocationTag locationTag = locationService.getLocationTagByName(tagName);
 				LocationTagAttributeValue locationTagAttributeValue = backportsService.getLocationTagAttributeValue(locationTag.getLocationTagId(), locationTagAttribute.getName(), locationId);
-				if (locationTagAttributeValue!=null)
-					locationTagAttributeValues.add(locationTagAttributeValue);
+				if (locationTagAttributeValue == null) {
+					locationTagAttributeValue = new LocationTagAttributeValue();
+					locationTagAttributeValue.setLocationId(locationId);
+					locationTagAttributeValue.setLocationTagAttributeId(locationTagAttribute.getLocationTagAttributeId());
+					locationTagAttributeValue.setLocationTagId(locationTag.getLocationTagId());
+					locationTagAttributeValue.setValue(ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING);
+				}
+				
+				locationTagAttributeValues.add(locationTagAttributeValue);
 				map.put("locationTagAttributeValues", locationTagAttributeValues);
 			}
 		}
