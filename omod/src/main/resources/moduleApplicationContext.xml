@@ -19,8 +19,6 @@
 				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
 				<prop key="/module/@MODULE_ID@/faxableForm.form">faxableForm</prop>
 				<prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
-				<prop key="/module/@MODULE_ID@/createClinicTagForm.form">createClinicTagForm</prop>
-				<prop key="/module/@MODULE_ID@/editClinicTagAttributeForm.form">editClinicTagAttributeForm</prop>
 			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
 			    <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
@@ -100,16 +98,6 @@
     <bean id="createClinicForm" class="@MODULE_PACKAGE@.web.CreateClinicFormController">
         <property name="commandName"><value>createClinicFormObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/createClinicForm</value></property>
-        <property name="successView"><value>configurationManagerSuccess.form</value></property>
-    </bean>
-    <bean id="createClinicTagForm" class="@MODULE_PACKAGE@.web.CreateClinicTagFormController">
-        <property name="commandName"><value>createClinicTagFormObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/createClinicTagForm</value></property>
-        <property name="successView"><value>configurationManagerSuccess.form</value></property>
-    </bean>
-	<bean id="editClinicTagAttributeForm" class="@MODULE_PACKAGE@.web.CreateClinicTagFormController">
-        <property name="commandName"><value>editClinicTagAttributeFormObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/editClinicTagAttributeForm</value></property>
         <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
 	<bean id="importConceptsFromFile" class="@MODULE_PACKAGE@.web.ImportConceptsFromFileController">
