@@ -21,6 +21,7 @@ import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.User;
 import org.openmrs.api.LocationService;
+import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
@@ -109,9 +110,10 @@ public class CreateClinicTagFormController extends SimpleFormController {
 		Location location = locationService.getLocation(locationId);
 		
 		User user = null;
-		String password = null;
 		String existingLocProp = null;
 		String existingLocTagProp = null;
+		
+		UserService userService = Context.getUserService();
 		
 		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) {
 			// Check to see if clinic tag name was specified.
@@ -153,20 +155,12 @@ public class CreateClinicTagFormController extends SimpleFormController {
 				return new ModelAndView(view, map);
 			}
 			
-			// Check to make sure a password was specified.
-			password = request.getParameter(ChirdlUtilConstants.PARAMETER_PASSWORD);
-			if (password == null || password.length() == 0) {
-				map.put("invalidPassword", true);
-				reloadValues(request, map);
-				return new ModelAndView(view, map);
-			}
-			
 			String locationName = location.getName();
 			existingLocProp = user.getUserProperty("location");
 			existingLocTagProp = user.getUserProperty("locationTags");
 			try {
 				if (existingLocProp == null || existingLocProp.trim().length() == 0) {
-					user.setUserProperty("location", locationName);
+					userService.setUserProperty(user, "location", locationName);
 				} else {
 					String[] locations = existingLocProp.split(",");
 					boolean found = false;
@@ -177,17 +171,15 @@ public class CreateClinicTagFormController extends SimpleFormController {
 					}
 					
 					if (!found) {
-						user.setUserProperty("location", existingLocProp + ", " + locationName);
+						userService.setUserProperty(user, "location", existingLocProp + ", " + locationName);
 					}
 				}
 				
 				if (existingLocTagProp == null || existingLocTagProp.trim().length() == 0) {
-					user.setUserProperty("locationTags", tagName);
+					userService.setUserProperty(user, "locationTags", tagName);
 				} else {
-					user.setUserProperty("locationTags", existingLocTagProp + ", " + tagName);
+					userService.setUserProperty(user, "locationTags", existingLocTagProp + ", " + tagName);
 				}
-				
-				Context.getUserService().saveUser(user, password);
 			} catch (Exception e) {
 				log.error("Error creating new clinic location", e);
 				map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
@@ -209,18 +201,16 @@ public class CreateClinicTagFormController extends SimpleFormController {
 			reloadValues(request, map);
 			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form)) {
 				if (existingLocProp == null) {
-					user.removeUserProperty("location");
+					userService.removeUserProperty(user, "location");
 				} else {
-					user.setUserProperty("location", existingLocProp);
+					userService.setUserProperty(user, "location", existingLocProp);
 				}
 				
 				if (existingLocTagProp == null) {
-					user.removeUserProperty("locationTags");
+					userService.removeUserProperty(user, "locationTags");
 				} else {
-					user.setUserProperty("locationTags", existingLocTagProp);
+					userService.setUserProperty(user, "locationTags", existingLocTagProp);
 				}
-				
-				Context.getUserService().saveUser(user, password);
 			} 
 			return new ModelAndView(view, map);
 		}

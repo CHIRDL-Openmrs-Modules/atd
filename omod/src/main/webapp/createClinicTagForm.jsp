@@ -79,21 +79,17 @@
 <td style="padding: 0px 0px 10px 0px"><label>Username: </label></td>
 <td align="left" style="padding: 0px 0px 10px 0px"><input id="username" maxlength="50" size="25" name="username" value="${username}">&nbsp;<font color="red">*</font></td>
 </tr>
+<c:if test="${missingUsername == 'true'}">
+    <tr style="padding: 5px">
+      <td colspan="2" style="padding: 0px 0px 10px 0px">
+           <font color="red">Please enter the username for this location tag!</font>
+      </td>
+    </tr>
+</c:if>
 <c:if test="${unknownUsername == 'true'}">
     <tr style="padding: 5px">
       <td colspan="2" style="padding: 0px 0px 10px 0px">
            <font color="red">Username not found!</font>
-      </td>
-    </tr>
-</c:if>
-<tr style="padding: 5px">
-<td style="padding: 0px 0px 10px 0px"><label>Password: </label></td>
-<td align="left" style="padding: 0px 0px 10px 0px"><input id="password" maxlength="50" size="25" name="password" type="password" value="${password}">&nbsp;<font color="red">*</font></td>
-</tr>
-<c:if test="${invalidPassword == 'true'}">
-    <tr style="padding: 5px">
-      <td colspan="2" style="padding: 0px 0px 10px 0px">
-           <font color="red">Incorrect password!</font>
       </td>
     </tr>
 </c:if>
