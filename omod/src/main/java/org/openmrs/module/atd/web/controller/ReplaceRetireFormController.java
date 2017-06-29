@@ -68,8 +68,7 @@ public class ReplaceRetireFormController {
 			return new ModelAndView(new RedirectView("configurationManager.form"));
 		}
 		
-		String retireForm = request.getParameter("retireForm");
-		if ("Yes".equalsIgnoreCase(retireForm)) {
+			// CHICA-1050 Remove yes/no (retireForm) parameter. The form will always be retired.
 			FormService formService = Context.getFormService();
 			Form form = formService.getForm(formId);
 			String formName = form.getName();
@@ -81,7 +80,6 @@ public class ReplaceRetireFormController {
 			LoggingUtil.logEvent(null, formId, null, LoggingConstants.EVENT_RETIRE_FORM, 
 				Context.getUserContext().getAuthenticatedUser().getUserId(), 
 				"Form retired.  Class: " + ReplaceRetireFormController.class.getCanonicalName());
-		}
 		
 		LoggingUtil.logEvent(null, newFormId, null, LoggingConstants.EVENT_REPLACE_FORM, 
 			Context.getUserContext().getAuthenticatedUser().getUserId(), 
