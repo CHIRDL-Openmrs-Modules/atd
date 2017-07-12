@@ -20,17 +20,7 @@
 <form id="input" name="input" action="replaceRetireForm.form" method="post">
     <table>
         <tr style="padding: 5px">
-            <td style="padding: 0px 0px 0px 0px">Do you wish to retire the original form?</td>
-        </tr>
-        <tr style="padding: 0px">
-            <td align="left" style="padding: 0px 0px 0px 0px">
-              <input type="radio" name="retireForm" value="Yes" checked>Yes
-            </td>
-        </tr>
-        <tr style="padding: 0px">
-            <td align="left" style="padding: 0px 0px 10px 0px">
-              <input type="radio" name="retireForm" value="No">No
-            </td>
+            <td style="padding: 0px 0px 0px 0px">The original form will be retired.</td>
         </tr>
         <tr style="padding: 5px">
             <td colspan="2" align="center"><hr size="3" color="black"/></td>
