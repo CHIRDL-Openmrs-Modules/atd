@@ -58,13 +58,6 @@ public class FaxJIT implements ProcessStateAction {
 	                          HashMap<String, Object> parameters) {
 
 		// lookup the patient again to avoid lazy initialization errors
-		log.info("this is a test");
-		try {
-			log.info(" This is line 61" + Thread.currentThread().getStackTrace()[0].getLineNumber());
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		ATDService atdService = Context.getService(ATDService.class);
 		FormService formService = Context.getFormService();
 		
