@@ -1,4 +1,4 @@
-package org.openmrs.module.atd.web;
+package org.openmrs.module.atd.web.controller;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -17,14 +17,17 @@ import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.springframework.validation.BindException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -32,24 +35,28 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author wang417
  * controller for configFormAttributeValue.form
  */
-public class ConfigFormAttributeValueController extends SimpleFormController {
+@Controller
+@RequestMapping(value = "module/atd/configFormAttributeValue.form")
+public class ConfigFormAttributeValueController {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
+	
+	/** Form view */
+	private static final String FORM_VIEW = "/module/atd/configFormAttributeValue";
+	
+	/** Success form view */
+	private static final String SUCCESS_FORM_VIEW_MLM = "mlmForm.form";
+	private static final String SUCCESS_FORM_VIEW_REPLACE_RETIRE = "replaceRetireForm.form";
 
-
-	@Override
-	protected Object formBackingObject(HttpServletRequest request) throws Exception {
-		return "testing";
-	}
 	/*
 	 * There are two kinds of input text: form attribute value for all positions and these for each different position. For the former one, leaving the text field blank
 	 * would not delete the current value in server for all positions but for the latter ones it does. users may set some specific values to positions that they think identical
 	 * in position-specific text fields and leave all-positions field blank, but once user input some values in all-position field, it will override the values of each specific-position field.
 	 * When the page is new loaded, the position-specific text fields reflect the current value of each position but all-positions field is always blank.
 	 * */
-	@Override
-	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, BindException errors) throws Exception {
+	@RequestMapping(method = RequestMethod.POST)
+	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
 		String formId = request.getParameter("formId");
 		Integer iFormId = Integer.parseInt(formId);
 		// DWE CHICA-332 The success view needs to be different depending on which page the user came from
@@ -57,11 +64,14 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {
 			// Delete the form when coming from the create/replace form pages
-			if(successViewName.equalsIgnoreCase("replaceRetireForm.form") || successViewName.equalsIgnoreCase("mlmForm.form"))
+			if(successViewName.equalsIgnoreCase(SUCCESS_FORM_VIEW_REPLACE_RETIRE) || successViewName.equalsIgnoreCase(SUCCESS_FORM_VIEW_MLM))
 			{
-				ConfigManagerUtil.deleteForm(iFormId);
+				// CHICA-993 Updated to delete based on formId
+				// true when successViewName is mlmForm.form (which happens when using the Create Form tool)
+				// false when successViewName is replaceRetireForm.form (which happens when using the Replace Form tool)
+				ConfigManagerUtil.deleteForm(iFormId, successViewName.equalsIgnoreCase(SUCCESS_FORM_VIEW_MLM));
 			}
-			return new ModelAndView(new RedirectView("configurationManager.form"));
+			return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_MANAGER));
 		}
 		
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -98,7 +108,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		}
 		
 		
-		if(successViewName.equalsIgnoreCase("replaceRetireForm.form"))
+		if(successViewName.equalsIgnoreCase(SUCCESS_FORM_VIEW_REPLACE_RETIRE))
 		{
 			// Need to switch the parameters back around to what this page is expecting
 			map.put("formId", request.getParameter("replaceFormId"));
@@ -114,14 +124,13 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 		
 	}
 
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
+	@RequestMapping(method = RequestMethod.GET)
+	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		//empty and initialize positions every time when this page is redirected to. 
 		List<Location> locationsList = new ArrayList<Location>();
 		Set<Integer> locationsIdSet = new HashSet<Integer>();
 		Map<Integer, List<LocationTag>> locationTagsMap = new HashMap<Integer, List<LocationTag>>();
 		ChirdlUtilBackportsService cubService = Context.getService(ChirdlUtilBackportsService.class);
-		Map<String, Object> map = new HashMap<String, Object>();
 		
 		// DWE CHICA-332 4/16/15 Making the configFormAttributeValue.form available from the Replace Form page
 		// When this page is displayed from the Replace Form page, use newFormId parameter
@@ -172,7 +181,7 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 			log.error("Error logging form attribute values map.", e);
 		}
 		
-		return map;
+		return FORM_VIEW;
 	}
 	
 	private Map<String, Object> getFormAttributesValueMap(List<Location> locationsList, Map<Integer, List<LocationTag>> locationTagsMap,List<FormAttribute> editableFormAttributes, Integer iFormId, HttpServletRequest request, ChirdlUtilBackportsService cubService){
@@ -210,17 +219,6 @@ public class ConfigFormAttributeValueController extends SimpleFormController {
 			formAttributesValueEnumMap.put(efa.getFormAttributeId().toString(), valueList);
 		}
 		return formAttributesValueEnumMap;
-	}
-	
-	
-	private boolean checkParameter(HttpServletRequest request, String parameterName) {
-		boolean positive = false;
-		String parameter = request.getParameter(parameterName);
-		if ("true".equalsIgnoreCase(parameter)) {
-			positive = true;
-		}
-
-		return positive;
 	}
 	
 	private List<FormAttribute> getEditableFormAttributes(){

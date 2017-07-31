@@ -29,17 +29,8 @@ public class AdminList extends AdministrationSectionExt {
 		
 		Map<String, String> map = new HashMap<String, String>();
 		
-		map.put("module/atd/uploadForms.form", "atd.uploadForms");
-		//map.put("module/atd/editForms.form", "Edit Forms");
-		//map.put("module/atd/deleteForms.form", "Delete Forms");
-		//map.put("module/atd/createForm.form", "Create Form");
-		map.put("module/atd/ruleBuilder.form", "Meaghan's Rule Builder");
-		//map.put("module/atd/printerFormSelectionForm.form", "Printer Configuration");
-		//map.put("module/atd/replaceForm.form", "Replace Form");
-		//map.put("module/atd/updateForm.form", "Update Form");
 		map.put("module/atd/configurationManager.form", "Configuration Manager");
 		map.put("module/atd/importConceptsFromFile.form", "Import Concepts From File");
-		map.put("module/atd/createFormFromFile.form", "Create Form From File");
 
 		return map;
 	}

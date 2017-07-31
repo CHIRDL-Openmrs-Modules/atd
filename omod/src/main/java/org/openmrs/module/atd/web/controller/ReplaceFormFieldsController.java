@@ -1,4 +1,4 @@
-package org.openmrs.module.atd.web;
+package org.openmrs.module.atd.web.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,35 +22,34 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.Util;
-import org.springframework.validation.BindException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class ReplaceFormFieldsController extends SimpleFormController {
+@Controller
+@RequestMapping(value = "module/atd/replaceFormFields.form")
+public class ReplaceFormFieldsController{
 	
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
-	 */
-	@Override
-	protected Object formBackingObject(HttpServletRequest request) throws Exception {
-		return "testing";
-	}
+	/** Form view name */
+	private static final String FORM_VIEW = "/module/atd/replaceFormFields";
 	
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		
+	/** Success form view */
+	private static final String SUCCESS_FORM_VIEW = "configFormAttributeValue.form";
+	
+	@RequestMapping(method = RequestMethod.GET) 
+	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		FormService formService = Context.getFormService();
 		
 		String formIdString = request.getParameter("formId");
@@ -76,20 +75,18 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 				this.log.error(Util.getStackTrace(e));
 			}
 		}
-		return map;
+		return FORM_VIEW;
 	}
 	
-	@Override
-	protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response, Object command,
-	                                BindException errors) throws Exception {
-		long timeInMilliseconds = 0;
+	@RequestMapping(method = RequestMethod.POST)
+	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object command) throws Exception {
 		FormService formService = Context.getFormService();
 		String formIdString = request.getParameter("formId");
 		int formId = Integer.parseInt(formIdString);
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {
-			ConfigManagerUtil.deleteForm(formId);
-			return new ModelAndView(new RedirectView("configurationManager.form"));
+			ConfigManagerUtil.deleteForm(formId, false); // CHICA-993 Updated to delete based on formId, also pass false so that LocationTagAttribute record is NOT deleted
+			return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_MANAGER));
 		}
 		
 		ConceptService conceptService = Context.getConceptService();
@@ -164,10 +161,8 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 					this.log.error(e.getMessage());
 					this.log.error(Util.getStackTrace(e));
 				}
-				long startTime = System.currentTimeMillis();
 				formService.saveFormField(currFormField);
 				formService.saveField(currField);
-				timeInMilliseconds += (System.currentTimeMillis() - startTime);
 			}
 			LoggingUtil.logEvent(null, formId, null, LoggingConstants.EVENT_MODIFY_FORM_FIELDS, 
 				Context.getUserContext().getAuthenticatedUser().getUserId(), 
@@ -210,7 +205,7 @@ public class ReplaceFormFieldsController extends SimpleFormController {
 		map.put("successViewName", "replaceRetireForm.form");
 		
 		
-		return new ModelAndView(new RedirectView(getSuccessView()), map);
+		return new ModelAndView(new RedirectView(SUCCESS_FORM_VIEW), map);
 	}
 	
 	private List<Boolean> getNewFieldIndicators(List<FormField> formFields, Form origForm) {
