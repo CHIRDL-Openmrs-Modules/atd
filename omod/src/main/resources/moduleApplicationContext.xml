@@ -103,7 +103,7 @@
 	<bean id="importConceptsFromFile" class="@MODULE_PACKAGE@.web.ImportConceptsFromFileController">
         <property name="commandName"><value>importConceptsFromFileObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/importConceptsFromFile</value></property>
-        <property name="successView"><value>importConceptsFromFile.form</value></property>
+        <property name="successView"><value>configurationManagerSuccess.form</value></property>
 	</bean>
 	<bean id="exportFormCSV" class="@MODULE_PACKAGE@.web.ExportFormCSVController">
         <property name="commandName"><value>exportFormCSVObject</value></property>
