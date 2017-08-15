@@ -81,11 +81,14 @@
                 </td>
             </tr>
         </table></center>
-        <center><h3>Concept Definition</h3></center>
+        <center><h3>Concept Configuration</h3></center>
         <center><table>
             <tr style="padding: 5px">
                 <td style="padding: 10px 10px 10px 10px">
                     <a href="${pageContext.request.contextPath}/module/atd/exportConceptCSV.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/ExportConcepts.gif"/></a>
+                </td>
+				<td style="padding: 10px 10px 10px 10px">
+                    <a href="${pageContext.request.contextPath}/module/atd/importConceptsFromFile.form"><img width="227" height="72" border="0" src="${pageContext.request.contextPath}/moduleResources/atd/importConceptsButton.gif"/></a>
                 </td>
             </tr>
         </table></center>

@@ -19,7 +19,6 @@
 				<prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
 				<prop key="/module/@MODULE_ID@/faxableForm.form">faxableForm</prop>
 				<prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
-			    <prop key="/module/@MODULE_ID@/importConceptsFromFile.form">importConceptsFromFile</prop>
 			    <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
 			    <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
 			    <prop key="/module/@MODULE_ID@/exportFormCSV.form">exportFormCSV</prop>
@@ -100,11 +99,6 @@
         <property name="formView"><value>/module/@MODULE_ID@/createClinicForm</value></property>
         <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
-	<bean id="importConceptsFromFile" class="@MODULE_PACKAGE@.web.ImportConceptsFromFileController">
-        <property name="commandName"><value>importConceptsFromFileObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/importConceptsFromFile</value></property>
-        <property name="successView"><value>importConceptsFromFile.form</value></property>
-	</bean>
 	<bean id="exportFormCSV" class="@MODULE_PACKAGE@.web.ExportFormCSVController">
         <property name="commandName"><value>exportFormCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportFormCSV</value></property> 
