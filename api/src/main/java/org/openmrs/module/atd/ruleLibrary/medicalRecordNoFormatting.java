@@ -1,26 +1,21 @@
 package org.openmrs.module.atd.ruleLibrary;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicContext;
 import org.openmrs.logic.LogicException;
-import org.openmrs.logic.LogicService;
 import org.openmrs.logic.Rule;
 import org.openmrs.logic.result.Result;
 import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
-import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.util.Util;
 
 public class medicalRecordNoFormatting implements Rule
 {
-	private LogicService logicService = Context.getLogicService();
-
 	/**
 	 * *
 	 * 
@@ -61,21 +56,22 @@ public class medicalRecordNoFormatting implements Rule
 	{
 		return Datatype.CODED;
 	}
+	
+	/**
+	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, java.lang.Integer, java.util.Map)
+	 */
 	public Result eval(LogicContext context, Integer patientId,
 			Map<String, Object> parameters) throws LogicException
 	{	
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(patientId);
-		ATDService atdService = Context.getService(ATDService.class);
-		PatientIdentifier patientIdentifier = atdService.getPatientMRN(patient.getPatientId());
+		String mrn = Util.getMedicalRecordNoFormatting(patient);
 		
-		if(patientIdentifier != null)
+		if(mrn != null)
 		{
-			String identifier = patientIdentifier.getIdentifier();
-			if(identifier != null){
-				return new Result(identifier.replaceAll("-", ""));
-			}
+			return new Result(mrn);
 		}
+		
 		return Result.emptyResult();
 	}
 }
