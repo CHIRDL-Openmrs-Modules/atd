@@ -1190,9 +1190,9 @@ public class HibernateATDDAO implements ATDDAO
 	}
 
 	/**
-	 * @see org.openmrs.module.atd.db.ATDDAO#getPSFQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer)
+	 * @see org.openmrs.module.atd.db.ATDDAO#getPatientFormQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.String)
 	 */
-    public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId) {
+    public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
     	try
 		{
     		String sql = 
@@ -1204,7 +1204,7 @@ public class HibernateATDDAO implements ATDDAO
     			"                a.encounter_id" +
     			"  FROM (SELECT *" +
     			"          FROM atd_statistics a" +
-    			"         WHERE     form_name = 'PSF'" +
+    			"         WHERE     form_name = ?" +
     			"               AND form_instance_id = ?" +
     			"               AND location_id = ?" +
     			"               AND answer <> 'NoAnswer') a" +
@@ -1227,9 +1227,10 @@ public class HibernateATDDAO implements ATDDAO
 			qry.addScalar("b.form_id");
 			qry.addScalar("b.location_id");
 			qry.addScalar("a.encounter_id");
-			qry.setInteger(0, formInstanceId);
-			qry.setInteger(1, locationId);
-			qry.setInteger(2, patientId);
+			qry.setString(0, patientForm);
+			qry.setInteger(1, formInstanceId);
+			qry.setInteger(2, locationId);
+			qry.setInteger(3, patientId);
 			List<Object[]> list = qry.list();
 			List<PSFQuestionAnswer> returnList = new ArrayList<PSFQuestionAnswer>();
 			for (Object[] arry : list) {

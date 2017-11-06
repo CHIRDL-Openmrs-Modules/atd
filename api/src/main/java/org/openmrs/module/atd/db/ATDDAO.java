@@ -114,9 +114,10 @@ public interface ATDDAO {
 	 * @param formInstanceId The form instance ID
 	 * @param locationId The location ID
 	 * @param patientId The patient ID
+	 * @param patientForm The Patient Form Name
 	 * @return List of PSFQuestionAnswer objects.  This will not return null.
 	 */
-	public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId);
+	public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm);
 	
 	/**
 	 * Returns PatientATD objects based on the form instance and field Id information provided.

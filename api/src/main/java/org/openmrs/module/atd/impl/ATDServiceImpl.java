@@ -964,10 +964,10 @@ public class ATDServiceImpl implements ATDService
 	}
 
 	/**
-	 * @see org.openmrs.module.atd.service.ATDService#getPSFQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer)
+	 * @see org.openmrs.module.atd.service.ATDService#getPatientFormQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.String)
 	 */
-    public List<PSFQuestionAnswer> getPSFQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId) {
-	    return getATDDAO().getPSFQuestionAnswers(formInstanceId, locationId, patientId);
+    public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
+	    return getATDDAO().getPatientFormQuestionAnswers(formInstanceId, locationId, patientId, patientForm);
     }
 
 	/**
