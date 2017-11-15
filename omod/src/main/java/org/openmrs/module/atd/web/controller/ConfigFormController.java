@@ -228,6 +228,14 @@ public class ConfigFormController
 		LocationService locService = Context.getLocationService();
 		List<Location> locations = locService.getAllLocations(false);
 		List<String> locNames = new ArrayList<String>();
+		List<String> primaryFormNames = new ArrayList<String>();
+		
+		FormService formService = Context.getFormService();
+		List<Form> forms = formService.getAllForms(false);
+		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+		
+		ATDService atdService = Context.getService(ATDService.class);
+		
 		for (Location location : locations) {
 			boolean checkLocation = false;
 			String name = location.getName();
@@ -238,12 +246,28 @@ public class ConfigFormController
 			
 			locNames.add(name);
 			map.put("checked_" + name, checkLocation);
+			for (Form form : forms) {
+				String isPrimaryPatientFormValue = atdService.isPrimaryFormValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
+				String isPrimaryPhysicianFormValue = atdService.isPrimaryFormValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
+				if (ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPatientFormValue) || ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPhysicianFormValue)) {
+					primaryFormNames.add(form.getName());
+				}
+				
+				
+				//String isPrimaryPatientFormValue = chirdlutilbackportsService.getFormAttributeValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM, locationTagId, location.getLocationId()).getValue();
+	           // String isPrimaryPhysicianFormValue = chirdlutilbackportsService.getFormAttributeValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM, locationTagId, location.getLocationId()).getValue();
+			}
 		}
+		
+		
+		
+		
 		
 		map.put("locations", locNames);
 		map.put("formName", request.getParameter("formName"));
 		map.put("formId", request.getParameter("formId"));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
+		map.put("primaryFormNames", primaryFormNames);
 		return FORM_VIEW;
 	}
 }

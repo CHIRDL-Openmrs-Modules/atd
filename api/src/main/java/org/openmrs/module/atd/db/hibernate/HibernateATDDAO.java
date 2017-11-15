@@ -1724,4 +1724,32 @@ public class HibernateATDDAO implements ATDDAO
     	
 		return criteria.list();
 	}
+    
+	/**
+     * Gets the primary form attribute value for patient and physician form
+     * 
+     * @param formId
+     * @param formAttrName
+     * @return 
+     */
+    public String isPrimaryFormValue(Integer formId, String formAttrName) {
+		try {
+			String sql = "SELECT DISTINCT value FROM chirdlutilbackports_form_attribute_value "
+					+ "WHERE form_id = ? AND form_attribute_id = (SELECT form_attribute_id FROM "
+					+ "chirdlutilbackports_form_attribute WHERE name = ?)";
+
+			SQLQuery qry = this.sessionFactory.getCurrentSession()
+					.createSQLQuery(sql);
+			qry.setInteger(0, formId);
+			qry.setString(1, formAttrName);
+			qry.addScalar("value");
+			List<String> list = qry.list();
+			if (list.size() == 1){
+				return (String) list.get(0);
+			}
+		} catch (Exception e) {
+			this.log.error(Util.getStackTrace(e));
+		}
+		return null;
+    }
 }

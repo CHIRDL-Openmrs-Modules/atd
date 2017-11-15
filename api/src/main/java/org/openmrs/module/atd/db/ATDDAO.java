@@ -233,4 +233,13 @@ public interface ATDDAO {
      * @return
      */
     public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId);
+    
+    /**
+     * Gets the primary form attribute value for patient and physician form
+     * 
+     * @param formId
+     * @param formAttrName
+     * @return
+     */
+    public String isPrimaryFormValue(Integer formId, String formAttrName) ;
 }

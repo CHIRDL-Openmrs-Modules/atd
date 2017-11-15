@@ -356,4 +356,13 @@ public interface ATDService
      * @throws APIException
      */
     public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException;
+    
+	/**
+     * Gets the primary form attribute value for patient and physician form
+     * 
+     * @param formId
+     * @param formAttrName
+     * @return
+     */
+    public String isPrimaryFormValue(Integer formId, String formAttrName);
 }

@@ -1245,4 +1245,12 @@ public class ATDServiceImpl implements ATDService
 			}
 		}
 	}
+	
+	/**
+     * @see org.openmrs.module.atd.service.ATDService#isPrimaryFormValue(Integer, String)
+     */
+    public String isPrimaryFormValue(Integer formId, String formAttrName)
+    {
+    	return getATDDAO().isPrimaryFormValue(formId, formAttrName);
+    }
 }
