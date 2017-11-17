@@ -20,7 +20,9 @@ public class ConfigManagerSuccessController{
 	@RequestMapping(method = RequestMethod.GET)
 	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		String application = request.getParameter("application");
+		String errorMsg = request.getParameter("errorMsg");
 		map.put("application", application);
+		map.put("errorMsg", errorMsg);
 		return FORM_VIEW;
 	}
 	
