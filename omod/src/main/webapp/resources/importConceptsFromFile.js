@@ -107,7 +107,10 @@ var changeEventText = 'Import Progress: ';
 						// The import completed, but one or more errors occurred during the import
 						if(data.errorOccurred)
 						{
-							displayError("The import is complete, but one or more errors occurred. Check the server log for details.")
+							window.location = ctx + '/module/atd/configurationManagerSuccess.form' + '?errorMsg=The+import+is+complete,+but+one+or+more+errors+occurred.+Check+the+server+log+for+details.'	;
+						}
+						else {
+							window.location = ctx + '/module/atd/configurationManagerSuccess.form' + '?application=Import+Concepts'	;
 						}
 					}
 					else if(data.isComplete && data.isImportCancelled)
@@ -177,9 +180,6 @@ var changeEventText = 'Import Progress: ';
   				          value: data.currentRow,
   				          change: function() {
   				            progressLabel.text(changeEventText +  progressbar.progressbar( "value" ) + " of " + progressbar.progressbar("option", "max") );
-  				          },
-  				          complete: function() {
-							 window.location = ctx + '/module/atd/configurationManagerSuccess.form' + '?application=Import+Concepts' ;							 
   				          }
   				        });
   				        

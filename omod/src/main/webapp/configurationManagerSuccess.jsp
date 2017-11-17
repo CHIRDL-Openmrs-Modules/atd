@@ -9,7 +9,14 @@
         <form name="input" action="configurationManagerSuccess.form" method="post" enctype="multipart/form-data">
         <table>
             <tr style="padding: 5px">
-                <td style="padding: 0px 0px 10px 0px"><c:out value="${application}"/> completed successfully!</td>
+				<c:choose>
+					<c:when test="${not empty errorMsg}">
+						<td style="padding: 0px 0px 10px 0px"><c:out value="${errorMsg}"/></td>
+					</c:when>
+					<c:otherwise>
+						<td style="padding: 0px 0px 10px 0px"><c:out value="${application}"/> completed successfully!</td>
+					</c:otherwise>
+				</c:choose>
             </tr>
             <tr style="padding: 10px">
                 <td colspan="3" align="center"><hr size="3" color="black"/></td>
