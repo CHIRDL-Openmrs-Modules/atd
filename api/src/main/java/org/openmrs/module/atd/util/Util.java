@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,7 @@ import org.openmrs.module.atd.xmlBeans.Language;
 import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
@@ -734,5 +736,21 @@ public class Util {
 		}
 		
 		return fieldNameToFieldMap;
+	}
+	
+	public static List<Form> getPrimaryForms(List<Form> forms) {
+		List<Form> primaryForms = new ArrayList<Form>();
+		ATDService atdService = Context.getService(ATDService.class);
+		for (Form form : forms) {
+			String isPrimaryPatientFormValue = atdService.isPrimaryFormValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
+			String isPrimaryPhysicianFormValue = atdService.isPrimaryFormValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
+			if (ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPatientFormValue) || ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPhysicianFormValue)) {
+				primaryForms.add(form);
+			}
+		}
+		if (primaryForms == null ||primaryForms.size() == 0) {
+			return Collections.emptyList();
+		}
+		return primaryForms;
 	}
 }
