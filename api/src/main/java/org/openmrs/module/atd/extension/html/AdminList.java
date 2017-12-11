@@ -30,7 +30,6 @@ public class AdminList extends AdministrationSectionExt {
 		Map<String, String> map = new HashMap<String, String>();
 		
 		map.put("module/atd/configurationManager.form", "Configuration Manager");
-		map.put("module/atd/importConceptsFromFile.form", "Import Concepts From File");
 
 		return map;
 	}

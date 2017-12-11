@@ -6,8 +6,6 @@ var progressLabel = $( ".progress-label" );
 var checkProgressTimer;
 var ajaxURL = ctx + '/moduleServlet/atd/importConceptsFromFile';
 var changeEventText = 'Import Progress: ';
-var completeEventText = 'Import Complete!';
-var canceledEventText = 'Import Canceled: ';
 
 
     $j(function(){
@@ -55,14 +53,20 @@ var canceledEventText = 'Import Canceled: ';
 						  }
 						 }
 				});
-		   } 	
+		   } 
+		else {
+			var agree=confirm("Are you sure you want to cancel the import?");
+			if (agree) {
+				   window.location = ctx + '/module/atd/configurationManager.form';
+			}
+		}
     }
     
     function cancelImport()
     {
 	    	$.ajax({type: 'GET', cache: false, dataType: 'json', url: ajaxURL+'?cancelImport=true', success: function(data){
 				progressbar.progressbar("value", data.currentRow)
-				checkProgressTimer = setTimeout( checkImportProgress, 5000 );	
+				checkProgressTimer = setTimeout( checkImportProgress, 5000 );
 	    }});
     }
    
@@ -80,9 +84,6 @@ var canceledEventText = 'Import Canceled: ';
   				          value: data.currentRow,
   				          change: function() {
   				            progressLabel.text(changeEventText +  progressbar.progressbar( "value" ) + " of " + progressbar.progressbar("option", "max") );
-  				          },
-  				          complete: function() {   				        	  
-  				             progressLabel.text( completeEventText );   				        	  				            
   				          }
   				        });
 						// The import was already running when the page was loaded, set the label to the appropriate text instead of waiting for the "change" event
@@ -99,17 +100,21 @@ var canceledEventText = 'Import Canceled: ';
 						// Set the progress bar to the max value in case not all concepts were imported so that the complete event will be triggered
 						progressbar.progressbar("value", progressbar.progressbar("option", "max"));
 						clearTimeout(checkProgressTimer);
-						
+
 						// The import completed, but one or more errors occurred during the import
 						if(data.errorOccurred)
 						{
-							displayError("The import is complete, but one or more errors occurred. Check the server log for details.")
+							window.location = ctx + '/module/atd/configurationManagerSuccess.form' + '?errorMsg=The+import+is+complete,+but+one+or+more+errors+occurred.+Check+the+server+log+for+details.'	;
+						}
+						else {
+							window.location = ctx + '/module/atd/configurationManagerSuccess.form' + '?application=Import+Concepts'	;
 						}
 					}
 					else if(data.isComplete && data.isImportCancelled)
 					{
-						progressLabel.text(canceledEventText + data.currentRow + " of " + progressbar.progressbar("option", "max"));
+						progressLabel.text(data.currentRow + " of " + progressbar.progressbar("option", "max"));
 						clearTimeout(checkProgressTimer);
+						window.location = ctx + '/module/atd/cancelledImport.form' + '?application=Import+Concepts'	;
 					}
 					else
 					{
@@ -124,8 +129,8 @@ var canceledEventText = 'Import Canceled: ';
 	  				          change: function() {
 	  				            progressLabel.text(changeEventText +  progressbar.progressbar( "value" ) + " of " + progressbar.progressbar("option", "max") );
 	  				          },
-	  				          complete: function() {   				        	  
-	  				             progressLabel.text(completeEventText);   				        	  				            
+	  				          complete: function() {			
+								window.location = ctx + '/module/atd/configurationManagerSuccess.form' + '?application=Import+Concepts'	;
 	  				          }
 	  				        });
 							
@@ -172,12 +177,9 @@ var canceledEventText = 'Import Canceled: ';
   				          value: data.currentRow,
   				          change: function() {
   				            progressLabel.text(changeEventText +  progressbar.progressbar( "value" ) + " of " + progressbar.progressbar("option", "max") );
-  				          },
-  				          complete: function() {   				        	  
-  				             progressLabel.text(completeEventText );   				        	  				            
   				          }
   				        });
-    					
+  				        
     					progressLabel.show();
     					progressbar.show();
     					checkProgressTimer = setTimeout( checkImportProgress, 5000 );

@@ -11,18 +11,16 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
-@RequestMapping(value = "module/atd/configurationManagerSuccess.form")
-public class ConfigManagerSuccessController{
+@RequestMapping(value = "module/atd/cancelledImport.form")
+public class ImportCancelledController{
 	
 	/** Form view name */
-	private static final String FORM_VIEW = "/module/atd/configurationManagerSuccess";
+	private static final String FORM_VIEW = "/module/atd/cancelledImport";
 	
 	@RequestMapping(method = RequestMethod.GET)
 	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		String application = request.getParameter("application");
-		String errorMsg = request.getParameter("errorMsg");
 		map.put("application", application);
-		map.put("errorMsg", errorMsg);
 		return FORM_VIEW;
 	}
 	
