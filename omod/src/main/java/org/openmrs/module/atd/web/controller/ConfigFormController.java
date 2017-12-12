@@ -20,6 +20,7 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
@@ -44,33 +45,21 @@ public class ConfigFormController
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
-	
-	/** Form view name */
-	private static final String FORM_VIEW = "/module/atd/configForm";
-	
-	/** Success form view */
-	private static final String SUCCESS_FORM_VIEW = "configFormAttributeValue.form";
 
 	@RequestMapping(method = RequestMethod.POST)
 	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		FormService formService = Context.getFormService();
-		String formIdStr = request.getParameter("formId");
+		String formIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_ID);
 		Integer formId = Integer.parseInt(formIdStr);
-		String cancel = request.getParameter("cancelProcess");
-		if ("true".equalsIgnoreCase(cancel)) {
+		String cancel = request.getParameter(ChirdlUtilConstants.PARAMETER_CANCEL_PROCESS);
+		if (ChirdlUtilConstants.GENERAL_INFO_TRUE.equalsIgnoreCase(cancel)) {
 			ConfigManagerUtil.deleteForm(formId, true); // CHICA-993 Updated to delete based on formId, also pass true to delete LocationTagAttribute record
-			return new ModelAndView(new RedirectView("configurationManager.form"));
+			return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_MANAGER));
 		}
-		String formName = request.getParameter("formName");
-		String printerCopy = request.getParameter("printerCopy");
-		Integer printerConfNone = null; 
-		//map.put("printerCopy", printerCopy);
-		if (printerCopy.equals("none")) {
-			map.put("None", "none");
-			printerConfNone = Integer.parseInt("none");
-		}
-		map.put("printerCopy", printerCopy);
+		String formName = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_NAME);
+		String printerCopy = request.getParameter(ChirdlUtilConstants.PARAMTER_PRINTER_COPY);
+		map.put(ChirdlUtilConstants.PARAMTER_PRINTER_COPY, printerCopy);
 		
 		// Check to see if the user checked any locations
 		LocationService locService = Context.getLocationService();
@@ -85,52 +74,52 @@ public class ConfigFormController
 			if (foundLoc != null) {
 				found = true;
 				selectedLocations.add(name);
-				map.put("checked_" + name, "true");
+				map.put("checked_" + name, ChirdlUtilConstants.GENERAL_INFO_TRUE);
 			} else {
-				map.put("checked_" + name, "false");
+				map.put("checked_" + name, ChirdlUtilConstants.GENERAL_INFO_FALSE);
 			}
 		}
 		List<Form> forms = formService.getAllForms(false);
 		List<Form> primaryForms = Util.getPrimaryForms(forms);
 		
 		map.put("locations", locNames);
-		map.put("formId", formIdStr);
-		map.put("selectedFormName", request.getParameter("formName"));
+		map.put(ChirdlUtilConstants.PARAMETER_FORM_ID, formIdStr);
+		map.put("selectedFormName", request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_NAME));
 		map.put("primaryForms", primaryForms);
 		
 		boolean faxableForm = false;
-		String faxChoice = request.getParameter("faxableForm");
+		String faxChoice = request.getParameter(ChirdlUtilConstants.PARAMTER_FAXABLE_FORM);
 		if (faxChoice != null) {
-			if ("Yes".equalsIgnoreCase(faxChoice)) {
+			if (ChirdlUtilConstants.GENERAL_INFO_YES.equalsIgnoreCase(faxChoice)) {
 				faxableForm = true;
 			}
 		}
 		
-		map.put("faxableForm", faxableForm);
+		map.put(ChirdlUtilConstants.PARAMTER_FAXABLE_FORM, faxableForm);
 		
 		boolean scannableForm = false;
-		String scanChoice = request.getParameter("scannableForm");
+		String scanChoice = request.getParameter(ChirdlUtilConstants.PARAMTER_SCANNABLE_FORM);
 		if (scanChoice != null) {
-			if ("Yes".equalsIgnoreCase(scanChoice)) {
+			if (ChirdlUtilConstants.GENERAL_INFO_YES.equalsIgnoreCase(scanChoice)) {
 				scannableForm = true;
 			}
 		}
 		
-		map.put("scannableForm", scannableForm);
+		map.put(ChirdlUtilConstants.PARAMTER_SCANNABLE_FORM, scannableForm);
 		
 		boolean scorableForm = false;
-		String scoreChoice = request.getParameter("scorableForm");
+		String scoreChoice = request.getParameter(ChirdlUtilConstants.PARAMTER_SCORABLE_FORM);
 		if (scoreChoice != null) {
-			if ("Yes".equalsIgnoreCase(scoreChoice)) {
+			if (ChirdlUtilConstants.GENERAL_INFO_YES.equalsIgnoreCase(scoreChoice)) {
 				scorableForm = true;
 			}
 		}
 		
-		map.put("scorableForm", scorableForm);		
-		map.put("formName", formName);
+		map.put(ChirdlUtilConstants.PARAMTER_SCORABLE_FORM, scorableForm);		
+		map.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
 		if (!found) {
 			map.put("noLocationsChecked", true);
-			return new ModelAndView(FORM_VIEW, map);
+			return new ModelAndView(AtdConstants.FORM_CONFIG_FORM_VIEW, map);
 		}
 		
 		AdministrationService adminService = Context.getAdministrationService();
@@ -142,7 +131,7 @@ public class ConfigFormController
 		} catch (Exception e) {			
 			log.error("Error creating directories", e);
 			map.put("failedCreateDirectories", true);
-			return new ModelAndView(FORM_VIEW, map);
+			return new ModelAndView(AtdConstants.FORM_CONFIG_FORM_VIEW, map);
 		}
         
         // Copy form configuration
@@ -159,7 +148,7 @@ public class ConfigFormController
                 	map.put("missingScoringFile", true);
                 	// delete the directories
                 	ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
-        			return new ModelAndView(FORM_VIEW, map);
+        			return new ModelAndView(AtdConstants.FORM_CONFIG_FORM_VIEW, map);
                 }
             }
         	
@@ -184,7 +173,7 @@ public class ConfigFormController
             map.put("failedScoringFileUpload", true);
 			// delete the directories
             ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
-			return new ModelAndView(FORM_VIEW, map);
+			return new ModelAndView(AtdConstants.FORM_CONFIG_FORM_VIEW, map);
         }
         
         try {
@@ -225,12 +214,12 @@ public class ConfigFormController
         	ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
 			// remove attribute values
 			atdService.purgeFormAttributeValues(formId);
-			return new ModelAndView(FORM_VIEW, map);
+			return new ModelAndView(AtdConstants.FORM_CONFIG_FORM_VIEW, map);
         }
 		
-		map.put("successViewName", "mlmForm.form"); // Success view will depend on which page the user came from
+		map.put("successViewName", AtdConstants.FORM_VIEW_CREATE_FORM_MLM_SUCCESS); // Success view will depend on which page the user came from
 		return new ModelAndView(
-			new RedirectView(SUCCESS_FORM_VIEW), map);
+			new RedirectView(AtdConstants.FORM_VIEW_CONFIG_SUCCESS), map);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -246,7 +235,7 @@ public class ConfigFormController
 			boolean checkLocation = false;
 			String name = location.getName();
 			String checked = request.getParameter("checked_" + name);
-			if (checked != null && "true".equalsIgnoreCase(checked)) {
+			if (checked != null && ChirdlUtilConstants.GENERAL_INFO_TRUE.equalsIgnoreCase(checked)) {
 				checkLocation = true;
 			}
 			
@@ -257,10 +246,10 @@ public class ConfigFormController
 		List<Form> primaryForms = Util.getPrimaryForms(forms);
 
 		map.put("locations", locNames);
-		map.put("formName", request.getParameter("formName"));
-		map.put("formId", request.getParameter("formId"));
+		map.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_NAME));
+		map.put(ChirdlUtilConstants.PARAMETER_FORM_ID, request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_ID));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
 		map.put("primaryForms", primaryForms);
-		return FORM_VIEW;
+		return AtdConstants.FORM_CONFIG_FORM_VIEW;
 	}
 }

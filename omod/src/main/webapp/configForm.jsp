@@ -137,16 +137,16 @@
                 <td style="padding: 0px 0px 10px 0px">Copy printer configuration:</td>
                 <td style="padding: 0px 0px 10px 0px">
                     <select name="printerCopy">
-						<option name="none" value="none">None</option>
+						<option name="none" value="">None</option>
 						<c:forEach items="${primaryForms}" var="primaryForm">
-								<c:choose>
-									<c:when test="${printerCopy ne 'none'}">
-										<option value="${primaryForm.formId}" selected>${primaryForm.name}</option>
-									</c:when>
-									<c:otherwise>
-										<option value="${primaryForm.formId}">${primaryForm.name}</option>
-									</c:otherwise>
-								</c:choose>
+							<c:choose>
+								<c:when test="${primaryForm.name == printerCopy}">
+									<option value="${primaryForm.name}" selected>${primaryForm.name}</option>
+								</c:when>
+								<c:otherwise>
+									<option value="${primaryForm.name}">${primaryForm.name}</option>
+								</c:otherwise>
+							</c:choose>
 						</c:forEach>
                     </select>
                 </td>         

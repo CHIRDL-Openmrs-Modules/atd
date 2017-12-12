@@ -1,4 +1,4 @@
-package org.openmrs.module.atd.web;
+package org.openmrs.module.atd.web.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,41 +23,37 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.AtdConstants;
+import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
+import org.openmrs.module.chirdlutil.log.LoggingConstants;
+import org.openmrs.module.chirdlutil.log.LoggingUtil;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.openmrs.module.chirdlutil.log.LoggingConstants;
-import org.openmrs.module.chirdlutil.log.LoggingUtil;
-import org.openmrs.module.chirdlutil.service.ChirdlUtilService;
-import org.springframework.validation.BindException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-public class EnableLocationsFormController extends SimpleFormController {
+@Controller
+@RequestMapping(value = "module/atd/enableLocationsForm.form")
+public class EnableLocationsFormController {
 
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
-	
-	/* (non-Javadoc)
-	 * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
-	 */
-	@Override
-	protected Object formBackingObject(HttpServletRequest request)
-			throws Exception {
-		return "testing";
-	}
 
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		
+	@RequestMapping(method = RequestMethod.GET)
+	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
+
 		LocationService locService = Context.getLocationService();
 		ATDService atdService = Context.getService(ATDService.class);
-		String formIdString = request.getParameter("formToEdit");
+		String formIdString = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_TO_EDIT);
 		Integer formId = Integer.parseInt(formIdString);
 		List<Location> locations = locService.getAllLocations(false);
 		List<String> locNames = new ArrayList<String>();
@@ -67,9 +63,9 @@ public class EnableLocationsFormController extends SimpleFormController {
 			Boolean checked = atdService.isFormEnabledAtClinic(formId, location.getLocationId());			
 			locNames.add(name);
 			if (checked == Boolean.TRUE) {
-				checkedLocations.add("true");
+				checkedLocations.add(ChirdlUtilConstants.GENERAL_INFO_TRUE);
 			} else {
-				checkedLocations.add("false");
+				checkedLocations.add(ChirdlUtilConstants.GENERAL_INFO_FALSE);
 			}
 		}
 		
@@ -79,28 +75,29 @@ public class EnableLocationsFormController extends SimpleFormController {
 		FormService formService = Context.getFormService();
 		try {
 			Form formToEdit = formService.getForm(formId);
-			map.put("formName", formToEdit.getName());
-			map.put("formId", formId);
+			map.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formToEdit.getName());
+			map.put(ChirdlUtilConstants.PARAMETER_FORM_ID, formId);
 		} 
 		catch (Exception e) {
 			log.error("Error retrieving form", e);
 			map.put("failedLoad", true);
 		}
+		List<Form> forms = formService.getAllForms(false);
+		List<Form> primaryForms = Util.getPrimaryForms(forms);
+		map.put("primaryForms", primaryForms);
 		
-		return map;
+		return AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW;
 	}
 
-	@Override
-	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object, 
-	                                             BindException errors) throws Exception {
+	@RequestMapping(method = RequestMethod.POST)
+	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		String formName = request.getParameter("formName");
-		String printerCopy = request.getParameter("printerCopy");
-		map.put("printerCopy", printerCopy);
-		String view = getFormView();
+		String formName = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_NAME);
+		String printerCopy = request.getParameter(ChirdlUtilConstants.PARAMTER_PRINTER_COPY);
+		map.put(ChirdlUtilConstants.PARAMTER_PRINTER_COPY, printerCopy);
 		
-		String formIdStr = request.getParameter("formId");
-		map.put("formId", formIdStr);
+		String formIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_ID);
+		map.put(ChirdlUtilConstants.PARAMETER_FORM_ID, formIdStr);
         Integer formId = Integer.parseInt(formIdStr);
 		
 		// Check to see if the user checked any locations
@@ -117,9 +114,9 @@ public class EnableLocationsFormController extends SimpleFormController {
 			Object foundLoc = request.getParameterValues("location_" + name);
 			Boolean checked = atdService.isFormEnabledAtClinic(formId, location.getLocationId());			
 			if (checked == Boolean.TRUE) {
-				checkedLocations.add("true");
+				checkedLocations.add(ChirdlUtilConstants.GENERAL_INFO_TRUE);
 			} else {
-				checkedLocations.add("false");
+				checkedLocations.add(ChirdlUtilConstants.GENERAL_INFO_FALSE);
 			}
 			if (foundLoc != null) {
 				found = true;
@@ -129,41 +126,45 @@ public class EnableLocationsFormController extends SimpleFormController {
 		
 		map.put("locations", locNames);
 		map.put("checkedLocations", checkedLocations);
+    	FormService formService = Context.getFormService();
+		List<Form> forms = formService.getAllForms(false);
+		List<Form> primaryForms = Util.getPrimaryForms(forms);
+		map.put("primaryForms", primaryForms);
 		
 		boolean faxableForm = false;
-		String faxChoice = request.getParameter("faxableForm");
+		String faxChoice = request.getParameter(ChirdlUtilConstants.PARAMTER_FAXABLE_FORM);
 		if (faxChoice != null) {
-			if ("Yes".equalsIgnoreCase(faxChoice)) {
+			if (ChirdlUtilConstants.GENERAL_INFO_YES.equalsIgnoreCase(faxChoice)) {
 				faxableForm = true;
 			}
 		}
 		
-		map.put("faxableForm", faxableForm);
+		map.put(ChirdlUtilConstants.PARAMTER_FAXABLE_FORM, faxableForm);
 		
 		boolean scannableForm = false;
-		String scanChoice = request.getParameter("scannableForm");
+		String scanChoice = request.getParameter(ChirdlUtilConstants.PARAMTER_SCANNABLE_FORM);
 		if (scanChoice != null) {
-			if ("Yes".equalsIgnoreCase(scanChoice)) {
+			if (ChirdlUtilConstants.GENERAL_INFO_YES.equalsIgnoreCase(scanChoice)) {
 				scannableForm = true;
 			}
 		}
 		
-		map.put("scannableForm", scannableForm);
+		map.put(ChirdlUtilConstants.PARAMTER_SCANNABLE_FORM, scannableForm);
 		
 		boolean scorableForm = false;
-		String scoreChoice = request.getParameter("scorableForm");
+		String scoreChoice = request.getParameter(ChirdlUtilConstants.PARAMTER_SCORABLE_FORM);
 		if (scoreChoice != null) {
-			if ("Yes".equalsIgnoreCase(scoreChoice)) {
+			if (ChirdlUtilConstants.GENERAL_INFO_YES.equalsIgnoreCase(scoreChoice)) {
 				scorableForm = true;
 			}
 		}
 		
-		map.put("scorableForm", scorableForm);
+		map.put(ChirdlUtilConstants.PARAMTER_SCORABLE_FORM, scorableForm);
 		
-		map.put("formName", formName);
+		map.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
 		if (!found) {
 			map.put("noLocationsChecked", true);
-			return new ModelAndView(view, map);
+			return new ModelAndView(AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW, map);
 		}
 		
 		AdministrationService adminService = Context.getAdministrationService();
@@ -175,7 +176,7 @@ public class EnableLocationsFormController extends SimpleFormController {
 		} catch (Exception e) {			
 			log.error("Error creating directories", e);
 			map.put("failedCreateDirectories", true);
-			return new ModelAndView(view, map);
+			return new ModelAndView(AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW, map);
 		}
 		
     	try {
@@ -190,23 +191,26 @@ public class EnableLocationsFormController extends SimpleFormController {
                 	map.put("missingScoringFile", true);
                 	// delete the directories
                 	ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
-        			return new ModelAndView(view, map);
+        			return new ModelAndView(AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW, map);
                 }
             }
         	
-        	FormService formService = Context.getFormService();
         	Integer numPrioritizedFields = getPrioritizedFieldCount(formService, formId);
         	Form printerCopyForm = formService.getForm(printerCopy);
+        	Integer printerCopyFormId = null;
+        	if (printerCopyForm != null) {
+        		printerCopyFormId = printerCopyForm.getFormId();
+        	}
         	atdService.setupInitialFormValues(formId, formName, selectedLocations, installationDirectory, 
         		serverName, faxableForm, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
-        		printerCopyForm.getFormId());
+        		printerCopyFormId);
     	}
     	catch (Exception e) {
     		log.error("Error saving form changes", e);
             map.put("failedSaveChanges", true);
 			// delete the directories
             ConfigManagerUtil.deleteFormDirectories(formName, locNames, faxableForm, scannableForm);
-			return new ModelAndView(view, map);
+			return new ModelAndView(AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW, map);
         }
         
     	List<LocationTagAttributeValue> addedTags = new ArrayList<LocationTagAttributeValue>();
@@ -250,12 +254,11 @@ public class EnableLocationsFormController extends SimpleFormController {
 				chirdlutilbackportsService.deleteLocationTagAttributeValue(val);
 			}
 			
-			return new ModelAndView(view, map);
+			return new ModelAndView(AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW, map);
         }
 		
 		map.put("application", "Enable Form at Clinics");
-		view = getSuccessView();
-		return new ModelAndView(new RedirectView(view), map);
+		return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_SUCCESS), map);
 	}
 	
 	private Integer getPrioritizedFieldCount(FormService formService, Integer formId) {
