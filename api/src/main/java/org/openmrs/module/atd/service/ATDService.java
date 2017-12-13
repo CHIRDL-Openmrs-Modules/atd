@@ -364,5 +364,5 @@ public interface ATDService
      * @param formAttrName
      * @return
      */
-    public String isPrimaryFormValue(Integer formId, String formAttrName);
+    public List<String> getPrimaryFormValues(Integer formId, String formAttrName);
 }

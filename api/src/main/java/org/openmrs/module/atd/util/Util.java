@@ -742,10 +742,18 @@ public class Util {
 		List<Form> primaryForms = new ArrayList<Form>();
 		ATDService atdService = Context.getService(ATDService.class);
 		for (Form form : forms) {
-			String isPrimaryPatientFormValue = atdService.isPrimaryFormValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
-			String isPrimaryPhysicianFormValue = atdService.isPrimaryFormValue(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
-			if (ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPatientFormValue) || ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPhysicianFormValue)) {
-				primaryForms.add(form);
+			List<String> primaryPatientFormValues = atdService.getPrimaryFormValues(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
+			List<String> primaryPhysicianFormValues = atdService.getPrimaryFormValues(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
+			
+			for (String isPrimaryPatientFormValue : primaryPatientFormValues) {
+				if (ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPatientFormValue)) {
+					primaryForms.add(form);
+				}
+			}
+			for (String isPrimaryPhysicianFormValue : primaryPhysicianFormValues) {
+				if (ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPhysicianFormValue)) {
+					primaryForms.add(form);
+				}
 			}
 		}
 		if (primaryForms == null ||primaryForms.size() == 0) {

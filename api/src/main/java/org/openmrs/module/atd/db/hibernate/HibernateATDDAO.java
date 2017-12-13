@@ -1732,7 +1732,7 @@ public class HibernateATDDAO implements ATDDAO
      * @param formAttrName
      * @return 
      */
-    public String isPrimaryFormValue(Integer formId, String formAttrName) {
+    public List<String> getPrimaryFormValues(Integer formId, String formAttrName) {
 		try {
 			String sql = "SELECT DISTINCT value FROM chirdlutilbackports_form_attribute_value "
 					+ "WHERE form_id = ? AND form_attribute_id = (SELECT form_attribute_id FROM "
@@ -1744,9 +1744,9 @@ public class HibernateATDDAO implements ATDDAO
 			qry.setString(1, formAttrName);
 			qry.addScalar("value");
 			List<String> list = qry.list();
-			if (list.size() == 1){
-				return (String) list.get(0);
-			}
+			
+			return list;
+			
 		} catch (Exception e) {
 			this.log.error(Util.getStackTrace(e));
 		}
