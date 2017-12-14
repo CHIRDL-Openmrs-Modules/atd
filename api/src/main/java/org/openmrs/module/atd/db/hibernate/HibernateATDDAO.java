@@ -16,6 +16,9 @@ import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.jdbc.Work;
 import org.hibernate.type.BooleanType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
@@ -177,8 +180,32 @@ public class HibernateATDDAO implements ATDDAO
 	
 
     public void prePopulateNewFormFields(Integer formId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
-		PreparedStatement ps1 = null;
+    	// CHICA-1151 connection() method has been removed in new version of hibernate
+    	// Work API is recommended
+    	this.sessionFactory.getCurrentSession().doWork(connection -> executePrePopulateNewFormFields(connection, formId));
+    			
+    			// For reference pre-Java 8 without lambda
+//    			this.sessionFactory.getCurrentSession().doWork(new Work() {
+//    				
+//    				@Override
+//    				public void execute(Connection con) throws SQLException 
+//    				{
+//    					executePrePopulateNewFormFields(connection, formId);
+//    				}
+//    			});
+		
+    }
+    
+    /**
+     * CHICA-1151 Moved existing code into a method to execute pre-populating new form fields
+	 * Used when calling {@link Work#execute(Connection)}
+     * @param con
+     * @param formId
+     * @throws DAOException
+     */
+    private void executePrePopulateNewFormFields(Connection con, Integer formId) throws DAOException
+    {
+    	PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		// copy concept, default_value, and field_type to the new form
 		String step1 = "update field f1, "
@@ -264,8 +291,33 @@ public class HibernateATDDAO implements ATDDAO
     }
     
     public void populateEmtptyFormFields(Integer formId) throws DAOException {
-    	Connection con = this.sessionFactory.getCurrentSession().connection();
-		PreparedStatement ps1 = null;
+    	
+    	// CHICA-1151 connection() method has been removed in new version of hibernate
+    	// Work API is recommended
+    	this.sessionFactory.getCurrentSession().doWork(connection -> executePopulateEmtptyFormFields(connection, formId));
+    			
+    			// For reference pre-Java 8 without lambda
+//    			this.sessionFactory.getCurrentSession().doWork(new Work() {
+//    				
+//    				@Override
+//    				public void execute(Connection con) throws SQLException 
+//    				{
+//    					executePopulateEmtptyFormFields(connection, formId);
+//    				}
+//    			});
+		
+    }
+    
+    /**
+     * CHICA-1151 Moved existing code into a method to execute populate empty form fields
+	 * Used when calling {@link Work#execute(Connection)}
+     * @param con
+     * @param formId
+     * @throws DAOException
+     */
+    private void executePopulateEmtptyFormFields(Connection con, Integer formId) throws DAOException
+    {
+    	PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		// copy parent_field mapping to the new form
 		String step1 = "update form_field a, ("
@@ -358,7 +410,51 @@ public class HibernateATDDAO implements ATDDAO
 	                                   String installationDirectory, String serverName, boolean faxableForm, 
 	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
 	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> executeSetupInitialFormValues(connection, formId, formName, locationNames, 
+	            installationDirectory, serverName, faxableForm, 
+	            scannableForm, scorableForm, scoreConfigLoc, 
+	            numPrioritizedFields, copyPrinterConfigFormId));
+				
+				// For reference pre-Java 8 without lambda
+//				this.sessionFactory.getCurrentSession().doWork(new Work() {
+//					
+//					@Override
+//					public void execute(Connection con) throws SQLException 
+//					{
+//						executeSetupInitialFormValues(connection, formId, formName, locationNames, 
+//        					installationDirectory, serverName, faxableForm, 
+//        					scannableForm, scorableForm, scoreConfigLoc, 
+//        					numPrioritizedFields, copyPrinterConfigFormId);
+//					}
+//				});
+		
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to execute setting up initial form values
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param formId
+	 * @param formName
+	 * @param locationNames
+	 * @param installationDirectory
+	 * @param serverName
+	 * @param faxableForm
+	 * @param scannableForm
+	 * @param scorableForm
+	 * @param scoreConfigLoc
+	 * @param numPrioritizedFields
+	 * @param copyPrinterConfigFormId
+	 * @throws DAOException
+	 */
+	private void executeSetupInitialFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
+            String installationDirectory, String serverName, boolean faxableForm, 
+            boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
+            Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException
+	{
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		
@@ -446,7 +542,30 @@ public class HibernateATDDAO implements ATDDAO
 	}
 
 	public void purgeFormAttributeValues(Integer formId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> executePurgeFormAttributeValues(connection, formId));
+		
+		// For reference pre-Java 8 without lambda
+//		this.sessionFactory.getCurrentSession().doWork(new Work() {
+//			
+//			@Override
+//			public void execute(Connection con) throws SQLException 
+//			{
+//				executePurgeFormAttributeValues(connection, formId);
+//			}
+//		});
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to execute purging form attribute values
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param formId
+	 * @throws DAOException
+	 */
+	private void executePurgeFormAttributeValues(Connection con, Integer formId) throws DAOException
+	{
 		PreparedStatement ps = null;
 		String sql = "delete from chirdlutilbackports_form_attribute_value where form_id = ?";
 		try {
@@ -481,8 +600,8 @@ public class HibernateATDDAO implements ATDDAO
 			FormAttribute useAlternatePrinterAttr = chirdlUtilBackportsService.getFormAttributeByName("useAlternatePrinter");
 			
 			for (LocationTag locTag : location.getTags()) {
-				LocationTagPrinterConfig locTagPrinterConfig = new LocationTagPrinterConfig(locTag.getTag(), 
-					locTag.getLocationTagId());
+				LocationTagPrinterConfig locTagPrinterConfig = new LocationTagPrinterConfig(locTag.getName(), 
+					locTag.getLocationTagId()); // CHICA-1151 replace getTag() with getName()
 				FormAttributeValue defaultPrinterVal = chirdlUtilBackportsService.getFormAttributeValue(formId, "defaultPrinter", 
 					locTag.getLocationTagId(), locationId);
 				FormAttributeValue altPrinterVal = chirdlUtilBackportsService.getFormAttributeValue(formId, "alternatePrinter", 
@@ -560,7 +679,32 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> executeCopyFormAttributeValues(connection, fromFormId, toFormId));
+		
+		// For reference pre-Java 8 without lambda
+//		this.sessionFactory.getCurrentSession().doWork(new Work() {
+//			
+//			@Override
+//			public void execute(Connection con) throws SQLException 
+//			{
+//				executeCopyFormAttributeValues(con, fromFormId, toFormId);
+//			}
+//		});
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to execute copying form attribute values
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param fromFormId
+	 * @param toFormId
+	 * @throws DAOException
+	 */
+	private void executeCopyFormAttributeValues(Connection con, Integer fromFormId, Integer toFormId) throws DAOException
+	{
 		PreparedStatement ps = null;
 		String sql = "insert into chirdlutilbackports_form_attribute_value(form_id,value,form_attribute_id,location_tag_id,location_id) "
 			+ "select ?, b.value, b.form_attribute_id, b.location_tag_id, b.location_id "
@@ -1257,30 +1401,56 @@ public class HibernateATDDAO implements ATDDAO
  */
 	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
 		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> populateConceptDescriptorList(connection, cdList));
+		
+		// For reference pre-Java 8 without lambda
+//		this.sessionFactory.getCurrentSession().doWork(new Work() {
+//			
+//			@Override
+//			public void execute(Connection con) throws SQLException 
+//			{
+//				populateConceptDescriptorList(connection, cdList);
+//			}
+//		});
+		
+		return cdList;
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to populate the list of ConceptDescriptor objects
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param cdList
+	 * @throws SQLException
+	 */
+	private void populateConceptDescriptorList(Connection con, List<ConceptDescriptor> cdList) throws SQLException
+	{
 		String sql = "SELECT distinct a.*, b.name AS \"parent concept\""
-                   + "FROM    (SELECT a.name AS name,"
-                   + "                c.name AS \"concept class\","
-                   + "                d.name AS \"datatype\","
-                   + "                e.description AS description,"
-                   + "                g.concept_id,"
-                   + "                f.units AS units"
-                   + "           FROM concept_name a"
-                   + "                INNER JOIN concept b"
-                   + "                    ON a.concept_id = b.concept_id"
-                   + "                INNER JOIN concept_class c"
-                   + "                    ON b.class_id = c.concept_class_id"
-                   + "                INNER JOIN concept_datatype d"
-                   + "                    ON b.datatype_id = d.concept_datatype_id"
-                   + "                LEFT JOIN concept_description e"
-                   + "                    ON e.concept_id = b.concept_id"
-                   + "                LEFT JOIN concept_numeric f"
-                   + "                    ON f.concept_id = b.concept_id"
-                   + "                LEFT JOIN concept_answer g"
-                   + "                    ON g.answer_concept = b.concept_id) a"
-                   + "          LEFT JOIN"
-                   + "               concept_name b"
-                   + "               ON a.concept_id = b.concept_id";
+                + "FROM    (SELECT a.name AS name,"
+                + "                c.name AS \"concept class\","
+                + "                d.name AS \"datatype\","
+                + "                e.description AS description,"
+                + "                g.concept_id,"
+                + "                f.units AS units"
+                + "           FROM concept_name a"
+                + "                INNER JOIN concept b"
+                + "                    ON a.concept_id = b.concept_id"
+                + "                INNER JOIN concept_class c"
+                + "                    ON b.class_id = c.concept_class_id"
+                + "                INNER JOIN concept_datatype d"
+                + "                    ON b.datatype_id = d.concept_datatype_id"
+                + "                LEFT JOIN concept_description e"
+                + "                    ON e.concept_id = b.concept_id"
+                + "                LEFT JOIN concept_numeric f"
+                + "                    ON f.concept_id = b.concept_id"
+                + "                LEFT JOIN concept_answer g"
+                + "                    ON g.answer_concept = b.concept_id) a"
+                + "          LEFT JOIN"
+                + "               concept_name b"
+                + "               ON a.concept_id = b.concept_id";
 		try {
 			java.sql.Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
@@ -1306,8 +1476,6 @@ public class HibernateATDDAO implements ATDDAO
 			con.close();
 			
 		}
-		
-		return cdList;
 	}
 	
 	/**
@@ -1315,9 +1483,36 @@ public class HibernateATDDAO implements ATDDAO
 	 */
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> populateFormDefinitionListForGetAllFormDefinitions(connection, fddList));
+		
+		// For reference pre-Java 8 without lambda
+//		this.sessionFactory.getCurrentSession().doWork(new Work() {
+//			
+//			@Override
+//			public void execute(Connection con) throws SQLException 
+//			{
+//				populateFormDefinitionListForGetAllFormDefinitions(con, fddList);
+//			}
+//		});
+		
+		return fddList;
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to populate the list of FormDefinitionDescriptor objects
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param fddList
+	 * @throws SQLException
+	 */
+	private void populateFormDefinitionListForGetAllFormDefinitions(Connection con, List<FormDefinitionDescriptor> fddList) throws SQLException
+	{
+		// Code in this section was pre-existing before switching to the Work API
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
-       + " INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id LEFT JOIN (SELECT b.*, a.name FROM    field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id WHERE a.retired = 0";
+				+ " INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id LEFT JOIN (SELECT b.*, a.name FROM    field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id WHERE a.retired = 0";
 		try {
 			java.sql.Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
@@ -1344,15 +1539,41 @@ public class HibernateATDDAO implements ATDDAO
 		}finally{
 			con.close();
 		}
-		
-		return fddList;
 	}
+	
 	/**
 	 * @see org.openmrs.module.atd.db.ATDDAO#getFormDefinition()
 	 */
 	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException{
-		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>(); 
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
+		
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> populateFormDefinitionListForGetFormDefinition(connection, formId, fddList));
+		
+		// For reference pre-Java 8 without lambda
+//		this.sessionFactory.getCurrentSession().doWork(new Work() {
+//			
+//			@Override
+//			public void execute(Connection con) throws SQLException 
+//			{
+//				populateFormDefinitionListForGetFormDefinition(con, formId, fddList);
+//			}
+//		});
+        
+		return fddList;
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to populate the list of FormDefinitionDescriptor objects
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param formId
+	 * @param fddList
+	 */
+	private void populateFormDefinitionListForGetFormDefinition(Connection con, int formId, List<FormDefinitionDescriptor> fddList) throws SQLException
+	{
+		// Code in this section was pre-existing before switching to the Work API
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
 				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
 				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id IN (?)";
@@ -1385,7 +1606,6 @@ public class HibernateATDDAO implements ATDDAO
 		} finally{
 			con.close();
 		}
-		return fddList;
 	}
 	
 	/**
