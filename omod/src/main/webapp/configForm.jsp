@@ -140,11 +140,11 @@
 						<option name="none" value="">None</option>
 						<c:forEach items="${primaryForms}" var="primaryForm">
 							<c:choose>
-								<c:when test="${primaryForm.name == printerCopy}">
-									<option value="${primaryForm.name}" selected>${primaryForm.name}</option>
+								<c:when test="${primaryForm == printerCopy}">
+									<option value="${primaryForm}" selected>${primaryForm}</option>
 								</c:when>
 								<c:otherwise>
-									<option value="${primaryForm.name}">${primaryForm.name}</option>
+									<option value="${primaryForm}">${primaryForm}</option>
 								</c:otherwise>
 							</c:choose>
 						</c:forEach>

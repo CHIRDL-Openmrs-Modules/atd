@@ -738,24 +738,25 @@ public class Util {
 		return fieldNameToFieldMap;
 	}
 	
-	public static List<Form> getPrimaryForms(List<Form> forms) {
-		List<Form> primaryForms = new ArrayList<Form>();
+	/**
+	 * Gets the primary form names for patient and physician form
+	 * @return List containing primary form names.
+	 */
+	public static List<String> getPrimaryForms() {
+		
+		FormService formService = Context.getFormService();
+		List<Form> forms = formService.getAllForms(false);
 		ATDService atdService = Context.getService(ATDService.class);
+		List<Integer> formIds = new ArrayList<Integer>();
 		for (Form form : forms) {
-			List<String> primaryPatientFormValues = atdService.getPrimaryFormValues(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
-			List<String> primaryPhysicianFormValues = atdService.getPrimaryFormValues(form.getFormId(), ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
-			
-			for (String isPrimaryPatientFormValue : primaryPatientFormValues) {
-				if (ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPatientFormValue)) {
-					primaryForms.add(form);
-				}
-			}
-			for (String isPrimaryPhysicianFormValue : primaryPhysicianFormValues) {
-				if (ChirdlUtilConstants.FORM_ATTR_VAL_TRUE.equalsIgnoreCase(isPrimaryPhysicianFormValue)) {
-					primaryForms.add(form);
-				}
-			}
+			formIds.add(form.getFormId());
 		}
+		List<String> formAttrNames = new ArrayList<String>();
+		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
+		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
+		
+		List<String> primaryForms = atdService.getPrimaryFormNames(formIds, formAttrNames);
+		
 		if (primaryForms == null ||primaryForms.size() == 0) {
 			return Collections.emptyList();
 		}

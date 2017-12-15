@@ -1247,10 +1247,10 @@ public class ATDServiceImpl implements ATDService
 	}
 	
 	/**
-     * @see org.openmrs.module.atd.service.ATDService#getPrimaryFormValues(Integer, String)
+     * @see org.openmrs.module.atd.service.ATDService#getPrimaryFormNames(java.util.List, java.util.List)
      */
-    public List<String> getPrimaryFormValues(Integer formId, String formAttrName)
+    public List<String> getPrimaryFormNames(List<Integer> formIds, List<String> formAttrNames)
     {
-    	return getATDDAO().getPrimaryFormValues(formId, formAttrName);
+    	return getATDDAO().getPrimaryFormNames(formIds, formAttrNames);
     }
 }

@@ -79,8 +79,7 @@ public class ConfigFormController
 				map.put("checked_" + name, ChirdlUtilConstants.GENERAL_INFO_FALSE);
 			}
 		}
-		List<Form> forms = formService.getAllForms(false);
-		List<Form> primaryForms = Util.getPrimaryForms(forms);
+		List<String> primaryForms = Util.getPrimaryForms();
 		
 		map.put("locations", locNames);
 		map.put(ChirdlUtilConstants.PARAMETER_FORM_ID, formIdStr);
@@ -228,9 +227,6 @@ public class ConfigFormController
 		List<Location> locations = locService.getAllLocations(false);
 		List<String> locNames = new ArrayList<String>();
 		
-		FormService formService = Context.getFormService();
-		List<Form> forms = formService.getAllForms(false);
-		
 		for (Location location : locations) {
 			boolean checkLocation = false;
 			String name = location.getName();
@@ -243,7 +239,7 @@ public class ConfigFormController
 			map.put("checked_" + name, checkLocation);
 		}
 		
-		List<Form> primaryForms = Util.getPrimaryForms(forms);
+		List<String> primaryForms = Util.getPrimaryForms();
 
 		map.put("locations", locNames);
 		map.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_NAME));

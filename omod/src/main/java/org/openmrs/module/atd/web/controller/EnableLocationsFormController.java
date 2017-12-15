@@ -82,8 +82,7 @@ public class EnableLocationsFormController {
 			log.error("Error retrieving form", e);
 			map.put("failedLoad", true);
 		}
-		List<Form> forms = formService.getAllForms(false);
-		List<Form> primaryForms = Util.getPrimaryForms(forms);
+		List<String> primaryForms = Util.getPrimaryForms();
 		map.put("primaryForms", primaryForms);
 		
 		return AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW;
@@ -126,9 +125,8 @@ public class EnableLocationsFormController {
 		
 		map.put("locations", locNames);
 		map.put("checkedLocations", checkedLocations);
-    	FormService formService = Context.getFormService();
-		List<Form> forms = formService.getAllForms(false);
-		List<Form> primaryForms = Util.getPrimaryForms(forms);
+
+		List<String> primaryForms = Util.getPrimaryForms();
 		map.put("primaryForms", primaryForms);
 		
 		boolean faxableForm = false;
@@ -195,6 +193,7 @@ public class EnableLocationsFormController {
                 }
             }
         	
+        	FormService formService = Context.getFormService();
         	Integer numPrioritizedFields = getPrioritizedFieldCount(formService, formId);
         	Form printerCopyForm = formService.getForm(printerCopy);
         	Integer printerCopyFormId = null;
@@ -258,7 +257,7 @@ public class EnableLocationsFormController {
         }
 		
 		map.put("application", "Enable Form at Clinics");
-		return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_SUCCESS), map);
+		return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_MANAGER_SUCCESS), map);
 	}
 	
 	private Integer getPrioritizedFieldCount(FormService formService, Integer formId) {

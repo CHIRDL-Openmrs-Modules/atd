@@ -1726,23 +1726,24 @@ public class HibernateATDDAO implements ATDDAO
 	}
     
 	/**
-     * Gets the primary form attribute value for patient and physician form
+     * Gets the primary form  names for patient and physician form
      * 
-     * @param formId
-     * @param formAttrName
+     * @param formIds
+     * @param formAttrNames
      * @return 
      */
-    public List<String> getPrimaryFormValues(Integer formId, String formAttrName) {
+    public List<String> getPrimaryFormNames(List<Integer> formIds, List<String> formAttrNames) {
 		try {
-			String sql = "SELECT DISTINCT value FROM chirdlutilbackports_form_attribute_value "
-					+ "WHERE form_id = ? AND form_attribute_id = (SELECT form_attribute_id FROM "
-					+ "chirdlutilbackports_form_attribute WHERE name = ?)";
+			String sql = "SELECT name FROM form WHERE form_id IN "
+					+ "(SELECT DISTINCT form_id FROM chirdlutilbackports_form_attribute_value "
+					+ "WHERE form_id IN (:formIds) AND form_attribute_id IN (SELECT form_attribute_id FROM "
+					+ "chirdlutilbackports_form_attribute WHERE name IN (:formAttrNames)) AND value = 'true')";
 
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
-			qry.setInteger(0, formId);
-			qry.setString(1, formAttrName);
-			qry.addScalar("value");
+			qry.setParameterList("formIds", formIds);
+			qry.setParameterList("formAttrNames", formAttrNames);
+			qry.addScalar("name");
 			List<String> list = qry.list();
 			
 			return list;
