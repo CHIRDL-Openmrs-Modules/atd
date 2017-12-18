@@ -84,9 +84,6 @@ var changeEventText = 'Import Progress: ';
   				          value: data.currentRow,
   				          change: function() {
   				            progressLabel.text(changeEventText +  progressbar.progressbar( "value" ) + " of " + progressbar.progressbar("option", "max") );
-  				          },
-  				          complete: function() {
-							window.location = ctx + '/module/atd/configurationManagerSuccess.form' + '?application=Import+Concepts'	;
   				          }
   				        });
 						// The import was already running when the page was loaded, set the label to the appropriate text instead of waiting for the "change" event
