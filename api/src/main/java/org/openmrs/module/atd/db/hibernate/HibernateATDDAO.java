@@ -1726,23 +1726,28 @@ public class HibernateATDDAO implements ATDDAO
 	}
     
 	/**
-     * Gets the primary form  names for patient and physician form
+     * Looks up the form names by form attribute values
      * 
-     * @param formIds
      * @param formAttrNames
-     * @return 
+     * @param frmAttrvalue
+	 * @param isRetired
+     * @return
      */
-    public List<String> getPrimaryFormNames(List<Integer> formIds, List<String> formAttrNames) {
-		try {
-			String sql = "SELECT name FROM form WHERE form_id IN "
-					+ "(SELECT DISTINCT form_id FROM chirdlutilbackports_form_attribute_value "
-					+ "WHERE form_id IN (:formIds) AND form_attribute_id IN (SELECT form_attribute_id FROM "
-					+ "chirdlutilbackports_form_attribute WHERE name IN (:formAttrNames)) AND value = 'true')";
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) {
+		
+    	try {
+    		
+    		String sql = "SELECT DISTINCT form.name FROM form "
+    				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
+    				+ "INNER JOIN chirdlutilbackports_form_attribute fa ON fav.form_attribute_id = fa.form_attribute_id "
+    				+ "WHERE fa.name IN (:formAttrNames) "
+    				+ "AND fav.value = :frmAttrvalue AND form.retired = :isRetired ";
 
-			SQLQuery qry = this.sessionFactory.getCurrentSession()
+    		SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
-			qry.setParameterList("formIds", formIds);
 			qry.setParameterList("formAttrNames", formAttrNames);
+			qry.setString("frmAttrvalue", frmAttrvalue);
+			qry.setBoolean("isRetired", isRetired);
 			qry.addScalar("name");
 			List<String> list = qry.list();
 			

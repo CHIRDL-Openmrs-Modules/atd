@@ -744,18 +744,12 @@ public class Util {
 	 */
 	public static List<String> getPrimaryForms() {
 		
-		FormService formService = Context.getFormService();
-		List<Form> forms = formService.getAllForms(false);
 		ATDService atdService = Context.getService(ATDService.class);
-		List<Integer> formIds = new ArrayList<Integer>();
-		for (Form form : forms) {
-			formIds.add(form.getFormId());
-		}
 		List<String> formAttrNames = new ArrayList<String>();
 		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
 		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
 		
-		List<String> primaryForms = atdService.getPrimaryFormNames(formIds, formAttrNames);
+		List<String> primaryForms = atdService.getFormNamesByFormAttribute(formAttrNames, "true", false);
 		
 		if (primaryForms == null ||primaryForms.size() == 0) {
 			return Collections.emptyList();

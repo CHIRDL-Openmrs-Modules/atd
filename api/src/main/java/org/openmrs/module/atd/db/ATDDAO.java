@@ -235,11 +235,12 @@ public interface ATDDAO {
     public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId);
     
     /**
-     * Gets the primary form names for patient and physician form
+     * Looks up the form names by form attribute values
      * 
-     * @param formIds
      * @param formAttrNames
+     * @param frmAttrvalue
+	 * @param isRetired
      * @return
      */
-    public List<String> getPrimaryFormNames(List<Integer> formIds, List<String> formAttrNames) ;
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) ;
 }

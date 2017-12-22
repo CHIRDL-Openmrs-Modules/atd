@@ -358,11 +358,12 @@ public interface ATDService
     public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException;
     
 	/**
-     * Gets the primary form names for patient and physician form
+     * Looks up the form names by Form Attribute Value
      * 
-     * @param formIds
      * @param formAttrNames
+	 * @param frmAttrvalue
+	 * @param isRetired
      * @return
      */
-    public List<String> getPrimaryFormNames(List<Integer> formIds, List<String> formAttrNames);
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired);
 }
