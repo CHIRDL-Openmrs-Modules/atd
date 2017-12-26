@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.HibernateException;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
@@ -365,5 +366,5 @@ public interface ATDService
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired);
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws HibernateException;
 }

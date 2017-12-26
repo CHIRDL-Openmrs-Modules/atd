@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.hibernate.HibernateException;
 import org.openmrs.Obs;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.db.DAOException;
@@ -242,5 +243,5 @@ public interface ATDDAO {
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) ;
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws HibernateException;
 }
