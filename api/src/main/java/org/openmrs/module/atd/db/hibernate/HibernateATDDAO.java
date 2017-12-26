@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
@@ -1733,29 +1734,22 @@ public class HibernateATDDAO implements ATDDAO
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) {
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws HibernateException {
 		
-    	try {
-    		
-    		String sql = "SELECT DISTINCT form.name FROM form "
-    				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
-    				+ "INNER JOIN chirdlutilbackports_form_attribute fa ON fav.form_attribute_id = fa.form_attribute_id "
-    				+ "WHERE fa.name IN (:formAttrNames) "
-    				+ "AND fav.value = :frmAttrvalue AND form.retired = :isRetired ";
+		String sql = "SELECT DISTINCT form.name FROM form "
+				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
+				+ "INNER JOIN chirdlutilbackports_form_attribute fa ON fav.form_attribute_id = fa.form_attribute_id "
+				+ "WHERE fa.name IN (:formAttrNames) "
+				+ "AND fav.value = :frmAttrvalue AND form.retired = :isRetired ";
 
-    		SQLQuery qry = this.sessionFactory.getCurrentSession()
-					.createSQLQuery(sql);
-			qry.setParameterList("formAttrNames", formAttrNames);
-			qry.setString("frmAttrvalue", frmAttrvalue);
-			qry.setBoolean("isRetired", isRetired);
-			qry.addScalar("name");
-			List<String> list = qry.list();
-			
-			return list;
-			
-		} catch (Exception e) {
-			this.log.error(Util.getStackTrace(e));
-		}
-		return null;
+		SQLQuery qry = this.sessionFactory.getCurrentSession()
+				.createSQLQuery(sql);
+		qry.setParameterList("formAttrNames", formAttrNames);
+		qry.setString("frmAttrvalue", frmAttrvalue);
+		qry.setBoolean("isRetired", isRetired);
+		qry.addScalar("name");
+		List<String> list = qry.list();
+		
+		return list;
     }
 }

@@ -749,7 +749,12 @@ public class Util {
 		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
 		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
 		
-		List<String> primaryForms = atdService.getFormNamesByFormAttribute(formAttrNames, "true", false);
+		List<String> primaryForms = null;
+		try {
+			primaryForms = atdService.getFormNamesByFormAttribute(formAttrNames, "true", false);
+		} catch(Exception e) {
+			log.error("Error occurred while generating a list of primary form names.", e);
+		}
 		
 		if (primaryForms == null ||primaryForms.size() == 0) {
 			return Collections.emptyList();
