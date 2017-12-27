@@ -243,5 +243,5 @@ public interface ATDDAO {
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws HibernateException;
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws DAOException;
 }

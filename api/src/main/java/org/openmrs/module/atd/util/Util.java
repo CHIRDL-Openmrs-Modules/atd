@@ -35,6 +35,7 @@ import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
+import org.openmrs.api.APIException;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
@@ -742,7 +743,7 @@ public class Util {
 	 * Gets the primary form names for patient and physician form
 	 * @return List containing primary form names.
 	 */
-	public static List<String> getPrimaryForms() {
+	public static List<String> getPrimaryForms() throws APIException{
 		
 		ATDService atdService = Context.getService(ATDService.class);
 		List<String> formAttrNames = new ArrayList<String>();

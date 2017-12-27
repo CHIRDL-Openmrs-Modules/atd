@@ -1250,7 +1250,7 @@ public class ATDServiceImpl implements ATDService
 	/**
      * @see org.openmrs.module.atd.service.ATDService#getFormNamesByFormAttribute(java.util.List, String, boolean)
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws HibernateException
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws APIException
     {
     	return getATDDAO().getFormNamesByFormAttribute(formAttrNames, frmAttrvalue, isRetired);
     }

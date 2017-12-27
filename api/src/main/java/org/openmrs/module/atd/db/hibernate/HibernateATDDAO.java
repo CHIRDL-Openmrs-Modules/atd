@@ -1734,7 +1734,7 @@ public class HibernateATDDAO implements ATDDAO
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws HibernateException {
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws DAOException {
 		
 		String sql = "SELECT DISTINCT form.name FROM form "
 				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
