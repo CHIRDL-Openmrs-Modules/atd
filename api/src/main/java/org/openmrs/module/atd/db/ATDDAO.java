@@ -120,12 +120,6 @@ public interface ATDDAO {
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
-    /**
-	 * Get all concept information from database as list of ConceptDescriptor
-	 * @return A list of ConceptDescriptor objects
-	 * @throws SQLException
-	 */
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException ;
 	
 	/**
 	 * Get all form definition from database as list of FormDefinitionDescriptor

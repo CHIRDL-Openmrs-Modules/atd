@@ -980,10 +980,6 @@ public class ATDServiceImpl implements ATDService
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
 
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
-		return this.dao.getAllConcepts();
-	}
-
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		return this.dao.getAllFormDefinitions();
 	}
