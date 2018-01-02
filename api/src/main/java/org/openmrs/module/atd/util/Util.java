@@ -752,7 +752,7 @@ public class Util {
 		
 		List<String> primaryForms = null;
 		try {
-			primaryForms = atdService.getFormNamesByFormAttribute(formAttrNames, "true", false);
+			primaryForms = atdService.getFormNamesByFormAttribute(formAttrNames, ChirdlUtilConstants.GENERAL_INFO_TRUE, false);
 		} catch(Exception e) {
 			log.error("Error occurred while generating a list of primary form names.", e);
 		}
