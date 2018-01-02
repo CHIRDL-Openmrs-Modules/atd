@@ -53,14 +53,6 @@ public interface ATDDAO {
 	 */
 	public void prePopulateNewFormFields(Integer formId) throws DAOException;
 	
-	/**
-	 * Populates fields in a form having no current metadata with data found in form fields from other forms.
-	 * 
-	 * @param formId The form ID for the form to have its empty fields auto-populated.
-	 * @throws DAOException
-	 */
-	public void populateEmtptyFormFields(Integer formId) throws DAOException;
-	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String installationDirectory, String serverName, boolean faxableForm, 
 	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
