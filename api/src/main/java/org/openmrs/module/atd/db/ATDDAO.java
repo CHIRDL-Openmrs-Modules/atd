@@ -239,9 +239,9 @@ public interface ATDDAO {
      * Looks up the form names by form attribute values
      * 
      * @param formAttrNames
-     * @param frmAttrvalue
+     * @param formAttrValue
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws DAOException;
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException;
 }

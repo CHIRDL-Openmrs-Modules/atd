@@ -1730,22 +1730,22 @@ public class HibernateATDDAO implements ATDDAO
      * Looks up the form names by form attribute values
      * 
      * @param formAttrNames
-     * @param frmAttrvalue
+     * @param formAttrValue
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws DAOException {
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException {
 		
 		String sql = "SELECT DISTINCT form.name FROM form "
 				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
 				+ "INNER JOIN chirdlutilbackports_form_attribute fa ON fav.form_attribute_id = fa.form_attribute_id "
 				+ "WHERE fa.name IN (:formAttrNames) "
-				+ "AND fav.value = :frmAttrvalue AND form.retired = :isRetired ";
+				+ "AND fav.value = :formAttrValue AND form.retired = :isRetired ";
 
 		SQLQuery qry = this.sessionFactory.getCurrentSession()
 				.createSQLQuery(sql);
 		qry.setParameterList("formAttrNames", formAttrNames);
-		qry.setString("frmAttrvalue", frmAttrvalue);
+		qry.setString("formAttrValue", formAttrValue);
 		qry.setBoolean("isRetired", isRetired);
 		qry.addScalar("name");
 		List<String> list = qry.list();

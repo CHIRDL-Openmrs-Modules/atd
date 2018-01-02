@@ -362,9 +362,9 @@ public interface ATDService
      * Looks up the form names by Form Attribute Value
      * 
      * @param formAttrNames
-	 * @param frmAttrvalue
+	 * @param formAttrValue
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String frmAttrvalue, boolean isRetired) throws APIException;
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException;
 }
