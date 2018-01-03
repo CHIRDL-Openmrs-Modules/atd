@@ -25,6 +25,7 @@ import javax.cache.Cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -1237,4 +1238,12 @@ public class ATDServiceImpl implements ATDService
 			}
 		}
 	}
+	
+	/**
+     * @see org.openmrs.module.atd.service.ATDService#getFormNamesByFormAttribute(java.util.List, String, boolean)
+     */
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException
+    {
+    	return getATDDAO().getFormNamesByFormAttribute(formAttrNames, formAttrValue, isRetired);
+    }
 }
