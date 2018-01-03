@@ -690,10 +690,6 @@ public class ATDServiceImpl implements ATDService
     public void prePopulateNewFormFields(Integer formId) {
 	    getATDDAO().prePopulateNewFormFields(formId);
     }
-    
-    public void populateEmtptyFormFields(Integer formId) throws APIException {
-	    getATDDAO().populateEmtptyFormFields(formId);
-    }
 
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
                                        String installationDirectory, String serverName, boolean faxableForm, 
@@ -984,10 +980,6 @@ public class ATDServiceImpl implements ATDService
     public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
-
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
-		return this.dao.getAllConcepts();
-	}
 
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		return this.dao.getAllFormDefinitions();

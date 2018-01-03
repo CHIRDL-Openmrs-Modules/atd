@@ -54,14 +54,6 @@ public interface ATDDAO {
 	 */
 	public void prePopulateNewFormFields(Integer formId) throws DAOException;
 	
-	/**
-	 * Populates fields in a form having no current metadata with data found in form fields from other forms.
-	 * 
-	 * @param formId The form ID for the form to have its empty fields auto-populated.
-	 * @throws DAOException
-	 */
-	public void populateEmtptyFormFields(Integer formId) throws DAOException;
-	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String installationDirectory, String serverName, boolean faxableForm, 
 	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
@@ -129,12 +121,6 @@ public interface ATDDAO {
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
-    /**
-	 * Get all concept information from database as list of ConceptDescriptor
-	 * @return A list of ConceptDescriptor objects
-	 * @throws SQLException
-	 */
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException ;
 	
 	/**
 	 * Get all form definition from database as list of FormDefinitionDescriptor
