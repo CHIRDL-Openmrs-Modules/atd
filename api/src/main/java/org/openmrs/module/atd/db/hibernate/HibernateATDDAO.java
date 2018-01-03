@@ -1328,10 +1328,12 @@ public class HibernateATDDAO implements ATDDAO
 		// CHICA-1151 Code in this section was pre-existing, but modified so that the connection() method is no longer used
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
 				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
-				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id IN (?)";
+				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id = ?";
 		
 		SQLQuery qry = this.sessionFactory.getCurrentSession()
 				.createSQLQuery(sql);
+		
+		qry.setInteger(0, formId);
 
 		List<Object[]> list = qry.list();
 		
