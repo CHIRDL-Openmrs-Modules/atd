@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.HibernateException;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
@@ -356,4 +357,14 @@ public interface ATDService
      * @throws APIException
      */
     public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException;
+    
+	/**
+     * Looks up the form names by Form Attribute Value
+     * 
+     * @param formAttrNames
+	 * @param formAttrValue
+	 * @param isRetired
+     * @return
+     */
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException;
 }
