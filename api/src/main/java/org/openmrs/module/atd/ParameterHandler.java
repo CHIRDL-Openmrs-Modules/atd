@@ -15,7 +15,7 @@ import org.openmrs.module.dss.hibernateBeans.Rule;
  */
 public interface ParameterHandler
 {
-	public void addParameters(Map<String, Object> parameters, Rule rule);
+	public void addParameters(Map<String, Object> parameters);
 	
-	public void addParameters(Map<String, Object> parameters, Rule rule, Map<String, Field> fieldMap);
+	public void addParameters(Map<String, Object> parameters, Map<String, Field> fieldMap);
 }

@@ -427,7 +427,7 @@ public class ATDServiceImpl implements ATDService
 					parameters.putAll(baseParameters);
 				}
 				if(parameterHandler != null){
-					parameterHandler.addParameters(parameters,rule);
+					parameterHandler.addParameters(parameters);
 				}
 				this.evaluateRule(currRuleName, patient, parameters);
 			}
