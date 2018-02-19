@@ -25,6 +25,7 @@ import javax.cache.Cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -689,10 +690,6 @@ public class ATDServiceImpl implements ATDService
     public void prePopulateNewFormFields(Integer formId) {
 	    getATDDAO().prePopulateNewFormFields(formId);
     }
-    
-    public void populateEmtptyFormFields(Integer formId) throws APIException {
-	    getATDDAO().populateEmtptyFormFields(formId);
-    }
 
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
                                        String installationDirectory, String serverName, boolean faxableForm, 
@@ -984,10 +981,6 @@ public class ATDServiceImpl implements ATDService
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
 
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
-		return this.dao.getAllConcepts();
-	}
-
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		return this.dao.getAllFormDefinitions();
 	}
@@ -1245,4 +1238,12 @@ public class ATDServiceImpl implements ATDService
 			}
 		}
 	}
+	
+	/**
+     * @see org.openmrs.module.atd.service.ATDService#getFormNamesByFormAttribute(java.util.List, String, boolean)
+     */
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException
+    {
+    	return getATDDAO().getFormNamesByFormAttribute(formAttrNames, formAttrValue, isRetired);
+    }
 }

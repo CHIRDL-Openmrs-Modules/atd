@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
+import org.openmrs.api.APIException;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
@@ -48,6 +50,7 @@ import org.openmrs.module.atd.xmlBeans.Language;
 import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
@@ -734,5 +737,29 @@ public class Util {
 		}
 		
 		return fieldNameToFieldMap;
+	}
+	
+	/**
+	 * Gets the primary form names for patient and physician form
+	 * @return List containing primary form names.
+	 */
+	public static List<String> getPrimaryForms() throws APIException{
+		
+		ATDService atdService = Context.getService(ATDService.class);
+		List<String> formAttrNames = new ArrayList<String>();
+		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PATIENT_FORM);
+		formAttrNames.add(ChirdlUtilConstants.FORM_ATTRIBUTE_IS_PRIMARY_PHYSICIAN_FORM);
+		
+		List<String> primaryForms = null;
+		try {
+			primaryForms = atdService.getFormNamesByFormAttribute(formAttrNames, ChirdlUtilConstants.GENERAL_INFO_TRUE, false);
+		} catch(Exception e) {
+			log.error("Error occurred while generating a list of primary form names.", e);
+		}
+		
+		if (primaryForms == null ||primaryForms.size() == 0) {
+			return Collections.emptyList();
+		}
+		return primaryForms;
 	}
 }

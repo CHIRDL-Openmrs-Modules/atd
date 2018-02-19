@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.HibernateException;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
@@ -108,14 +109,6 @@ public interface ATDService
 	 */
 	public void prePopulateNewFormFields(Integer formId) throws APIException;
 	
-	/**
-	 * Populates fields in a form having no current metadata with data found in form fields from other forms.
-	 * 
-	 * @param formId The form ID for the form to have its empty fields auto-populated.
-	 * @throws APIException
-	 */
-	public void populateEmtptyFormFields(Integer formId) throws APIException;
-	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String installationDirectory, String serverName, boolean faxableForm, 
 	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
@@ -213,13 +206,6 @@ public interface ATDService
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
-
-	/**
-	 * Get all concept information in system as list of ConceptDescriptor
-	 * @return A list of ConceptDescriptor objects
-	 * @throws SQLException
-	 */
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException;
 	
 	/**
 	 * Get all form definition in system as list of FormDefinitionDescriptor
@@ -356,4 +342,14 @@ public interface ATDService
      * @throws APIException
      */
     public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException;
+    
+	/**
+     * Looks up the form names by Form Attribute Value
+     * 
+     * @param formAttrNames
+	 * @param formAttrValue
+	 * @param isRetired
+     * @return
+     */
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException;
 }

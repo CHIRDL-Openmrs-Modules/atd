@@ -12,10 +12,14 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.jdbc.Work;
 import org.hibernate.type.BooleanType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
@@ -177,8 +181,32 @@ public class HibernateATDDAO implements ATDDAO
 	
 
     public void prePopulateNewFormFields(Integer formId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
-		PreparedStatement ps1 = null;
+    	// CHICA-1151 connection() method has been removed in new version of hibernate
+    	// Work API is recommended
+    	this.sessionFactory.getCurrentSession().doWork(connection -> executePrePopulateNewFormFields(connection, formId));
+    			
+    			// For reference pre-Java 8 without lambda
+//    			this.sessionFactory.getCurrentSession().doWork(new Work() {
+//    				
+//    				@Override
+//    				public void execute(Connection con) throws SQLException 
+//    				{
+//    					executePrePopulateNewFormFields(connection, formId);
+//    				}
+//    			});
+		
+    }
+    
+    /**
+     * CHICA-1151 Moved existing code into a method to execute pre-populating new form fields
+	 * Used when calling {@link Work#execute(Connection)}
+     * @param con
+     * @param formId
+     * @throws DAOException
+     */
+    private void executePrePopulateNewFormFields(Connection con, Integer formId) throws DAOException
+    {
+    	PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		// copy concept, default_value, and field_type to the new form
 		String step1 = "update field f1, "
@@ -262,103 +290,56 @@ public class HibernateATDDAO implements ATDDAO
 			}
 		}
     }
-    
-    public void populateEmtptyFormFields(Integer formId) throws DAOException {
-    	Connection con = this.sessionFactory.getCurrentSession().connection();
-		PreparedStatement ps1 = null;
-		PreparedStatement ps2 = null;
-		// copy parent_field mapping to the new form
-		String step1 = "update form_field a, ("
-			+ "select b.form_field_id as parent_form_field,b.name as parent_form_field_name,c.form_field_id,c.name as field_name from "
-			+ "(select distinct b.name as field_name,c.name as parent_field_name from form_field a "
-			+ "inner join field b on a.field_id=b.field_id "
-			+ "inner join field c on a.parent_form_field=c.field_id "
-			+ "inner join form d on a.form_id=d.form_id "
-			+ "where parent_form_field is not null and d.retired = 0) a "
-			+ "inner join (select a.*,form_field_id from field a inner join form_field b on a.field_id=b.field_id where form_id=?) b "
-			+ "on a.parent_field_name=b.name "
-			+ "inner join (select a.*,form_field_id from field a inner join form_field b on a.field_id=b.field_id where form_id=? and a.field_type is null and concept_id is null and default_value is null) c "
-			+ "on a.field_name=c.name order by b.name,c.name) b "
-			+ "set a.parent_form_field=b.parent_form_field "
-			+ "where a.form_field_id=b.form_field_id";
-
-		// copy concept, default_value, and field_type to the new form		
-		String step2 = "update field f1, "
-			+ "(select b.name,b.default_value,b.concept_id,b.field_type from "
-			+ "(select b.name,max(form_id) as form_id from "
-			+ "(select name, max(count) as count from "
-			+ "(select a.name,a.default_value,max(form_id) as form_id,count(*) as count from "
-			+ "(select b.name,default_value,c.form_id from form_field a inner join field b on a.field_id = b.field_id "
-			+ "inner join form c on a.form_id = c.form_id "
-			+ "where c.form_id not in (?) and c.retired = 0)a "
-			+ "group by a.name,a.default_value)a "
-			+ "group by name) a "
-			+ "inner join "
-			+ "(select a.name,a.default_value,max(form_id) as form_id,count(*) as count from "
-			+ "(select b.name,default_value,c.form_id from form_field a inner join field b on a.field_id = b.field_id "
-			+ "inner join form c on a.form_id = c.form_id "
-			+ "where c.form_id not in (?) and c.retired = 0)a "
-			+ "group by a.name,a.default_value)b "
-			+ "on a.name=b.name and a.count=b.count "
-			+ "group by b.name) a "
-			+ "inner join "
-			+ "(select a.name,default_value,concept_id,field_type,c.form_id from field a inner join form_field b on a.field_id=b.field_id "
-			+ "inner join form c on b.form_id = c.form_id where c.retired = 0)b "
-			+ "on a.name=b.name and a.form_id=b.form_id) f2, "
-			+ "form_field f3 "
-			+ "set f1.concept_id=f2.concept_id, f1.default_value=f2.default_value, f1.field_type=f2.field_type "
-			+ "where f1.name=f2.name "
-			+ "and f1.concept_id is null "
-			+ "and f1.default_value is null "
-			+ "and f1.field_type is null "
-		    + "and f1.field_id=f3.field_id and f3.form_id=?";
-
-		try {
-			ps1 = con.prepareStatement(step1);
-			ps1.setInt(1, formId);
-			ps1.setInt(2, formId);
-			ps1.executeUpdate();
-			
-			ps2 = con.prepareStatement(step2);
-			ps2.setInt(1, formId);
-			ps2.setInt(2, formId);
-			ps2.setInt(3, formId);
-			ps2.executeUpdate();
-			
-			con.commit();
-		} catch (Exception e) {
-			try {
-	            con.rollback();
-            }
-            catch (SQLException e1) {
-	            log.error("Error rolling back connection", e1);
-            }
-            throw new DAOException(e);
-		} finally {
-			if (ps1 != null) {
-				try {
-	                ps1.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing prepared statement", e);
-                }
-			}
-			if (ps2 != null) {
-				try {
-					ps2.close();
-                }
-                catch (SQLException e) {
-	                log.error("Error closing prepared statement", e);
-                }
-			}
-		}
-    }
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String installationDirectory, String serverName, boolean faxableForm, 
 	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
 	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> executeSetupInitialFormValues(connection, formId, formName, locationNames, 
+	            installationDirectory, serverName, faxableForm, 
+	            scannableForm, scorableForm, scoreConfigLoc, 
+	            numPrioritizedFields, copyPrinterConfigFormId));
+				
+				// For reference pre-Java 8 without lambda
+//				this.sessionFactory.getCurrentSession().doWork(new Work() {
+//					
+//					@Override
+//					public void execute(Connection con) throws SQLException 
+//					{
+//						executeSetupInitialFormValues(connection, formId, formName, locationNames, 
+//        					installationDirectory, serverName, faxableForm, 
+//        					scannableForm, scorableForm, scoreConfigLoc, 
+//        					numPrioritizedFields, copyPrinterConfigFormId);
+//					}
+//				});
+		
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to execute setting up initial form values
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param formId
+	 * @param formName
+	 * @param locationNames
+	 * @param installationDirectory
+	 * @param serverName
+	 * @param faxableForm
+	 * @param scannableForm
+	 * @param scorableForm
+	 * @param scoreConfigLoc
+	 * @param numPrioritizedFields
+	 * @param copyPrinterConfigFormId
+	 * @throws DAOException
+	 */
+	private void executeSetupInitialFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
+            String installationDirectory, String serverName, boolean faxableForm, 
+            boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
+            Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException
+	{
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		
@@ -446,7 +427,30 @@ public class HibernateATDDAO implements ATDDAO
 	}
 
 	public void purgeFormAttributeValues(Integer formId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> executePurgeFormAttributeValues(connection, formId));
+		
+		// For reference pre-Java 8 without lambda
+//		this.sessionFactory.getCurrentSession().doWork(new Work() {
+//			
+//			@Override
+//			public void execute(Connection con) throws SQLException 
+//			{
+//				executePurgeFormAttributeValues(connection, formId);
+//			}
+//		});
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to execute purging form attribute values
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param formId
+	 * @throws DAOException
+	 */
+	private void executePurgeFormAttributeValues(Connection con, Integer formId) throws DAOException
+	{
 		PreparedStatement ps = null;
 		String sql = "delete from chirdlutilbackports_form_attribute_value where form_id = ?";
 		try {
@@ -481,8 +485,8 @@ public class HibernateATDDAO implements ATDDAO
 			FormAttribute useAlternatePrinterAttr = chirdlUtilBackportsService.getFormAttributeByName("useAlternatePrinter");
 			
 			for (LocationTag locTag : location.getTags()) {
-				LocationTagPrinterConfig locTagPrinterConfig = new LocationTagPrinterConfig(locTag.getTag(), 
-					locTag.getLocationTagId());
+				LocationTagPrinterConfig locTagPrinterConfig = new LocationTagPrinterConfig(locTag.getName(), 
+					locTag.getLocationTagId()); // CHICA-1151 replace getTag() with getName()
 				FormAttributeValue defaultPrinterVal = chirdlUtilBackportsService.getFormAttributeValue(formId, "defaultPrinter", 
 					locTag.getLocationTagId(), locationId);
 				FormAttributeValue altPrinterVal = chirdlUtilBackportsService.getFormAttributeValue(formId, "alternatePrinter", 
@@ -560,7 +564,32 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws DAOException {
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		
+		// CHICA-1151 connection() method has been removed in new version of hibernate
+		// Work API is recommended
+		this.sessionFactory.getCurrentSession().doWork(connection -> executeCopyFormAttributeValues(connection, fromFormId, toFormId));
+		
+		// For reference pre-Java 8 without lambda
+//		this.sessionFactory.getCurrentSession().doWork(new Work() {
+//			
+//			@Override
+//			public void execute(Connection con) throws SQLException 
+//			{
+//				executeCopyFormAttributeValues(con, fromFormId, toFormId);
+//			}
+//		});
+	}
+	
+	/**
+	 * CHICA-1151 Moved existing code into a method to execute copying form attribute values
+	 * Used when calling {@link Work#execute(Connection)}
+	 * @param con
+	 * @param fromFormId
+	 * @param toFormId
+	 * @throws DAOException
+	 */
+	private void executeCopyFormAttributeValues(Connection con, Integer fromFormId, Integer toFormId) throws DAOException
+	{
 		PreparedStatement ps = null;
 		String sql = "insert into chirdlutilbackports_form_attribute_value(form_id,value,form_attribute_id,location_tag_id,location_id) "
 			+ "select ?, b.value, b.form_attribute_id, b.location_tag_id, b.location_id "
@@ -1251,140 +1280,85 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return new ArrayList<PSFQuestionAnswer>();
     }
-
-/**
- * @see org.openmrs.module.atd.db.ATDDAO#getAllConcept()
- */
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException {
-		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
-		Connection con = this.sessionFactory.getCurrentSession().connection();
-		String sql = "SELECT distinct a.*, b.name AS \"parent concept\""
-                   + "FROM    (SELECT a.name AS name,"
-                   + "                c.name AS \"concept class\","
-                   + "                d.name AS \"datatype\","
-                   + "                e.description AS description,"
-                   + "                g.concept_id,"
-                   + "                f.units AS units"
-                   + "           FROM concept_name a"
-                   + "                INNER JOIN concept b"
-                   + "                    ON a.concept_id = b.concept_id"
-                   + "                INNER JOIN concept_class c"
-                   + "                    ON b.class_id = c.concept_class_id"
-                   + "                INNER JOIN concept_datatype d"
-                   + "                    ON b.datatype_id = d.concept_datatype_id"
-                   + "                LEFT JOIN concept_description e"
-                   + "                    ON e.concept_id = b.concept_id"
-                   + "                LEFT JOIN concept_numeric f"
-                   + "                    ON f.concept_id = b.concept_id"
-                   + "                LEFT JOIN concept_answer g"
-                   + "                    ON g.answer_concept = b.concept_id) a"
-                   + "          LEFT JOIN"
-                   + "               concept_name b"
-                   + "               ON a.concept_id = b.concept_id";
-		try {
-			java.sql.Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-			while(rs.next()){
-				String name = rs.getString("name");
-				String conceptClass = rs.getString("concept class");
-				String dataType = rs.getString("datatype");
-				String description = rs.getString("description");
-				Integer conceptId = rs.getInt("concept_id");
-				String units = rs.getString("units");
-				String parentConcept = rs.getString("parent concept");
-				ConceptDescriptor cd = new ConceptDescriptor();
-				cd.setName(name);
-				cd.setConceptClass(conceptClass);
-				cd.setDatatype(dataType);
-				cd.setDescription(description);
-				cd.setUnits(units);
-				cd.setParentConcept(parentConcept);
-				cd.setConceptId(conceptId);
-				cdList.add(cd);
-			}
-		}finally{
-			con.close();
-			
-		}
-		
-		return cdList;
-	}
 	
 	/**
 	 *  @see org.openmrs.module.atd.db.ATDDAO#getAllFormDefinitions()
 	 */
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
-		Connection con = this.sessionFactory.getCurrentSession().connection();
-		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
-       + " INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id LEFT JOIN (SELECT b.*, a.name FROM    field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id WHERE a.retired = 0";
-		try {
-			java.sql.Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-			while(rs.next()){
-				String formName = rs.getString("form_name");
-				String formDescription = rs.getString("form_description");
-				String fieldName = rs.getString("field_name");
-				String fieldType = rs.getString("field_type");
-				String conceptName = rs.getString("concept_name");
-				String defaultValue = rs.getString("default_value");
-				int fieldNumber = rs.getInt("field_number");
-				String parentFieldName = rs.getString("parent_field_name");
-				FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
-				fdd.setFormName(formName);
-				fdd.setFormDescription(formDescription);
-				fdd.setFieldName(fieldName);
-				fdd.setFieldType(fieldType);
-				fdd.setConceptName(conceptName);
-				fdd.setDefaultValue(defaultValue);
-				fdd.setFieldNumber(fieldNumber);
-				fdd.setParentFieldName(parentFieldName);
-				fddList.add(fdd);
-			}
-		}finally{
-			con.close();
-		}
 		
-		return fddList;
+		// CHICA-1151 Code in this section was pre-existing, but modified so that the connection() method is no longer used
+		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id"
+				+ " INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id LEFT JOIN (SELECT b.*, a.name FROM    field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id WHERE a.retired = 0";
+
+		SQLQuery qry = this.sessionFactory.getCurrentSession()
+				.createSQLQuery(sql);
+
+		List<Object[]> list = qry.list();
+
+		for (Object[] arry : list) {
+			String formName = (String)arry[0];
+			String formDescription = (String)arry[1];
+			String fieldName = (String)arry[2];
+			String fieldType = (String)arry[3]; 
+			String conceptName = (String)arry[4];
+			String defaultValue = (String)arry[5];
+			int fieldNumber = (Integer)arry[6];
+			String parentFieldName = (String)arry[7];
+			FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
+			fdd.setFormName(formName);
+			fdd.setFormDescription(formDescription);
+			fdd.setFieldName(fieldName);
+			fdd.setFieldType(fieldType);
+			fdd.setConceptName(conceptName);
+			fdd.setDefaultValue(defaultValue);
+			fdd.setFieldNumber(fieldNumber);
+			fdd.setParentFieldName(parentFieldName);
+			fddList.add(fdd);
+		}
+			
+		return fddList;	
 	}
+	
 	/**
 	 * @see org.openmrs.module.atd.db.ATDDAO#getFormDefinition()
 	 */
 	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException{
-		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>(); 
-		Connection con = this.sessionFactory.getCurrentSession().connection();
+		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
+		
+		// CHICA-1151 Code in this section was pre-existing, but modified so that the connection() method is no longer used
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
 				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
-				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id IN (?)";
-		PreparedStatement ps = null;
-		try {
-			ps = con.prepareStatement(sql);
-			ps.setInt(1, formId);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next()){
-				String formName = rs.getString("form_name");
-				String formDescription = rs.getString("form_description");
-				String fieldName = rs.getString("field_name");
-				String fieldType = rs.getString("field_type");
-				String conceptName = rs.getString("concept_name");
-				String defaultValue = rs.getString("default_value");
-				int fieldNumber = rs.getInt("field_number");
-				String parentFieldName = rs.getString("parent_field_name");
-				FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
-				fdd.setFormName(formName);
-				fdd.setFormDescription(formDescription);
-				fdd.setFieldName(fieldName);
-				fdd.setFieldType(fieldType);
-				fdd.setConceptName(conceptName);
-				fdd.setDefaultValue(defaultValue);
-				fdd.setFieldNumber(fieldNumber);
-				fdd.setParentFieldName(parentFieldName);
-				fddList.add(fdd);
-			}
-			
-		} finally{
-			con.close();
+				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id = ?";
+		
+		SQLQuery qry = this.sessionFactory.getCurrentSession()
+				.createSQLQuery(sql);
+		
+		qry.setInteger(0, formId);
+
+		List<Object[]> list = qry.list();
+		
+		for (Object[] arry : list) {
+			String formName = (String)arry[0];
+			String formDescription = (String)arry[1];
+			String fieldName = (String)arry[2];
+			String fieldType = (String)arry[3]; 
+			String conceptName = (String)arry[4];
+			String defaultValue = (String)arry[5];
+			int fieldNumber = (Integer)arry[6];
+			String parentFieldName = (String)arry[7];
+			FormDefinitionDescriptor fdd = new FormDefinitionDescriptor();
+			fdd.setFormName(formName);
+			fdd.setFormDescription(formDescription);
+			fdd.setFieldName(fieldName);
+			fdd.setFieldType(fieldType);
+			fdd.setConceptName(conceptName);
+			fdd.setDefaultValue(defaultValue);
+			fdd.setFieldNumber(fieldNumber);
+			fdd.setParentFieldName(parentFieldName);
+			fddList.add(fdd);
 		}
+		
 		return fddList;
 	}
 	
@@ -1724,4 +1698,31 @@ public class HibernateATDDAO implements ATDDAO
     	
 		return criteria.list();
 	}
+    
+	/**
+     * Looks up the form names by form attribute values
+     * 
+     * @param formAttrNames
+     * @param formAttrValue
+	 * @param isRetired
+     * @return
+     */
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException {
+		
+		String sql = "SELECT DISTINCT form.name FROM form "
+				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
+				+ "INNER JOIN chirdlutilbackports_form_attribute fa ON fav.form_attribute_id = fa.form_attribute_id "
+				+ "WHERE fa.name IN (:formAttrNames) "
+				+ "AND fav.value = :formAttrValue AND form.retired = :isRetired ";
+
+		SQLQuery qry = this.sessionFactory.getCurrentSession()
+				.createSQLQuery(sql);
+		qry.setParameterList("formAttrNames", formAttrNames);
+		qry.setString("formAttrValue", formAttrValue);
+		qry.setBoolean("isRetired", isRetired);
+		qry.addScalar("name");
+		List<String> list = qry.list();
+		
+		return list;
+    }
 }

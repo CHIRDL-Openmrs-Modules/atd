@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.hibernate.HibernateException;
 import org.openmrs.Obs;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.db.DAOException;
@@ -52,14 +53,6 @@ public interface ATDDAO {
 	 * @throws DAOException
 	 */
 	public void prePopulateNewFormFields(Integer formId) throws DAOException;
-	
-	/**
-	 * Populates fields in a form having no current metadata with data found in form fields from other forms.
-	 * 
-	 * @param formId The form ID for the form to have its empty fields auto-populated.
-	 * @throws DAOException
-	 */
-	public void populateEmtptyFormFields(Integer formId) throws DAOException;
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String installationDirectory, String serverName, boolean faxableForm, 
@@ -128,12 +121,6 @@ public interface ATDDAO {
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
-    /**
-	 * Get all concept information from database as list of ConceptDescriptor
-	 * @return A list of ConceptDescriptor objects
-	 * @throws SQLException
-	 */
-	public List<ConceptDescriptor> getAllConcepts() throws SQLException ;
 	
 	/**
 	 * Get all form definition from database as list of FormDefinitionDescriptor
@@ -233,4 +220,14 @@ public interface ATDDAO {
      * @return
      */
     public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId);
+    
+    /**
+     * Looks up the form names by form attribute values
+     * 
+     * @param formAttrNames
+     * @param formAttrValue
+	 * @param isRetired
+     * @return
+     */
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException;
 }

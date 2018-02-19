@@ -34,4 +34,9 @@ public class AtdConstants {
     /** Form views */
 	public static final String FORM_VIEW_CONFIG_MANAGER_SUCCESS = "configurationManagerSuccess.form";
 	public static final String FORM_VIEW_CONFIG_MANAGER = "configurationManager.form";
+	public static final String FORM_CONFIG_FORM_VIEW = "/module/atd/configForm";
+	public static final String FORM_VIEW_CONFIG_SUCCESS = "configFormAttributeValue.form";
+	public static final String FORM_VIEW_CREATE_FORM_MLM_SUCCESS = "mlmForm.form";
+	public static final String FORM_ENABLE_LOCATIONS_FORM_VIEW = "/module/atd/enableLocationsForm";
+	public static final String FORM_ENABLE_FORM_VIEW = "/module/atd/enableForm";
 }
