@@ -25,7 +25,6 @@ import javax.cache.Cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.HibernateException;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -73,6 +72,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
+import org.openmrs.module.dss.hibernateBeans.RuleEntry;
 import org.openmrs.module.dss.service.DssService;
 
 /**
@@ -427,7 +427,7 @@ public class ATDServiceImpl implements ATDService
 					parameters.putAll(baseParameters);
 				}
 				if(parameterHandler != null){
-					parameterHandler.addParameters(parameters,rule);
+					parameterHandler.addParameters(parameters);
 				}
 				this.evaluateRule(currRuleName, patient, parameters);
 			}
@@ -817,11 +817,17 @@ public class ATDServiceImpl implements ATDService
 	                           Encounter encounter, String formName, Integer locationTagId, Integer locationId) {
 		DssService dssService = Context.getService(DssService.class);
 		Integer ruleId = currDssElement.getRuleId();
-		Rule rule = dssService.getRule(ruleId);
+		
+		// Try to get rule entry to determine priority
+		Integer priority = null;
+		RuleEntry ruleEntry = dssService.getRuleEntry(ruleId, formName);
+		if (ruleEntry != null) {
+			priority = ruleEntry.getPriority();
+		}
 		
 		Statistics statistics = new Statistics();
 		statistics.setAgeAtVisit(Util.adjustAgeUnits(patient.getBirthdate(), null));
-		statistics.setPriority(rule.getPriority());
+		statistics.setPriority(priority);
 		statistics.setFormInstanceId(formInstanceId);
 		statistics.setLocationTagId(locationTagId);
 		statistics.setPosition(questionPosition + 1);

@@ -19,9 +19,9 @@
 	<require_version>2.0.6</require_version>
 	<require_database_version>1.0.0</require_database_version>
 	<require_modules>
-   		<require_module version="2.34.0">org.openmrs.module.dss</require_module>
+   		<require_module version="3.0.0">org.openmrs.module.dss</require_module>
 		<require_module version="1.17.0">org.openmrs.module.chirdlutil</require_module>
-		<require_module version="2.9.0">org.openmrs.module.chirdlutilbackports</require_module>
+		<require_module version="2.10.0">org.openmrs.module.chirdlutilbackports</require_module>
 		<require_module version="1.3.1">org.openmrs.module.legacyui</require_module>
 	</require_modules>
 	
@@ -167,12 +167,6 @@
         <description>The name of the recipient of the faxed image</description>
     </globalProperty>
         
-	<!-- Internationalization -->
-	<!-- All message codes should start with moduleId.* -->
-	<messages>
-		<lang>en</lang>
-		<file>messages.properties</file>
-	</messages>
 	<!-- /Internationalization -->
 
     <!-- Servlets -->
@@ -188,8 +182,16 @@
        <servlet-name>importConceptsFromFile</servlet-name>
        <servlet-class>@MODULE_PACKAGE@.web.ImportConceptsFromFileServlet</servlet-class>
    </servlet>
-	<mappingFiles>
+   
+   <!-- Internationalization -->
+   <!-- All message codes should start with moduleId.* -->
+   <messages>
+       <lang>en</lang>
+       <file>messages.properties</file>
+   </messages>
+   
+   <mappingFiles>
 	patient_atd.hbm.xml
 	statistics.hbm.xml
-	</mappingFiles>
+   </mappingFiles>
 </module>
