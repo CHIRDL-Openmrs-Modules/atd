@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp" %>
     
 <%@ include file="/WEB-INF/template/header.jsp" %>
+<openmrs:require allPrivileges="Manage ATD" otherwise="/login.htm" redirect="/module/atd/updateForm.form" />
 <link href="${pageContext.request.contextPath}/moduleResources/atd/atd.css" type="text/css" rel="stylesheet" />
 <p>Please choose the form you would like to update:</p>
 <form name="input" action="updateForm.form" method="post">

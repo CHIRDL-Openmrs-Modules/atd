@@ -770,5 +770,17 @@ where a.form_attribute_id=c.form_attribute_id;
             ALTER TABLE atd_statistics ADD COLUMN form_field_id int(11) DEFAULT NULL;
             ALTER TABLE atd_statistics ADD CONSTRAINT atd_stats_fk_form_field FOREIGN KEY (form_field_id) REFERENCES form_field (form_field_id);
         </sql>
+    </diff>
+    <diff>
+        <version>1.3.8</version>
+        <author>David Ely</author>
+        <date>March 14, 2018</date>
+        <description>
+            CHICA-1209 Create new privilege for atd module
+        </description>
+        <sql>
+            Insert Into privilege(privilege, description, uuid)
+			Values('Manage ATD', 'ATD Module privilege', UUID());
+        </sql>
     </diff> 
 </sqldiff>

@@ -4,7 +4,7 @@
 <%@ page import="org.openmrs.LocationTag"%>
 <%@ page import="java.util.*"%>
 <%@ page import="org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue"%>
-
+<openmrs:require privilege="Manage ATD" otherwise="/login.htm" redirect="/module/atd/chooseLocation.form" />
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 
