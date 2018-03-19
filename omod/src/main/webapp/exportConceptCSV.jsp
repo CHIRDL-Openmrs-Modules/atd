@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <%@ include file="/WEB-INF/template/header.jsp"%>
-<openmrs:require privilege="Manage Concepts" otherwise="/login.htm" redirect="/module/atd/exportConceptCSV.form" />
+<openmrs:require privilege="Manage ATD" otherwise="/login.htm" redirect="/module/atd/exportConceptCSV.form" />
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>

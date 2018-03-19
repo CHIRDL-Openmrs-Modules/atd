@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
+<openmrs:require allPrivileges="Manage ATD" otherwise="/login.htm" redirect="/module/atd/replaceFormFields.form" />
 <link
     href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"
     type="text/css" rel="stylesheet" />
