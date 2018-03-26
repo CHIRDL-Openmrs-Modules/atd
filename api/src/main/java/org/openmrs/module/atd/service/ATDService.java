@@ -16,6 +16,7 @@ import org.openmrs.FormField;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.FormPrinterConfig;
@@ -41,9 +42,11 @@ import org.openmrs.module.dss.DssManager;
 public interface ATDService
 {
 	
+	@Authorized()
 	public Form teleformXMLToDatabaseForm(String formName,
 			String templateXMLFilename);
 	
+	@Authorized()
 	public boolean consume(InputStream customInput, FormInstance formInstance,
 			Patient patient, int encounterId,
 			Map<String,Object> baseParameters,
@@ -52,33 +55,39 @@ public interface ATDService
 			Integer locationTagId, Integer sessionId
 			);
 	
+	@Authorized()
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
 			DssManager dssManager,Integer encounterId,
 			Map<String,Object> baseParameters,
 			Integer locationTagId,Integer sessionId);
 	
+	@Authorized()
 	public boolean produce(Patient patient,
 	           			FormInstance formInstance, Map<String,OutputStream> outputs, 
 	           			DssManager dssManager,Integer encounterId,
 	           			Map<String,Object> baseParameters,
 	           			Integer locationTagId,Integer sessionId);
-	           	
+	          
+	@Authorized()
 	public boolean produce(Patient patient,
 	           			FormInstance formInstance, OutputStream customOutput, 
 	           			Integer encounterId,
 	           			Map<String,Object> baseParameters,
 	           			Integer locationTagId,Integer sessionId);
-	           	
+	        
+	@Authorized()
 	public boolean produce(Patient patient,
 			FormInstance formInstance, Map<String,OutputStream> outputs, 
 			Integer encounterId,
 			Map<String,Object> baseParameters,
 			Integer locationTagId,Integer sessionId);
 	
+	@Authorized()
 	public Result evaluateRule(String ruleEvalString,Patient patient,
 			Map<String, Object> baseParameters);
 	
+	@Authorized()
 	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
 			Integer encounterId) throws APIException;
 	
@@ -89,16 +98,22 @@ public interface ATDService
 	 * @return The updated PatientATD object.
 	 * @throws APIException
 	 */
+	@Authorized()
 	public PatientATD updatePatientATD(PatientATD patientATD) throws APIException;
 	
+	@Authorized()
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId);
 	
+	@Authorized()
 	public ArrayList<TeleformFileState> fileProcessed(ArrayList<TeleformFileState> tfstates);
 	
+	@Authorized()
 	public TeleformFileState fileProcessed(TeleformFileState tfstate);
 	
+	@Authorized()
 	public void updatePatientStates(Date thresholdDate);
 		
+	@Authorized()
 	public void cleanCache();
 	
 	/**
@@ -107,23 +122,31 @@ public interface ATDService
 	 * @param formId The form ID for the form to have its fields auto-populated.
 	 * @throws APIException
 	 */
+	@Authorized()
 	public void prePopulateNewFormFields(Integer formId) throws APIException;
 	
+	@Authorized()
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String installationDirectory, String serverName, boolean faxableForm, 
 	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
 	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws APIException;
 	
+	@Authorized()
 	public void purgeFormAttributeValues(Integer formId) throws APIException;
 	
+	@Authorized()
 	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws APIException;
 	
+	@Authorized()
 	public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws APIException;
 	
+	@Authorized()
 	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws APIException;
 	
+	@Authorized()
 	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws APIException;
 	
+	@Authorized()
 	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException;
 	
 	/**
@@ -132,6 +155,7 @@ public interface ATDService
 	 * @param locationName The name of the location to search for bad scans.
 	 * @return List of URL objects of the bad scans.
 	 */
+	@Authorized()
 	public List<URL> getBadScans(String locationName);
 	
 	/**
@@ -144,8 +168,10 @@ public interface ATDService
 	 * 
 	 * @throws Exception
 	 */
+	@Authorized()
 	public void moveBadScan(String url, boolean formRescanned) throws Exception;
 
+	@Authorized()
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName);
 	
 	/**
@@ -155,24 +181,32 @@ public interface ATDService
 	 * @param formName
 	 * @return List of Statistics objects
 	 */
+	@Authorized()
 	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
 
+	@Authorized()
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName);
 	
+	@Authorized()
 	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName,
 		Integer locationId);
 	
+	@Authorized()
 	public List<Statistics> getStatByFormInstance(int formInstanceId,String formName,
 		Integer locationId);
 	
+	@Authorized()
 	public void updateStatistics(Statistics statistics);
 
+	@Authorized()
 	public void createStatistics(Statistics statistics);
 	
+	@Authorized()
 	public void produce(OutputStream output, PatientState state,
 	        			Patient patient, Integer encounterId, String dssType,
 	        			int maxDssElements,Integer sessionId);
 	
+	@Authorized()
 	public void produce(Map<String,OutputStream> outputs, PatientState state,
 	        			Patient patient, Integer encounterId, String dssType,
 	        			int maxDssElements,Integer sessionId);
@@ -184,6 +218,7 @@ public interface ATDService
 	 * @param patientId
 	 * @return
 	 */
+	@Authorized()
 	public PatientIdentifier getPatientMRN(Integer patientId);
 	
 	/**
@@ -195,6 +230,7 @@ public interface ATDService
 	 * @param patientForm The Patient Form Name
 	 * @return List of PSFQuestionAnswer objects.  This will not return null;
 	 */
+	@Authorized()
 	public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm);
 	
 	/**
@@ -205,6 +241,7 @@ public interface ATDService
 	 * 
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
+	@Authorized()
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds);
 	
 	/**
@@ -212,6 +249,7 @@ public interface ATDService
 	 * @return A list of FormDefinitionDescriptor objects
 	 * @throws SQLException
 	 */
+	@Authorized()
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException;
 	
 	/**
@@ -220,6 +258,7 @@ public interface ATDService
 	 * @return A list of DefinitionDescriptor objects
 	 * @throws SQLException
 	 */
+	@Authorized()
 	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException;
 	
 	/**
@@ -231,6 +270,7 @@ public interface ATDService
 	 * @param formId
 	 * @return the HashMap
 	 */
+	@Authorized()
 	public HashMap<Integer, List<Integer>> getFormAttributeValueLocationsAndTagsMap(Integer formId);
 	
 	/**
@@ -248,6 +288,7 @@ public interface ATDService
 	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
 	 * @return
 	 */
+	@Authorized()
 	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch);
 	
 	/**
@@ -261,6 +302,7 @@ public interface ATDService
 	 * @param exactMatchSearch - true to perform and exact match search using the searchValue parameter
 	 * @return the total number of concept records
 	 */
+	@Authorized()
 	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch);
 
 	/**
@@ -273,6 +315,7 @@ public interface ATDService
      * @param includeVoidedObs
      * @return
      */
+	@Authorized()
     public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs);
     
     /**
@@ -283,6 +326,7 @@ public interface ATDService
      * @param orderAscDesc - ASC or DESC
      * @return sorted list of Statistics
      */
+	@Authorized()
     public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc);
     
     /**
@@ -293,6 +337,7 @@ public interface ATDService
      * @param ruleId
      * @return
      */
+	@Authorized()
     public boolean oneBoxChecked(Integer encounterId, Integer ruleId);
     
     /**
@@ -304,6 +349,7 @@ public interface ATDService
      * @param ruleId
      * @return
      */
+	@Authorized()
     public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId);
     
     /**
@@ -313,6 +359,7 @@ public interface ATDService
      * @param ruleId
      * @return
      */
+	@Authorized()
     public boolean ruleFiredForEncounter(Integer encounterId, Integer ruleId);
     
     /**
@@ -323,6 +370,7 @@ public interface ATDService
      * @return Records object containing form information
      * @throws APIException
      */
+	@Authorized()
     public Records getFormRecords(FormInstanceTag formInstanceTag) throws APIException;
     
     /**
@@ -332,6 +380,7 @@ public interface ATDService
      * @param records Records object containing form information
      * @throws APIException
      */
+	@Authorized()
     public void saveFormRecordsDraft(FormInstanceTag formInstanceTag, Records records) throws APIException;
     
     /**
@@ -341,6 +390,7 @@ public interface ATDService
      * @param records Records object containing form information
      * @throws APIException
      */
+	@Authorized()
     public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException;
     
 	/**
@@ -351,5 +401,6 @@ public interface ATDService
 	 * @param isRetired
      * @return
      */
+	@Authorized()
     public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException;
 }
