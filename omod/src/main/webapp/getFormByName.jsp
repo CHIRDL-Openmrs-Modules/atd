@@ -1,5 +1,6 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <%@ include file="/WEB-INF/template/header.jsp"%>
+<openmrs:require allPrivileges="Manage ATD" otherwise="/login.htm" redirect="/module/atd/getFormByName.form" />
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">

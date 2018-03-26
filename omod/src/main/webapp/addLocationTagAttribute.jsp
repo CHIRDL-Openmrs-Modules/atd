@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 
 
-<openmrs:require privilege="Edit Users, Manage Location Tags, View Locations" otherwise="/login.htm" redirect="/module/atd/editClinicTagAttributeForm.form" />
+<openmrs:require privilege="Manage ATD" otherwise="/login.htm" redirect="/module/atd/editClinicTagAttributeForm.form" />
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"/>
 <h2></h2>
 
