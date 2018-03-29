@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.HibernateException;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
@@ -127,9 +126,9 @@ public interface ATDService
 	
 	@Authorized()
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-	                                   String installationDirectory, String serverName, boolean faxableForm, 
-	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
-	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws APIException;
+	                                   String installationDirectory, boolean faxableForm, boolean scannableForm, 
+	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields, 
+	                                   Integer copyPrinterConfigFormId) throws APIException;
 	
 	@Authorized()
 	public void purgeFormAttributeValues(Integer formId) throws APIException;

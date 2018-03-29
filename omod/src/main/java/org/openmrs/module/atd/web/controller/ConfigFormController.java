@@ -23,12 +23,12 @@ import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
-import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttribute;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
+import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -136,7 +136,6 @@ public class ConfigFormController
         // Copy form configuration
         ATDService atdService = Context.getService(ATDService.class);
     	try {
-        	String serverName = adminService.getGlobalProperty("atd.serverName");
         	String scoreConfigFile = null;
         	if (request instanceof MultipartHttpServletRequest && scorableForm) {
                 MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest)request;
@@ -164,8 +163,7 @@ public class ConfigFormController
         	}
         	
         	atdService.setupInitialFormValues(formId, formName, selectedLocations, installationDirectory, 
-        		serverName, faxableForm, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
-        		printerCopyFormId);
+        		faxableForm, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields, printerCopyFormId);
     	}
     	catch (Exception e) {
     		log.error("Error saving form changes", e);

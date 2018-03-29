@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.hibernate.HibernateException;
 import org.openmrs.Obs;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.db.DAOException;
@@ -55,9 +54,9 @@ public interface ATDDAO {
 	public void prePopulateNewFormFields(Integer formId) throws DAOException;
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-	                                   String installationDirectory, String serverName, boolean faxableForm, 
-	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
-	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException;
+	                                   String installationDirectory, boolean faxableForm, boolean scannableForm, 
+	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields, 
+	                                   Integer copyPrinterConfigFormId) throws DAOException;
 	
 	public void purgeFormAttributeValues(Integer formId) throws DAOException;
 	

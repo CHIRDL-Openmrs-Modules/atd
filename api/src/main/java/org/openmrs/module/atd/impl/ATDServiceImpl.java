@@ -25,7 +25,6 @@ import javax.cache.Cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.HibernateException;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -692,10 +691,10 @@ public class ATDServiceImpl implements ATDService
     }
 
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-                                       String installationDirectory, String serverName, boolean faxableForm, 
-                                       boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
-                                       Integer numPrioritizedFields, Integer copyPrinterConfigFormId) {
-	    getATDDAO().setupInitialFormValues(formId, formName, locationNames, installationDirectory, serverName, faxableForm, 
+                                       String installationDirectory, boolean faxableForm, boolean scannableForm, 
+                                       boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields, 
+                                       Integer copyPrinterConfigFormId) {
+	    getATDDAO().setupInitialFormValues(formId, formName, locationNames, installationDirectory, faxableForm, 
 	    	scannableForm, scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
     }
 
