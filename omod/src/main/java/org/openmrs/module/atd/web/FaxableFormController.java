@@ -18,7 +18,8 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.AtdConstants;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
@@ -29,6 +30,12 @@ import org.springframework.web.servlet.view.RedirectView;
 
 
 public class FaxableFormController extends SimpleFormController {
+	
+	private static final String SCAN_DIRECTORY_EXTENSION = "_SCAN";
+	private static final String IMAGES_DIRECTORY_NAME = "images";
+	private static final String FAX_DIRECTORY_NAME = "Fax";
+	private static final String SCAN_DIRECTORY_NAME = "scan";
+	private static final String APPLICATION_NAME = "Make Faxable Form";
 	
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
@@ -47,18 +54,18 @@ public class FaxableFormController extends SimpleFormController {
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object,
 	                                             BindException errors) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("application", "Make Faxable Form");
+		map.put(AtdConstants.PARAMETER_APPLICATION, APPLICATION_NAME);
 		String view = getFormView();
 		
-		String formIdStr = request.getParameter("formToEdit");
+		String formIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_TO_EDIT);
 		if (formIdStr != null && formIdStr.trim().length() > 0) {
 			try {
 				Integer formId = Integer.parseInt(formIdStr);
 				makeFaxableForm(formId);
 			} catch (Exception e) {
 				log.error("Error making form faxable", e);
-				map.put("error", true);
-				map.put("forms", getForms(false));
+				map.put(AtdConstants.PARAMETER_ERROR, true);
+				map.put(AtdConstants.PARAMETER_FORMS, getForms(false));
 				return new ModelAndView(view, map);
 			}
 		}
@@ -71,26 +78,20 @@ public class FaxableFormController extends SimpleFormController {
 	protected Map referenceData(HttpServletRequest request) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		
-		map.put("forms", getForms(false));
+		map.put(AtdConstants.PARAMETER_FORMS, getForms(false));
 		
 		return map;
 	}
 	
 	private void makeFaxableForm(Integer formId) throws Exception {
 		AdministrationService adminService = Context.getAdministrationService();
-		ATDService atdService = Context.getService(ATDService.class);
 		LocationService locService = Context.getLocationService();
 		FormService formService = Context.getFormService();
 		ChirdlUtilBackportsService chirdlutilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		
-		String installationDirectory = adminService.getGlobalProperty("atd.installationDirectory");
+		String installationDirectory = adminService.getGlobalProperty(AtdConstants.GLOBAL_PROP_INSTALLATION_DIRECTORY);
 		if (installationDirectory == null) {
-			throw new Exception("atd.installationDirectory not specified.");
-		}
-		
-		String serverName = adminService.getGlobalProperty("atd.serverName");
-		if (serverName == null) {
-			throw new Exception("atd.serverName not specified");
+			throw new Exception(AtdConstants.GLOBAL_PROP_INSTALLATION_DIRECTORY + " not specified.");
 		}
 		
 		Form currentForm = formService.getForm(formId);
@@ -98,13 +99,15 @@ public class FaxableFormController extends SimpleFormController {
 		// We need to update retired versions of the form as well.
 		List<Form> forms = findAllVersionsOfForm(currentForm);
 		
-		FormAttribute exportAttr = chirdlutilBackportsService.getFormAttributeByName("defaultExportDirectory");
-		FormAttribute imageAttr = chirdlutilBackportsService.getFormAttributeByName("imageDirectory");
+		FormAttribute exportAttr = chirdlutilBackportsService.getFormAttributeByName(
+			ChirdlUtilConstants.FORM_ATTR_DEFAULT_EXPORT_DIRECTORY);
+		FormAttribute imageAttr = chirdlutilBackportsService.getFormAttributeByName(
+			ChirdlUtilConstants.FORM_ATTRIBUTE_IMAGE_DIRECTORY);
 		
-		String newExportValue = installationDirectory + File.separator + "scan" + File.separator + "Fax" + 
-			File.separator + currentFormName + "_SCAN";
-		String newImageValue = File.separator + File.separator + serverName + File.separator + "images" + 
-			File.separator + "Fax" + File.separator + currentFormName;
+		String newExportValue = installationDirectory + File.separator + SCAN_DIRECTORY_NAME + 
+			File.separator + FAX_DIRECTORY_NAME +  File.separator + currentFormName + SCAN_DIRECTORY_EXTENSION;
+		String newImageValue = installationDirectory + File.separator + IMAGES_DIRECTORY_NAME + File.separator + 
+			FAX_DIRECTORY_NAME + File.separator + currentFormName;
 		
 		// Get the merge values.  This will guide us through creating the other info we need.
 		for (Location location : locService.getAllLocations()) {
@@ -112,8 +115,8 @@ public class FaxableFormController extends SimpleFormController {
 			for (LocationTag tag : location.getTags()) {
 				Integer locationTagId = tag.getLocationTagId();
 				for (Form form : forms) {
-					FormAttributeValue value = chirdlutilBackportsService.getFormAttributeValue(form.getFormId(), "defaultMergeDirectory", 
-						locationTagId, locationId);
+					FormAttributeValue value = chirdlutilBackportsService.getFormAttributeValue(
+						form.getFormId(), ChirdlUtilConstants.FORM_ATTR_DEFAULT_MERGE_DIRECTORY, locationTagId, locationId);
 					if (value != null && value.getValue() != null) {
 						// Create and save the new scan value.
 						setupFormAttributeValue(chirdlutilBackportsService, form, locationId, locationTagId, 
@@ -152,13 +155,13 @@ public class FaxableFormController extends SimpleFormController {
 	
 	private void createFaxDirectories(Integer formId, String installationDirectory, String formName) throws Exception {			
 		// Create the scan directory
-		File scanDir = new File(installationDirectory + File.separator + "scan" + 
-			File.separator + "Fax" + File.separator + formName + "_SCAN");
+		File scanDir = new File(installationDirectory + File.separator + SCAN_DIRECTORY_NAME + 
+			File.separator + FAX_DIRECTORY_NAME + File.separator + formName + SCAN_DIRECTORY_EXTENSION);
 		scanDir.mkdirs();
 		
 		// Create the images directory
-		File imageDir = new File(installationDirectory + File.separator + "images" + 
-			File.separator + "Fax" + File.separator + formName);
+		File imageDir = new File(installationDirectory + File.separator + IMAGES_DIRECTORY_NAME + 
+			File.separator + FAX_DIRECTORY_NAME + File.separator + formName);
 		imageDir.mkdirs();
 	}
 	

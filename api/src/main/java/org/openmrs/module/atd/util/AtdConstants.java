@@ -39,4 +39,22 @@ public class AtdConstants {
 	public static final String FORM_VIEW_CREATE_FORM_MLM_SUCCESS = "mlmForm.form";
 	public static final String FORM_ENABLE_LOCATIONS_FORM_VIEW = "/module/atd/enableLocationsForm";
 	public static final String FORM_ENABLE_FORM_VIEW = "/module/atd/enableForm";
+	
+	/*
+	 * Constants for global properties
+	 */
+	public static final String GLOBAL_PROP_INSTALLATION_DIRECTORY = "atd.installationDirectory";
+	/*
+	 * 
+	 */
+	
+	/*
+	 * Constants for common controller parameters
+	 */
+	public static final String PARAMETER_APPLICATION = "application";
+	public static final String PARAMETER_ERROR = "error";
+	public static final String PARAMETER_FORMS = "forms";
+	/*
+	 * 
+	 */
 }
