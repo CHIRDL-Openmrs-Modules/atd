@@ -1,4 +1,4 @@
-package org.openmrs.module.atd.web;
+package org.openmrs.module.atd.web.controller;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,13 +23,16 @@ import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
-import org.springframework.validation.BindException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
-
-public class FaxableFormController extends SimpleFormController {
+@Controller
+@RequestMapping(value = "module/atd/faxableForm.form") 
+public class FaxableFormController {
 	
 	private static final String SCAN_DIRECTORY_EXTENSION = "_SCAN";
 	private static final String IMAGES_DIRECTORY_NAME = "images";
@@ -39,23 +42,12 @@ public class FaxableFormController extends SimpleFormController {
 	
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
-	 */
-	@Override
-	protected Object formBackingObject(HttpServletRequest request) throws Exception {
-		return "testing";
-	}
 	
-	@Override
-	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object,
-	                                             BindException errors) throws Exception {
+    @RequestMapping(method = RequestMethod.POST)
+	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object object) 
+			throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put(AtdConstants.PARAMETER_APPLICATION, APPLICATION_NAME);
-		String view = getFormView();
 		
 		String formIdStr = request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_TO_EDIT);
 		if (formIdStr != null && formIdStr.trim().length() > 0) {
@@ -66,21 +58,17 @@ public class FaxableFormController extends SimpleFormController {
 				log.error("Error making form faxable", e);
 				map.put(AtdConstants.PARAMETER_ERROR, true);
 				map.put(AtdConstants.PARAMETER_FORMS, getForms(false));
-				return new ModelAndView(view, map);
+				return new ModelAndView(AtdConstants.FORM_VIEW_FAXABLE, map);
 			}
 		}
 		
-		view = getSuccessView();
-		return new ModelAndView(new RedirectView(view), map);
+		return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_MANAGER_SUCCESS), map);
 	}
 	
-	@Override
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		
+	@RequestMapping(method = RequestMethod.GET) 
+	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		map.put(AtdConstants.PARAMETER_FORMS, getForms(false));
-		
-		return map;
+		return AtdConstants.FORM_VIEW_FAXABLE;
 	}
 	
 	private void makeFaxableForm(Integer formId) throws Exception {

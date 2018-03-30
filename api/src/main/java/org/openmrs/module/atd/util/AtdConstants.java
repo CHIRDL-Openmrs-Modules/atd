@@ -39,6 +39,7 @@ public class AtdConstants {
 	public static final String FORM_VIEW_CREATE_FORM_MLM_SUCCESS = "mlmForm.form";
 	public static final String FORM_ENABLE_LOCATIONS_FORM_VIEW = "/module/atd/enableLocationsForm";
 	public static final String FORM_ENABLE_FORM_VIEW = "/module/atd/enableForm";
+	public static final String FORM_VIEW_FAXABLE = "/module/atd/faxableForm";
 	
 	/*
 	 * Constants for global properties
