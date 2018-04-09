@@ -35,7 +35,6 @@
                 <prop key="/module/@MODULE_ID@/updateForm.form">updateForm</prop>
                 <prop key="/module/@MODULE_ID@/clinicPrinterConfigForm.form">clinicPrinterConfigForm</prop>
                 <prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
-                <prop key="/module/@MODULE_ID@/faxableForm.form">faxableForm</prop>
                 <prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
                 <prop key="/module/@MODULE_ID@/chooseLocation.form">chooseLocation</prop>
                 <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
@@ -95,12 +94,6 @@
         <property name="commandName"><value>getFormByNameObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/getFormByName</value></property>
         <property name="successView"><value>operationSuccess.form</value></property>
-    </bean>
-   
-    <bean id="faxableForm" class="@MODULE_PACKAGE@.web.FaxableFormController">
-        <property name="commandName"><value>faxableFormObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/faxableForm</value></property>
-        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     <bean id="createClinicForm" class="@MODULE_PACKAGE@.web.CreateClinicFormController">
         <property name="commandName"><value>createClinicFormObject</value></property>

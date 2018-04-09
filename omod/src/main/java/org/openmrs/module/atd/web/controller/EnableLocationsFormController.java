@@ -178,7 +178,6 @@ public class EnableLocationsFormController {
 		}
 		
     	try {
-        	String serverName = adminService.getGlobalProperty("atd.serverName");
         	String scoreConfigFile = null;
         	if (request instanceof MultipartHttpServletRequest && scorableForm) {
                 MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest)request;
@@ -201,8 +200,7 @@ public class EnableLocationsFormController {
         		printerCopyFormId = printerCopyForm.getFormId();
         	}
         	atdService.setupInitialFormValues(formId, formName, selectedLocations, installationDirectory, 
-        		serverName, faxableForm, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields,
-        		printerCopyFormId);
+        		faxableForm, scannableForm, scorableForm, scoreConfigFile, numPrioritizedFields, printerCopyFormId);
     	}
     	catch (Exception e) {
     		log.error("Error saving form changes", e);
