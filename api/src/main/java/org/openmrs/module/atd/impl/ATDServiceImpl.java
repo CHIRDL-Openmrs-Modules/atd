@@ -413,6 +413,7 @@ public class ATDServiceImpl implements ATDService
 		}
 		
 		//run all the consume rules
+		String formType = org.openmrs.module.chirdlutil.util.Util.getFormType(formInstance.getFormId(), locationTagId, locationId); // CHICA-1234 Look up the formType
 		for(LinkedHashMap<String, Rule> rulesToRun: 
 			rulesToRunByField.values())
 		{
@@ -427,7 +428,7 @@ public class ATDServiceImpl implements ATDService
 					parameters.putAll(baseParameters);
 				}
 				if(parameterHandler != null){
-					parameterHandler.addParameters(parameters);
+					parameterHandler.addParameters(parameters, formType); // CHICA-1234 Added formType parameter
 				}
 				this.evaluateRule(currRuleName, patient, parameters);
 			}
