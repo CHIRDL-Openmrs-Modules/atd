@@ -2,23 +2,20 @@ package org.openmrs.module.atd.db.hibernate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.jdbc.Work;
 import org.hibernate.type.BooleanType;
 import org.hibernate.type.IntegerType;
@@ -292,16 +289,15 @@ public class HibernateATDDAO implements ATDDAO
     }
 	
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
-	                                   String installationDirectory, String serverName, boolean faxableForm, 
-	                                   boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
-	                                   Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException {
+	                                   String installationDirectory, boolean faxableForm, boolean scannableForm, 
+	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields, 
+	                                   Integer copyPrinterConfigFormId) throws DAOException {
 		
 		// CHICA-1151 connection() method has been removed in new version of hibernate
 		// Work API is recommended
-		this.sessionFactory.getCurrentSession().doWork(connection -> executeSetupInitialFormValues(connection, formId, formName, locationNames, 
-	            installationDirectory, serverName, faxableForm, 
-	            scannableForm, scorableForm, scoreConfigLoc, 
-	            numPrioritizedFields, copyPrinterConfigFormId));
+		this.sessionFactory.getCurrentSession().doWork(connection -> executeSetupInitialFormValues(connection, formId, 
+			formName, locationNames, installationDirectory, faxableForm, scannableForm, scorableForm, scoreConfigLoc, 
+	        numPrioritizedFields, copyPrinterConfigFormId));
 				
 				// For reference pre-Java 8 without lambda
 //				this.sessionFactory.getCurrentSession().doWork(new Work() {
@@ -326,7 +322,6 @@ public class HibernateATDDAO implements ATDDAO
 	 * @param formName
 	 * @param locationNames
 	 * @param installationDirectory
-	 * @param serverName
 	 * @param faxableForm
 	 * @param scannableForm
 	 * @param scorableForm
@@ -336,9 +331,8 @@ public class HibernateATDDAO implements ATDDAO
 	 * @throws DAOException
 	 */
 	private void executeSetupInitialFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
-            String installationDirectory, String serverName, boolean faxableForm, 
-            boolean scannableForm, boolean scorableForm, String scoreConfigLoc, 
-            Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException
+            String installationDirectory, boolean faxableForm, boolean scannableForm, boolean scorableForm, 
+            String scoreConfigLoc, Integer numPrioritizedFields, Integer copyPrinterConfigFormId) throws DAOException
 	{
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
@@ -378,9 +372,9 @@ public class HibernateATDDAO implements ATDDAO
 			ps1.executeUpdate();
 			
 			if (scannableForm) {
-				setupScannableFormValues(con, formId, formName, locationNames, installationDirectory, serverName);
+				setupScannableFormValues(con, formId, formName, locationNames, installationDirectory);
 			} else if (faxableForm) {
-				setupFaxableFormValues(con, formId, formName, locationNames, installationDirectory, serverName);
+				setupFaxableFormValues(con, formId, formName, locationNames, installationDirectory);
 			}
 			
 			if (scorableForm) {
@@ -683,13 +677,13 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	private void setupScannableFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
-		                                  String installationDirectory, String serverName) throws SQLException {
+		                                  String installationDirectory) throws SQLException {
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		PreparedStatement ps3 = null;
 		
 		String scan = installationDirectory + "\\scan\\";
-		String images = "\\\\" + serverName + "\\images\\";
+		String images = installationDirectory + "\\images\\";
 		String formNameDrive = "\\" + formName;
 		String step1 = "INSERT INTO chirdlutilbackports_form_attribute_value "
 			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
@@ -788,14 +782,14 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	
 	private void setupFaxableFormValues(Connection con, Integer formId, String formName, List<String> locationNames, 
-		                                  String installationDirectory, String serverName) throws SQLException {
+		                                  String installationDirectory) throws SQLException {
 		PreparedStatement ps1 = null;
 		PreparedStatement ps2 = null;
 		PreparedStatement ps3 = null;
 		PreparedStatement ps4 = null;
 		
 		String scan = installationDirectory + "\\scan\\";
-		String images = "\\\\" + serverName + "\\images\\";
+		String images = installationDirectory + "\\images\\";
 		String formNameDrive = "\\" + formName;
 		String step1 = "INSERT INTO chirdlutilbackports_form_attribute_value "
 			+ "(`form_id`, `value`, `form_attribute_id`,location_tag_id,location_Id) "
