@@ -73,6 +73,7 @@ public class MoveMergeFiles extends AbstractTask {
 			}
 			catch (InterruptedException e) {
 				log.error("Error generated", e);
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

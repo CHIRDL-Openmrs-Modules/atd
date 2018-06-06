@@ -67,7 +67,8 @@ public class CheckIncompleteScoringJit implements Rule {
 	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, org.openmrs.Patient,
 	 *      java.util.Map)
 	 */
-	public Result eval(LogicContext context, Integer patientId, Map<String, Object> parameters) throws LogicException {
+	@Override
+    public Result eval(LogicContext context, Integer patientId, Map<String, Object> parameters) throws LogicException {
 		
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(patientId);
@@ -106,10 +107,9 @@ public class CheckIncompleteScoringJit implements Rule {
 			return Result.emptyResult();
 		}
 		LanguageAnswers answersByLanguage = null;
-		InputStream input = null;
+		
 		FormConfig formConfig = null;
-		try {
-			input = new FileInputStream(scorableFormConfigFile);
+		try (InputStream input = new FileInputStream(scorableFormConfigFile)){
 			formConfig = (FormConfig) XMLUtil.deserializeXML(FormConfig.class, input);
 			answersByLanguage = formConfig.getLanguageAnswers();
 		}
@@ -120,7 +120,7 @@ public class CheckIncompleteScoringJit implements Rule {
 		HashMap<String, Field> langFieldsToConsume = org.openmrs.module.atd.util.Util.getLanguageFieldsToConsume(fieldMap, formInstance,
 		    answersByLanguage);
 		
-		HashMap<String, HashMap<String, FormField>> formFieldsMap = new HashMap<String, HashMap<String, FormField>>();
+		HashMap<String, HashMap<String, FormField>> formFieldsMap = new HashMap<>();
 		FormService formService = Context.getFormService();
 		Form form = formService.getForm(formId);
 		
@@ -135,7 +135,7 @@ public class CheckIncompleteScoringJit implements Rule {
 				String parentName = parentField.getField().getName();
 				childFields = formFieldsMap.get(parentName);
 				if (childFields == null) {
-					childFields = new HashMap<String, FormField>();
+					childFields = new HashMap<>();
 					formFieldsMap.put(parentName, childFields);
 				}
 				
@@ -202,9 +202,9 @@ public class CheckIncompleteScoringJit implements Rule {
 										}
 										
 										if (fieldOperand != null && cnOperand != null) {
-											Field matchingField = pickFieldLanguage(fieldOperand, childFields,
-											    langFieldsToConsume, formFieldsMap);
-											if (matchingField != null && fieldMap != null) {
+											Field matchingField = pickFieldLanguage(fieldOperand, langFieldsToConsume, 
+											    formFieldsMap);
+											if (matchingField != null) {
 												org.openmrs.module.atd.xmlBeans.Field scorableFormField = fieldMap
 												        .get(matchingField.getId());
 												if (scorableFormField!=null&&
@@ -223,7 +223,7 @@ public class CheckIncompleteScoringJit implements Rule {
 						//sum the fields
 						if (fields != null) {
 							
-							Integer computeSumResult =  computeSum(fields, childFields, langFieldsToConsume, fieldMap,
+							Integer computeSumResult =  computeSum(fields, langFieldsToConsume, fieldMap,
 							    formFieldsMap);
 							numBlankFieldsPerScore+=computeSumResult;
 						}
@@ -232,7 +232,7 @@ public class CheckIncompleteScoringJit implements Rule {
 					if (mean != null) {
 						
 						List<Field> fields = mean.getFields();
-						Integer computeSumResult = computeSum(fields, childFields, langFieldsToConsume, fieldMap,
+						Integer computeSumResult = computeSum(fields, langFieldsToConsume, fieldMap,
 						    formFieldsMap);
 						numBlankFieldsPerScore += computeSumResult;
 						
@@ -282,14 +282,13 @@ public class CheckIncompleteScoringJit implements Rule {
 		
 	}
 	
-	private Field pickFieldLanguage(Field currField, HashMap<String, FormField> childFields,
-	                                HashMap<String, Field> langFieldsToConsume,
+	private Field pickFieldLanguage(Field currField, HashMap<String, Field> langFieldsToConsume,
 	                                HashMap<String, HashMap<String, FormField>> formFieldsMap) {
 		String fieldName = currField.getId();
 		
 		//field name in config file matches the preferred language
 		//field name
-		childFields = formFieldsMap.get(fieldName);
+		HashMap<String, FormField> childFields = formFieldsMap.get(fieldName);
 		Field matchingField = null;
 		
 		if (childFields != null) {
@@ -309,8 +308,7 @@ public class CheckIncompleteScoringJit implements Rule {
 		return matchingField;
 	}
 	
-	private Integer computeSum(List<Field> fields, HashMap<String, FormField> childFields,
-	                           HashMap<String, Field> langFieldsToConsume,
+	private Integer computeSum(List<Field> fields, HashMap<String, Field> langFieldsToConsume,
 	                           HashMap<String, org.openmrs.module.atd.xmlBeans.Field> fieldMap,
 	                           HashMap<String, HashMap<String, FormField>> formFieldsMap) {
 		
@@ -321,7 +319,7 @@ public class CheckIncompleteScoringJit implements Rule {
 		}
 		for (Field currField : fields) {
 			
-			Field matchingField = pickFieldLanguage(currField, childFields, langFieldsToConsume, formFieldsMap);
+			Field matchingField = pickFieldLanguage(currField, langFieldsToConsume, formFieldsMap);
 			org.openmrs.module.atd.xmlBeans.Field scorableFormField = fieldMap.get(matchingField.getId());
 			
 			if (scorableFormField.getValue() == null) {
@@ -335,28 +333,32 @@ public class CheckIncompleteScoringJit implements Rule {
 	/**
 	 * @see org.openmrs.logic.rule.Rule#getParameterList()
 	 */
-	public Set<RuleParameterInfo> getParameterList() {
+	@Override
+    public Set<RuleParameterInfo> getParameterList() {
 		return null;
 	}
 	
 	/**
 	 * @see org.openmrs.logic.rule.Rule#getDependencies()
 	 */
-	public String[] getDependencies() {
+	@Override
+    public String[] getDependencies() {
 		return new String[] { "%%patient.birthdate" };
 	}
 	
 	/**
 	 * @see org.openmrs.logic.rule.Rule#getTTL()
 	 */
-	public int getTTL() {
+	@Override
+    public int getTTL() {
 		return 60 * 60 * 24; // 1 day
 	}
 	
 	/**
 	 * @see org.openmrs.logic.rule.Rule#getDatatype(String)
 	 */
-	public Datatype getDefaultDatatype() {
+	@Override
+    public Datatype getDefaultDatatype() {
 		return Datatype.NUMERIC;
 	}
 	

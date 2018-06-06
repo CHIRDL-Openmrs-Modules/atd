@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,9 +55,10 @@ import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
  * DWE CHICA-426 Implemented Runnable interface 
  * and added supporting code to allow the import to be run in a separate thread
  */
-public class ImportConceptsUtil implements Runnable{
+public class ImportConceptsUtil implements Runnable, Serializable{
 	
-	private static Log log = LogFactory.getLog(ImportConceptsUtil.class);
+	private static final long serialVersionUID = 1L;
+    private static Log log = LogFactory.getLog(ImportConceptsUtil.class);
 	private InputStream inputStream;
 	private boolean isImportComplete = false;
 	private boolean importStarted = false;

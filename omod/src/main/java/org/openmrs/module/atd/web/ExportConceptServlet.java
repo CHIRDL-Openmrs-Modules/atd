@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jfree.util.Log;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.ConceptDescriptor;
@@ -34,7 +37,8 @@ public class ExportConceptServlet extends HttpServlet
 	private static final String ORDER_BY_COLUMN_PARAM = "order[0][column]";
 	private static final String ORDER_BY_ASC_DESC_PARAM = "order[0][dir]";
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	@Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if(request.getParameter(LOAD_TABLE_PARAM) != null)
 		{
@@ -54,11 +58,13 @@ public class ExportConceptServlet extends HttpServlet
 			ATDService atdService = Context.getService(ATDService.class);
 			int total = 0;
 			int totalRecordsWithFilter = 0;
+			int drawVal = 1;
 			try
 			{
 				results = atdService.getConceptDescriptorList(Integer.parseInt(start), Integer.parseInt(length), searchValue, includeRetired, Integer.parseInt(conceptClass), orderByColumn, ascDesc, false);
 				total = atdService.getCountConcepts("", includeRetired, -1, false);
 				totalRecordsWithFilter = atdService.getCountConcepts(searchValue, includeRetired, Integer.parseInt(conceptClass), false);
+				drawVal = Integer.parseInt(draw);
 				
 				// Make sure an error didn't occur in the query
 				if(total == -1 || totalRecordsWithFilter == -1)
@@ -71,6 +77,7 @@ public class ExportConceptServlet extends HttpServlet
 				results = new ArrayList<ConceptDescriptor>();
 				total = 0;
 				totalRecordsWithFilter = 0;
+				drawVal = 1;
 			}
 			
 			// Create a DataTableObject object that will be used with ObjectMapper
@@ -79,21 +86,38 @@ public class ExportConceptServlet extends HttpServlet
 			dt.setData(results);
 			dt.setRecordsTotal(total); // If it is displayed, this is the X in "(filtered from X total entries)"
 			dt.setRecordsFiltered(totalRecordsWithFilter); // this is the X in "Showing n to n of X entries"
-			dt.setDraw(Integer.parseInt(draw));
+			dt.setDraw(drawVal);
 			
 			StringWriter w = new StringWriter();
 			ObjectMapper mapper = new ObjectMapper();
-			mapper.writeValue(w, dt); // Convert to JSON
-			//EXAMPLE {"draw":1,"recordsTotal":27257,"recordsFiltered":27257,"data":[{"name":"value","description":"value","units":"value","conceptId":value,"conceptClass":"value","datatype":"value","parentConcept":"value"}]}
+			final String DEFAULT_JSON = "{\"draw\":1,\"recordsTotal\":0,\"recordsFiltered\":0,\"data\":[{\"name\":"
+			        + "\"value\",\"description\":\"value\",\"units\":\"value\",\"conceptId\":value,\"conceptClass\":\"value"
+			        + "\",\"datatype\":\"value\",\"parentConcept\":\"value\"}]}";
+			try {
+    			mapper.writeValue(w, dt); // Convert to JSON
+    			//EXAMPLE {"draw":1,"recordsTotal":27257,"recordsFiltered":27257,"data":[{"name":"value","description":"value","units":"value","conceptId":value,"conceptClass":"value","datatype":"value","parentConcept":"value"}]}
+			} catch (Exception e) {
+			    Log.error("Error generating JSON", e);
+			    w.write(DEFAULT_JSON);
+			}
 			
 			response.setContentType(CONTENT_TYPE_JSON);
-			response.getWriter().write(w.toString());		
+			try {
+			    response.getWriter().write(w.toString());	
+			} catch (IOException e) {
+			    Log.error("Error writing data to response", e);
+			}
 		}	
 	}
 
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	@Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		doGet(request, response);
+	    try {
+	        doGet(request, response);
+	    } catch (Exception e) {
+	        Log.error("Error performing POST", e);
+	    }
 	}
 	
 	/**

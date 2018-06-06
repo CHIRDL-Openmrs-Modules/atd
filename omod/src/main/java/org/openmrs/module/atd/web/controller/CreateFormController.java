@@ -100,6 +100,7 @@ public class CreateFormController {
 						return new ModelAndView(FORM_VIEW, map);
 					}
 					
+					map.put("formId", newForm.getFormId());
 					LoggingUtil.logEvent(null, newForm.getFormId(), null, LoggingConstants.EVENT_CREATE_FORM, 
 						Context.getUserContext().getAuthenticatedUser().getUserId(), 
 						"New Form Created.  Class: " + CreateFormController.class.getCanonicalName());
@@ -115,7 +116,6 @@ public class CreateFormController {
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
-		map.put("formId", newForm.getFormId());
 		return new ModelAndView(new RedirectView(SUCCESS_FORM_VIEW), map);
 	}
 }

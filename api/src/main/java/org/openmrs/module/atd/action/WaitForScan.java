@@ -42,7 +42,8 @@ public class WaitForScan implements ProcessStateAction {
 	 *      org.openmrs.module.atd.hibernateBeans.PatientState,
 	 *      java.util.HashMap)
 	 */
-	public void processAction(StateAction stateAction, Patient patient,
+	@Override
+    public void processAction(StateAction stateAction, Patient patient,
 			PatientState patientState, HashMap<String, Object> parameters){
 		// lookup the patient again to avoid lazy initialization errors
 		PatientService patientService = Context.getPatientService();
@@ -69,11 +70,11 @@ public class WaitForScan implements ProcessStateAction {
 		teleformFileState.addParameter("patientState", patientState);
 	}
 
-	public void changeState(PatientState patientState,
+	@Override
+    public void changeState(PatientState patientState,
 			HashMap<String, Object> parameters) {
 
 		StateManager.endState(patientState);
-		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		ATDService atdService = Context.getService(ATDService.class);
 
 		try {
@@ -81,24 +82,27 @@ public class WaitForScan implements ProcessStateAction {
 			FormInstance formInstance = patientState.getFormInstance();
 			
 			if(formInstance == null){
-			Integer sessionId = patientState.getSessionId();
-			PatientState stateWithFormId = Util.getPrevProducePatientStateByAction(patientState, sessionId);
-
-			if (stateWithFormId != null) {
-				formInstance = stateWithFormId.getFormInstance();
+    			Integer sessionId = patientState.getSessionId();
+    			PatientState stateWithFormId = Util.getPrevProducePatientStateByAction(patientState, sessionId);
+    
+    			if (stateWithFormId != null) {
+    				formInstance = stateWithFormId.getFormInstance();
+    			}
 			}
-			}
-			Integer formId = formInstance.getFormId();
-			FormService formService = Context.getFormService();
-			Form form = formService.getForm(formId);
-			String formName = form.getName();
 			
-			List<Statistics> statistics = atdService.getStatByFormInstance(
-				formInstance.getFormInstanceId(), formName, patientState.getLocationId());
-
-			for (Statistics currStat : statistics) {
-				currStat.setScannedTimestamp(patientState.getEndTime());
-				atdService.updateStatistics(currStat);
+			if (formInstance != null) {
+    			Integer formId = formInstance.getFormId();
+    			FormService formService = Context.getFormService();
+    			Form form = formService.getForm(formId);
+    			String formName = form.getName();
+    			
+    			List<Statistics> statistics = atdService.getStatByFormInstance(
+    				formInstance.getFormInstanceId(), formName, patientState.getLocationId());
+    
+    			for (Statistics currStat : statistics) {
+    				currStat.setScannedTimestamp(patientState.getEndTime());
+    				atdService.updateStatistics(currStat);
+    			}
 			}
 
 			BaseStateActionHandler.changeState(patientState.getPatient(), patientState.getSessionId(),
