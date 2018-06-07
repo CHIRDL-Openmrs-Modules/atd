@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jfree.util.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.api.AdministrationService;
@@ -25,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 public class ConfigManagerUtil {
+    
+    private static final Log Log = LogFactory.getLog(ConfigManagerUtil.class);
 
 	public static Form loadTeleformFile(MultipartFile multipartFile, String formName) throws Exception {
 		Form form = null;
@@ -78,7 +81,10 @@ public class ConfigManagerUtil {
 		multipartFile.transferTo(file);
 		
 		// Load the CSV file
-		form = CreateFormUtil.createFormFromCSVFile(new FileInputStream(file));
+		try (InputStream inputStream = new FileInputStream(file)) {
+		    form = CreateFormUtil.createFormFromCSVFile(inputStream);
+		}
+		
 		return form;
 	}
 	
