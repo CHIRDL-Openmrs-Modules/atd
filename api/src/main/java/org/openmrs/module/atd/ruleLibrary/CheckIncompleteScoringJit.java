@@ -37,6 +37,7 @@ import org.openmrs.logic.result.Result;
 import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
 import org.openmrs.module.atd.datasource.FormDatasource;
+import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
@@ -202,7 +203,7 @@ public class CheckIncompleteScoringJit implements Rule {
 										}
 										
 										if (fieldOperand != null && cnOperand != null) {
-											Field matchingField = pickFieldLanguage(fieldOperand, langFieldsToConsume, 
+											Field matchingField = Util.pickFieldLanguage(fieldOperand, langFieldsToConsume, 
 											    formFieldsMap);
 											if (matchingField != null) {
 												org.openmrs.module.atd.xmlBeans.Field scorableFormField = fieldMap
@@ -282,32 +283,6 @@ public class CheckIncompleteScoringJit implements Rule {
 		
 	}
 	
-	private Field pickFieldLanguage(Field currField, HashMap<String, Field> langFieldsToConsume,
-	                                HashMap<String, HashMap<String, FormField>> formFieldsMap) {
-		String fieldName = currField.getId();
-		
-		//field name in config file matches the preferred language
-		//field name
-		HashMap<String, FormField> childFields = formFieldsMap.get(fieldName);
-		Field matchingField = null;
-		
-		if (childFields != null) {
-			
-			//see which of the child fields is in the language list
-			for (String currChildFieldName : childFields.keySet()) {
-				
-				matchingField = langFieldsToConsume.get(currChildFieldName);
-				if (matchingField != null) {
-					break;
-				}
-			}
-		}
-		if (matchingField == null) {
-			matchingField = currField;
-		}
-		return matchingField;
-	}
-	
 	private Integer computeSum(List<Field> fields, HashMap<String, Field> langFieldsToConsume,
 	                           HashMap<String, org.openmrs.module.atd.xmlBeans.Field> fieldMap,
 	                           HashMap<String, HashMap<String, FormField>> formFieldsMap) {
@@ -319,7 +294,7 @@ public class CheckIncompleteScoringJit implements Rule {
 		}
 		for (Field currField : fields) {
 			
-			Field matchingField = pickFieldLanguage(currField, langFieldsToConsume, formFieldsMap);
+			Field matchingField = Util.pickFieldLanguage(currField, langFieldsToConsume, formFieldsMap);
 			org.openmrs.module.atd.xmlBeans.Field scorableFormField = fieldMap.get(matchingField.getId());
 			
 			if (scorableFormField.getValue() == null) {
