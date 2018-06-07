@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ConfigManagerUtil {
     
-    private static final Log Log = LogFactory.getLog(ConfigManagerUtil.class);
+    private static final Log LOG = LogFactory.getLog(ConfigManagerUtil.class);
 
 	public static Form loadTeleformFile(MultipartFile multipartFile, String formName) throws Exception {
 		Form form = null;
@@ -41,7 +41,7 @@ public class ConfigManagerUtil {
 		File file = new File(formLoadDir, formName + ".xml");
 		if (file.exists()) {
 			if (!file.delete()) {
-			    Log.error("Error deleting file: " + file.getAbsolutePath());
+			    LOG.error("Error deleting file: " + file.getAbsolutePath());
 			}
 		}
 		
@@ -74,7 +74,7 @@ public class ConfigManagerUtil {
 		File file = new File(formLoadDir, formName + ".csv");
 		if (file.exists()) {
 			if (!file.delete()) {
-			    Log.error("Error deleting file: " + file.getAbsolutePath());
+			    LOG.error("Error deleting file: " + file.getAbsolutePath());
 			}
 		}
 		
@@ -137,13 +137,13 @@ public class ConfigManagerUtil {
 				File.separator + locName + File.separator + formName);
 			if (mergePendingDir.exists()) {
 				if (!mergePendingDir.delete()) {
-				    Log.error("Error deleting merge pending directory: " + mergePendingDir.getAbsolutePath());
+				    LOG.error("Error deleting merge pending directory: " + mergePendingDir.getAbsolutePath());
 				}
 			}
 			
 			if (mergeDir.exists()) {
 				if (!mergeDir.delete()) {
-				    Log.error("Error deleting merge directory: " + mergeDir.getAbsolutePath());
+				    LOG.error("Error deleting merge directory: " + mergeDir.getAbsolutePath());
 				}
 			}
 			
@@ -153,7 +153,7 @@ public class ConfigManagerUtil {
 					File.separator + locName + File.separator + formName + "_SCAN");
 				if (scanDir.exists()) {
 					if (!scanDir.delete()) {
-					    Log.error("Error deleting scan directory: " + scanDir.getAbsolutePath());
+					    LOG.error("Error deleting scan directory: " + scanDir.getAbsolutePath());
 					}
 				}
 				
@@ -162,7 +162,7 @@ public class ConfigManagerUtil {
 					File.separator + locName + File.separator + formName);
 				if (imageDir.exists()) {
 					if (!imageDir.delete()) {
-					    Log.error("Error deleting image directory: " + imageDir.getAbsolutePath());
+					    LOG.error("Error deleting image directory: " + imageDir.getAbsolutePath());
 					}
 				}
 			} else if (faxableForm) {
@@ -171,7 +171,7 @@ public class ConfigManagerUtil {
 					File.separator + "Fax" + File.separator + formName + "_SCAN");
 				if (scanDir.exists()) {
 					if (!scanDir.delete()) {
-					    Log.error("Error deleting scan directory: " + scanDir.getAbsolutePath());
+					    LOG.error("Error deleting scan directory: " + scanDir.getAbsolutePath());
 					}
 				}
 				
@@ -180,7 +180,7 @@ public class ConfigManagerUtil {
 					File.separator + "Fax" + File.separator + formName);
 				if (imageDir.exists()) {
 					if (!imageDir.delete()) {
-					    Log.error("Error deleting image directory: " + imageDir.getAbsolutePath());
+					    LOG.error("Error deleting image directory: " + imageDir.getAbsolutePath());
 					}
 				}
 			}
@@ -199,7 +199,7 @@ public class ConfigManagerUtil {
 		File file = new File(loadDir, fileName);
 		if (file.exists()) {
 			if (!file.delete()) {
-			    Log.error("Error deleting file: " + file.getAbsolutePath());
+			    LOG.error("Error deleting file: " + file.getAbsolutePath());
 			}
 		}
 		
@@ -275,7 +275,7 @@ public class ConfigManagerUtil {
 		} finally {
 			if (tempFile != null && tempFile.exists()) {
 				if (!tempFile.delete()) {
-				    Log.error("Error deleting file: " + tempFile.getAbsolutePath());
+				    LOG.error("Error deleting file: " + tempFile.getAbsolutePath());
 				}
 			}
 		}

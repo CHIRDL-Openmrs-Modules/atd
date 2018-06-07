@@ -25,7 +25,7 @@ public class ExportConceptServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static final Log Log = LogFactory.getLog(ExportConceptServlet.class);
+	private static final Log LOG = LogFactory.getLog(ExportConceptServlet.class);
 
 	private static final String LOAD_TABLE_PARAM = "loadTable";
 	private static final String INCLUDE_RETIRED_PARAM = "includeRetired";
@@ -100,7 +100,7 @@ public class ExportConceptServlet extends HttpServlet
     			mapper.writeValue(w, dt); // Convert to JSON
     			//EXAMPLE {"draw":1,"recordsTotal":27257,"recordsFiltered":27257,"data":[{"name":"value","description":"value","units":"value","conceptId":value,"conceptClass":"value","datatype":"value","parentConcept":"value"}]}
 			} catch (Exception e) {
-			    Log.error("Error generating JSON", e);
+			    LOG.error("Error generating JSON", e);
 			    w.write(DEFAULT_JSON);
 			}
 			
@@ -108,7 +108,7 @@ public class ExportConceptServlet extends HttpServlet
 			try {
 			    response.getWriter().write(w.toString());	
 			} catch (IOException e) {
-			    Log.error("Error writing data to response", e);
+			    LOG.error("Error writing data to response", e);
 			}
 		}	
 	}
@@ -119,7 +119,7 @@ public class ExportConceptServlet extends HttpServlet
 	    try {
 	        doGet(request, response);
 	    } catch (Exception e) {
-	        Log.error("Error performing POST", e);
+	        LOG.error("Error performing POST", e);
 	    }
 	}
 	
