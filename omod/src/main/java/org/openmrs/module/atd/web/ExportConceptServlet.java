@@ -93,14 +93,12 @@ public class ExportConceptServlet extends HttpServlet
 			
 			StringWriter w = new StringWriter();
 			ObjectMapper mapper = new ObjectMapper();
-			final String DEFAULT_JSON = "{\"draw\":1,\"recordsTotal\":0,\"recordsFiltered\":0,\"data\":[{\"name\":"
-			        + "\"value\",\"description\":\"value\",\"units\":\"value\",\"conceptId\":value,\"conceptClass\":\"value"
-			        + "\",\"datatype\":\"value\",\"parentConcept\":\"value\"}]}";
 			try {
     			mapper.writeValue(w, dt); // Convert to JSON
     			//EXAMPLE {"draw":1,"recordsTotal":27257,"recordsFiltered":27257,"data":[{"name":"value","description":"value","units":"value","conceptId":value,"conceptClass":"value","datatype":"value","parentConcept":"value"}]}
 			} catch (Exception e) {
 			    LOG.error("Error generating JSON", e);
+			    final String DEFAULT_JSON = "{\"draw\":1,\"recordsTotal\":0,\"recordsFiltered\":0,\"data\":[]}";
 			    w.write(DEFAULT_JSON);
 			}
 			
