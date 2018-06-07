@@ -10,8 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jfree.util.Log;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.ConceptDescriptor;
@@ -23,6 +24,8 @@ import org.openmrs.module.atd.util.ConceptDescriptor;
 public class ExportConceptServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static final Log Log = LogFactory.getLog(ExportConceptServlet.class);
 
 	private static final String LOAD_TABLE_PARAM = "loadTable";
 	private static final String INCLUDE_RETIRED_PARAM = "includeRetired";
