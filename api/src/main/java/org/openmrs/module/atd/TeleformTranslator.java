@@ -125,11 +125,11 @@ public class TeleformTranslator
 	private void teleformTemplateXMLToMergeXML(String inputFilename,
 			String outputFilename, String xsltFilename)
 	{
-		try
+		try (InputStream transformInput = new FileInputStream(inputFilename);
+	            OutputStream transformOutput = new FileOutputStream(outputFilename);
+	            InputStream xslt = new FileInputStream(xsltFilename))
 		{
-			InputStream transformInput = new FileInputStream(inputFilename);
-			OutputStream transformOutput = new FileOutputStream(outputFilename);
-			InputStream xslt = new FileInputStream(xsltFilename);
+			
 
 			XMLUtil.transformXML(transformInput, transformOutput, xslt,null);
 		} catch (Exception e)

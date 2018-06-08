@@ -96,6 +96,22 @@ public class ReplaceFormController{
 						return new ModelAndView(FORM_VIEW, map);
 					}
 					
+					ATDService atdService = Context.getService(ATDService.class);
+			        try {
+			            atdService.copyFormAttributeValues(replaceFormId, newForm.getFormId());
+			        }
+			        catch (Exception e) {
+			            log.error("Error copying form attribute values", e);
+			            map.put("failedAttrValCopy", true);
+			            map.put("forms", formService.getAllForms(false));
+			            map.put("selectedForm", replaceFormIdStr);
+			            ConfigManagerUtil.deleteForm(newForm.getFormId(), false); // CHICA-993 Updated to delete based on formId, also pass false so that LocationTagAttribute record is NOT deleted
+			            return new ModelAndView(FORM_VIEW, map);
+			        }
+			        
+			        map.put("formId", newForm.getFormId());
+			        map.put("replaceFormId", replaceFormIdStr);
+			        map.put("selectedFormName", newForm.getName());
 					LoggingUtil.logEvent(null, newForm.getFormId(), null, LoggingConstants.EVENT_CREATE_FORM, 
 						Context.getUserContext().getAuthenticatedUser().getUserId(), 
 						"Form created.  Class: " + ReplaceFormController.class.getCanonicalName());
@@ -115,22 +131,6 @@ public class ReplaceFormController{
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
-		ATDService atdService = Context.getService(ATDService.class);
-		try {
-			atdService.copyFormAttributeValues(replaceFormId, newForm.getFormId());
-		}
-		catch (Exception e) {
-			log.error("Error copying form attribute values", e);
-			map.put("failedAttrValCopy", true);
-			map.put("forms", formService.getAllForms(false));
-			map.put("selectedForm", replaceFormIdStr);
-			ConfigManagerUtil.deleteForm(newForm.getFormId(), false); // CHICA-993 Updated to delete based on formId, also pass false so that LocationTagAttribute record is NOT deleted
-			return new ModelAndView(FORM_VIEW, map);
-		}
-		
-		map.put("formId", newForm.getFormId());
-		map.put("replaceFormId", replaceFormIdStr);
-		map.put("selectedFormName", newForm.getName());
 		return new ModelAndView(new RedirectView(SUCCESS_FORM_VIEW), map);
 	}
 }

@@ -210,14 +210,13 @@ public class Util {
 		return obs;
 	}
 	
-	public static Field pickFieldLanguage(Field currField, HashMap<String, FormField> childFields,
-	                                      HashMap<String, Field> langFieldsToConsume,
+	public static Field pickFieldLanguage(Field currField, HashMap<String, Field> langFieldsToConsume,
 	                                      HashMap<String, HashMap<String, FormField>> formFieldsMap) {
 		String fieldName = currField.getId();
 		
 		//field name in config file matches the preferred language
 		//field name
-		childFields = formFieldsMap.get(fieldName);
+		HashMap<String, FormField> childFields = formFieldsMap.get(fieldName);
 		Field matchingField = null;
 		
 		if (childFields != null) {
@@ -409,8 +408,7 @@ public class Util {
 			favdList = csv.parse(strat, reader);
 		}
 		catch(Exception e){
-			log.error(e);
-			e.printStackTrace();
+			log.error("Error parsing form attribute value CSV", e);
 			throw e;
 		}
 		return favdList;

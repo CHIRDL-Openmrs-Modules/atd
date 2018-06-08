@@ -849,7 +849,7 @@ public class ATDServiceImpl implements ATDService
         AdministrationService adminService = Context.getAdministrationService();
         String imageDirStr = adminService.getGlobalProperty("atd.defaultTifImageDirectory");
         if (imageDirStr == null || imageDirStr.length() == 0) {
-        	log.equals("Please specify a value for the global property 'atd.defaultTifImageDirectory'");
+        	log.error("Please specify a value for the global property 'atd.defaultTifImageDirectory'");
         	return new ArrayList<URL>();
         }
         
@@ -914,7 +914,9 @@ public class ATDServiceImpl implements ATDService
             }
             
             IOUtil.copyFile(fileLoc.getAbsolutePath(), newLoc.getAbsolutePath());
-            fileLoc.delete();
+            if (!fileLoc.delete()) {
+                log.error("Unable to delete file: " + fileLoc.getAbsolutePath());
+            }
             
             // log the event
             String description = null;
@@ -1085,7 +1087,7 @@ public class ATDServiceImpl implements ATDService
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
 			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
-					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+					"formInstanceTag: " + formInstanceTag;
 			log.error(message);
 			throw new APIException(message);
 		}
@@ -1139,7 +1141,7 @@ public class ATDServiceImpl implements ATDService
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
 			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
-					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+					"formInstanceTag: " + formInstanceTag;
 			log.error(message);
 			throw new APIException(message);
 		}
@@ -1165,7 +1167,7 @@ public class ATDServiceImpl implements ATDService
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
 			String message = "Invalid parameters.  A non-null formInstance must be provided with non-null attributes. " + 
-					formInstanceTag == null ? "formInstanceTag: null" : formInstanceTag.toString();
+					"formInstanceTag: " + formInstanceTag;
 			log.error(message);
 			throw new APIException(message);
 		}

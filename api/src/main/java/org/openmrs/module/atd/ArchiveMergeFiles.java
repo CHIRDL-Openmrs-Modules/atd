@@ -137,7 +137,9 @@ public class ArchiveMergeFiles extends AbstractTask {
                 if (archiveFile.exists()) {
                 	// Delete the archive file we created.
                 	try {
-                		archiveFile.delete();
+                		if (!archiveFile.delete()) {
+                		    log.error("Unable to delete archive file: " + archiveFile.getAbsolutePath());
+                		}
                 	} catch (Exception ex) {
                 		log.error("Error deleting archived file after failure from " + 
                 			archiveFile.getAbsolutePath(), ex);
@@ -149,7 +151,9 @@ public class ArchiveMergeFiles extends AbstractTask {
             
             // Delete the original file.
             try {
-            	file.delete();
+            	if (!file.delete()) {
+            	    log.error("Unable to delete file: " + file.getAbsolutePath());
+            	}
             } catch (Exception e) {
             	log.error("Error deleting file from " + file.getAbsolutePath(), e);
             	continue;

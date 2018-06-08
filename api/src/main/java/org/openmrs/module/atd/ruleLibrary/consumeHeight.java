@@ -32,7 +32,8 @@ public class consumeHeight implements Rule
 	 * 
 	 * @see org.openmrs.logic.rule.Rule#getParameterList()
 	 */
-	public Set<RuleParameterInfo> getParameterList()
+	@Override
+    public Set<RuleParameterInfo> getParameterList()
 	{
 		return null;
 	}
@@ -42,7 +43,8 @@ public class consumeHeight implements Rule
 	 * 
 	 * @see org.openmrs.logic.rule.Rule#getDependencies()
 	 */
-	public String[] getDependencies()
+	@Override
+    public String[] getDependencies()
 	{
 		return new String[]
 		{};
@@ -53,7 +55,8 @@ public class consumeHeight implements Rule
 	 * 
 	 * @see org.openmrs.logic.rule.Rule#getTTL()
 	 */
-	public int getTTL()
+	@Override
+    public int getTTL()
 	{
 		return 0; // 60 * 30; // 30 minutes
 	}
@@ -63,11 +66,13 @@ public class consumeHeight implements Rule
 	 * 
 	 * @see org.openmrs.logic.rule.Rule#getDatatype(String)
 	 */
-	public Datatype getDefaultDatatype()
+	@Override
+    public Datatype getDefaultDatatype()
 	{
 		return Datatype.CODED;
 	}
-	public Result eval(LogicContext context, Integer patientId,
+	@Override
+    public Result eval(LogicContext context, Integer patientId,
 			Map<String, Object> parameters) throws LogicException
 	{
 		PatientService patientService = Context.getPatientService();
@@ -77,6 +82,7 @@ public class consumeHeight implements Rule
 		String conceptName  = null;
 		Integer encounterId = null;
 		Integer ruleId = null;
+		Integer locationId = null;
 		Integer locationTagId = null;
 		Integer formFieldId = null;
 
@@ -93,6 +99,7 @@ public class consumeHeight implements Rule
 			}
 			
 			encounterId = (Integer) parameters.get("encounterId");
+			locationId = (Integer) parameters.get("locationId");
 			locationTagId = (Integer) parameters.get("locationTagId");
 			formFieldId = (Integer)parameters.get("formFieldId"); // DWE CHICA-437
 		}
@@ -112,17 +119,20 @@ public class consumeHeight implements Rule
 				.getLogicDataSource("form"), formIdCriteria);
 		
 		String primaryResult = ruleResult.toString();
+		String secondaryResult = null;
 		
-		fieldName = (String) parameters.get("child0");
-		formIdCriteria = new LogicCriteriaImpl(Operator.EQUALS, new OperandObject(formInstance));
-
-		fieldNameCriteria = new LogicCriteriaImpl(fieldName);
-		formIdCriteria = formIdCriteria.and(fieldNameCriteria);
-
-		ruleResult = context.read(patientId, this.logicService
-				.getLogicDataSource("form"), formIdCriteria);
-		
-		String secondaryResult = ruleResult.toString();
+		if (parameters != null) {
+    		fieldName = (String) parameters.get("child0");
+    		formIdCriteria = new LogicCriteriaImpl(Operator.EQUALS, new OperandObject(formInstance));
+    
+    		fieldNameCriteria = new LogicCriteriaImpl(fieldName);
+    		formIdCriteria = formIdCriteria.and(fieldNameCriteria);
+    
+    		ruleResult = context.read(patientId, this.logicService
+    				.getLogicDataSource("form"), formIdCriteria);
+    		
+    		secondaryResult = ruleResult.toString();
+		}
 			
 		ConceptService conceptService = Context.getConceptService();
 		
@@ -144,7 +154,6 @@ public class consumeHeight implements Rule
 		
 		String fullResult = primaryResult+"."+secondaryResult;
 		
-		Integer locationId = (Integer) parameters.get("locationId");
 		LocationService locationService = Context.getLocationService();
 		Location location = locationService.getLocation(locationId);
 		
@@ -152,9 +161,6 @@ public class consumeHeight implements Rule
 			//if this is Pecar, consume kilograms
 			if(location.getName().equalsIgnoreCase("PEPS")){
 				fullResult = consumeInchesOrCm(fullResult,patient,parameters);
-			}else{
-				//consume lb. or lb. and oz. based on age
-				fullResult = consumeInches(fullResult);
 			}
 		}
 		
@@ -165,10 +171,6 @@ public class consumeHeight implements Rule
 		}
 		
 		return Result.emptyResult();
-	}
-	
-	private String consumeInches(String fullResult){
-		return fullResult;
 	}
 	
 	private String consumeInchesOrCm(String fullResult,Patient patient,
@@ -183,7 +185,7 @@ public class consumeHeight implements Rule
 			double inches = 
 				org.openmrs.module.chirdlutil.util.Util.convertUnitsToEnglish(measurement, 
 						org.openmrs.module.chirdlutil.util.Util.MEASUREMENT_CM);
-			fullResult = String.valueOf(inches);
+			return String.valueOf(inches);
 		}
 		return fullResult;
 	}
