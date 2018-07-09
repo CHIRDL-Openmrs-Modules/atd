@@ -55,6 +55,8 @@ public class AtdConstants {
 	public static final String PARAMETER_APPLICATION = "application";
 	public static final String PARAMETER_ERROR = "error";
 	public static final String PARAMETER_FORMS = "forms";
+	public static final String PARAMETER_OPERATION_TYPE = "operationType";
+	public static final String PARAMETER_LOCATIONS = "locations";
 	/*
 	 * 
 	 */
