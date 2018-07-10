@@ -28,28 +28,12 @@
 	<bean id="atdUrlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
             <props>
-                <prop key="/module/@MODULE_ID@/editFields.form">editFields</prop>            
-                <prop key="/module/@MODULE_ID@/editForms.form">editForms</prop>            
                 <prop key="/module/@MODULE_ID@/updateForm.form">updateForm</prop>
-                <prop key="/module/@MODULE_ID@/configurationManager.form">configurationManager</prop>
-                <prop key="/module/@MODULE_ID@/createClinicForm.form">createClinicForm</prop>
                 <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
                 <prop key="/module/@MODULE_ID@/exportFormCSV.form">exportFormCSV</prop>
-                <prop key="/module/@MODULE_ID@/exportConceptCSV.form">exportConceptCSV</prop>
                 <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV.form">exportFormDefinitionCSV</prop> 
             </props>
         </property>
-    </bean>
-    
-    <bean id="editForms" class="org.openmrs.module.atd.web.EditFormsController">
-        <property name="commandName"><value>EditFormsObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/editForms</value></property>
-        <property name="successView"><value>editForms.form</value></property>
-    </bean>
-    <bean id="editFields" class="org.openmrs.module.atd.web.EditFieldsController">
-        <property name="commandName"><value>EditFieldsObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/editFields</value></property>
-        <property name="successView"><value>configurationManagerSuccess.form</value></property>
     </bean>
     
     <bean id="updateForm" class="@MODULE_PACKAGE@.web.UpdateFormController">
@@ -57,32 +41,17 @@
         <property name="formView"><value>/module/@MODULE_ID@/updateForm</value></property>
         <property name="successView"><value>updateFieldsForm.form</value></property>
     </bean>
-    <bean id="configurationManager" class="@MODULE_PACKAGE@.web.ConfigurationManagerController">
-        <property name="commandName"><value>configurationManagerObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/configurationManager</value></property>
-        <property name="successView"><value>configurationManager.form</value></property>
-    </bean>
 
     <bean id="getFormByName" class="@MODULE_PACKAGE@.web.GetFormByNameController">
         <property name="commandName"><value>getFormByNameObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/getFormByName</value></property>
         <property name="successView"><value>operationSuccess.form</value></property>
     </bean>
-    <bean id="createClinicForm" class="@MODULE_PACKAGE@.web.CreateClinicFormController">
-        <property name="commandName"><value>createClinicFormObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/createClinicForm</value></property>
-        <property name="successView"><value>configurationManagerSuccess.form</value></property>
-    </bean>
     <bean id="exportFormCSV" class="@MODULE_PACKAGE@.web.ExportFormCSVController">
         <property name="commandName"><value>exportFormCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportFormCSV</value></property> 
         <property name="successView"><value>operationSuccess.form</value></property>
     </bean> 
-    <bean id="exportConceptCSV" class="@MODULE_PACKAGE@.web.ExportConceptCSVController">
-        <property name="commandName"><value>exportConceptCSVObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/exportConceptCSV</value></property> 
-        <property name="successView"><value>operationSuccess.form</value></property>
-    </bean>
     <bean id="exportFormDefinitionCSV" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSVController">
         <property name="commandName"><value>exportFormDefinitionCSVObject</value></property>
         <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV</value></property> 
