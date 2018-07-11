@@ -49,7 +49,6 @@ public class EditFieldsController
     private static final String PARAMETER_NAME_PREFIX = "name_";
     private static final String PARAMETER_FIELD_TYPES = "fieldTypes";
     private static final String PARAMETER_FORM_FIELDS = "formFields";
-    private static final String PARAMETER_FORM_TO_EDIT = "formToEdit";
     
     /** Application name */
     private static final String APPLICATION_EDIT_FORM_FIELDS = "Edit Form Fields";
@@ -66,7 +65,7 @@ public class EditFieldsController
 	{
 		FormService formService = Context.getFormService();
 
-		String formIdString = request.getParameter(PARAMETER_FORM_TO_EDIT);
+		String formIdString = request.getParameter(AtdConstants.PARAMETER_FORM_TO_EDIT);
 
 		if (formIdString != null)
 		{
@@ -100,7 +99,7 @@ public class EditFieldsController
 	{
 		FormService formService = Context.getFormService();
 		ConceptService conceptService = Context.getConceptService();
-		String formIdString = request.getParameter(PARAMETER_FORM_TO_EDIT);
+		String formIdString = request.getParameter(AtdConstants.PARAMETER_FORM_TO_EDIT);
 		if (formIdString != null)
 		{
 			try

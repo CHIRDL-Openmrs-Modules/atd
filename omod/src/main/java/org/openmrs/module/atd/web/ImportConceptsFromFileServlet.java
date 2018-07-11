@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.ImportConceptsUtil;
 import org.apache.commons.fileupload.FileItem;
@@ -122,7 +123,7 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 			}
 			catch(Exception e)
 			{
-				returnMap.put("serverError", true);
+				returnMap.put(AtdConstants.ERROR_TYPE_SERVER, true);
 				log.error("An error occurred starting the import.", e);
 			}	
 		}

@@ -55,7 +55,7 @@ public class ReplaceFormFieldsController{
 		String formIdString = request.getParameter("formId");
 		String replaceFormIdString = request.getParameter("replaceFormId");
 		map.put("replaceFormId", replaceFormIdString);
-		map.put("selectedFormName", request.getParameter("selectedFormName"));
+		map.put(AtdConstants.PARAMETER_SELECTED_FORM_NAME, request.getParameter(AtdConstants.PARAMETER_SELECTED_FORM_NAME));
 		
 		if (formIdString != null) {
 			try {

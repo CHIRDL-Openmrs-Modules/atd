@@ -24,38 +24,5 @@
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 	
 	<context:component-scan base-package="org.openmrs.module.atd.web.controller" />
-	
-	<bean id="atdUrlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <property name="mappings">
-            <props>
-                <prop key="/module/@MODULE_ID@/updateForm.form">updateForm</prop>
-                <prop key="/module/@MODULE_ID@/getFormByName.form">getFormByName</prop>
-                <prop key="/module/@MODULE_ID@/exportFormCSV.form">exportFormCSV</prop>
-                <prop key="/module/@MODULE_ID@/exportFormDefinitionCSV.form">exportFormDefinitionCSV</prop> 
-            </props>
-        </property>
-    </bean>
-    
-    <bean id="updateForm" class="@MODULE_PACKAGE@.web.UpdateFormController">
-        <property name="commandName"><value>updateFormObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/updateForm</value></property>
-        <property name="successView"><value>updateFieldsForm.form</value></property>
-    </bean>
-
-    <bean id="getFormByName" class="@MODULE_PACKAGE@.web.GetFormByNameController">
-        <property name="commandName"><value>getFormByNameObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/getFormByName</value></property>
-        <property name="successView"><value>operationSuccess.form</value></property>
-    </bean>
-    <bean id="exportFormCSV" class="@MODULE_PACKAGE@.web.ExportFormCSVController">
-        <property name="commandName"><value>exportFormCSVObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/exportFormCSV</value></property> 
-        <property name="successView"><value>operationSuccess.form</value></property>
-    </bean> 
-    <bean id="exportFormDefinitionCSV" class="@MODULE_PACKAGE@.web.ExportFormDefinitionCSVController">
-        <property name="commandName"><value>exportFormDefinitionCSVObject</value></property>
-        <property name="formView"><value>/module/@MODULE_ID@/exportFormDefinitionCSV</value></property> 
-        <property name="successView"><value>operationSuccess.form</value></property>
-    </bean>
  
 </beans>

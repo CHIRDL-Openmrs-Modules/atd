@@ -83,7 +83,7 @@ public class ConfigFormController
 		
 		map.put("locations", locNames);
 		map.put(ChirdlUtilConstants.PARAMETER_FORM_ID, formIdStr);
-		map.put("selectedFormName", request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_NAME));
+		map.put(AtdConstants.PARAMETER_SELECTED_FORM_NAME, request.getParameter(ChirdlUtilConstants.PARAMETER_FORM_NAME));
 		map.put("primaryForms", primaryForms);
 		
 		boolean faxableForm = false;

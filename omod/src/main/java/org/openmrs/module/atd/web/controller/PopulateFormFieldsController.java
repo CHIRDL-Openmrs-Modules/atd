@@ -71,7 +71,7 @@ public class PopulateFormFieldsController{
 	@RequestMapping(method = RequestMethod.POST)
 	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
 		FormService formService = Context.getFormService();
-		String formIdString = request.getParameter("formToEdit");
+		String formIdString = request.getParameter(AtdConstants.PARAMETER_FORM_TO_EDIT);
 		int formId = Integer.parseInt(formIdString);
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {

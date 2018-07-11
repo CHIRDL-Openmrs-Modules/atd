@@ -31,7 +31,9 @@ public class AtdConstants {
 	 * 
 	 */
     
-    /** Form views */
+    /* 
+     * Constants for form views 
+     */
 	public static final String FORM_VIEW_CONFIG_MANAGER_SUCCESS = "configurationManagerSuccess.form";
 	public static final String FORM_VIEW_CONFIG_MANAGER = "configurationManager.form";
 	public static final String FORM_CONFIG_FORM_VIEW = "/module/atd/configForm";
@@ -41,6 +43,10 @@ public class AtdConstants {
 	public static final String FORM_ENABLE_FORM_VIEW = "/module/atd/enableForm";
 	public static final String FORM_VIEW_FAXABLE = "/module/atd/faxableForm";
 	public static final String FORM_VIEW_OPERATION_SUCCESS = "operationSuccess.form";
+	public static final String FORM_VIEW_CHOOSE_LOCATION_FORM = "chooseLocation.form";
+	/*
+	 * 
+	 */
 	
 	/*
 	 * Constants for global properties
@@ -58,7 +64,28 @@ public class AtdConstants {
 	public static final String PARAMETER_FORMS = "forms";
 	public static final String PARAMETER_OPERATION_TYPE = "operationType";
 	public static final String PARAMETER_LOCATIONS = "locations";
+	public static final String PARAMETER_EXPORT_TO_CSV = "exportToCSV";
+	public static final String PARAMETER_FORM_NAME_SELECT = "formNameSelect";
+	public static final String PARAMETER_SELECTED_FORM_NAME = "selectedFormName";
+	public static final String PARAMETER_FORM_TO_EDIT = "formToEdit";
 	/*
 	 * 
 	 */
+	
+	/*
+	 * Constants for error types
+	 */
+    public static final String ERROR_TYPE_SERVER = "serverError";
+    /*
+     * 
+     */
+    
+    /*
+     * Constants for HTTP attributes
+     */
+    public static final String ATTRIBUTE_SELECTED_FORM_ID = "selectedFormId";
+    public static final String ATTRIBUTE_CHOOSE_FORM_OPTION_CONSTANT = "chooseFormOptionConstant";
+    /*
+     * 
+     */
 }

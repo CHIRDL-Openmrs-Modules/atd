@@ -166,7 +166,7 @@ public class ConfigFormAttributeValueController {
 		map.put("editableFormAttributes", editableFormAttributes);
 		map.put("formAttributesValueMap", formAttributesValueMap);
 		map.put("formId", formId);
-		map.put("selectedFormName", request.getParameter("selectedFormName"));
+		map.put(AtdConstants.PARAMETER_SELECTED_FORM_NAME, request.getParameter(AtdConstants.PARAMETER_SELECTED_FORM_NAME));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
 		map.put("successViewName", request.getParameter("successViewName")); // Success view will depend on which page the user came from
 		

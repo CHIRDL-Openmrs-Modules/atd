@@ -39,9 +39,6 @@ public class ExportConceptCSVController {
     /** Operation types */
     private static final String OPERATION_TYPE_EXPORT_CONCEPT_AS_CSV_FILE = "export concept as csv file";
     
-    /** Error types */
-    private static final String ERROR_TYPE_SERVER = "serverError";
-    
     /** Attributes */
     private static final String ATTRIBUTE_ALL_CONCEPT_CLASSES_OPTION_CONSTANT = "allConceptClassesOptionConstant";
     
@@ -53,8 +50,9 @@ public class ExportConceptCSVController {
     /** Sorting */
     private static final String SORT_ASC = "ASC";
     
+    /** Concepts Filename */
 	private static final String CONCEPTS_FILENAME = "concepts.csv";
-	private static final String CONTENT_TYPE_CSV = "text/csv";
+	
 	protected static final String ALL_CONCEPT_CLASSES_OPTION = "-1";
 	
 	/**
@@ -66,9 +64,9 @@ public class ExportConceptCSVController {
     @RequestMapping(method = RequestMethod.POST)
     protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<>();
-		response.setContentType(CONTENT_TYPE_CSV);
+		response.setContentType(ChirdlUtilConstants.HTTP_CONTENT_TYPE_CSV);
 		response.setHeader(ChirdlUtilConstants.HTTP_HEADER_CONTENT_DISPOSITION, 
-		    String.format("attachment; filename=\"%s\"", CONCEPTS_FILENAME));
+		    String.format(ChirdlUtilConstants.HTTP_HEADER_ATTACHMENT, CONCEPTS_FILENAME));
 
 		ATDService atdService = Context.getService(ATDService.class);
 		List<ConceptDescriptor> cdList = new ArrayList<>();
@@ -114,7 +112,7 @@ public class ExportConceptCSVController {
 		catch(IOException e)
 		{
 		    Log.error("Error exporting concepts as CSV", e);
-			map.put(AtdConstants.PARAMETER_ERROR, ERROR_TYPE_SERVER);
+			map.put(AtdConstants.PARAMETER_ERROR, AtdConstants.ERROR_TYPE_SERVER);
 			return new ModelAndView(FORM_VIEW, map);
 		}
 
