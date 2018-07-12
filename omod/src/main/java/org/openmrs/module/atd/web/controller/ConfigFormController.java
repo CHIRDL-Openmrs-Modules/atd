@@ -117,7 +117,7 @@ public class ConfigFormController
 		map.put(ChirdlUtilConstants.PARAMTER_SCORABLE_FORM, scorableForm);		
 		map.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
 		if (!found) {
-			map.put("noLocationsChecked", true);
+			map.put(AtdConstants.PARAMETER_NO_LOCATIONS_CHECKED, true);
 			return new ModelAndView(AtdConstants.FORM_CONFIG_FORM_VIEW, map);
 		}
 		
@@ -202,7 +202,7 @@ public class ConfigFormController
         			"Form configuration modified.  Class: " + ConfigFormController.class.getCanonicalName());
         	}
         	
-        	map.put("positions", locationsAndTags.toArray(new String[0]));
+        	map.put(AtdConstants.PARAMETER_POSITIONS, locationsAndTags.toArray(new String[0]));
         	
         } catch (Exception e) {
         	log.error("Error while creating data for the Chirdl location tag tables", e);
@@ -214,7 +214,8 @@ public class ConfigFormController
 			return new ModelAndView(AtdConstants.FORM_CONFIG_FORM_VIEW, map);
         }
 		
-		map.put("successViewName", AtdConstants.FORM_VIEW_CREATE_FORM_MLM_SUCCESS); // Success view will depend on which page the user came from
+        // Success view will depend on which page the user came from
+		map.put(AtdConstants.PARAMETER_SUCCESS_VIEW_NAME, AtdConstants.FORM_VIEW_CREATE_FORM_MLM_SUCCESS); 
 		return new ModelAndView(
 			new RedirectView(AtdConstants.FORM_VIEW_CONFIG_SUCCESS), map);
 	}

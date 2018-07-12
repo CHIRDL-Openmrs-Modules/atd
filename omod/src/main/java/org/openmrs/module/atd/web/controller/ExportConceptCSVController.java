@@ -47,9 +47,6 @@ public class ExportConceptCSVController {
     private static final String PARAMETER_EXPORT_ALL = "exportAll";
     private static final String PARAMETER_SELECTED_IDS = "selectedIdsField";
     
-    /** Sorting */
-    private static final String SORT_ASC = "ASC";
-    
     /** Concepts Filename */
 	private static final String CONCEPTS_FILENAME = "concepts.csv";
 	
@@ -74,7 +71,8 @@ public class ExportConceptCSVController {
 		if(request.getParameter(PARAMETER_EXPORT_ALL) != null) // Exporting all records
 		{
 			cdList = atdService.getConceptDescriptorList(-1, -1, ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, true, 
-			    Integer.parseInt(ALL_CONCEPT_CLASSES_OPTION), ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, SORT_ASC, false);	
+			    Integer.parseInt(ALL_CONCEPT_CLASSES_OPTION), ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, 
+			    ChirdlUtilConstants.SORT_ASC, false);	
 		}
 		else if(request.getParameter(PARAMETER_SELECTED_IDS) != null) // Exporting specifically selected records
 		{
@@ -83,7 +81,7 @@ public class ExportConceptCSVController {
 			// This may seem inefficient but is significantly faster than looking each one up individually 
 			List<ConceptDescriptor> tempList = atdService.getConceptDescriptorList(-1, -1, 
 			    ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, true, Integer.parseInt(ALL_CONCEPT_CLASSES_OPTION), 
-			    ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, SORT_ASC, false);
+			    ChirdlUtilConstants.GENERAL_INFO_EMPTY_STRING, ChirdlUtilConstants.SORT_ASC, false);
 			Map<String, ConceptDescriptor> conceptMap = new HashMap<>();
 			for(ConceptDescriptor cd : tempList)
 			{

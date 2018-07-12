@@ -56,8 +56,8 @@ public class PopulateFormFieldsController{
 				
 				map.put("formId", formId);
 				map.put("form", formToEdit);
-				map.put("formFields", formFields);
-				map.put("fieldTypes", formService.getAllFieldTypes());
+				map.put(AtdConstants.PARAMETER_FORM_FIELDS, formFields);
+				map.put(AtdConstants.PARAMETER_FIELD_TYPES, formService.getAllFieldTypes());
 				
 			}
 			catch (Exception e) {
@@ -88,12 +88,12 @@ public class PopulateFormFieldsController{
 			for (FormField currFormField : formFields) {
 				Field currField = currFormField.getField();
 				Integer fieldId = currField.getFieldId();
-				String name = request.getParameter("name_" + fieldId);
-				String fieldTypeIdStr = request.getParameter("fieldType_" + fieldId);
-				String conceptName = request.getParameter("concept_" + fieldId);
-				String defaultValue = request.getParameter("defaultValue_" + fieldId);
-				String fieldNumber = request.getParameter("fieldNumber_" + fieldId);
-				String parentFieldId = request.getParameter("parent_" + fieldId);
+				String name = request.getParameter(AtdConstants.PARAMETER_NAME_PREFIX + fieldId);
+				String fieldTypeIdStr = request.getParameter(AtdConstants.PARAMETER_FIELD_TYPE_PREFIX + fieldId);
+				String conceptName = request.getParameter(AtdConstants.PARAMETER_CONCEPT_PREFIX + fieldId);
+				String defaultValue = request.getParameter(AtdConstants.PARAMETER_DEFAULT_VALUE_PREFIX + fieldId);
+				String fieldNumber = request.getParameter(AtdConstants.PARAMETER_FIELD_NUMBER_PREFIX + fieldId);
+				String parentFieldId = request.getParameter(AtdConstants.PARAMETER_PARENT_PREFIX + fieldId);
 				
 				if (name != null && name.length() > 0) {
 					currField.setName(name);

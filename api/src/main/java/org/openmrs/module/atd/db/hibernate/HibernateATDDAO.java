@@ -36,6 +36,7 @@ import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
@@ -1444,7 +1445,8 @@ public class HibernateATDDAO implements ATDDAO
 	{
 		try
 		{
-			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", "ASC", exactMatchSearch);
+			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", 
+			    ChirdlUtilConstants.SORT_ASC, exactMatchSearch);
 			return qry.list().size();
 		}
 		catch(Exception e)
@@ -1637,11 +1639,11 @@ public class HibernateATDDAO implements ATDDAO
     	criteria.add(Restrictions.eq("encounterId", encounterId));
     	criteria.add(Restrictions.eq("formName", formName));
     	
-    	if("ASC".equals(orderAscDesc))
+    	if(ChirdlUtilConstants.SORT_ASC.equals(orderAscDesc))
     	{
     		criteria.addOrder(Order.asc("statisticsId"));
     	}
-    	else if("DESC".equals(orderAscDesc))
+    	else if(ChirdlUtilConstants.SORT_DESC.equals(orderAscDesc))
     	{
     		criteria.addOrder(Order.desc("statisticsId"));
     	}

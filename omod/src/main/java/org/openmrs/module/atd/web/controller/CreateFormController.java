@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
@@ -49,21 +50,21 @@ public class CreateFormController {
 		
 		// Check to see if form name was specified.
 		if (formName == null || formName.trim().length() == 0) {
-			map.put("missingName", true);
+			map.put(AtdConstants.PARAMETER_MISSING_NAME, true);
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
 		map.put("formName", formName);
 		// Make sure there are no spaces in the form name.
 		if (formName.indexOf(" ") >= 0) {
-			map.put("spacesInName", true);
+			map.put(AtdConstants.PARAMETER_SPACES_IN_NAME, true);
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
 		// Check to see if the form name is already specified.
 		Form form = formService.getForm(formName);
 		if (form != null) {
-			map.put("duplicateName", true);
+			map.put(AtdConstants.PARAMETER_DUPLICATE_NAME, true);
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		

@@ -32,16 +32,8 @@ public class ChooseLocationController {
     /** Form view */
     private static final String FORM_VIEW = "/module/atd/chooseLocation";
     
-    /** Success view */
-    private static final String SUCCESS_VIEW = "configFormAttributeValue.form";
-    
     /** Parameters */
-    private static final String PARAMETER_LOCATION_TAGS_MAP = "locationTagsMap";
-    private static final String PARAMETER_LOCATIONS_LIST = "locationsList";
-    private static final String OPERATION_SUCCESS_FORM_VIEW = "operationSuccess.form";
-    private static final String PARAMETER_SUCCESS_VIEW_NAME = "successViewName";
     private static final String PARAMETER_FORM_ID_STRING = "formIdStr";
-    private static final String PARAMETER_POSITIONS = "positions";
     private static final String PARAMETER_NO_POSITION_SELECTED = "NoPositionSelected";
     private static final String PARAMETER_POSITIONS_APPLICABLE = "positions_applicable";
     
@@ -61,12 +53,12 @@ public class ChooseLocationController {
 					new RedirectView(AtdConstants.FORM_VIEW_CHOOSE_LOCATION_FORM), map);
 		}
 		
-		map.put(PARAMETER_POSITIONS, positionStrs);
+		map.put(AtdConstants.PARAMETER_POSITIONS, positionStrs);
 		map.put(ChirdlUtilConstants.PARAMETER_FORM_ID, request.getParameter(PARAMETER_FORM_ID_STRING));
 		map.put(AtdConstants.PARAMETER_SELECTED_FORM_NAME, request.getParameter(AtdConstants.PARAMETER_SELECTED_FORM_NAME));
 		// Success view will depend on which page the user came from
-		map.put(PARAMETER_SUCCESS_VIEW_NAME, OPERATION_SUCCESS_FORM_VIEW); 
-		return new ModelAndView(new RedirectView(SUCCESS_VIEW), map);
+		map.put(AtdConstants.PARAMETER_SUCCESS_VIEW_NAME, AtdConstants.FORM_VIEW_OPERATION_SUCCESS); 
+		return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_FORM_ATTRIBUTE_VALUE), map);
 	}
 	
     /**
@@ -97,8 +89,8 @@ public class ChooseLocationController {
             locationTagsMap.put(currLoc.getId(), locationTagsList);
 		}
 		
-		map.put(PARAMETER_LOCATIONS_LIST, locationsList);
-		map.put(PARAMETER_LOCATION_TAGS_MAP, locationTagsMap);
+		map.put(AtdConstants.PARAMETER_LOCATIONS_LIST, locationsList);
+		map.put(AtdConstants.PARAMETER_LOCATION_TAGS_MAP, locationTagsMap);
 		return FORM_VIEW;
 	}
 	

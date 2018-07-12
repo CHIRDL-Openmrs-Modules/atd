@@ -41,10 +41,6 @@ public class CreateClinicFormController {
     private static final String PARAMETER_CITY = "city";
     private static final String PARAMETER_ADDRESS_TWO = "addressTwo";
     private static final String PARAMETER_ADDRESS = "address";
-    private static final String PARAMETER_FAILED_CREATION = "failedCreation";
-    private static final String PARAMETER_SPACES_IN_NAME = "spacesInName";
-    private static final String PARAMETER_DUPLICATE_NAME = "duplicateName";
-    private static final String PARAMETER_MISSING_NAME = "missingName";
     private static final String PARAMETER_LOCATION_ATTRIBUTES = "locationAttributes";
     
     /** Application name */
@@ -77,7 +73,7 @@ public class CreateClinicFormController {
 		
 		// Check to see if clinic name was specified.
 		if (clinicName == null || clinicName.trim().length() == 0) {
-			map.put(PARAMETER_MISSING_NAME, ChirdlUtilConstants.GENERAL_INFO_TRUE);
+			map.put(AtdConstants.PARAMETER_MISSING_NAME, ChirdlUtilConstants.GENERAL_INFO_TRUE);
 			reloadValues(request, map);
 			return new ModelAndView(FORM_VIEW, map);
 		}
@@ -87,14 +83,14 @@ public class CreateClinicFormController {
 		LocationService locationService = Context.getLocationService();
 		Location location = locationService.getLocation(clinicName);
 		if (location != null) {
-			map.put(PARAMETER_DUPLICATE_NAME, ChirdlUtilConstants.GENERAL_INFO_TRUE);
+			map.put(AtdConstants.PARAMETER_DUPLICATE_NAME, ChirdlUtilConstants.GENERAL_INFO_TRUE);
 			reloadValues(request, map);
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
 		// Check to see if the clinic name has spaces.
 		if (clinicName.contains(" ")) {
-			map.put(PARAMETER_SPACES_IN_NAME, ChirdlUtilConstants.GENERAL_INFO_TRUE);
+			map.put(AtdConstants.PARAMETER_SPACES_IN_NAME, ChirdlUtilConstants.GENERAL_INFO_TRUE);
 			reloadValues(request, map);
 			return new ModelAndView(FORM_VIEW, map);
 		}
@@ -103,7 +99,7 @@ public class CreateClinicFormController {
 			createClinic(request, clinicName);
 		} catch (Exception e) {
 			log.error("Error creating new clinic location", e);
-			map.put(PARAMETER_FAILED_CREATION, "Failed creating a new clinic location: " + e.getMessage());
+			map.put(AtdConstants.PARAMETER_FAILED_CREATION, "Failed creating a new clinic location: " + e.getMessage());
 			reloadValues(request, map);
 			return new ModelAndView(FORM_VIEW, map);
 		}

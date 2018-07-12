@@ -40,16 +40,6 @@ public class EditFieldsController
 	/** Form view */
     private static final String FORM_VIEW = "/module/atd/editFields";
     
-    /** Parameters */
-    private static final String PARAMETER_PARENT_PREFIX = "parent_";
-    private static final String PARAMETER_FIELD_NUMBER_PREFIX = "fieldNumber_";
-    private static final String PARAMETER_DEFAULT_VALUE_PREFIX = "defaultValue_";
-    private static final String PARAMETER_CONCEPT_PREFIX = "concept_";
-    private static final String PARAMETER_FIELD_TYPE_PREFIX = "fieldType_";
-    private static final String PARAMETER_NAME_PREFIX = "name_";
-    private static final String PARAMETER_FIELD_TYPES = "fieldTypes";
-    private static final String PARAMETER_FORM_FIELDS = "formFields";
-    
     /** Application name */
     private static final String APPLICATION_EDIT_FORM_FIELDS = "Edit Form Fields";
 
@@ -76,8 +66,8 @@ public class EditFieldsController
 				List<FormField> formFields = formToEdit.getOrderedFormFields();
 
 				map.put(ChirdlUtilConstants.PARAMETER_FORM, formToEdit);
-				map.put(PARAMETER_FORM_FIELDS, formFields);
-				map.put(PARAMETER_FIELD_TYPES, formService.getAllFieldTypes());
+				map.put(AtdConstants.PARAMETER_FORM_FIELDS, formFields);
+				map.put(AtdConstants.PARAMETER_FIELD_TYPES, formService.getAllFieldTypes());
 
 			} catch (Exception e)
 			{
@@ -112,12 +102,12 @@ public class EditFieldsController
 				{
 					Field currField = currFormField.getField();
 					Integer fieldId = currField.getFieldId();
-					String name = request.getParameter(PARAMETER_NAME_PREFIX + fieldId);
-					String fieldTypeId = request.getParameter(PARAMETER_FIELD_TYPE_PREFIX + fieldId);
-					String conceptName= request.getParameter(PARAMETER_CONCEPT_PREFIX + fieldId);
-					String defaultValue = request.getParameter(PARAMETER_DEFAULT_VALUE_PREFIX + fieldId);
-					String fieldNumber = request.getParameter(PARAMETER_FIELD_NUMBER_PREFIX + fieldId);
-					String parentFieldId = request.getParameter(PARAMETER_PARENT_PREFIX + fieldId);
+					String name = request.getParameter(AtdConstants.PARAMETER_NAME_PREFIX + fieldId);
+					String fieldTypeId = request.getParameter(AtdConstants.PARAMETER_FIELD_TYPE_PREFIX + fieldId);
+					String conceptName= request.getParameter(AtdConstants.PARAMETER_CONCEPT_PREFIX + fieldId);
+					String defaultValue = request.getParameter(AtdConstants.PARAMETER_DEFAULT_VALUE_PREFIX + fieldId);
+					String fieldNumber = request.getParameter(AtdConstants.PARAMETER_FIELD_NUMBER_PREFIX + fieldId);
+					String parentFieldId = request.getParameter(AtdConstants.PARAMETER_PARENT_PREFIX + fieldId);
 
 					if(name != null && name.length() >0)
 					{

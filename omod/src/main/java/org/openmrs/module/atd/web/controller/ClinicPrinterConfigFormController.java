@@ -32,8 +32,6 @@ public class ClinicPrinterConfigFormController {
     
     /** Parameters */
     private static final String PARAMETER_FAILED_UPDATE = "failedUpdate";
-    private static final String PARAMETER_LOCATIONS = "locations";
-    private static final String PARAMETER_NO_LOCATIONS_CHECKED = "noLocationsChecked";
     private static final String PARAMETER_USE_ALT_PRINTER = "useAltPrinter";
     private static final String PARAMETER_CHECKED_PREFIX = "checked_";
     private static final String PARAMETER_LOCATION_PREFIX = "location_";
@@ -77,8 +75,8 @@ public class ClinicPrinterConfigFormController {
 		}
 		
 		if (!found) {
-			map.put(PARAMETER_NO_LOCATIONS_CHECKED, ChirdlUtilConstants.GENERAL_INFO_TRUE);
-			map.put(PARAMETER_LOCATIONS, locNames);
+			map.put(AtdConstants.PARAMETER_NO_LOCATIONS_CHECKED, ChirdlUtilConstants.GENERAL_INFO_TRUE);
+			map.put(AtdConstants.PARAMETER_LOCATIONS, locNames);
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
@@ -94,7 +92,7 @@ public class ClinicPrinterConfigFormController {
 		catch (Exception e) {
 		    Log.error("Error setting clinic to use alternate printer", e);
 			map.put(PARAMETER_FAILED_UPDATE, ChirdlUtilConstants.GENERAL_INFO_TRUE);
-			map.put(PARAMETER_LOCATIONS, locNames);
+			map.put(AtdConstants.PARAMETER_LOCATIONS, locNames);
 			return new ModelAndView(FORM_VIEW, map);
 		}
 		
@@ -132,7 +130,7 @@ public class ClinicPrinterConfigFormController {
 			map.put(PARAMETER_CHECKED_PREFIX + name, checkLocation);
 		}
 		
-		map.put(PARAMETER_LOCATIONS, locNames);
+		map.put(AtdConstants.PARAMETER_LOCATIONS, locNames);
 		
 		return FORM_VIEW;
 	}
