@@ -1,7 +1,6 @@
 package org.openmrs.module.atd.web.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,9 +44,6 @@ public class ReplaceFormFieldsController{
 	/** Form view name */
 	private static final String FORM_VIEW = "/module/atd/replaceFormFields";
 	
-	/** Success form view */
-	private static final String SUCCESS_FORM_VIEW = "configFormAttributeValue.form";
-	
 	@RequestMapping(method = RequestMethod.GET) 
 	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {
 		FormService formService = Context.getFormService();
@@ -55,7 +51,7 @@ public class ReplaceFormFieldsController{
 		String formIdString = request.getParameter("formId");
 		String replaceFormIdString = request.getParameter("replaceFormId");
 		map.put("replaceFormId", replaceFormIdString);
-		map.put("selectedFormName", request.getParameter("selectedFormName"));
+		map.put(AtdConstants.PARAMETER_SELECTED_FORM_NAME, request.getParameter(AtdConstants.PARAMETER_SELECTED_FORM_NAME));
 		
 		if (formIdString != null) {
 			try {
@@ -66,8 +62,8 @@ public class ReplaceFormFieldsController{
 				List<Boolean> newFieldIndicators = getNewFieldIndicators(
 					formFields, replaceForm);
 				map.put("form", formToEdit);
-				map.put("formFields", formFields);
-				map.put("fieldTypes", formService.getAllFieldTypes());
+				map.put(AtdConstants.PARAMETER_FORM_FIELDS, formFields);
+				map.put(AtdConstants.PARAMETER_FIELD_TYPES, formService.getAllFieldTypes());
 				map.put("newFieldIndicators", newFieldIndicators);
 			}
 			catch (Exception e) {
@@ -100,12 +96,12 @@ public class ReplaceFormFieldsController{
 			for (FormField currFormField : formFields) {
 				Field currField = currFormField.getField();
 				Integer fieldId = currField.getFieldId();
-				String name = request.getParameter("name_" + fieldId);
-				String fieldTypeId = request.getParameter("fieldType_" + fieldId);
-				String conceptName = request.getParameter("concept_" + fieldId);
-				String defaultValue = request.getParameter("defaultValue_" + fieldId);
-				String fieldNumber = request.getParameter("fieldNumber_" + fieldId);
-				String parentFieldId = request.getParameter("parent_" + fieldId);
+				String name = request.getParameter(AtdConstants.PARAMETER_NAME_PREFIX + fieldId);
+				String fieldTypeId = request.getParameter(AtdConstants.PARAMETER_FIELD_TYPE_PREFIX + fieldId);
+				String conceptName = request.getParameter(AtdConstants.PARAMETER_CONCEPT_PREFIX + fieldId);
+				String defaultValue = request.getParameter(AtdConstants.PARAMETER_DEFAULT_VALUE_PREFIX + fieldId);
+				String fieldNumber = request.getParameter(AtdConstants.PARAMETER_FIELD_NUMBER_PREFIX + fieldId);
+				String parentFieldId = request.getParameter(AtdConstants.PARAMETER_PARENT_PREFIX + fieldId);
 				
 				if (name != null && name.length() > 0) {
 					currField.setName(name);
@@ -200,12 +196,12 @@ public class ReplaceFormFieldsController{
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("formId", replaceFormIdString);
 		map.put("newFormId", formIdString);
-		map.put("positions", locationIdsAndTagIdsList.toArray(new String[0]));
+		map.put(AtdConstants.PARAMETER_POSITIONS, locationIdsAndTagIdsList.toArray(new String[0]));
 		map.put("selectedFormName", formNameToEdit);
-		map.put("successViewName", "replaceRetireForm.form");
+		map.put(AtdConstants.PARAMETER_SUCCESS_VIEW_NAME, "replaceRetireForm.form");
 		
 		
-		return new ModelAndView(new RedirectView(SUCCESS_FORM_VIEW), map);
+		return new ModelAndView(new RedirectView(AtdConstants.FORM_VIEW_CONFIG_FORM_ATTRIBUTE_VALUE), map);
 	}
 	
 	private List<Boolean> getNewFieldIndicators(List<FormField> formFields, Form origForm) {

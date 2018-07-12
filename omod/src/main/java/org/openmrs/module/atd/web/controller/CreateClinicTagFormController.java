@@ -82,7 +82,7 @@ public class CreateClinicTagFormController {
 					LocationTagAttribute locTagAttribute = 
 							Context.getService(ChirdlUtilBackportsService.class).getLocationTagAttribute(tagAttrName);
 					if (locTagAttribute != null) {
-						map.put("duplicateName", true);
+						map.put(AtdConstants.PARAMETER_DUPLICATE_NAME, true);
 						reloadValues(request, map);
 						return new ModelAndView(EDIT_TAG_FORM_VIEW, map);
 					}
@@ -114,7 +114,7 @@ public class CreateClinicTagFormController {
 		if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) {
 			// Check to see if clinic tag name was specified.
 			if (tagName == null || tagName.trim().length() == 0) {
-				map.put("missingName", true);
+				map.put(AtdConstants.PARAMETER_MISSING_NAME, true);
 				reloadValues(request, map);
 				return new ModelAndView(CREATE_TAG_FORM_VIEW, map);
 			}
@@ -123,14 +123,14 @@ public class CreateClinicTagFormController {
 			// Check to see if the clinic name is already specified.
 			LocationTag locationTag = locationService.getLocationTagByName(tagName);
 			if (locationTag != null) {
-				map.put("duplicateName", true);
+				map.put(AtdConstants.PARAMETER_DUPLICATE_NAME, true);
 				reloadValues(request, map);
 				return new ModelAndView(CREATE_TAG_FORM_VIEW, map);
 			}
 			
 			// Check to see if the clinic name has spaces.
 			if (tagName.contains(" ")) {
-				map.put("spacesInName", true);
+				map.put(AtdConstants.PARAMETER_SPACES_IN_NAME, true);
 				reloadValues(request, map);
 				return new ModelAndView(CREATE_TAG_FORM_VIEW, map);
 			}
@@ -178,7 +178,7 @@ public class CreateClinicTagFormController {
 				}
 			} catch (Exception e) {
 				log.error("Error creating new clinic location", e);
-				map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
+				map.put(AtdConstants.PARAMETER_FAILED_CREATION, "Failed creating a new clinic location: " + e.getMessage());
 				reloadValues(request, map);
 				return new ModelAndView(CREATE_TAG_FORM_VIEW, map);
 			}
@@ -189,7 +189,7 @@ public class CreateClinicTagFormController {
 		} catch (Exception e) {
 			if (ChirdlUtilConstants.LOC_TAG_FORM_CREATE.equals(form) ) {
 				log.error("Error creating new clinic location", e);
-				map.put("failedCreation", "Failed creating a new clinic location: " + e.getMessage());
+				map.put(AtdConstants.PARAMETER_FAILED_CREATION, "Failed creating a new clinic location: " + e.getMessage());
 			} else if (ChirdlUtilConstants.LOC_TAG_ATTR_FORM_EDIT.equals(form) ) {
 				log.error("Error updating clinic location tag attribute values", e);
 				map.put("UpdateFailed", "Failed updating clinic location tag attribute values: " + e.getMessage());

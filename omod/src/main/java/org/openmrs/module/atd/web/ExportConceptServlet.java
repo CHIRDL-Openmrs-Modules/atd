@@ -16,6 +16,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 
 /**
  * DWE CHICA-330 4/20/15
@@ -53,7 +54,7 @@ public class ExportConceptServlet extends HttpServlet
 			boolean includeRetired = Boolean.valueOf(request.getParameter(INCLUDE_RETIRED_PARAM));
 			String conceptClass = request.getParameter(CONCEPT_CLASS_PARAM) != null ? request.getParameter(CONCEPT_CLASS_PARAM) : "-1";
 			String orderByColumnNumber = request.getParameter(ORDER_BY_COLUMN_PARAM) != null ? request.getParameter(ORDER_BY_COLUMN_PARAM) : "5"; // Default to conceptId column number
-			String ascDesc = request.getParameter(ORDER_BY_ASC_DESC_PARAM) != null ? request.getParameter(ORDER_BY_ASC_DESC_PARAM) : "ASC";
+			String ascDesc = request.getParameter(ORDER_BY_ASC_DESC_PARAM) != null ? request.getParameter(ORDER_BY_ASC_DESC_PARAM) : ChirdlUtilConstants.SORT_ASC;
 			String orderByColumn = request.getParameter("columns[" + orderByColumnNumber + "][data]") != null ? request.getParameter("columns[" + orderByColumnNumber + "][data]") : "conceptId";
 			
 			// Queries to populate the total number of records, the results list, and the total number of records with filter applied

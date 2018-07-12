@@ -13,6 +13,7 @@ import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.web.util.ConfigManagerUtil;
 import org.openmrs.module.chirdlutil.log.LoggingConstants;
 import org.openmrs.module.chirdlutil.log.LoggingUtil;
@@ -111,7 +112,7 @@ public class ReplaceFormController{
 			        
 			        map.put("formId", newForm.getFormId());
 			        map.put("replaceFormId", replaceFormIdStr);
-			        map.put("selectedFormName", newForm.getName());
+			        map.put(AtdConstants.PARAMETER_SELECTED_FORM_NAME, newForm.getName());
 					LoggingUtil.logEvent(null, newForm.getFormId(), null, LoggingConstants.EVENT_CREATE_FORM, 
 						Context.getUserContext().getAuthenticatedUser().getUserId(), 
 						"Form created.  Class: " + ReplaceFormController.class.getCanonicalName());
