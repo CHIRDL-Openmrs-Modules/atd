@@ -2,6 +2,10 @@ package org.openmrs.module.atd.impl;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
@@ -150,6 +154,77 @@ public class ATDServiceImplTest extends BaseModuleContextSensitiveTest {
         assertNotNull(patientATD.getAtdId());
         assertNotNull(patientATD.getCreationTime());
         assertEquals(fieldId, patientATD.getFieldId());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getPatientATDs(FormInstance,List)
+     * @verifies get patient ATDs by form instance and field ids
+     */
+    @Test
+    public void getPatientATDs_shouldGetPatientATDsByFormInstanceAndFieldIds() throws Exception {
+        Integer patientId = 1;
+        FormInstance formInstance = new FormInstance();
+        formInstance.setFormId(1);
+        formInstance.setFormInstanceId(1);
+        formInstance.setLocationId(1);
+        Integer ruleId = 1;
+        Result result = new Result();
+        String text = "prompt text";
+        result.setValueText(text);
+        Integer encounterId = 1;
+        Integer fieldId1 = 1;
+        Integer fieldId2 = 2;
+        DssElement dssElement = new DssElement(result, ruleId);
+        HashMap<Integer, PatientATD> map = new HashMap<Integer, PatientATD>();
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        PatientATD patientATD = atdService.addPatientATD(patientId, formInstance, dssElement, encounterId);
+        patientATD.setFieldId(fieldId1);
+        atdService.updatePatientATD(patientATD);
+        map.put(fieldId1, patientATD);
+        
+        patientATD = atdService.addPatientATD(patientId, formInstance, dssElement, encounterId);
+        patientATD.setFieldId(fieldId2);
+        atdService.updatePatientATD(patientATD);
+        map.put(fieldId2, patientATD);
+        
+        ArrayList<Integer> fieldIds = new ArrayList<Integer>();
+        fieldIds.add(fieldId1);
+        fieldIds.add(fieldId2);
+        List<PatientATD> expectedPatientATDs = atdService.getPatientATDs(formInstance, fieldIds);
+        
+        for (PatientATD expectedPatientATD : expectedPatientATDs) {
+            patientATD = map.get(expectedPatientATD.getFieldId());
+            assertEquals(expectedPatientATD.getPatientId(), patientATD.getPatientId());
+            assertEquals(expectedPatientATD.getFormInstance(), patientATD.getFormInstance());
+            assertEquals(expectedPatientATD.getEncounterId(), patientATD.getEncounterId());
+            assertEquals(expectedPatientATD.getRule(), patientATD.getRule());
+            assertEquals(expectedPatientATD.getText(), patientATD.getText());
+            assertEquals(expectedPatientATD.getAtdId(), patientATD.getAtdId());
+            assertEquals(expectedPatientATD.getCreationTime(), patientATD.getCreationTime());
+            assertEquals(expectedPatientATD.getFieldId(), patientATD.getFieldId());
+        }
+    }
+    
+    /**
+     * @see ATDServiceImpl#getPatientATDs(FormInstance,List)
+     * @verifies get patient ATDs by form instance and field ids null
+     */
+    @Test
+    public void getPatientATDs_shouldGetPatientATDsByFormInstanceAndFieldIdsNull() throws Exception {
+        FormInstance formInstance = new FormInstance();
+        formInstance.setFormId(1);
+        formInstance.setFormInstanceId(1);
+        formInstance.setLocationId(1);
+        ArrayList<Integer> fieldIds = new ArrayList<Integer>();
+        Integer fieldId1 = 1;
+        Integer fieldId2 = 2;
+        fieldIds.add(fieldId1);
+        fieldIds.add(fieldId2);
+        ATDService atdService = Context.getService(ATDService.class);
+        
+        List<PatientATD> expectedPatientATDs = atdService.getPatientATDs(formInstance, fieldIds);
+        assertTrue(expectedPatientATDs.isEmpty());
     }
     
 }
