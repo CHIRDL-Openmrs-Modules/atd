@@ -644,7 +644,10 @@ public class ATDServiceImpl implements ATDService
 		return null;
 	}
 	
-	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
+	/**
+	 * @should add new PatientATD
+	 */
+	public PatientATD addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
 			Integer encounterId) throws APIException
 	{
 		PatientATD patientATD = new PatientATD();
@@ -669,14 +672,21 @@ public class ATDServiceImpl implements ATDService
 			}
 		}
 		
-		getATDDAO().addPatientATD(patientATD);
+		return getATDDAO().addPatientATD(patientATD);
 	}
 	
+	/** 
+	 * @should get PatientATD
+	 * @should get PatientATD null
+	 */
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId)
 	{
 		return getATDDAO().getPatientATD(formInstance,fieldId);
 	}
 		
+	/** 
+	 * @should update PatientATD
+	 */
 	public void updatePatientStates(Date thresholdDate){
 		getATDDAO().updatePatientStates(thresholdDate);
 	}
@@ -704,14 +714,21 @@ public class ATDServiceImpl implements ATDService
 		getATDDAO().purgeFormAttributeValues(formId);
 	}
 
+	/**
+	 * @should get printer configuration
+	 * @should get printer configuration null
+	 */
     public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws APIException {
 	    return getATDDAO().getPrinterConfigurations(formId, locationId);
     }
     
+    /**
+     * @should save printer configuration
+     */
     public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws APIException {
     	getATDDAO().savePrinterConfigurations(printerConfig);
     }
-
+    
     public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws APIException {
 	    getATDDAO().copyFormAttributeValues(fromFormId, toFormId);
     }
@@ -723,34 +740,61 @@ public class ATDServiceImpl implements ATDService
     public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException {
     	return getATDDAO().isFormEnabledAtClinic(formId, locationId);
     }
+    
+    /**
+     * @should update statistics
+     */
     public void updateStatistics(Statistics statistics)
 	{
     	getATDDAO().updateStatistics(statistics);
 	}
 	
+    /**
+     * @should create statistics
+     */
 	public void createStatistics(Statistics statistics)
 	{
 		getATDDAO().addStatistics(statistics);
 	}
 	
+	/**
+	 * @should get statistics by id and rule
+	 * @should get statistics by id and rule null
+	 */
 	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName, 
 		Integer locationId)	{
 		return getATDDAO().getStatByIdAndRule(formInstanceId,ruleId,formName,locationId);
 	}
 	
+	/**
+	 * @should get statistics by form instance
+	 * @should get statistics by form instance null
+	 */
 	public List<Statistics> getStatByFormInstance(int formInstanceId,String formName, 
 		Integer locationId){
 		return getATDDAO().getStatByFormInstance(formInstanceId,formName, locationId);
 	}
 	
+	/**
+	 * @should get statistics by encounter id and form name
+	 * @should get statistics by encounter id and form name null
+	 */
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName){
 		return getATDDAO().getStatsByEncounterForm(encounterId, formName);
 	}
 	
+	/**
+     * @should get all statistics by encounter id and form name
+     * @should get all statistics by encounter id and form name null
+     */
 	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName){
 		return getATDDAO().getAllStatsByEncounterForm(encounterId, formName);
 	}
 
+	/**
+	 * @should get statistics for non-prioritized rules by encounter id and form name
+	 * @should get statistics for non-prioritized rules by encounter id and form name null
+	 */
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName){
 		return getATDDAO().getStatsByEncounterFormNotPrioritized(encounterId, formName);
 	}
@@ -960,7 +1004,6 @@ public class ATDServiceImpl implements ATDService
     
     /**
 	 * This is a method I added to get around lazy initialization errors with patient.getIdentifier() in rules
-	 * Auto generated method comment
 	 * 
 	 * @param patientId
 	 * @return
@@ -977,6 +1020,7 @@ public class ATDServiceImpl implements ATDService
     }
 
 	/**
+	 * @should update Patient ATD
 	 * @see org.openmrs.module.atd.service.ATDService#updatePatientATD(org.openmrs.module.atd.hibernateBeans.PatientATD)
 	 */
     public PatientATD updatePatientATD(PatientATD patientATD) throws APIException {
@@ -984,22 +1028,34 @@ public class ATDServiceImpl implements ATDService
     }
 
 	/**
+	 * @should get patient ATDs by form instance and field ids
+	 * @should get patient ATDs by form instance and field ids null
 	 * @see org.openmrs.module.atd.service.ATDService#getPatientATDs(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance, java.util.List)
 	 */
     public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
 
+    /**
+     * @should get all form definitions
+     * @should get all form definitions null
+     */
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		return this.dao.getAllFormDefinitions();
 	}
 
+	/**
+	 * @should get form definition by form id
+	 * @should get form definition by form id null
+	 */
 	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException {
 		return this.dao.getFormDefinition(formId);
 	}
 	
 	/**
 	 * DWE CHICA-332 4/16/15
+	 * @should get form attribute value locations and tags map by form id
+	 * @should get form attribute value locations and tags map by form id null
 	 * 
 	 * @see org.openmrs.module.atd.service.ATDService#getFormAttributeValueLocationsAndTagsMap(Integer)
 	 */
@@ -1031,6 +1087,9 @@ public class ATDServiceImpl implements ATDService
 	
 	/**
      * DWE CHICA-437
+     * @should get obs with statistics
+     * @should get obs with statistics null
+     * @should get obs with statistics include voided obs
      * @see org.openmrs.module.atd.service.ATDService#getObsWithStatistics(Integer, Integer, Integer, boolean)
      */
     public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
@@ -1040,6 +1099,8 @@ public class ATDServiceImpl implements ATDService
     
     /**
      * DWE CHICA-612
+     * @should get all statistics by encounter and form name
+     * @should get all statistics by encounter and form name null
      * @see org.openmrs.module.atd.service.ATDService#getAllStatsByEncounterForm(Integer, String, String)
      */
     public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc)
@@ -1064,6 +1125,8 @@ public class ATDServiceImpl implements ATDService
      * Look up the Statistics record by encounter_id and rule_id.
      * This checks to see if the rule fired for a certain encounter
      * 
+     * @should get statistics by encounter id and rule id
+     * @should get statistics by encounter id and rule id null
      * @param encounterId
      * @param ruleId
      * @return
@@ -1249,6 +1312,8 @@ public class ATDServiceImpl implements ATDService
 	}
 	
 	/**
+	 * @should get form names by form attribute
+	 * @should get form names by form attribute null
      * @see org.openmrs.module.atd.service.ATDService#getFormNamesByFormAttribute(java.util.List, String, boolean)
      */
     public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException

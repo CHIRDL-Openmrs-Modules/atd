@@ -87,7 +87,7 @@ public interface ATDService
 			Map<String, Object> baseParameters);
 	
 	@Authorized()
-	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
+	public PatientATD addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
 			Integer encounterId) throws APIException;
 	
 	/**
