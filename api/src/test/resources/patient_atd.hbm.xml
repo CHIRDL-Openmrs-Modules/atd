@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+
+<hibernate-mapping package="org.openmrs.module.atd">
+
+	<class name="org.openmrs.module.atd.hibernateBeans.PatientATD" table="atd_patient_atd_element">
+		
+		<id name="atdId" type="java.lang.Integer" column="atd_id">
+			<generator class="native" />
+		</id>
+	
+		<property name="patientId" type="java.lang.Integer" column="patient_id" />
+		<property name="formId" type="java.lang.Integer" column="form_id" />
+		<property name="fieldId" type="java.lang.Integer" column="field_id" />
+		<property name="formInstanceId" type="java.lang.Integer" column="form_instance_id" />
+		<property name="text" type="java.lang.String" column="text" />
+		<property name="creationTime" type="java.util.Date" column="creation_time" />
+		<property name="encounterId" type="java.lang.Integer" column="encounter_id" />
+	    <property name="locationId" type="java.lang.Integer" column="location_id" />
+		<many-to-one name="rule" class="org.openmrs.module.dss.hibernateBeans.Rule" column="rule_id" />
+	</class>
+	
+</hibernate-mapping>

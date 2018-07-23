@@ -70,7 +70,7 @@ public interface ATDDAO {
 	
 	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws DAOException;
 
-	public void addStatistics(Statistics statistics);
+	public Statistics addStatistics(Statistics statistics);
 	
 	public void updateStatistics(Statistics statistics);
 	

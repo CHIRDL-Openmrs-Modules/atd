@@ -1151,7 +1151,7 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 	
-	public void addStatistics(Statistics statistics)
+	public Statistics addStatistics(Statistics statistics)
 	{
 		try
 		{
@@ -1160,6 +1160,7 @@ public class HibernateATDDAO implements ATDDAO
 		{
 			this.log.error(Util.getStackTrace(e));
 		}
+		return statistics;
 	}
 
 	public void updateStatistics(Statistics statistics)

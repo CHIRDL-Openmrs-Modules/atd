@@ -198,7 +198,7 @@ public interface ATDService
 	public void updateStatistics(Statistics statistics);
 
 	@Authorized()
-	public void createStatistics(Statistics statistics);
+	public Statistics createStatistics(Statistics statistics);
 	
 	@Authorized()
 	public void produce(OutputStream output, PatientState state,

@@ -1,8 +1,13 @@
 package org.openmrs.module.atd.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,12 +16,12 @@ import org.junit.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
+import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
+import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
-
-import junit.framework.Assert;
 
 public class ATDServiceImplTest extends BaseModuleContextSensitiveTest {
     
@@ -227,4 +232,395 @@ public class ATDServiceImplTest extends BaseModuleContextSensitiveTest {
         assertTrue(expectedPatientATDs.isEmpty());
     }
     
+    /**
+     * @see ATDServiceImpl#createStatistics(Statistics)
+     * @verifies create statistics
+     */
+    @Test
+    public void createStatistics_shouldCreateStatistics() throws Exception {
+        Integer ruleId = 1;
+        
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        statistics = atdService.createStatistics(statistics);
+        
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertNotNull(statistics.getStatisticsId());
+        assertNull(statistics.getPrintedTimestamp());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatsByEncounterRule(Integer,Integer)
+     * @verifies get statistics by encounter id and rule id
+     */
+    @Test
+    public void getStatsByEncounterRule_shouldGetStatisticsByEncounterIdAndRuleId() throws Exception {
+        Integer ruleId = 1;
+        
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        atdService.createStatistics(statistics);
+        List<Statistics> statisticsList = atdService.getStatsByEncounterRule(encounterId, ruleId);
+        assertEquals(1, statisticsList.size());
+        
+        statistics = statisticsList.get(0);
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertNotNull(statistics.getStatisticsId());
+        assertNull(statistics.getPrintedTimestamp());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatsByEncounterRule(Integer,Integer)
+     * @verifies get statistics by encounter id and rule id null
+     */
+    @Test
+    public void getStatsByEncounterRule_shouldGetStatisticsByEncounterIdAndRuleIdNull() throws Exception {
+        Integer encounterId = 1;
+        Integer ruleId = 1;
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        List<Statistics> statisticsList = atdService.getStatsByEncounterRule(encounterId, ruleId);
+        assertTrue(statisticsList.isEmpty());
+        
+    }
+    
+    /**
+     * @see ATDServiceImpl#updateStatistics(Statistics)
+     * @verifies update statistics
+     */
+    @Test
+    public void updateStatistics_shouldUpdateStatistics() throws Exception {
+        Integer ruleId = 1;
+        
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        statistics = atdService.createStatistics(statistics);
+        
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertNotNull(statistics.getStatisticsId());
+        assertNull(statistics.getPrintedTimestamp());
+        
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2018, Calendar.JULY, 23);
+        statistics.setPrintedTimestamp(calendar.getTime());
+        
+        atdService.updateStatistics(statistics);
+        statistics = atdService.getStatByFormInstance(formInstanceId, formName, locationId).get(0);
+        
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertNotNull(statistics.getStatisticsId());
+        assertEquals(calendar.getTime().toString(), statistics.getPrintedTimestamp().toString());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatsByEncounterForm(Integer,String)
+     * @verifies get statistics by encounter id and form name
+     */
+    @Test
+    public void getStatsByEncounterForm_shouldGetStatisticsByEncounterIdAndFormName() throws Exception {
+        Integer ruleId = 1;
+        
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Integer obsvId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        statistics.setObsvId(obsvId); //obsvId must be non null to return results
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        atdService.createStatistics(statistics);
+        List<Statistics> statisticsList = atdService.getStatsByEncounterForm(encounterId, formName);
+        assertEquals(1, statisticsList.size());
+        
+        statistics = statisticsList.get(0);
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertEquals(obsvId, statistics.getObsvId());
+        assertNotNull(statistics.getStatisticsId());
+        assertNull(statistics.getPrintedTimestamp());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatsByEncounterForm(Integer,String)
+     * @verifies get statistics by encounter id and form name null
+     */
+    @Test
+    public void getStatsByEncounterForm_shouldGetStatisticsByEncounterIdAndFormNameNull() throws Exception {
+        Integer encounterId = 1;
+        String formName = "PSF";
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        List<Statistics> statisticsList = atdService.getStatsByEncounterForm(encounterId, formName);
+        assertTrue(statisticsList.isEmpty());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatByFormInstance(int,String,Integer)
+     * @verifies get statistics by form instance
+     */
+    @Test
+    public void getStatByFormInstance_shouldGetStatisticsByFormInstance() throws Exception {
+        Integer ruleId = 1;
+        
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        atdService.createStatistics(statistics);
+        List<Statistics> statisticsList = atdService.getStatByFormInstance(formInstanceId, formName, locationId);
+        assertEquals(1, statisticsList.size());
+        
+        statistics = statisticsList.get(0);
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertNotNull(statistics.getStatisticsId());
+        assertNull(statistics.getPrintedTimestamp());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatByFormInstance(int,String,Integer)
+     * @verifies get statistics by form instance null
+     */
+    @Test
+    public void getStatByFormInstance_shouldGetStatisticsByFormInstanceNull() throws Exception {
+        
+        Integer formInstanceId = 1;
+        
+        String formName = "PSF";
+        Integer locationId = 1;
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        List<Statistics> statisticsList = atdService.getStatByFormInstance(formInstanceId, formName, locationId);
+        assertTrue(statisticsList.isEmpty());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatByIdAndRule(int,int,String,Integer)
+     * @verifies get statistics by id and rule
+     */
+    @Test
+    public void getStatByIdAndRule_shouldGetStatisticsByIdAndRule() throws Exception {
+        Integer ruleId = 1;
+        
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        atdService.createStatistics(statistics);
+        List<Statistics> statisticsList = atdService.getStatByIdAndRule(formInstanceId, ruleId, formName, locationId);
+        assertEquals(1, statisticsList.size());
+        
+        statistics = statisticsList.get(0);
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertNotNull(statistics.getStatisticsId());
+        assertNull(statistics.getPrintedTimestamp());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatByIdAndRule(int,int,String,Integer)
+     * @verifies get statistics by id and rule null
+     */
+    @Test
+    public void getStatByIdAndRule_shouldGetStatisticsByIdAndRuleNull() throws Exception {
+        Integer formInstanceId = 1;
+        Integer ruleId = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        List<Statistics> statisticsList = atdService.getStatByIdAndRule(formInstanceId, ruleId, formName, locationId);
+        assertTrue(statisticsList.isEmpty());
+    }
+   
 }

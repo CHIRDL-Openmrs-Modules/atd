@@ -752,9 +752,9 @@ public class ATDServiceImpl implements ATDService
     /**
      * @should create statistics
      */
-	public void createStatistics(Statistics statistics)
+	public Statistics createStatistics(Statistics statistics)
 	{
-		getATDDAO().addStatistics(statistics);
+		return getATDDAO().addStatistics(statistics);
 	}
 	
 	/**
