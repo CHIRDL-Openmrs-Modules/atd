@@ -622,5 +622,99 @@ public class ATDServiceImplTest extends BaseModuleContextSensitiveTest {
         List<Statistics> statisticsList = atdService.getStatByIdAndRule(formInstanceId, ruleId, formName, locationId);
         assertTrue(statisticsList.isEmpty());
     }
-   
+    
+    /**
+     * @see ATDServiceImpl#getStatsByEncounterFormNotPrioritized(Integer,String)
+     * @verifies get statistics for non-prioritized rules by encounter id and form name
+     */
+    @Test
+    public void getStatsByEncounterFormNotPrioritized_shouldGetStatisticsForNonprioritizedRulesByEncounterIdAndFormName()
+            throws Exception {
+        Integer ruleId = null;
+        
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Integer obsvId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        statistics.setObsvId(obsvId); //obsvId must be non null to return results
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        atdService.createStatistics(statistics);
+        List<Statistics> statisticsList = atdService.getStatsByEncounterFormNotPrioritized(encounterId, formName);
+        assertEquals(1, statisticsList.size());
+        
+        statistics = statisticsList.get(0);
+        assertEquals(age, statistics.getAgeAtVisit());
+        assertEquals(encounterId, statistics.getEncounterId());
+        assertEquals(formInstanceId, statistics.getFormInstanceId());
+        assertEquals(formName, statistics.getFormName());
+        assertEquals(locationId, statistics.getLocationId());
+        assertEquals(locationTagId, statistics.getLocationTagId());
+        assertEquals(patientId, statistics.getPatientId());
+        assertEquals(questionPosition, statistics.getPosition());
+        assertEquals(priority, statistics.getPriority());
+        assertEquals(ruleId, statistics.getRuleId());
+        assertEquals(obsvId, statistics.getObsvId());
+        assertNotNull(statistics.getStatisticsId());
+        assertNull(statistics.getPrintedTimestamp());
+    }
+    
+    /**
+     * @see ATDServiceImpl#getStatsByEncounterFormNotPrioritized(Integer,String)
+     * @verifies get statistics for non-prioritized rules by encounter id and form name null
+     */
+    @Test
+    public void getStatsByEncounterFormNotPrioritized_shouldGetStatisticsForNonprioritizedRulesByEncounterIdAndFormNameNull()
+            throws Exception {
+        Integer ruleId = 1;
+        Integer priority = 1;
+        Integer formInstanceId = 1;
+        Integer locationTagId = 1;
+        Integer questionPosition = 1;
+        String formName = "PSF";
+        Integer locationId = 1;
+        Integer encounterId = 1;
+        Integer patientId = 1;
+        Date birthDate = new Date();
+        String age = Util.adjustAgeUnits(birthDate, null);
+        
+        Statistics statistics = new Statistics();
+        statistics.setAgeAtVisit(age);
+        statistics.setPriority(priority);
+        statistics.setFormInstanceId(formInstanceId);
+        statistics.setLocationTagId(locationTagId);
+        statistics.setPosition(questionPosition);
+        
+        statistics.setRuleId(ruleId);
+        statistics.setPatientId(patientId);
+        statistics.setFormName(formName);
+        statistics.setEncounterId(encounterId);
+        statistics.setLocationId(locationId);
+        
+        ATDService atdService = Context.getService(ATDService.class);
+        atdService.createStatistics(statistics);
+        List<Statistics> statisticsList = atdService.getStatsByEncounterFormNotPrioritized(encounterId, formName);
+        assertTrue(statisticsList.isEmpty());
+    }
+    
 }

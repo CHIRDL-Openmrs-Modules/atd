@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.hibernate.type.BooleanType;
@@ -1116,23 +1115,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		return null;
 	}
-	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName)
-	{
-		try
-		{
-			String sql = "select * from atd_statistics where encounter_id=? and form_name=?";
-			SQLQuery qry = this.sessionFactory.getCurrentSession()
-					.createSQLQuery(sql);
-			qry.setInteger(0, encounterId);
-			qry.setString(1, formName);
-			qry.addEntity(Statistics.class);
-			return qry.list();
-		} catch (Exception e)
-		{
-			this.log.error(Util.getStackTrace(e));
-		}
-		return null;
-	}
+
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName)
 	{
 		try
@@ -1625,31 +1608,6 @@ public class HibernateATDDAO implements ATDDAO
 			return new ArrayList<Obs>();
 		}
     }
-    
-    /**
-     * DWE CHICA-612
-     * Gets a sorted list of all atd_statistics with the encounterId and formName
-     * @param encounterId
-     * @param formName
-     * @param orderAscDesc - ASC or DESC
-     * @return sorted list of Statistics
-     */
-    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc)
-	{
-    	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
-    	criteria.add(Restrictions.eq("encounterId", encounterId));
-    	criteria.add(Restrictions.eq("formName", formName));
-    	
-    	if(ChirdlUtilConstants.SORT_ASC.equals(orderAscDesc))
-    	{
-    		criteria.addOrder(Order.asc("statisticsId"));
-    	}
-    	else if(ChirdlUtilConstants.SORT_DESC.equals(orderAscDesc))
-    	{
-    		criteria.addOrder(Order.desc("statisticsId"));
-    	}
-		return criteria.list();
-	}
     
     /**
      * Checks to see if at least one box is checked for this rule and encounter 

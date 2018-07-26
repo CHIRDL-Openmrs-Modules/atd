@@ -173,16 +173,6 @@ public interface ATDService
 	@Authorized()
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName);
 	
-	/**
-	 * Get all statistics for a given encounter ID and form name whether the there is an observation associated or not.
-	 * 
-	 * @param encounterId
-	 * @param formName
-	 * @return List of Statistics objects
-	 */
-	@Authorized()
-	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
-
 	@Authorized()
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName);
 	
@@ -316,18 +306,7 @@ public interface ATDService
      */
 	@Authorized()
     public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs);
-    
-    /**
-     * DWE CHICA-612
-     * Gets a sorted list of all atd_statistics with the encounterId and formName
-     * @param encounterId
-     * @param formName
-     * @param orderAscDesc - ASC or DESC
-     * @return sorted list of Statistics
-     */
-	@Authorized()
-    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc);
-    
+
     /**
      * Checks to see if at least one box is checked for this rule and encounter 
      * in the atd_statistics table
