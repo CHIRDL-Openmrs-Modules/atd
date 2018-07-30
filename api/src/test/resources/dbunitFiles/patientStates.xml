@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE dataset SYSTEM "test/dbunitFiles/tableSetupDTD.dtd">
+<dataset>
+    <dss_rule rule_id="1" class_filename="MDEPFUPWS.class" creation_time="2016-01-01 00:00:00.0" token_name="MDEPFUPWS" />
+    
+</dataset>
