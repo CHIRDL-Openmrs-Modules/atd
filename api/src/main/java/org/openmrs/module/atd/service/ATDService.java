@@ -86,8 +86,11 @@ public interface ATDService
 	public Result evaluateRule(String ruleEvalString,Patient patient,
 			Map<String, Object> baseParameters);
 	
+	/**
+     * @should add new PatientATD
+     */
 	@Authorized()
-	public void addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
+	public PatientATD addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
 			Integer encounterId) throws APIException;
 	
 	/**
@@ -96,10 +99,15 @@ public interface ATDService
 	 * @param patientATD The PatientATD object to update.
 	 * @return The updated PatientATD object.
 	 * @throws APIException
+	 * @should update Patient ATD
 	 */
 	@Authorized()
 	public PatientATD updatePatientATD(PatientATD patientATD) throws APIException;
 	
+	/** 
+     * @should get PatientATD
+     * @should get PatientATD null
+     */
 	@Authorized()
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId);
 	
@@ -170,35 +178,53 @@ public interface ATDService
 	@Authorized()
 	public void moveBadScan(String url, boolean formRescanned) throws Exception;
 
+	
+	/**
+     * @should get statistics by encounter id and form name
+     * @should get statistics by encounter id and form name null
+     */
 	@Authorized()
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName);
 	
-	/**
+	/** 
 	 * Get all statistics for a given encounter ID and form name whether the there is an observation associated or not.
-	 * 
+	 *
 	 * @param encounterId
-	 * @param formName
-	 * @return List of Statistics objects
+     * @param formName
+     * @return List of Statistics objects
+	 * @should get statistics for non-prioritized rules by encounter id and form name
+       @should get statistics for non-prioritized rules by encounter id and form name null
 	 */
-	@Authorized()
-	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
-
 	@Authorized()
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName);
 	
+	/**
+     * @should get statistics by id and rule
+     * @should get statistics by id and rule null
+     */
 	@Authorized()
 	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName,
 		Integer locationId);
 	
+	/**
+     * @should get statistics by form instance
+     * @should get statistics by form instance null
+     */
 	@Authorized()
 	public List<Statistics> getStatByFormInstance(int formInstanceId,String formName,
 		Integer locationId);
 	
+	/**
+     * @should update statistics
+     */
 	@Authorized()
 	public void updateStatistics(Statistics statistics);
 
+	/**
+     * @should create statistics
+     */
 	@Authorized()
-	public void createStatistics(Statistics statistics);
+	public Statistics createStatistics(Statistics statistics);
 	
 	@Authorized()
 	public void produce(OutputStream output, PatientState state,
@@ -238,6 +264,9 @@ public interface ATDService
 	 * @param formInstance Form Instance object.
 	 * @param fieldIds Field Ids to find.
 	 * 
+	 * @should get patient ATDs by form instance and field ids
+     * @should get patient ATDs by form instance and field ids null
+     * 
 	 * @return List of PatientATD objects matching the criteria provided.
 	 */
 	@Authorized()
@@ -316,18 +345,7 @@ public interface ATDService
      */
 	@Authorized()
     public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs);
-    
-    /**
-     * DWE CHICA-612
-     * Gets a sorted list of all atd_statistics with the encounterId and formName
-     * @param encounterId
-     * @param formName
-     * @param orderAscDesc - ASC or DESC
-     * @return sorted list of Statistics
-     */
-	@Authorized()
-    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc);
-    
+
     /**
      * Checks to see if at least one box is checked for this rule and encounter 
      * in the atd_statistics table
@@ -343,6 +361,9 @@ public interface ATDService
      * 
      * Look up the Statistics record by encounter_id and rule_id.
      * This checks to see if the rule fired for a certain encounter
+     * 
+     * @should get statistics by encounter id and rule id
+     * @should get statistics by encounter id and rule id null
      * 
      * @param encounterId
      * @param ruleId
