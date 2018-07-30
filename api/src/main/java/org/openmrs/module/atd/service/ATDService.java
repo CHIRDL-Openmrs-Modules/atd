@@ -186,8 +186,12 @@ public interface ATDService
 	@Authorized()
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName);
 	
-	
 	/** 
+	 * Get all statistics for a given encounter ID and form name whether the there is an observation associated or not.
+	 *
+	 * @param encounterId
+     * @param formName
+     * @return List of Statistics objects
 	 * @should get statistics for non-prioritized rules by encounter id and form name
        @should get statistics for non-prioritized rules by encounter id and form name null
 	 */
