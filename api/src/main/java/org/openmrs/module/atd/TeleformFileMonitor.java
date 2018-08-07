@@ -272,7 +272,7 @@ public class TeleformFileMonitor extends AbstractTask
 		String[] fileExtensions = new String[]
 		{ ".xml", ".xmle" };
 
-		if (exportDirectories == null || exportDirectories.size() == 0)
+		if (exportDirectories == null || exportDirectories.isEmpty())
 		{
 			return;
 		}
@@ -331,7 +331,7 @@ public class TeleformFileMonitor extends AbstractTask
 							.getFormAttributeValuesByValue(
                             org.openmrs.module.chirdlutil.util.IOUtil.getDirectoryName(filename));
                         
-                        if (formAttrValues != null && formAttrValues.size() > 0) 
+                        if (formAttrValues != null && !formAttrValues.isEmpty()) 
                         {
                             FormAttributeValue value = formAttrValues.get(0);
                             formInstance = new FormInstance();
