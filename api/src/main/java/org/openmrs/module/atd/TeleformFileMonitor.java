@@ -478,7 +478,7 @@ public class TeleformFileMonitor extends AbstractTask
                                     Set<String> patientForms = getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PATIENT_FORM, locationId);
                                     Set<String> physicianForms = getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PHYSICIAN_FORM, locationId);
 
-                                    if (!patientForms.contains(formName)||!physicianForms.contains(formName)) {
+                                    if (!patientForms.contains(formName)&&!physicianForms.contains(formName)) {
                                         formName = "JIT";  
                                     }
                                                          
