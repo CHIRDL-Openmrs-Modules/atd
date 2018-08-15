@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
@@ -42,7 +40,6 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceAttributeValue;
-import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.State;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction;
@@ -475,8 +472,8 @@ public class TeleformFileMonitor extends AbstractTask
                                     
                                     //if a form name is not patient form or physician form then assume JIT
                                     Integer locationId = formInstance.getLocationId();
-                                    Set<String> patientForms = getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PATIENT_FORM, locationId);
-                                    Set<String> physicianForms = getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PHYSICIAN_FORM, locationId);
+                                    Set<String> patientForms = org.openmrs.module.atd.util.Util.getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PATIENT_FORM, locationId);
+                                    Set<String> physicianForms = org.openmrs.module.atd.util.Util.getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PHYSICIAN_FORM, locationId);
 
                                     if (!patientForms.contains(formName)&&!physicianForms.contains(formName)) {
                                         formName = "JIT";  
@@ -547,26 +544,6 @@ public class TeleformFileMonitor extends AbstractTask
 		}
 	}
 	
-    private static Set<String> getPrimaryFormNameByLocation(String attributeName, Integer locationId) {
-        Set<String> primaryFormList = new HashSet<String>();
-        
-        ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
-        LocationService locService = Context.getLocationService();
-        
-        Location location = locService.getLocation(locationId);
-        Set<LocationTag> tags = location.getTags();
-        
-        for (LocationTag tag : tags) {
-            LocationTagAttributeValue locationTagAttributeValueForm = chirdlutilbackportsService
-                    .getLocationTagAttributeValue(tag.getLocationTagId(), attributeName, locationId);
-            
-            if (locationTagAttributeValueForm != null && StringUtils.isNotBlank(locationTagAttributeValueForm.getValue())) {
-                primaryFormList.add(locationTagAttributeValueForm.getValue());
-            }
-        }
-        return primaryFormList;
-    }
-
 	private static void processPendingStatesWithFilename(ATDService atdService) throws APIException, Exception
 	{
 		String filename = "";
