@@ -772,7 +772,7 @@ public class Util {
 	 * @return
 	 */
 	public static Set<String> getPrimaryFormNameByLocation(String attributeName, Integer locationId) {
-        Set<String> primaryFormList = new HashSet<String>();
+        Set<String> primaryFormList = new HashSet<>();
         
         ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
         LocationService locService = Context.getLocationService();
