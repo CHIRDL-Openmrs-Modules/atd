@@ -4,14 +4,19 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.ConceptDescriptor;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 
 /**
  * DWE CHICA-330 4/20/15
@@ -20,6 +25,8 @@ import org.openmrs.module.atd.util.ConceptDescriptor;
 public class ExportConceptServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static final Log LOG = LogFactory.getLog(ExportConceptServlet.class);
 
 	private static final String LOAD_TABLE_PARAM = "loadTable";
 	private static final String INCLUDE_RETIRED_PARAM = "includeRetired";
@@ -34,7 +41,8 @@ public class ExportConceptServlet extends HttpServlet
 	private static final String ORDER_BY_COLUMN_PARAM = "order[0][column]";
 	private static final String ORDER_BY_ASC_DESC_PARAM = "order[0][dir]";
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	@Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if(request.getParameter(LOAD_TABLE_PARAM) != null)
 		{
@@ -46,7 +54,7 @@ public class ExportConceptServlet extends HttpServlet
 			boolean includeRetired = Boolean.valueOf(request.getParameter(INCLUDE_RETIRED_PARAM));
 			String conceptClass = request.getParameter(CONCEPT_CLASS_PARAM) != null ? request.getParameter(CONCEPT_CLASS_PARAM) : "-1";
 			String orderByColumnNumber = request.getParameter(ORDER_BY_COLUMN_PARAM) != null ? request.getParameter(ORDER_BY_COLUMN_PARAM) : "5"; // Default to conceptId column number
-			String ascDesc = request.getParameter(ORDER_BY_ASC_DESC_PARAM) != null ? request.getParameter(ORDER_BY_ASC_DESC_PARAM) : "ASC";
+			String ascDesc = request.getParameter(ORDER_BY_ASC_DESC_PARAM) != null ? request.getParameter(ORDER_BY_ASC_DESC_PARAM) : ChirdlUtilConstants.SORT_ASC;
 			String orderByColumn = request.getParameter("columns[" + orderByColumnNumber + "][data]") != null ? request.getParameter("columns[" + orderByColumnNumber + "][data]") : "conceptId";
 			
 			// Queries to populate the total number of records, the results list, and the total number of records with filter applied
@@ -54,11 +62,13 @@ public class ExportConceptServlet extends HttpServlet
 			ATDService atdService = Context.getService(ATDService.class);
 			int total = 0;
 			int totalRecordsWithFilter = 0;
+			int drawVal = 1;
 			try
 			{
 				results = atdService.getConceptDescriptorList(Integer.parseInt(start), Integer.parseInt(length), searchValue, includeRetired, Integer.parseInt(conceptClass), orderByColumn, ascDesc, false);
 				total = atdService.getCountConcepts("", includeRetired, -1, false);
 				totalRecordsWithFilter = atdService.getCountConcepts(searchValue, includeRetired, Integer.parseInt(conceptClass), false);
+				drawVal = Integer.parseInt(draw);
 				
 				// Make sure an error didn't occur in the query
 				if(total == -1 || totalRecordsWithFilter == -1)
@@ -71,6 +81,7 @@ public class ExportConceptServlet extends HttpServlet
 				results = new ArrayList<ConceptDescriptor>();
 				total = 0;
 				totalRecordsWithFilter = 0;
+				drawVal = 1;
 			}
 			
 			// Create a DataTableObject object that will be used with ObjectMapper
@@ -79,21 +90,36 @@ public class ExportConceptServlet extends HttpServlet
 			dt.setData(results);
 			dt.setRecordsTotal(total); // If it is displayed, this is the X in "(filtered from X total entries)"
 			dt.setRecordsFiltered(totalRecordsWithFilter); // this is the X in "Showing n to n of X entries"
-			dt.setDraw(Integer.parseInt(draw));
+			dt.setDraw(drawVal);
 			
 			StringWriter w = new StringWriter();
 			ObjectMapper mapper = new ObjectMapper();
-			mapper.writeValue(w, dt); // Convert to JSON
-			//EXAMPLE {"draw":1,"recordsTotal":27257,"recordsFiltered":27257,"data":[{"name":"value","description":"value","units":"value","conceptId":value,"conceptClass":"value","datatype":"value","parentConcept":"value"}]}
+			try {
+    			mapper.writeValue(w, dt); // Convert to JSON
+    			//EXAMPLE {"draw":1,"recordsTotal":27257,"recordsFiltered":27257,"data":[{"name":"value","description":"value","units":"value","conceptId":value,"conceptClass":"value","datatype":"value","parentConcept":"value"}]}
+			} catch (Exception e) {
+			    LOG.error("Error generating JSON", e);
+			    final String DEFAULT_JSON = "{\"draw\":1,\"recordsTotal\":0,\"recordsFiltered\":0,\"data\":[]}";
+			    w.write(DEFAULT_JSON);
+			}
 			
 			response.setContentType(CONTENT_TYPE_JSON);
-			response.getWriter().write(w.toString());		
+			try {
+			    response.getWriter().write(w.toString());	
+			} catch (IOException e) {
+			    LOG.error("Error writing data to response", e);
+			}
 		}	
 	}
 
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	@Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		doGet(request, response);
+	    try {
+	        doGet(request, response);
+	    } catch (Exception e) {
+	        LOG.error("Error performing POST", e);
+	    }
 	}
 	
 	/**

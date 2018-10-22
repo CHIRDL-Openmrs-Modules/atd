@@ -193,8 +193,7 @@ public class FormScoringUtil {
 				}
 				
 				if (fieldOperand != null && cnOperand != null) {
-					Field matchingField = Util.pickFieldLanguage(fieldOperand, childFields, 
-					  langFieldsToConsume, formFieldsMap);
+					Field matchingField = Util.pickFieldLanguage(fieldOperand, langFieldsToConsume, formFieldsMap);
 					if (matchingField != null && fieldMap != null) {
 						org.openmrs.module.atd.xmlBeans.Field scorableFormField = fieldMap
 								.get(matchingField.getId());
@@ -272,8 +271,7 @@ public class FormScoringUtil {
 			}
 		}
 		//compute the average
-		if (mean != null) {
-			
+		if (mean != null && fieldMap != null) {
 			scoreTotal = computeMean(mean, childFields, langFieldsToConsume, fieldMap, formFieldsMap,
 				estimatedScore);
 		}
@@ -312,7 +310,7 @@ public class FormScoringUtil {
 			numFields = 0;
 			
 			for (Field field : fields) {
-				Field matchingField = Util.pickFieldLanguage(field, childFields, langFieldsToConsume, formFieldsMap);
+				Field matchingField = Util.pickFieldLanguage(field, langFieldsToConsume, formFieldsMap);
 				org.openmrs.module.atd.xmlBeans.Field scorableFormField = fieldMap.get(matchingField.getId());
 				if(scorableFormField != null){
 					String fieldValue = scorableFormField.getValue();
@@ -323,7 +321,7 @@ public class FormScoringUtil {
 			}
 		}
 		
-		if (scoreTotal != null) {
+		if (scoreTotal != null && numFields != 0) {
 			return scoreTotal / numFields;
 		}
 		return scoreTotal;
@@ -339,7 +337,7 @@ public class FormScoringUtil {
 		for (Field currField : fields) {
 			try {
 				
-				Field matchingField = Util.pickFieldLanguage(currField, childFields, langFieldsToConsume, formFieldsMap);
+				Field matchingField = Util.pickFieldLanguage(currField, langFieldsToConsume, formFieldsMap);
 				org.openmrs.module.atd.xmlBeans.Field scorableFormField = fieldMap.get(matchingField.getId());
 				
 				if (scorableFormField.getValue() != null) {

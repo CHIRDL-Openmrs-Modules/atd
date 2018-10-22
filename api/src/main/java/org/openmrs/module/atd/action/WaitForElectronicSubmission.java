@@ -39,7 +39,8 @@ public class WaitForElectronicSubmission implements ProcessStateAction {
 	 *      org.openmrs.module.atd.hibernateBeans.PatientState,
 	 *      java.util.HashMap)
 	 */
-	public void processAction(StateAction stateAction, Patient patient,
+	@Override
+    public void processAction(StateAction stateAction, Patient patient,
 		PatientState patientState, HashMap<String, Object> parameters){
 		FormInstance formInstance = patientState.getFormInstance();
 		if(formInstance == null) {
@@ -60,7 +61,8 @@ public class WaitForElectronicSubmission implements ProcessStateAction {
 	/**
 	 * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#changeState(org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState, java.util.HashMap)
 	 */
-	public void changeState(PatientState patientState,
+	@Override
+    public void changeState(PatientState patientState,
 			HashMap<String, Object> parameters) {
 
 		StateManager.endState(patientState);
@@ -76,17 +78,19 @@ public class WaitForElectronicSubmission implements ProcessStateAction {
 				}
 			}
 			
-			Integer formId = formInstance.getFormId();
-			FormService formService = Context.getFormService();
-			Form form = formService.getForm(formId);
-			String formName = form.getName();
-			
-			List<Statistics> statistics = atdService.getStatByFormInstance(
-				formInstance.getFormInstanceId(), formName, patientState.getLocationId());
-
-			for (Statistics currStat : statistics) {
-				currStat.setScannedTimestamp(patientState.getEndTime());
-				atdService.updateStatistics(currStat);
+			if (formInstance != null) {
+    			Integer formId = formInstance.getFormId();
+    			FormService formService = Context.getFormService();
+    			Form form = formService.getForm(formId);
+    			String formName = form.getName();
+    			
+    			List<Statistics> statistics = atdService.getStatByFormInstance(
+    				formInstance.getFormInstanceId(), formName, patientState.getLocationId());
+    
+    			for (Statistics currStat : statistics) {
+    				currStat.setScannedTimestamp(patientState.getEndTime());
+    				atdService.updateStatistics(currStat);
+    			}
 			}
 
 			BaseStateActionHandler.changeState(patientState.getPatient(), patientState.getSessionId(),

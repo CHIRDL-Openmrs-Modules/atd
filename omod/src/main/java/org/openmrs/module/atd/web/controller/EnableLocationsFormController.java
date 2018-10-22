@@ -161,7 +161,7 @@ public class EnableLocationsFormController {
 		
 		map.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
 		if (!found) {
-			map.put("noLocationsChecked", true);
+			map.put(AtdConstants.PARAMETER_NO_LOCATIONS_CHECKED, true);
 			return new ModelAndView(AtdConstants.FORM_ENABLE_LOCATIONS_FORM_VIEW, map);
 		}
 		

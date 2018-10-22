@@ -36,6 +36,7 @@ import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
@@ -986,9 +987,6 @@ public class HibernateATDDAO implements ATDDAO
 	
 	private void copyPrinterConfiguration(Connection con, Integer fromFormId, Integer toFormId, List<String> locationNames) 
 	throws SQLException {		
-		PreparedStatement ps1 = null;
-		PreparedStatement ps2 = null;
-		PreparedStatement ps3 = null;
 		String locationStr = "";
 		int i = 0;
 	    while (i < locationNames.size()) {
@@ -1030,9 +1028,10 @@ public class HibernateATDDAO implements ATDDAO
 			+ "and b.name='useAlternatePrinter' and a.retired=0 and d.location_id=c.location_id and ("
 			+ locationStr + ") group by d.location_tag_id,d.location_id";
 		
-		try {
+		try (PreparedStatement ps1 = con.prepareStatement(sql1);
+		        PreparedStatement ps2 = con.prepareStatement(sql2);
+		        PreparedStatement ps3 = con.prepareStatement(sql3)){
 			i = 1;
-			ps1 = con.prepareStatement(sql1);
 			ps1.setInt(i++, fromFormId);
 			ps1.setInt(i++, toFormId);
 			for (String locationName : locationNames) {
@@ -1041,7 +1040,6 @@ public class HibernateATDDAO implements ATDDAO
 			ps1.executeUpdate();
 			
 			i = 1;
-			ps2 = con.prepareStatement(sql2);
 			ps2.setInt(i++, fromFormId);
 			ps2.setInt(i++, toFormId);
 			for (String locationName : locationNames) {
@@ -1050,23 +1048,12 @@ public class HibernateATDDAO implements ATDDAO
 			ps2.executeUpdate();
 			
 			i = 1;
-			ps3 = con.prepareStatement(sql3);
 			ps3.setInt(i++, fromFormId);
 			ps3.setInt(i++, toFormId);
 			for (String locationName : locationNames) {
 				ps3.setString(i++, locationName);
 			}
 			ps3.executeUpdate();
-		} finally {
-			if (ps1 != null) {
-				ps1.close();
-			}
-			if (ps2 != null) {
-				ps2.close();
-			}
-			if (ps3 != null) {
-				ps3.close();
-			}
 		}
 	}
 	
@@ -1458,7 +1445,8 @@ public class HibernateATDDAO implements ATDDAO
 	{
 		try
 		{
-			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", "ASC", exactMatchSearch);
+			SQLQuery qry = getConceptQuery(-1, -1, searchValue, includeRetired, conceptClassId, "conceptId", 
+			    ChirdlUtilConstants.SORT_ASC, exactMatchSearch);
 			return qry.list().size();
 		}
 		catch(Exception e)
@@ -1484,21 +1472,29 @@ public class HibernateATDDAO implements ATDDAO
 	 */
 	private SQLQuery getConceptQuery(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch)
 	{
-		String whereClause = "";
+		StringBuilder whereClause = new StringBuilder();
 		boolean needsAnd = false;
 		
 		if(!searchValue.isEmpty() || !includeRetired || conceptClassId > -1)
 		{
-			whereClause = " WHERE ";
+			whereClause.append(" WHERE ");
 			if(!searchValue.isEmpty())
 			{
 				if(exactMatchSearch)
 				{
-					whereClause += "(a.name = '" + searchValue + "' OR b.name = '" + searchValue + "')";
+					whereClause.append("(a.name = '");
+					whereClause.append(searchValue);
+					whereClause.append("' OR b.name = '");
+					whereClause.append(searchValue);
+					whereClause.append("')");
 				}
 				else
 				{
-					whereClause += "(a.name LIKE '%" + searchValue + "%' OR b.name LIKE '%" + searchValue + "%')";
+					whereClause.append("(a.name LIKE '%");
+					whereClause.append(searchValue);
+					whereClause.append("%' OR b.name LIKE '%");
+					whereClause.append(searchValue);
+					whereClause.append("%')");
 				}
 				
 				needsAnd = true;
@@ -1506,67 +1502,70 @@ public class HibernateATDDAO implements ATDDAO
 			
 			if(!includeRetired)
 			{
-				if(needsAnd){whereClause += " AND ";}
-				whereClause += "a.retired = 0";
+				if(needsAnd){whereClause.append(" AND ");}
+				whereClause.append("a.retired = 0");
 				needsAnd = true;
 			}
 			
 			if(conceptClassId > -1)
 			{
-				if(needsAnd){whereClause += " AND ";}
-				whereClause += "a.conceptClassId = " + conceptClassId;
+				if(needsAnd){whereClause.append(" AND ");}
+				whereClause.append("a.conceptClassId = ");
+				whereClause.append(conceptClassId);
 				needsAnd = true;
 			}
 		}
 		
-		String orderBy = " ORDER BY ";
+		StringBuilder orderBy = new StringBuilder(" ORDER BY ");
 		if(orderByColumn.equalsIgnoreCase("name"))
 		{
-			orderBy += "a.name ";
+			orderBy.append("a.name ");
 		}
 		else if(orderByColumn.equalsIgnoreCase("parentConcept"))
 		{ 
-			orderBy += "b.name ";
+			orderBy.append("b.name ");
 		}
 		else if(orderByColumn.equalsIgnoreCase("formattedDateCreated"))
 		{
-			orderBy += "a.dateCreated ";
+			orderBy.append("a.dateCreated ");
 		}
 		else
 		{
-			orderBy += "a.conceptId ";
+			orderBy.append("a.conceptId ");
 		}
-		orderBy += ascDesc;
+		orderBy.append(ascDesc);
 		
-		String sqlString = "SELECT distinct a.*, b.name AS \"parentConcept\" "
-                + "FROM    (SELECT a.concept_id AS conceptId, "
-                + "	               a.name AS name, "
-                + "                c.name AS \"conceptClass\", "
-                + "                d.name AS \"datatype\", "
-                + "                e.description AS description, "
-                + "                g.concept_id AS parentConceptId, "
-                + "                f.units AS units, "
-                + "				   con.retired AS retired, "
-                + "				   c.concept_class_id AS conceptClassId, "
-                + "                con.date_created AS dateCreated  "
-                + "           FROM concept_name a "
-                + "                INNER JOIN concept con "
-                + "                    ON a.concept_id = con.concept_id "
-                + "                INNER JOIN concept_class c "
-                + "                    ON con.class_id = c.concept_class_id "
-                + "                INNER JOIN concept_datatype d "
-                + "                    ON con.datatype_id = d.concept_datatype_id "
-                + "                LEFT JOIN concept_description e "
-                + "                    ON e.concept_id = con.concept_id "
-                + "                LEFT JOIN concept_numeric f "
-                + "                    ON f.concept_id = con.concept_id "
-                + "                LEFT JOIN concept_answer g "
-                + "                    ON g.answer_concept = con.concept_id) a "
-                + "          LEFT JOIN "
-                + "               concept_name b "
-                + "               ON a.parentConceptId = b.concept_id " + whereClause + orderBy;
+		StringBuilder sqlString = new StringBuilder("SELECT distinct a.*, b.name AS \"parentConcept\" ");
+                sqlString.append("FROM    (SELECT a.concept_id AS conceptId, ");
+                sqlString.append("	               a.name AS name, ");
+                sqlString.append("                c.name AS \"conceptClass\", ");
+                sqlString.append("                d.name AS \"datatype\", ");
+                sqlString.append("                e.description AS description, ");
+                sqlString.append("                g.concept_id AS parentConceptId, ");
+                sqlString.append("                f.units AS units, ");
+                sqlString.append("				   con.retired AS retired, ");
+                sqlString.append("				   c.concept_class_id AS conceptClassId, ");
+                sqlString.append("                con.date_created AS dateCreated  ");
+                sqlString.append("           FROM concept_name a ");
+                sqlString.append("                INNER JOIN concept con ");
+                sqlString.append("                    ON a.concept_id = con.concept_id ");
+                sqlString.append("                INNER JOIN concept_class c ");
+                sqlString.append("                    ON con.class_id = c.concept_class_id ");
+                sqlString.append("                INNER JOIN concept_datatype d ");
+                sqlString.append("                    ON con.datatype_id = d.concept_datatype_id ");
+                sqlString.append("                LEFT JOIN concept_description e ");
+                sqlString.append("                    ON e.concept_id = con.concept_id ");
+                sqlString.append("                LEFT JOIN concept_numeric f ");
+                sqlString.append("                    ON f.concept_id = con.concept_id ");
+                sqlString.append("                LEFT JOIN concept_answer g ");
+                sqlString.append("                    ON g.answer_concept = con.concept_id) a ");
+                sqlString.append("          LEFT JOIN ");
+                sqlString.append("               concept_name b ");
+                sqlString.append("               ON a.parentConceptId = b.concept_id ");
+                sqlString.append(whereClause);
+                sqlString.append(orderBy);
 		
-		SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sqlString);
+		SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sqlString.toString());
 		qry.addScalar("conceptId", new IntegerType());
 		qry.addScalar("name", new StringType());
 		qry.addScalar("conceptClass", new StringType());
@@ -1640,11 +1639,11 @@ public class HibernateATDDAO implements ATDDAO
     	criteria.add(Restrictions.eq("encounterId", encounterId));
     	criteria.add(Restrictions.eq("formName", formName));
     	
-    	if("ASC".equals(orderAscDesc))
+    	if(ChirdlUtilConstants.SORT_ASC.equals(orderAscDesc))
     	{
     		criteria.addOrder(Order.asc("statisticsId"));
     	}
-    	else if("DESC".equals(orderAscDesc))
+    	else if(ChirdlUtilConstants.SORT_DESC.equals(orderAscDesc))
     	{
     		criteria.addOrder(Order.desc("statisticsId"));
     	}

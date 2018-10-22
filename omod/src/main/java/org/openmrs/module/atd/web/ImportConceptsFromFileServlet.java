@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.ImportConceptsUtil;
 import org.apache.commons.fileupload.FileItem;
@@ -46,7 +47,8 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 	private static final String ERROR_OCCURRED = "errorOccurred";
 	private static final String PARSE_ERROR = "fileParseError";
 	
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	@Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		HttpSession session = request.getSession();
 		Map<String, Object> returnMap = new HashMap<String, Object>();
@@ -121,7 +123,7 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 			}
 			catch(Exception e)
 			{
-				returnMap.put("serverError", true);
+				returnMap.put(AtdConstants.ERROR_TYPE_SERVER, true);
 				log.error("An error occurred starting the import.", e);
 			}	
 		}
@@ -147,12 +149,21 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 			}	
 		}
 		
-		writeJSONResponse(response, returnMap);
+		try {
+		    writeJSONResponse(response, returnMap);
+		} catch (IOException e) {
+		    log.error("Error generating JSON response", e);
+		}
 	}
 	
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	@Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		doGet(request, response);
+	    try {
+	        doGet(request, response);
+	    } catch (Exception e) {
+	        log.error("Error performing POST", e);
+	    }
 	}
 	
 	/**

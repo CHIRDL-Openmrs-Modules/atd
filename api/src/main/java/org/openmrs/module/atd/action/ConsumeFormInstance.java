@@ -81,14 +81,11 @@ public class ConsumeFormInstance implements ProcessStateAction
 		if (parameters != null) {
 			exportFilename = (String) parameters.get("filename");
 		}
-		try {
-			InputStream input = new FileInputStream(exportFilename);
-			
+		try (InputStream input = new FileInputStream(exportFilename)) {
 			startTime = System.currentTimeMillis();
 			atdService.consume(input, formInstance, patient, encounterId, null, 
 				null, fieldsToConsume, locationTagId, sessionId);
 			startTime = System.currentTimeMillis();
-			input.close();
 		}
 		catch (Exception e) {
 			log.error("Error consuming file: " + exportFilename);

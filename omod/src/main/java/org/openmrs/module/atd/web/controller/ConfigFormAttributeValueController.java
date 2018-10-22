@@ -60,7 +60,7 @@ public class ConfigFormAttributeValueController {
 		String formId = request.getParameter("formId");
 		Integer iFormId = Integer.parseInt(formId);
 		// DWE CHICA-332 The success view needs to be different depending on which page the user came from
-		String successViewName = request.getParameter("successViewName");
+		String successViewName = request.getParameter(AtdConstants.PARAMETER_SUCCESS_VIEW_NAME);
 		String cancel = request.getParameter("cancelProcess");
 		if ("true".equalsIgnoreCase(cancel)) {
 			// Delete the form when coming from the create/replace form pages
@@ -158,17 +158,18 @@ public class ConfigFormAttributeValueController {
 		Map<String, Object> formAttributesValueMap = getFormAttributesValueMap(locationsList,locationTagsMap, editableFormAttributes,iFormId, request,cubService);
 	
 		//get attribute value enumeration info for each attribute
-		String[] positionStrs = request.getParameterValues("positions");
+		String[] positionStrs = request.getParameterValues(AtdConstants.PARAMETER_POSITIONS);
 		
 		map.put("positionStrs", positionStrs);
-		map.put("locationsList", locationsList);
-		map.put("locationTagsMap", locationTagsMap);
+		map.put(AtdConstants.PARAMETER_LOCATIONS_LIST, locationsList);
+		map.put(AtdConstants.PARAMETER_LOCATION_TAGS_MAP, locationTagsMap);
 		map.put("editableFormAttributes", editableFormAttributes);
 		map.put("formAttributesValueMap", formAttributesValueMap);
 		map.put("formId", formId);
-		map.put("selectedFormName", request.getParameter("selectedFormName"));
+		map.put(AtdConstants.PARAMETER_SELECTED_FORM_NAME, request.getParameter(AtdConstants.PARAMETER_SELECTED_FORM_NAME));
 		map.put("numPrioritizedFields", request.getParameter("numPrioritizedFields"));
-		map.put("successViewName", request.getParameter("successViewName")); // Success view will depend on which page the user came from
+		// Success view will depend on which page the user came from
+		map.put(AtdConstants.PARAMETER_SUCCESS_VIEW_NAME, request.getParameter(AtdConstants.PARAMETER_SUCCESS_VIEW_NAME)); 
 		
 		// DWE CHICA-596 Added logging so that we know what is sent back to the client
 		// Trying to track down why the page does not display any of the existing values in production
@@ -233,7 +234,7 @@ public class ConfigFormAttributeValueController {
 	private void configPositionInfo(List<Location> locationsList, Set<Integer> locationsIdSet,Map<Integer, List<LocationTag>> locationTagsMap, HttpServletRequest request){
 		// positionStrs are position array. for position string, it is composed
 		// of locationId + "_"+ locationTagId
-		String[] positionStrs = request.getParameterValues("positions");
+		String[] positionStrs = request.getParameterValues(AtdConstants.PARAMETER_POSITIONS);
 		LocationService locationService = Context.getLocationService();
 		if (positionStrs != null) {
 			StringTokenizer st = null;

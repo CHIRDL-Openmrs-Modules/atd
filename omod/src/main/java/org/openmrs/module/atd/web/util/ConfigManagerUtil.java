@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.api.AdministrationService;
@@ -24,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 public class ConfigManagerUtil {
+    
+    private static final Log LOG = LogFactory.getLog(ConfigManagerUtil.class);
 
 	public static Form loadTeleformFile(MultipartFile multipartFile, String formName) throws Exception {
 		Form form = null;
@@ -36,7 +40,9 @@ public class ConfigManagerUtil {
 		// Place the file in the forms to load directory
 		File file = new File(formLoadDir, formName + ".xml");
 		if (file.exists()) {
-			file.delete();
+			if (!file.delete()) {
+			    LOG.error("Error deleting file: " + file.getAbsolutePath());
+			}
 		}
 		
 		if (extension.equalsIgnoreCase("xml")) {
@@ -67,13 +73,18 @@ public class ConfigManagerUtil {
 		// Place the file in the forms to load directory
 		File file = new File(formLoadDir, formName + ".csv");
 		if (file.exists()) {
-			file.delete();
+			if (!file.delete()) {
+			    LOG.error("Error deleting file: " + file.getAbsolutePath());
+			}
 		}
 		
 		multipartFile.transferTo(file);
 		
 		// Load the CSV file
-		form = CreateFormUtil.createFormFromCSVFile(new FileInputStream(file));
+		try (InputStream inputStream = new FileInputStream(file)) {
+		    form = CreateFormUtil.createFormFromCSVFile(inputStream);
+		}
+		
 		return form;
 	}
 	
@@ -125,11 +136,15 @@ public class ConfigManagerUtil {
 			File mergeDir = new File(installationDirectory + File.separator + "merge" + 
 				File.separator + locName + File.separator + formName);
 			if (mergePendingDir.exists()) {
-				mergePendingDir.delete();
+				if (!mergePendingDir.delete()) {
+				    LOG.error("Error deleting merge pending directory: " + mergePendingDir.getAbsolutePath());
+				}
 			}
 			
 			if (mergeDir.exists()) {
-				mergeDir.delete();
+				if (!mergeDir.delete()) {
+				    LOG.error("Error deleting merge directory: " + mergeDir.getAbsolutePath());
+				}
 			}
 			
 			if (scannableForm) {
@@ -137,28 +152,36 @@ public class ConfigManagerUtil {
 				File scanDir = new File(installationDirectory + File.separator + "scan" + 
 					File.separator + locName + File.separator + formName + "_SCAN");
 				if (scanDir.exists()) {
-					scanDir.delete();
+					if (!scanDir.delete()) {
+					    LOG.error("Error deleting scan directory: " + scanDir.getAbsolutePath());
+					}
 				}
 				
 				// Delete the images directory
 				File imageDir = new File(installationDirectory + File.separator + "images" + 
 					File.separator + locName + File.separator + formName);
 				if (imageDir.exists()) {
-					imageDir.delete();
+					if (!imageDir.delete()) {
+					    LOG.error("Error deleting image directory: " + imageDir.getAbsolutePath());
+					}
 				}
 			} else if (faxableForm) {
 				// Delete the scan directory
 				File scanDir = new File(installationDirectory + File.separator + "scan" + 
 					File.separator + "Fax" + File.separator + formName + "_SCAN");
 				if (scanDir.exists()) {
-					scanDir.delete();
+					if (!scanDir.delete()) {
+					    LOG.error("Error deleting scan directory: " + scanDir.getAbsolutePath());
+					}
 				}
 				
 				// Delete the images directory
 				File imageDir = new File(installationDirectory + File.separator + "images" + 
 					File.separator + "Fax" + File.separator + formName);
 				if (imageDir.exists()) {
-					imageDir.delete();
+					if (!imageDir.delete()) {
+					    LOG.error("Error deleting image directory: " + imageDir.getAbsolutePath());
+					}
 				}
 			}
 		}
@@ -173,27 +196,20 @@ public class ConfigManagerUtil {
 		String fileName = formName + "_scoring_config.xml";
 		
 		// Place the file in the forms to load directory
-		InputStream in = xmlFile.getInputStream();
 		File file = new File(loadDir, fileName);
 		if (file.exists()) {
-			file.delete();
+			if (!file.delete()) {
+			    LOG.error("Error deleting file: " + file.getAbsolutePath());
+			}
 		}
 		
-		OutputStream out = new FileOutputStream(file);
 		int nextChar;
-		try {
+		try (InputStream in = xmlFile.getInputStream();
+		        OutputStream out = new FileOutputStream(file)) {
 			while ((nextChar = in.read()) != -1) {
 				out.write(nextChar);
 			}
 			
-		} finally {
-			if (in != null) {
-				in.close();
-			}
-			
-			if (out != null) {
-				out.close();
-			}
 		}
 		
 		return file.getAbsolutePath();
@@ -240,33 +256,27 @@ public class ConfigManagerUtil {
 	private static void loadZippedFormFile(AdministrationService adminService, MultipartFile multipartFile, File outFile) 
 	throws IOException {
 		File tempFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), ".zip");
-		OutputStream outStream = null;
-		InputStream inStream = null;
-		try {
-			multipartFile.transferTo(tempFile);
-			ZipFile zipFile = new ZipFile(tempFile);
+		multipartFile.transferTo(tempFile);
+		try (OutputStream outStream = new FileOutputStream(outFile);
+		        ZipFile zipFile = new ZipFile(tempFile)) {
 			String formFilename = adminService.getGlobalProperty("atd.TeleformFormFileName");
 			ZipEntry entry = zipFile.getEntry(formFilename);
 			if (entry == null) {
 				throw new IOException("No " + formFilename + " file found in: " + multipartFile.getOriginalFilename());
 			}
 			
-			inStream = zipFile.getInputStream(entry);
-			outStream = new FileOutputStream(outFile);
-			byte buf[]=new byte[1024];
-		    int len;
-		    while((len = inStream.read(buf)) > 0) {
-		    	outStream.write(buf,0,len);
-		    }
+			try (InputStream inStream = zipFile.getInputStream(entry)) {
+    			byte buf[]=new byte[1024];
+    		    int len;
+    		    while((len = inStream.read(buf)) > 0) {
+    		    	outStream.write(buf,0,len);
+    		    }
+			}
 		} finally {
 			if (tempFile != null && tempFile.exists()) {
-				tempFile.delete();
-			}
-			if (outStream != null) {
-				outStream.close();
-			}
-			if (inStream != null) {
-				inStream.close();
+				if (!tempFile.delete()) {
+				    LOG.error("Error deleting file: " + tempFile.getAbsolutePath());
+				}
 			}
 		}
 	}
