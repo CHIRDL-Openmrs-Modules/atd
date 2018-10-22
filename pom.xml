@@ -27,7 +27,7 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>logic-api</artifactId>
-				<version>0.5.5-SNAPSHOT</version>
+				<version>0.5.5</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -39,13 +39,13 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>chirdlutil-api</artifactId>
-				<version>1.19.0-SNAPSHOT</version>
+				<version>1.19.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>dss-api</artifactId>
-				<version>3.1.0-SNAPSHOT</version>
+				<version>3.1.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
