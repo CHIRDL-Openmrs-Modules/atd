@@ -90,8 +90,8 @@ public interface ATDService
      * @should add new PatientATD
      */
 	@Authorized()
-	public PatientATD addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
-			Integer encounterId) throws APIException;
+	public PatientATD addPatientATD(FormInstance formInstance, DssElement dssElement,
+			Integer encounterId, Integer patientId) throws APIException;
 	
 	/**
 	 * Update an existing PatientATD object.

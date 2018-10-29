@@ -73,7 +73,7 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
         DssElement dssElement = new DssElement(result, ruleId);
         
         ATDService atdService = Context.getService(ATDService.class);
-        PatientATD patientATD = atdService.addPatientATD(patientId, formInstance, dssElement, encounterId);
+        PatientATD patientATD = atdService.addPatientATD(formInstance, dssElement, encounterId, patientId);
         PatientATD expectedPatientATD = new PatientATD();
         expectedPatientATD.setPatientId(patientId);
         expectedPatientATD.setFormInstance(formInstance);
@@ -157,7 +157,7 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
         DssElement dssElement = new DssElement(result, ruleId);
         
         ATDService atdService = Context.getService(ATDService.class);
-        PatientATD patientATD = atdService.addPatientATD(patientId, formInstance, dssElement, encounterId);
+        PatientATD patientATD = atdService.addPatientATD(formInstance, dssElement, encounterId, patientId);
         patientATD.setFieldId(fieldId);
         atdService.updatePatientATD(patientATD);
         PatientATD expectedPatientATD = atdService.getPatientATD(formInstance, fieldId);
@@ -211,12 +211,12 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
         HashMap<Integer, PatientATD> map = new HashMap<Integer, PatientATD>();
         
         ATDService atdService = Context.getService(ATDService.class);
-        PatientATD patientATD = atdService.addPatientATD(patientId, formInstance, dssElement, encounterId);
+        PatientATD patientATD = atdService.addPatientATD(formInstance, dssElement, encounterId, patientId);
         patientATD.setFieldId(fieldId1);
         atdService.updatePatientATD(patientATD);
         map.put(fieldId1, patientATD);
         
-        patientATD = atdService.addPatientATD(patientId, formInstance, dssElement, encounterId);
+        patientATD = atdService.addPatientATD(formInstance, dssElement, encounterId, patientId);
         patientATD.setFieldId(fieldId2);
         atdService.updatePatientATD(patientATD);
         map.put(fieldId2, patientATD);
@@ -511,7 +511,7 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
         DssElement dssElement = new DssElement(result, ruleId);
         
         ATDService atdService = Context.getService(ATDService.class);
-        PatientATD patientATD = atdService.addPatientATD(patientId, formInstance, dssElement, encounterId);
+        PatientATD patientATD = atdService.addPatientATD(formInstance, dssElement, encounterId, patientId);
         assertEquals(patientId, patientATD.getPatientId());
         assertEquals(formInstance, patientATD.getFormInstance());
         assertEquals(encounterId, patientATD.getEncounterId());

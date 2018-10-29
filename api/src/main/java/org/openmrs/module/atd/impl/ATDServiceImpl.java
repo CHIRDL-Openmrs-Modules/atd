@@ -525,8 +525,8 @@ public class ATDServiceImpl implements ATDService
 			for (int i=0; i < dssElements.size(); i++)
 			{
 				DssElement currDssElement = dssElements.get(i);
-				atdService.addPatientATD(patientId, formInstance,
-						currDssElement,encounterId);
+				atdService.addPatientATD(formInstance,
+						currDssElement,encounterId, patientId);
 			}
 		}
 	}
@@ -643,9 +643,10 @@ public class ATDServiceImpl implements ATDService
 		}
 		return null;
 	}
-
-	public PatientATD addPatientATD(int patientId, FormInstance formInstance, DssElement dssElement,
-			Integer encounterId) throws APIException
+	
+	@Override
+    public PatientATD addPatientATD(FormInstance formInstance, DssElement dssElement,
+			Integer encounterId, Integer patientId) throws APIException
 	{
 		PatientATD patientATD = new PatientATD();
 		patientATD.setCreationTime(new java.util.Date());
