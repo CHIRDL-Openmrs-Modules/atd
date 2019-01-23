@@ -185,14 +185,11 @@ public class TeleformFileMonitor extends AbstractTask
 			processedStates++;
 		}
 		
-		log.info("Today's state initialization is: "+(int)((processedStates/numUnfinishedStates)*100)+"% complete.");
+		if(numUnfinishedStates>0){
+		    log.info("Today's state initialization is: "+(int)((processedStates/numUnfinishedStates)*100)+"% complete.");
+		}
 		}}}
 		
-		//TODO: Make the following two lines dependent on a new global property to control them.
-		Thread thread = new Thread(new InitializeOldStates());
-		thread.start();
-//		ThreadManager threadManager = ThreadManager.getInstance();
-//		threadManager.execute(new InitializeOldStates(), ThreadManager.NO_LOCATION);
 	}
 	
 	@Override
@@ -277,7 +274,7 @@ public class TeleformFileMonitor extends AbstractTask
 		String[] fileExtensions = new String[]
 		{ ".xml", ".xmle" };
 
-		if (exportDirectories == null || exportDirectories.size() == 0)
+		if (exportDirectories == null || exportDirectories.isEmpty())
 		{
 			return;
 		}
@@ -307,83 +304,83 @@ public class TeleformFileMonitor extends AbstractTask
 				//	continue;
 				//}
 				
-				try
-				{
-					// parse out the formInstance
-				
-					InputStream input;
-					try
-					{
-						input = new FileInputStream(filename);
-					} catch (Exception e)
-					{
-						if (!e.getMessage().contains(
-										"The process cannot access the file because it is being used by another process"))
-						{
-							log.error(Util.getStackTrace(e));
-						}
-						continue;
-					}
-	
-					formInstance = formDatasource.parseTeleformXmlFormat(input,formInstance,null);
-					input.close();
-					//This is an old form with a single key (formInstanceId) barcode
-					//we need to figure out the formId, locationId, and locationTagId
-					if (formInstance == null)
-					{
-						Integer locationTagId = null;
+                try 
+                {
+                    // parse out the formInstance
+                    
+                    InputStream input;
+                    try 
+                    {
+                        input = new FileInputStream(filename);
+                    } catch (Exception e) 
+                    {
+                        if (!e.getMessage().contains(
+                            "The process cannot access the file because it is being used by another process")) 
+                        {
+                            log.error(Util.getStackTrace(e));
+                        }
+                        continue;
+                    }
+                    
+                    formInstance = formDatasource.parseTeleformXmlFormat(input, formInstance, null);
+                    input.close();
+                    //This is an old form with a single key (formInstanceId) barcode
+                    //we need to figure out the formId, locationId, and locationTagId
+                    if (formInstance == null) 
+                    {
+                        Integer locationTagId = null;
 						List<FormAttributeValue> formAttrValues = chirdlUtilBackportsService
 							.getFormAttributeValuesByValue(
-								org.openmrs.module.chirdlutil.util.IOUtil.getDirectoryName(filename));
-
-						if (formAttrValues != null&&formAttrValues.size()>0)
-						{
-							FormAttributeValue value = formAttrValues.get(0);
-							formInstance = new FormInstance();
-							formInstance.setLocationId(value.getLocationId());
-							formInstance.setFormId(value.getFormId());
-							locationTagId = value.getLocationTagId();
-
-							try
-							{
-								input = new FileInputStream(filename);
-							} catch (Exception e)
-							{
-								if (!e.getMessage().contains(
+                            org.openmrs.module.chirdlutil.util.IOUtil.getDirectoryName(filename));
+                        
+                        if (formAttrValues != null && !formAttrValues.isEmpty()) 
+                        {
+                            FormAttributeValue value = formAttrValues.get(0);
+                            formInstance = new FormInstance();
+                            formInstance.setLocationId(value.getLocationId());
+                            formInstance.setFormId(value.getFormId());
+                            locationTagId = value.getLocationTagId();
+                            
+                            try
+                            {
+                                input = new FileInputStream(filename);
+                            } catch (Exception e) 
+                            {
+                                if (!e.getMessage().contains(
 												"The process cannot access the file because it is being used by another process"))
 								{
-									log.error(Util.getStackTrace(e));
-								}
-								continue;
-							}
-							formInstance = formDatasource.parseTeleformXmlFormat(input,
-									formInstance, locationTagId);
-							input.close();
-
-							if(formInstance == null){
-							    try {
-	                                // Strictly Stick to what was asked in Ticket #216 (the request in the ticket was just updated today),
-	                                // with the addition of the extra backward slashes around 'bad scans' to make it compilable.  
-							    	File badScansDir = new File(currExportDirectory,"bad scans");
-							    	if (!badScansDir.exists()) {
-							    		badScansDir.mkdirs();
-							    	}
-	                                IOUtil.copyFile(filename,currExportDirectory+"\\bad scans\\"
-	                                        + IOUtil.getFilenameWithoutExtension(filename) + ".xml");
-	                                IOUtil.deleteFile(filename);
+                                    log.error(Util.getStackTrace(e));
+                                }
+                                continue;
+                            }
+                            formInstance = formDatasource.parseTeleformXmlFormat(input, 
+                                formInstance, locationTagId);
+                            input.close();
+                            
+                            if (formInstance == null) {
+                                try {
+                                    // Strictly Stick to what was asked in Ticket #216 (the request in the ticket was just updated today),
+                                    // with the addition of the extra backward slashes around 'bad scans' to make it compilable.  
+                                    File badScansDir = new File(currExportDirectory, "bad scans");
+                                    if (!badScansDir.exists()) {
+                                        badScansDir.mkdirs();
+                                    }
+                                    IOUtil.copyFile(filename, currExportDirectory + "\\bad scans\\"
+                                            + IOUtil.getFilenameWithoutExtension(filename) + ".xml");
+                                    IOUtil.deleteFile(filename);
                                 }
                                 catch (Exception e) {
-									log.error("Could not copy " + filename + " to " + currExportDirectory + "\\bad scans\\"
-									        + IOUtil.getFilenameWithoutExtension(filename) + ".xml");
+                                    log.error("Could not copy " + filename + " to " + currExportDirectory + "\\bad scans\\"
+                                            + IOUtil.getFilenameWithoutExtension(filename) + ".xml");
                                 }
-								continue;
-							}
-							
-							// we need to figure out the correct formId now
-							// that we have
-							// the formInstanceId
-							for (FormAttributeValue formAttrValue : formAttrValues)
-							{
+                                continue;
+                            }
+                            
+                            // we need to figure out the correct formId now
+                            // that we have
+                            // the formInstanceId
+                            for (FormAttributeValue formAttrValue : formAttrValues) 
+                            {
 								FormInstance lookupFormInstance = new FormInstance(
 										formAttrValue.getLocationId(),
 										formAttrValue.getFormId(), formInstance
@@ -391,195 +388,162 @@ public class TeleformFileMonitor extends AbstractTask
 								PatientState patientState = 
 									org.openmrs.module.atd.util.Util.getProducePatientStateByFormInstanceAction(
 										lookupFormInstance);
-								if (patientState != null)
-								{
+                                if (patientState != null)
+                                {
 									formInstance = new FormInstance(
 											patientState.getLocationId(),
 											patientState.getFormId(),
-											patientState.getFormInstanceId());
-									break;
-								}
-							}
-						}
-					}
-					
+                                            patientState.getFormInstanceId());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (formInstance != null) {
+                        
+                        TeleformFileState tfFileState = pendingStatesWithoutFilename.get(formInstance);
+                        
+                        if (tfFileState != null) {
+                            // rename the consumed file by changing extension to .20
+                            // rename here so TeleformFileMonitor doesn't process it
+                            // more than once
+                            String newFilename = IOUtil.getDirectoryName(filename) + "/" + formInstance.toString() + ".20";
+                            
+                            IOUtil.renameFile(filename, newFilename);
+                            
+                            //if file rename fails, don't continue processing otherwise
+                            //the file will be processed more than once
+                            File newFile = new File(newFilename);
+                            if (!newFile.exists()) {
+                                continue;
+                            }
+                            
+                            // check to make sure the original file is gone.  If not, don't continue processing.  Otherwise 
+                            // the file will be processed more than once.
+                            File oldFile = new File(filename);
+                            if (oldFile.exists()) {
+                                IOUtil.deleteFile(newFilename);
+                                continue;
+                            }
+                            
+                            tfFileState.setFullFilePath(newFilename);
+                            tfFileState.setFormInstance(formInstance);
+                            pendingStatesWithoutFilename.remove(formInstance);
+                            recordMedium(formInstance, filename);
+                            atdService.fileProcessed(tfFileState);
+                            
+                        } else {
+                            
+                            //see if it is a form instance that is not loaded into memory
+                            PatientState formInstState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance, "WAIT FOR SCAN",true);
+                            
+                            if (formInstState != null) {
+                                chirdlUtilBackportsService.unretireStatesBySessionId(formInstState.getSessionId());
+                                
+                                //only process unfinished states for this sessionId
+                                if (formInstState.getEndTime() == null) {
+                                    
+                                    StateAction stateAction = formInstState.getState().getAction();
+                                    Patient patient = formInstState.getPatient();
+                                    
+                                    try {
+                                        
+                                        TeleformFileState teleformFileState = TeleformFileMonitor
+                                                .addToPendingStatesWithoutFilename(formInstState.getFormInstance());
+                                        teleformFileState.addParameter("patientState", formInstState);
+                                        
+                                        HashMap<String, Object> parameters = new HashMap<String, Object>();
+                                        parameters.put("formInstance", formInstState.getFormInstance());
+                                        BaseStateActionHandler handler = BaseStateActionHandler.getInstance();
+                                        handler.processAction(stateAction, patient, formInstState, parameters);
+                                    }
+                                    catch (Exception e) {
+                                        log.error(e.getMessage());
+                                        log.error(org.openmrs.module.chirdlutil.util.Util.getStackTrace(e));
+                                    }
+                                    
+                                } else {
+                                    
+                                    //This means we have found a .xml file that is not in pending processing.
+                                    //This is most likely a rescan.
+                                    
+                                    String formName = formService.getForm(formInstance.getFormId()).getName();
+                                    
+                                    //if a form name is not patient form or physician form then assume JIT
+                                    Integer locationId = formInstance.getLocationId();
+                                    Set<String> patientForms = org.openmrs.module.atd.util.Util.getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PATIENT_FORM, locationId);
+                                    Set<String> physicianForms = org.openmrs.module.atd.util.Util.getPrimaryFormNameByLocation(ChirdlUtilConstants.LOC_TAG_ATTR_PRIMARY_PHYSICIAN_FORM, locationId);
 
-					if (formInstance != null){
-									
-						TeleformFileState tfFileState = pendingStatesWithoutFilename.get(formInstance);
-
-						if(tfFileState != null){
-							// rename the consumed file by changing extension to .20
-							// rename here so TeleformFileMonitor doesn't process it
-							// more than once
-							String newFilename = IOUtil.getDirectoryName(filename)+"/"+formInstance.toString()+".20";
-							
-							IOUtil.renameFile(filename, newFilename);
-							
-							//if file rename fails, don't continue processing otherwise
-							//the file will be processed more than once
-							File newFile = new File(newFilename);
-							if(!newFile.exists()){
-								continue;
-							}
-							
-							// check to make sure the original file is gone.  If not, don't continue processing.  Otherwise 
-							// the file will be processed more than once.
-							File oldFile = new File(filename);
-							if (oldFile.exists()) {
-								IOUtil.deleteFile(newFilename);
-								continue;
-							}
-							    
-							tfFileState.setFullFilePath(newFilename);
-							tfFileState.setFormInstance(formInstance);
-							pendingStatesWithoutFilename.remove(formInstance);
-							recordMedium(formInstance, filename);
-							atdService.fileProcessed(tfFileState);
-							
-						}else{
-							
-							//see if it is retired 
-							List<PatientState> states = chirdlUtilBackportsService.getPatientStatesByFormInstance(formInstance,true);
-							
-							if (states != null && states.size() > 0) {
-								PatientState firstState = states.get(0);
-								chirdlUtilBackportsService.unretireStatesBySessionId(firstState.getSessionId());
-								states = 
-									chirdlUtilBackportsService.getPatientStatesBySession(firstState.getSessionId(), false);
-								
-								for (PatientState formInstState : states) {
-									
-									//only process unfinished states for this sessionId
-									if(formInstState.getEndTime() != null){
-										continue;
-									}
-									
-									StateAction stateAction = formInstState.getState().getAction();
-									Patient patient = formInstState.getPatient();
-									
-									try {
-										if (stateAction != null
-										        && (stateAction.getActionName().equalsIgnoreCase("CONSUME FORM INSTANCE"))) {
-											TeleformFileState teleformFileState = TeleformFileMonitor
-											        .addToPendingStatesWithoutFilename(formInstState.getFormInstance());
-											teleformFileState.addParameter("patientState", formInstState);
-										}
-										HashMap<String, Object> parameters = new HashMap<String, Object>();
-										parameters.put("formInstance", formInstState.getFormInstance());
-										BaseStateActionHandler handler = BaseStateActionHandler.getInstance();
-										handler.processAction(stateAction, patient, formInstState, parameters);
-									}
-									catch (Exception e) {
-										log.error(e.getMessage());
-										log.error(org.openmrs.module.chirdlutil.util.Util.getStackTrace(e));
-									}
-								}
-							} else {
-								
-								//This means we have found a .xml file that is not in pending processing.
-								//This is most likely a rescan. We need to see if a scan already exists
-								//for the session that has this formInstance
-								
-								//get the session that goes with this formInstanceId
-								PatientState patientState = 
-									org.openmrs.module.atd.util.Util.getProducePatientStateByFormInstanceAction(formInstance);
-//								PatientState patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance,
-//								    action);
-								
-								if (patientState != null) {
-									String formName = formService.getForm(formInstance.getFormId()).getName();
-									
-									Integer sessionId = patientState.getSessionId();
-									//see if consume exists for the session
-									//if so, then it is a rescan
-									
-									String stateName = null;
-									
-									//if a form name is not configured assume JIT
-									if (patientState.getState().getFormName() != null) {
-										stateName = formName + "_process";
-									} else {
-										stateName = "JIT_process";
-									}
-									
-									State state = chirdlUtilBackportsService.getStateByName(stateName);
-									List<PatientState> patientStates = chirdlUtilBackportsService.getPatientStateBySessionState(sessionId,
-									    state.getStateId());
-									
-									if (patientStates != null && patientStates.size() > 0) {
-										//assume JIT if no form name is configured
-										if (patientState.getState().getFormName() != null) {
-											stateName = formName + "_rescan";
-										} else {
-											stateName = "JIT_rescan";
-										}
-										State currState = chirdlUtilBackportsService.getStateByName(stateName);
-										patientState = 
-											org.openmrs.module.atd.util.Util.getProducePatientStateByFormInstanceAction(
-												formInstance);
-//										patientState = chirdlUtilBackportsService.getPatientStateByFormInstanceAction(formInstance, action);
-										try {
-											patientState = chirdlUtilBackportsService.addPatientState(patientState.getPatient(), currState,
-											    patientState.getSessionId(), patientState.getLocationTagId(), patientState
-											            .getLocationId(), patientState.getFormInstance());
-											tfFileState = new TeleformFileState();
-											String newFilename = IOUtil.getDirectoryName(filename) + "/"
-											        + formInstance.toString() + "_rescan.20";
-											
-											File newFile = new File(newFilename);
-											if (newFile.exists()) {
-												IOUtil.deleteFile(newFilename);
-												//if file delete fails, don't continue processing otherwise
-												//the file will be processed more than once
-												newFile = new File(newFilename);
-												if (newFile.exists()) {
-													continue;
-												}
-											}										
-											IOUtil.renameFile(filename, newFilename);
-											//if file rename fails, don't continue processing otherwise
-											//the file will be processed more than once
-											newFile = new File(newFilename);
-											if (!newFile.exists()) {
-												continue;
-											}
-											
-											// check to make sure the original file is gone.  If not, don't continue 
-											// processing.  Otherwise the file will be processed more than once.
-											File oldFile = new File(filename);
-											if (oldFile.exists()) {
-												IOUtil.deleteFile(newFilename);
-												continue;
-											}
-											
-											tfFileState.setFullFilePath(newFilename);
-											tfFileState.setFormInstance(formInstance);
-											tfFileState.addParameter("patientState", patientState);
-											recordMedium(formInstance, filename);
-											atdService.fileProcessed(tfFileState);
-										}
-										catch (Exception e) {
-											log.error("RESCAN for formInstanceId: " + formInstance.getFormInstanceId()
-											        + " failed.");
-											log.error(Util.getStackTrace(e));
-										}
-									}
-								}
-							}
-						}
-					}
-				} catch (Exception e)
-				{
-					log.error("Error processing filename: " + filename);
-					log.error(e.getMessage());
-					log.error(Util.getStackTrace(e));
-					//unparseableFiles.add(filename);
-				}
+                                    if (!patientForms.contains(formName)&&!physicianForms.contains(formName)) {
+                                        formName = "JIT";  
+                                    }
+                                                         
+                                    String stateName = formName + "_rescan";
+                                    State currState = chirdlUtilBackportsService.getStateByName(stateName);
+                                    
+                                    try {
+                                        formInstState = chirdlUtilBackportsService.addPatientState(
+                                            formInstState.getPatient(), currState, formInstState.getSessionId(),
+                                            formInstState.getLocationTagId(), formInstState.getLocationId(),
+                                            formInstState.getFormInstance());
+                                        tfFileState = new TeleformFileState();
+                                        String newFilename = IOUtil.getDirectoryName(filename) + "/"
+                                                + formInstance.toString() + "_rescan.20";
+                                        
+                                        File newFile = new File(newFilename);
+                                        if (newFile.exists()) {
+                                            IOUtil.deleteFile(newFilename);
+                                            //if file delete fails, don't continue processing otherwise
+                                            //the file will be processed more than once
+                                            newFile = new File(newFilename);
+                                            if (newFile.exists()) {
+                                                continue;
+                                            }
+                                        }
+                                        IOUtil.renameFile(filename, newFilename);
+                                        //if file rename fails, don't continue processing otherwise
+                                        //the file will be processed more than once
+                                        newFile = new File(newFilename);
+                                        if (!newFile.exists()) {
+                                            continue;
+                                        }
+                                        
+                                        // check to make sure the original file is gone.  If not, don't continue 
+                                        // processing.  Otherwise the file will be processed more than once.
+                                        File oldFile = new File(filename);
+                                        if (oldFile.exists()) {
+                                            IOUtil.deleteFile(newFilename);
+                                            continue;
+                                        }
+                                        
+                                        tfFileState.setFullFilePath(newFilename);
+                                        tfFileState.setFormInstance(formInstance);
+                                        tfFileState.addParameter("patientState", formInstState);
+                                        recordMedium(formInstance, filename);
+                                        atdService.fileProcessed(tfFileState);
+                                    }
+                                    catch (Exception e) {
+                                        log.error(
+                                            "RESCAN for formInstanceId: " + formInstance.getFormInstanceId() + " failed.");
+                                        log.error(Util.getStackTrace(e));
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                } catch (Exception e) 
+                {
+                    log.error("Error processing filename: " + filename);
+                    log.error(e.getMessage());
+                    log.error(Util.getStackTrace(e));
+                    //unparseableFiles.add(filename);
+                }
 			}
 		}
 	}
-
+	
 	private static void processPendingStatesWithFilename(ATDService atdService) throws APIException, Exception
 	{
 		String filename = "";

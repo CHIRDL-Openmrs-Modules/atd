@@ -645,7 +645,7 @@ public class ATDServiceImpl implements ATDService
 	}
 	
 	@Override
-    public void addPatientATD(FormInstance formInstance, DssElement dssElement,
+    public PatientATD addPatientATD(FormInstance formInstance, DssElement dssElement,
 			Integer encounterId, Integer patientId) throws APIException
 	{
 		PatientATD patientATD = new PatientATD();
@@ -670,7 +670,7 @@ public class ATDServiceImpl implements ATDService
 			}
 		}
 		
-		getATDDAO().addPatientATD(patientATD);
+		return getATDDAO().addPatientATD(patientATD);
 	}
 	
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId)
@@ -728,10 +728,10 @@ public class ATDServiceImpl implements ATDService
 	{
     	getATDDAO().updateStatistics(statistics);
 	}
-	
-	public void createStatistics(Statistics statistics)
+
+	public Statistics createStatistics(Statistics statistics)
 	{
-		getATDDAO().addStatistics(statistics);
+		return getATDDAO().addStatistics(statistics);
 	}
 	
 	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName, 
@@ -746,10 +746,6 @@ public class ATDServiceImpl implements ATDService
 	
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName){
 		return getATDDAO().getStatsByEncounterForm(encounterId, formName);
-	}
-	
-	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName){
-		return getATDDAO().getAllStatsByEncounterForm(encounterId, formName);
 	}
 
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName){
@@ -961,7 +957,6 @@ public class ATDServiceImpl implements ATDService
     
     /**
 	 * This is a method I added to get around lazy initialization errors with patient.getIdentifier() in rules
-	 * Auto generated method comment
 	 * 
 	 * @param patientId
 	 * @return
@@ -1038,16 +1033,7 @@ public class ATDServiceImpl implements ATDService
     {
     	return getATDDAO().getObsWithStatistics(encounterId, conceptId, formFieldId, includeVoidedObs);
     }
-    
-    /**
-     * DWE CHICA-612
-     * @see org.openmrs.module.atd.service.ATDService#getAllStatsByEncounterForm(Integer, String, String)
-     */
-    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName, String orderAscDesc)
-    {
-    	return getATDDAO().getAllStatsByEncounterForm(encounterId, formName, orderAscDesc);
-    }
-    
+  
     /**
      * Checks to see if at least one box is checked for this rule and encounter 
      * in the atd_statistics table

@@ -21,9 +21,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
@@ -54,6 +57,7 @@ import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.module.chirdlutilbackports.hibernateBeans.LocationTagAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 
@@ -760,4 +764,30 @@ public class Util {
 		}
 		return primaryForms;
 	}
+	
+	/**
+	 * Gets all primary forms for a given location
+	 * @param attributeName
+	 * @param locationId
+	 * @return
+	 */
+	public static Set<String> getPrimaryFormNameByLocation(String attributeName, Integer locationId) {
+        Set<String> primaryFormList = new HashSet<>();
+        
+        ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
+        LocationService locService = Context.getLocationService();
+        
+        Location location = locService.getLocation(locationId);
+        Set<LocationTag> tags = location.getTags();
+        
+        for (LocationTag tag : tags) {
+            LocationTagAttributeValue locationTagAttributeValueForm = chirdlutilbackportsService
+                    .getLocationTagAttributeValue(tag.getLocationTagId(), attributeName, locationId);
+            
+            if (locationTagAttributeValueForm != null && StringUtils.isNotBlank(locationTagAttributeValueForm.getValue())) {
+                primaryFormList.add(locationTagAttributeValueForm.getValue());
+            }
+        }
+        return primaryFormList;
+    }
 }
