@@ -102,7 +102,7 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 							// This also allows us to make sure an error didn't occur while parsing the file
 							List<ConceptDescriptor> list = ImportConceptsUtil.getConcepts(file.getInputStream());
 							
-							if(list != null && !list.isEmpty())
+							if(list != null && list.size() > 0)
 							{
 								importConcepts = new ImportConceptsUtil(file.getInputStream());
 								Thread thread = new Thread(importConcepts);
