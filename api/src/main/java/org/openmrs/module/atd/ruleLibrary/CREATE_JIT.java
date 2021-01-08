@@ -1,6 +1,7 @@
 package org.openmrs.module.atd.ruleLibrary;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,12 +12,13 @@ import org.openmrs.Patient;
 import org.openmrs.api.FormService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.Daemon;
 import org.openmrs.logic.LogicContext;
-import org.openmrs.logic.LogicException;
 import org.openmrs.logic.Rule;
 import org.openmrs.logic.result.Result;
 import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
+import org.openmrs.module.atd.ATDActivator;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
@@ -37,9 +39,10 @@ public class CREATE_JIT implements Rule
 	 * 
 	 * @see org.openmrs.logic.rule.Rule#getParameterList()
 	 */
+	@Override
 	public Set<RuleParameterInfo> getParameterList()
 	{
-		return null;
+		return new HashSet<>();
 	}
 
 	/**
@@ -47,6 +50,7 @@ public class CREATE_JIT implements Rule
 	 * 
 	 * @see org.openmrs.logic.rule.Rule#getDependencies()
 	 */
+	@Override
 	public String[] getDependencies()
 	{
 		return new String[]
@@ -58,6 +62,7 @@ public class CREATE_JIT implements Rule
 	 * 
 	 * @see org.openmrs.logic.rule.Rule#getTTL()
 	 */
+	@Override
 	public int getTTL()
 	{
 		return 0; // 60 * 30; // 30 minutes
@@ -68,6 +73,7 @@ public class CREATE_JIT implements Rule
 	 * 
 	 * @see org.openmrs.logic.Rule#getDefaultDatatype()
 	 */
+	@Override
 	public Datatype getDefaultDatatype()
 	{
 		return Datatype.CODED;
@@ -78,9 +84,37 @@ public class CREATE_JIT implements Rule
 	 * 
 	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, java.lang.Integer, java.util.Map)
 	 */
+	@Override
 	public Result eval(LogicContext context, Integer patientId,
-			Map<String, Object> parameters) throws LogicException
+			Map<String, Object> parameters)
 	{
+		FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
+		Integer locationId = formInstance.getLocationId();
+		Object asynchronousCreation = parameters.get("param5");
+		// Run asynchronously if value is empty or true
+		if (asynchronousCreation == null || 
+				(asynchronousCreation instanceof String 
+						&& ChirdlUtilConstants.GENERAL_INFO_TRUE.equalsIgnoreCase((String)asynchronousCreation))) {
+			Runnable runnable = () -> {
+				createJit(patientId, parameters, locationId);
+			};
+			
+			Daemon.runInDaemonThread(runnable, ATDActivator.daemonToken);
+			return Result.emptyResult();
+		}
+		
+		return createJit(patientId, parameters, locationId);
+	}
+	
+	/**
+	 * Creates a JIT.
+	 * 
+	 * @param patientId The patient identifier the JIT belongs to
+	 * @param parameters Map of parameters containing information required for the JIT creation
+	 * @param locationId The location identifier
+	 * @return Result object containing the form instance information if successful or empty result if not
+	 */
+	private Result createJit(Integer patientId, Map<String, Object> parameters, Integer locationId) {
 		PatientService patientService = Context.getPatientService();
 		FormService formService = Context.getFormService();
 		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
@@ -97,8 +131,6 @@ public class CREATE_JIT implements Rule
 		}
 		
 		Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
-		FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
-		Integer locationId = formInstance.getLocationId();
 		State currState = getCreateState(formName, locationTagId, locationId);
 		if (currState == null) {
 			return Result.emptyResult();
@@ -106,19 +138,19 @@ public class CREATE_JIT implements Rule
 			
 		try {
 			
-			HashMap<String,Object> actionParameters = new HashMap<String,Object>();
-			if (triggerObject != null && triggerObject instanceof String){
-				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, (String) triggerObject);
+			HashMap<String,Object> actionParameters = new HashMap<>();
+			if (triggerObject instanceof String){
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, triggerObject);
 			}
 			
-			if (autoPrintObject != null && autoPrintObject instanceof String){
-				actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, (String) autoPrintObject);
+			if (autoPrintObject instanceof String){
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrintObject);
 			}
 			
 			if (ignoreJitCreatedObject == null || !(ignoreJitCreatedObject instanceof String)
 							|| !((String)ignoreJitCreatedObject).trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
 						
-				Session session = chirdlUtilBackportsService.getSession(sessionId);
+				Session session = chirdlUtilBackportsService.getSession(sessionId.intValue());
 				PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(session.getEncounterId(), formService.getForm(formName).getFormId());
 							
 				if (patientState != null){
@@ -139,7 +171,7 @@ public class CREATE_JIT implements Rule
         	}
         }
         catch (Exception e) {
-            log.error("Error creating JIT",e);
+            this.log.error("Error creating JIT",e);
         }
 	
 		if (formInstTag != null) {
@@ -154,7 +186,7 @@ public class CREATE_JIT implements Rule
 		String stateName = ChirdlUtilConstants.STATE_JIT_CREATE;
 		Form form = Context.getFormService().getForm(formName);
 		if (form == null) {
-			log.error("No form found with name: " + formName);
+			this.log.error("No form found with name: " + formName);
 			return null;
 		}
 		
@@ -168,7 +200,6 @@ public class CREATE_JIT implements Rule
 			stateName = ChirdlUtilConstants.STATE_JIT_MOBILE_CREATE;
 		}
 		
-		State currState = chirdlUtilBackportsService.getStateByName(stateName);
-		return currState;
+		return chirdlUtilBackportsService.getStateByName(stateName);
 	}
 }
