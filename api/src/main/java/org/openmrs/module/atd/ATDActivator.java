@@ -21,7 +21,6 @@ import org.openmrs.module.chirdlutil.util.Util;
 public class ATDActivator extends BaseModuleActivator implements DaemonTokenAware {
 
 	private Log log = LogFactory.getLog(this.getClass());
-	public static DaemonToken daemonToken = null;
 	
 	/**
 	 * @see org.openmrs.module.BaseModuleActivator#started()
@@ -78,7 +77,7 @@ public class ATDActivator extends BaseModuleActivator implements DaemonTokenAwar
 	 */
 	@Override
 	public void setDaemonToken(DaemonToken token) {
-		daemonToken = token;
+		org.openmrs.module.atd.util.Util.setDaemonToken(token);
 	}
 	
 }

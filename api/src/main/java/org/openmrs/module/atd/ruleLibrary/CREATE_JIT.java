@@ -18,7 +18,7 @@ import org.openmrs.logic.Rule;
 import org.openmrs.logic.result.Result;
 import org.openmrs.logic.result.Result.Datatype;
 import org.openmrs.logic.rule.RuleParameterInfo;
-import org.openmrs.module.atd.ATDActivator;
+import org.openmrs.module.atd.util.Util;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutilbackports.BaseStateActionHandler;
 import org.openmrs.module.chirdlutilbackports.StateManager;
@@ -95,11 +95,9 @@ public class CREATE_JIT implements Rule
 		if (asynchronousCreation == null || 
 				(asynchronousCreation instanceof String 
 						&& ChirdlUtilConstants.GENERAL_INFO_TRUE.equalsIgnoreCase((String)asynchronousCreation))) {
-			Runnable runnable = () -> {
-				createJit(patientId, parameters, locationId);
-			};
+			Runnable runnable = () -> createJit(patientId, parameters, locationId);
 			
-			Daemon.runInDaemonThread(runnable, ATDActivator.daemonToken);
+			Daemon.runInDaemonThread(runnable, Util.getDaemonToken());
 			return Result.emptyResult();
 		}
 		
