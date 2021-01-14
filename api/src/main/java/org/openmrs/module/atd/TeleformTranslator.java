@@ -451,9 +451,6 @@ public class TeleformTranslator
 			fieldToResult.put(currFormField, null);//initially map field with no result
 			
 			Field currField = currFormField.getField();
-
-			//fix lazy initialization error
-			currField = formService.getField(currField.getFieldId());
 			
 			defaultValue = currField.getDefaultValue();
 			if(defaultValue == null)
@@ -576,8 +573,7 @@ public class TeleformTranslator
 		{
 			resultString = null;
 			
-			//fix lazy initialization error
-			Field currField = formService.getField(currFormField.getField().getFieldId());
+			Field currField = currFormField.getField();
 			String fieldName = currField.getName();
 			Object fieldResult = fieldToResult.get(currFormField);
 			

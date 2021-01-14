@@ -8,6 +8,8 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
+import org.openmrs.module.DaemonToken;
+import org.openmrs.module.DaemonTokenAware;
 import org.openmrs.module.chirdlutil.util.Util;
 
 /**
@@ -16,13 +18,14 @@ import org.openmrs.module.chirdlutil.util.Util;
  * 
  * @author Tammy Dugan
  */
-public class ATDActivator extends BaseModuleActivator {
+public class ATDActivator extends BaseModuleActivator implements DaemonTokenAware {
 
 	private Log log = LogFactory.getLog(this.getClass());
 	
 	/**
 	 * @see org.openmrs.module.BaseModuleActivator#started()
 	 */
+	@Override
 	public void started() {
 		try
 		{
@@ -64,8 +67,17 @@ public class ATDActivator extends BaseModuleActivator {
 	/**
 	 * @see org.openmrs.module.BaseModuleActivator#stopped()
 	 */
+	@Override
 	public void stopped() {
 		this.log.info("Shutting down ATD Module");
+	}
+
+	/**
+	 * @see org.openmrs.module.DaemonTokenAware#setDaemonToken(org.openmrs.module.DaemonToken)
+	 */
+	@Override
+	public void setDaemonToken(DaemonToken token) {
+		org.openmrs.module.atd.util.Util.setDaemonToken(token);
 	}
 	
 }

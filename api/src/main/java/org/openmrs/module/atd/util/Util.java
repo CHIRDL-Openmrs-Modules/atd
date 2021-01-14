@@ -44,6 +44,7 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.DaemonToken;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
@@ -76,6 +77,7 @@ public class Util {
 	private static Log log = LogFactory.getLog(Util.class);
 	protected static final String ESCAPE_BACKSLASH = "&#092";
 	protected static final String ESCAPE_BACKSLASH_EXPORT = "\\\\";
+	private static DaemonToken daemonToken;
 	
 	public static int getMaxDssElements(Integer formId, Integer locationTagId, Integer locationId) {
 		String propertyValue = null;
@@ -790,4 +792,18 @@ public class Util {
         }
         return primaryFormList;
     }
+	
+	/**
+	 * @return the daemonToken
+	 */
+	public static DaemonToken getDaemonToken() {
+		return daemonToken;
+	}
+	
+	/**
+	 * @param daemonToken the daemonToken to set
+	 */
+	public static void setDaemonToken(DaemonToken daemonToken) {
+		Util.daemonToken = daemonToken;
+	}
 }
