@@ -13,9 +13,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.openmrs.api.context.Daemon;
 import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.ImportConceptsUtil;
+import org.openmrs.module.atd.util.Util;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
@@ -105,8 +107,7 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 							if(list != null && list.size() > 0)
 							{
 								importConcepts = new ImportConceptsUtil(file.getInputStream());
-								Thread thread = new Thread(importConcepts);
-								thread.start();
+								Daemon.runInDaemonThread(importConcepts, Util.getDaemonToken());
 
 								session.setAttribute(IMPORT_CONCEPTS_ATTRIB, importConcepts);
 								returnMap.put(IMPORT_STARTED, true);
