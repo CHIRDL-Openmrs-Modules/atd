@@ -25,13 +25,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
 import org.openmrs.module.chirdlutil.threadmgmt.ChirdlRunnable;
-import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
@@ -71,44 +69,39 @@ public class FormWriter implements ChirdlRunnable {
 	/**
 	 * @see java.lang.Runnable#run()
 	 */
+	@Override
 	public void run() {
-		log.info("Started execution of " + getName() + "(" + Thread.currentThread().getName() + ", "
+		this.log.info("Started execution of " + getName() + "(" + Thread.currentThread().getName() + ", "
 		        + new Timestamp(new Date().getTime()) + ")");
-		Context.openSession();
         try {
-            
-            Context.authenticate(org.openmrs.module.chirdlutilbackports.util.Util.decryptGlobalProperty(ChirdlUtilConstants.GLOBAL_PROPERTY_SCHEDULER_USERNAME),
-            org.openmrs.module.chirdlutilbackports.util.Util.decryptGlobalProperty(ChirdlUtilConstants.GLOBAL_PROPERTY_SCHEDULER_PASSPHRASE));
-
-            Integer locationId = formInstance.getLocationId();
-            Integer formId = formInstance.getFormId();
+            Integer locationId = this.formInstance.getLocationId();
+            Integer formId = this.formInstance.getFormId();
             String scanDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
-                    .getFormAttributeValue(formId, "defaultExportDirectory", locationTagId, locationId));
+                    .getFormAttributeValue(formId, "defaultExportDirectory", this.locationTagId, locationId));
             if (scanDirectory == null) {
-                log.info("No defaultExportDirectory found for Form: " + formId + " Location ID: " + locationId
-                        + " Location Tag ID: " + locationTagId + ".  No scan XML file will be created.");
+                this.log.info("No defaultExportDirectory found for Form: " + formId + " Location ID: " + locationId
+                        + " Location Tag ID: " + this.locationTagId + ".  No scan XML file will be created.");
                 return;
             }
 
-            File file = new File(scanDirectory, formInstance.toString() + ".20");
+            File file = new File(scanDirectory, this.formInstance.toString() + ".20");
             Records records = null;
             if (file.exists()) {
                 records = parseTeleformXmlFormat(file);
-                records = addFields(records, fieldsToAdd, fieldsToRemove); // DWE CHICA-430 Added fieldsToRemove
+                records = addFields(records, this.fieldsToAdd, this.fieldsToRemove); // DWE CHICA-430 Added fieldsToRemove
             } else {
                 Record record = new Record();
                 records = new Records(record);
-                for (Field field : fieldsToAdd) {
+                for (Field field : this.fieldsToAdd) {
                     record.addField(field);
                 }
             }
 
             serializeTeleformXmlFormat(records, file);
         } catch (ContextAuthenticationException e) {
-            log.error("Error authenticating user", e);
+            this.log.error("Error authenticating user", e);
         } finally {
-            Context.closeSession();
-            log.info("Finished execution of " + getName() + "(" + Thread.currentThread().getName() + ", "
+            this.log.info("Finished execution of " + getName() + "(" + Thread.currentThread().getName() + ", "
                     + new Timestamp(new Date().getTime()) + ")");
         }
 	}
@@ -116,14 +109,16 @@ public class FormWriter implements ChirdlRunnable {
 	/**
 	 * @see org.openmrs.module.chirdlutil.threadmgmt.ChirdlRunnable#getName()
 	 */
+	@Override
 	public String getName() {
-		return "Form Writer (Form: " + formInstance.getFormId() + " Location ID: " + formInstance.getLocationId() + 
-				" Location Tag ID: " + locationTagId + ")";
+		return "Form Writer (Form: " + this.formInstance.getFormId() + " Location ID: " + this.formInstance.getLocationId() + 
+				" Location Tag ID: " + this.locationTagId + ")";
 	}
 	
 	/**
 	 * @see org.openmrs.module.chirdlutil.threadmgmt.ChirdlRunnable#getPriority()
 	 */
+	@Override
 	public int getPriority() {
 		return ChirdlRunnable.PRIORITY_FIVE;
 	}

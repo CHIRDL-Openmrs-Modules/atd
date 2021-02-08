@@ -168,14 +168,10 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 	 * and allow the user to cancel the import 
 	 */ 
 	private void createConceptsFromFile() {
-		Context.openSession();
 		try
 		{
 		List<ConceptDescriptor> conceptDescriptorsToLink = new ArrayList<>();
 		ConceptService conceptService = Context.getConceptService();
-		
-        Context.authenticate(org.openmrs.module.chirdlutilbackports.util.Util.decryptGlobalProperty(ChirdlUtilConstants.GLOBAL_PROPERTY_SCHEDULER_USERNAME),
-        org.openmrs.module.chirdlutilbackports.util.Util.decryptGlobalProperty(ChirdlUtilConstants.GLOBAL_PROPERTY_SCHEDULER_PASSPHRASE));
 		
 		try {
 		    
@@ -338,10 +334,6 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 		{
 			errorOccurred = true;
 			log.error("Error authenticating context.", e);
-		}
-		finally
-		{
-			Context.closeSession();
 		}
 		
 	}
