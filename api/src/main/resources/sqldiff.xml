@@ -225,6 +225,11 @@ select a.* from
 (select count(*) as cnt from scheduler_task_config_property where name='initClass'
 and task_config_id=(select max(task_config_id) from scheduler_task_config where name='TeleformMonitor') )b
 where b.cnt=0;
+
+insert into field_type (name, description, is_set, creator, date_created, uuid)
+values ('Merge Field', 'fields populated by rules', false, 1, NOW(), UUID()), 
+('Export Field', 'fill in boxes', false, 1, NOW(), UUID()),
+('Prioritized Merge Field', 'fields populated by prioritized rules', false, 1, NOW(), UUID());
 	</sql>
    </diff>
    <diff>
