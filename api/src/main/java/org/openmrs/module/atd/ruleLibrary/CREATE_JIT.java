@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Form;
@@ -91,17 +92,29 @@ public class CREATE_JIT implements Rule
 		FormInstance formInstance = (FormInstance) parameters.get(ChirdlUtilConstants.PARAMETER_FORM_INSTANCE);
 		Integer locationId = formInstance.getLocationId();
 		Object asynchronousCreation = parameters.get("param5");
+		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
+		Object triggerObject = parameters.get(ChirdlUtilConstants.PARAMETER_2);
+		Object autoPrintObject = parameters.get(ChirdlUtilConstants.PARAMETER_3);
+		Object ignoreJitCreatedObject = parameters.get(ChirdlUtilConstants.PARAMETER_4);
+		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
+		Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
+		
+		final String trigger = (String)triggerObject;
+		final String autoPrint = (String)autoPrintObject;
+		final String ignoreJitCreated = (String)ignoreJitCreatedObject;
 		// Run asynchronously if value is empty or true
 		if (asynchronousCreation == null || 
 				(asynchronousCreation instanceof String 
 						&& ChirdlUtilConstants.GENERAL_INFO_TRUE.equalsIgnoreCase((String)asynchronousCreation))) {
-			Runnable runnable = () -> createJit(patientId, parameters, locationId);
+			Runnable runnable = () -> createJit(
+				patientId, locationId, formName, trigger, autoPrint, ignoreJitCreated, sessionId, locationTagId);
 			
 			Daemon.runInDaemonThread(runnable, Util.getDaemonToken());
 			return Result.emptyResult();
 		}
 		
-		return createJit(patientId, parameters, locationId);
+		return createJit(
+			patientId, locationId, formName, trigger, autoPrint, ignoreJitCreated, sessionId, locationTagId);
 	}
 	
 	/**
@@ -110,25 +123,25 @@ public class CREATE_JIT implements Rule
 	 * @param patientId The patient identifier the JIT belongs to
 	 * @param parameters Map of parameters containing information required for the JIT creation
 	 * @param locationId The location identifier
+	 * @param formName The form name
+	 * @param trigger How the JIT create was triggered
+	 * @param autoprint Whether or not the form should be auto-printed
+	 * @param ignoreJitCreated Whether or not to create the JIT again if it has already been created
+	 * @param sessionId The session identifier
+	 * @param locationTagId The location tag identifier
 	 * @return Result object containing the form instance information if successful or empty result if not
 	 */
-	private Result createJit(Integer patientId, Map<String, Object> parameters, Integer locationId) {
+	private Result createJit(Integer patientId, Integer locationId, String formName, String trigger, 
+			String autoPrint, String ignoreJitCreated, Integer sessionId, Integer locationTagId) {
 		PatientService patientService = Context.getPatientService();
 		FormService formService = Context.getFormService();
 		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		Patient patient = patientService.getPatient(patientId);
-		String formName = (String) parameters.get(ChirdlUtilConstants.PARAMETER_1);
-		Object triggerObject = parameters.get(ChirdlUtilConstants.PARAMETER_2);
-		Object autoPrintObject = parameters.get(ChirdlUtilConstants.PARAMETER_3);
-		Object ignoreJitCreatedObject = parameters.get(ChirdlUtilConstants.PARAMETER_4); 
-		
-		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		FormInstanceTag formInstTag = null;
 		if (sessionId == null) {
 			return Result.emptyResult();
 		}
 		
-		Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
 		State currState = getCreateState(formName, locationTagId, locationId);
 		if (currState == null) {
 			return Result.emptyResult();
@@ -137,16 +150,16 @@ public class CREATE_JIT implements Rule
 		try {
 			
 			HashMap<String,Object> actionParameters = new HashMap<>();
-			if (triggerObject instanceof String){
-				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, triggerObject);
+			if (StringUtils.isNotBlank(trigger)){
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_TRIGGER, trigger);
 			}
 			
-			if (autoPrintObject instanceof String){
-				actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrintObject);
+			if (StringUtils.isNotBlank(autoPrint)){
+				actionParameters.put(ChirdlUtilConstants.PARAMETER_AUTO_PRINT, autoPrint);
 			}
 			
-			if (ignoreJitCreatedObject == null || !(ignoreJitCreatedObject instanceof String)
-							|| !((String)ignoreJitCreatedObject).trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE)){
+			if (StringUtils.isBlank(ignoreJitCreated)
+							|| !(ignoreJitCreated.trim().equalsIgnoreCase(ChirdlUtilConstants.GENERAL_INFO_TRUE))){
 						
 				Session session = chirdlUtilBackportsService.getSession(sessionId.intValue());
 				PatientState patientState = org.openmrs.module.atd.util.Util.getProducePatientStateByEncounterFormAction(session.getEncounterId(), formService.getForm(formName).getFormId());
@@ -155,7 +168,6 @@ public class CREATE_JIT implements Rule
 					return Result.emptyResult();
 
 				}
-						
 			}
 						
 			actionParameters.put(ChirdlUtilConstants.PARAMETER_FORM_NAME, formName);
