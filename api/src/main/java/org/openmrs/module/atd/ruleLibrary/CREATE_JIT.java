@@ -99,9 +99,24 @@ public class CREATE_JIT implements Rule
 		Integer sessionId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_SESSION_ID);
 		Integer locationTagId = (Integer) parameters.get(ChirdlUtilConstants.PARAMETER_LOCATION_TAG_ID); 
 		
-		final String trigger = (String)triggerObject;
-		final String autoPrint = (String)autoPrintObject;
-		final String ignoreJitCreated = (String)ignoreJitCreatedObject;
+		String initialTrigger = null;
+		if (triggerObject instanceof String) {
+			initialTrigger = (String)triggerObject;
+		}
+		
+		String initialAutoPrint = null;
+		if (autoPrintObject instanceof String) {
+			initialAutoPrint = (String)autoPrintObject;
+		}
+		
+		String initialIgnoreJitCreated = null;
+		if (ignoreJitCreatedObject instanceof String) {
+			initialIgnoreJitCreated = (String)ignoreJitCreatedObject;
+		}
+		
+		final String trigger = initialTrigger;
+		final String autoPrint = initialAutoPrint;
+		final String ignoreJitCreated = initialIgnoreJitCreated;
 		// Run asynchronously if value is empty or true
 		if (asynchronousCreation == null || 
 				(asynchronousCreation instanceof String 
