@@ -35,6 +35,7 @@ import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.Person;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
@@ -74,6 +75,7 @@ import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.hibernateBeans.RuleEntry;
 import org.openmrs.module.dss.service.DssService;
+import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
 
 /**
  * ATD related service implementations
@@ -1242,4 +1244,18 @@ public class ATDServiceImpl implements ATDService
     {
     	return getATDDAO().getFormNamesByFormAttribute(formAttrNames, formAttrValue, isRetired);
     }
+
+    /**
+     * @see org.openmrs.module.atd.service.ATDService#getObservations(java.util.List, java.util.List, java.util.List, 
+     * java.util.List, java.util.List, java.util.List, java.util.List, java.lang.Integer, java.lang.Integer, 
+     * java.util.Date, java.util.Date, boolean, java.lang.String, java.lang.String)
+     */
+	@Override
+	public List<Obs> getObservations(List<Person> whom, List<Encounter> encounters, List<Concept> questions,
+	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sort,
+	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+	        String accessionNumber, String statFormName) throws APIException {
+		return getATDDAO().getObservations(whom, encounters, questions, answers, personTypes, locations, sort, 
+			mostRecentN, obsGroupId, fromDate, toDate, includeVoidedObs, accessionNumber, statFormName);
+	}
 }
