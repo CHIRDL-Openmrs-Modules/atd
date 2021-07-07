@@ -10,11 +10,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Form;
 import org.openmrs.FormField;
+import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.Person;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.logic.result.Result;
@@ -32,6 +36,8 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
+import org.openmrs.util.PrivilegeConstants;
+import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
 
 /**
  * ATD related services
@@ -423,4 +429,54 @@ public interface ATDService
      */
 	@Authorized()
     public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException;
+	
+	/**
+	 * @see org.openmrs.api.ObsService#getObservations(java.util.List, java.util.List,
+	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.util.List,
+	 *      java.lang.Integer, java.lang.Integer, java.util.Date, java.util.Date, boolean)
+	 *
+	 * This method works exactly the same; it only adds accession number search criteria.
+	 * It effectively surpasses the above method; the old one is however kept for backward
+	 * compatibility reasons.
+	 *
+	 * @param whom List&lt;Person&gt; to restrict obs to (optional)
+	 * @param encounters List&lt;Encounter&gt; to restrict obs to (optional)
+	 * @param questions List&lt;Concept&gt; to restrict the obs to (optional)
+	 * @param answers List&lt;Concept&gt; to restrict the valueCoded to (optional)
+	 * @param personTypes List&lt;PERSON_TYPE&gt; objects to restrict this to. Only used if
+	 *            <code>whom</code> is an empty list (optional)
+	 * @param locations The org.openmrs.Location objects to restrict to (optional)
+	 * @param sort list of column names to sort on (obsId, obsDatetime, etc) if null, defaults to
+	 *            obsDatetime (optional)
+	 * @param mostRecentN restrict the number of obs returned to this size (optional)
+	 * @param obsGroupId the Obs.getObsGroupId() to this integer (optional)
+	 * @param fromDate the earliest Obs date to get (optional)
+	 * @param toDate the latest Obs date to get (optional)
+	 * @param includeVoidedObs true/false whether to also include the voided obs (required)
+	 * @param accessionNumber accession number (optional)
+	 * @param statFormName the name of the form from the atd_statistics table (optional)
+	 * @return list of Observations that match all of the criteria given in the arguments
+	 * @since 1.12
+	 * @throws APIException
+	 * @should compare dates using lte and gte
+	 * @should get all obs assigned to given encounters
+	 * @should get all obs with question concept in given questions parameter
+	 * @should get all obs with answer concept in given answers parameter
+	 * @should return all obs whose person is a person only
+	 * @should return obs whose person is a patient only
+	 * @should return obs whose person is a user only
+	 * @should return obs with location in given locations parameter
+	 * @should sort returned obs by obsDatetime if sort is empty
+	 * @should sort returned obs by conceptId if sort is concept
+	 * @should limit number of obs returned to mostReturnN parameter
+	 * @should return obs whose groupId is given obsGroupId
+	 * @should not include voided obs
+	 * @should include voided obs if includeVoidedObs is true
+	 * @should only return observations with matching accession number
+	 */
+	@Authorized(PrivilegeConstants.GET_OBS)
+	public List<Obs> getObservations(List<Person> whom, List<Encounter> encounters, List<Concept> questions,
+	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sort,
+	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+	        String accessionNumber, String statFormName) throws APIException;
 }

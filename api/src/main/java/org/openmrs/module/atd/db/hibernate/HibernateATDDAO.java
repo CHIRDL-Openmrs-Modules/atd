@@ -9,21 +9,34 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 import org.hibernate.jdbc.Work;
 import org.hibernate.type.BooleanType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.TimestampType;
+import org.openmrs.Concept;
+import org.openmrs.ConceptName;
+import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.Person;
+import org.openmrs.User;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
@@ -43,6 +56,7 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.service.DssService;
+import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
 
 /**
  * Hibernate implementations of ATD database methods.
@@ -1677,4 +1691,161 @@ public class HibernateATDDAO implements ATDDAO
 		
 		return list;
     }
+    
+    /**
+	 * @see org.openmrs.api.db.ObsDAO#getObservations(List, List, List, List, List, List, List,
+	 *      Integer, Integer, Date, Date, boolean, String)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Obs> getObservations(List<Person> whom, List<Encounter> encounters, List<Concept> questions,
+	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sortList,
+	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+	        String accessionNumber, String statFormName) throws DAOException {
+		
+		Criteria criteria = createGetObservationsCriteria(whom, encounters, questions, answers, personTypes, locations,
+		    sortList, mostRecentN, obsGroupId, fromDate, toDate, null, includeVoidedObs, accessionNumber, statFormName);
+		
+		return criteria.list();
+	}
+    
+    private Criteria createGetObservationsCriteria(List<Person> whom, List<Encounter> encounters, List<Concept> questions,
+	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sortList,
+	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, List<ConceptName> valueCodedNameAnswers,
+	        boolean includeVoidedObs, String accessionNumber, String statFormName) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class, "obs");
+		
+		if (CollectionUtils.isNotEmpty(whom)) {
+			if (whom.size() > 1) {
+				criteria.add(Restrictions.in("person", whom));
+			} else {
+				criteria.add(Restrictions.eq("person", whom.get(0)));
+			}
+		}
+		
+		if (CollectionUtils.isNotEmpty(encounters)) {
+			if (encounters.size() > 1) {
+				criteria.add(Restrictions.in("encounter", encounters));
+			} else {
+				criteria.add(Restrictions.eq("encounter", encounters.get(0)));
+			}
+		}
+		
+		if (CollectionUtils.isNotEmpty(questions)) {
+			criteria.add(Restrictions.in("concept", questions));
+		}
+		
+		if (CollectionUtils.isNotEmpty(answers)) {
+			if (answers.size() > 1) {
+				criteria.add(Restrictions.in("valueCoded", answers));
+			} else {
+				criteria.add(Restrictions.eq("valueCoded", answers.get(0)));
+			}
+		}
+		
+		if (CollectionUtils.isNotEmpty(personTypes)) {
+			getCriteriaPersonModifier(criteria, personTypes);
+		}
+		
+		if (CollectionUtils.isNotEmpty(locations)) {
+			if (locations.size() > 1) {
+				criteria.add(Restrictions.in("location", locations));
+			} else {
+				criteria.add(Restrictions.eq("location", locations.get(0)));
+			}
+		}
+		
+		if (CollectionUtils.isNotEmpty(sortList)) {
+			for (String sort : sortList) {
+				if (StringUtils.isNotEmpty(sort)) {
+					// Split the sort, the field name shouldn't contain space char, so it's safe
+					String[] split = sort.split(" ", 2);
+					String fieldName = split[0];
+					
+					if (split.length == 2 && "asc".equals(split[1])) {
+						/* If asc is specified */
+						criteria.addOrder(Order.asc(fieldName));
+					} else {
+						/* If the field hasn't got ordering or desc is specified */
+						criteria.addOrder(Order.desc(fieldName));
+					}
+				}
+			}
+		}
+		
+		if (mostRecentN != null && mostRecentN > 0) {
+			criteria.setMaxResults(mostRecentN);
+		}
+		
+		if (obsGroupId != null) {
+			criteria.createAlias("obsGroup", "og");
+			criteria.add(Restrictions.eq("og.obsId", obsGroupId));
+		}
+		
+		if (fromDate != null) {
+			criteria.add(Restrictions.ge("obsDatetime", fromDate));
+		}
+		
+		if (toDate != null) {
+			criteria.add(Restrictions.le("obsDatetime", toDate));
+		}
+		
+		if (CollectionUtils.isNotEmpty(valueCodedNameAnswers)) {
+			if (valueCodedNameAnswers.size() > 1) {
+				criteria.add(Restrictions.in("valueCodedName", valueCodedNameAnswers));
+			} else {
+				criteria.add(Restrictions.eq("valueCodedName", valueCodedNameAnswers.get(0)));
+			}
+		}
+		
+		if (!includeVoidedObs) {
+			criteria.add(Restrictions.eq("voided", false));
+		}
+		
+		if (accessionNumber != null) {
+			criteria.add(Restrictions.eq("accessionNumber", accessionNumber));
+		}
+		
+		if (StringUtils.isNotBlank(statFormName) && CollectionUtils.isNotEmpty(encounters)) {
+			List<Integer> encounterIds = new ArrayList<>();
+			for (Encounter encounter : encounters) {
+				encounterIds.add(encounter.getEncounterId());
+			}
+			
+			DetachedCriteria subQuery = DetachedCriteria.forClass(Statistics.class, "stats").
+					add(Restrictions.eq("stats.formName", statFormName));
+					
+			if (encounters.size() > 1 ) {
+				subQuery.add(Restrictions.in("stats.encounterId", encounterIds));
+			} else {
+				subQuery.add(Restrictions.eq("stats.encounterId", encounterIds.get(0)));
+			}
+					
+			subQuery.setProjection(Projections.property("stats.obsvId"));
+			criteria.add(Subqueries.propertyIn("obsId", subQuery));
+		}
+		
+		return criteria;
+	}
+	
+	private Criteria getCriteriaPersonModifier(Criteria criteria, List<PERSON_TYPE> personTypes) {
+		if (personTypes.contains(PERSON_TYPE.PATIENT)) {
+			DetachedCriteria crit = DetachedCriteria.forClass(Patient.class, "patient").setProjection(
+			    Property.forName("patientId"));
+			criteria.add(Subqueries.propertyIn("person.personId", crit));
+		}
+		
+		if (personTypes.contains(PERSON_TYPE.USER)) {
+			DetachedCriteria crit = DetachedCriteria.forClass(User.class, "user").setProjection(Property.forName("userId"));
+			criteria.add(Subqueries.propertyIn("person.personId", crit));
+		}
+		
+		if (personTypes.contains(PERSON_TYPE.PERSON)) {
+			// all observations are already on person's.  Limit to non-patient and non-users here?
+			//criteria.createAlias("Person", "person");
+			//criteria.add(Restrictions.eqProperty("obs.person.personId", "person.personId"));
+		}
+		
+		return criteria;
+	}
 }

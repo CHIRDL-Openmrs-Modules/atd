@@ -5,8 +5,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
+import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.Person;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.atd.FormPrinterConfig;
 import org.openmrs.module.atd.hibernateBeans.PSFQuestionAnswer;
@@ -15,6 +19,7 @@ import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
+import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -210,4 +215,15 @@ public interface ATDDAO {
      * @return
      */
     public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException;
+    
+    /**
+	 * @see org.openmrs.module.atd.service.ATDService#getObservations(java.util.List, java.util.List,
+	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.util.List,
+	 *      java.lang.Integer, java.lang.Integer, java.util.Date, java.util.Date, boolean,
+	 *      java.lang.String, java.lang.String)
+	 */
+    public List<Obs> getObservations(List<Person> whom, List<Encounter> encounters, List<Concept> questions,
+	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sortList,
+	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+	        String accessionNumber, String statFormName);
 }
