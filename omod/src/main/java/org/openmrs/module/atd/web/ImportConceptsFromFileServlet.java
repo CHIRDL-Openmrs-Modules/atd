@@ -12,12 +12,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.api.context.Daemon;
 import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.ImportConceptsUtil;
 import org.openmrs.module.atd.util.Util;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
