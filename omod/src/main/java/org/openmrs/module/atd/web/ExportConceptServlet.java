@@ -12,11 +12,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * DWE CHICA-330 4/20/15
