@@ -14,8 +14,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
-import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
+import org.openmrs.module.chirdlutil.util.ConceptDescriptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

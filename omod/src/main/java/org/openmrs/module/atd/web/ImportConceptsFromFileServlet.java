@@ -14,9 +14,9 @@ import javax.servlet.http.HttpSession;
 
 import org.openmrs.api.context.Daemon;
 import org.openmrs.module.atd.util.AtdConstants;
-import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.ImportConceptsUtil;
 import org.openmrs.module.atd.util.Util;
+import org.openmrs.module.chirdlutil.util.ConceptDescriptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
