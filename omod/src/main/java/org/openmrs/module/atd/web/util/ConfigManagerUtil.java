@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.api.AdministrationService;
@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ConfigManagerUtil {
     
-    private static final Log LOG = LogFactory.getLog(ConfigManagerUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigManagerUtil.class);
 
 	public static Form loadTeleformFile(MultipartFile multipartFile, String formName) throws Exception {
 		Form form = null;

@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.Record;
@@ -45,7 +45,7 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
  */
 public class FormWriter implements ChirdlRunnable {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(FormWriter.class);
 	private FormInstance formInstance;
 	private Integer locationTagId;
 	private List<Field> fieldsToAdd;

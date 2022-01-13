@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.FieldType;
@@ -75,7 +75,7 @@ import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
  */
 public class Util {
 	
-	private static Log log = LogFactory.getLog(Util.class);
+	private static final Logger log = LoggerFactory.getLogger(Util.class);
 	protected static final String ESCAPE_BACKSLASH = "&#092";
 	protected static final String ESCAPE_BACKSLASH_EXPORT = "\\\\";
 	private static DaemonToken daemonToken;
@@ -524,7 +524,7 @@ public class Util {
 			csvWriter.close();
 			
 		} catch (IOException e) {
-			log.error(e);
+			log.error("Error exporting form Attribute value to csv", e);
 			throw e;
 		}
 
@@ -568,7 +568,7 @@ public class Util {
 			csvWriter.close();
 			
 		} catch (IOException e) {
-			log.error(e);
+			log.error("Error exporting concepts to csv", e);
 			throw e;
 		}
 	}
@@ -610,7 +610,7 @@ public class Util {
 		}
 		csvWriter.close();
 		}catch(IOException e){
-			log.error(e);
+			log.error("Error exporting form definiton to csv", e);
 			throw e;
 		}
 	}
@@ -648,7 +648,7 @@ public class Util {
 			}
 		}
 		catch (Exception e) {
-			log.error(e);
+			log.error("Error getting form attributes from csv", e);
 			throw e;
 		}
 		return favList;

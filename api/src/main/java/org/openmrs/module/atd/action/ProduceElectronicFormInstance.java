@@ -13,8 +13,8 @@
  */
 package org.openmrs.module.atd.action;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
@@ -32,7 +32,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class ProduceElectronicFormInstance extends ProduceFormInstance {
 	
-	private static Log log = LogFactory.getLog(ProduceElectronicFormInstance.class);
+	private static final Logger log = LoggerFactory.getLogger(ProduceElectronicFormInstance.class);
 
 	/**
 	 * @see org.openmrs.module.atd.action.ProduceFormInstance#produceForm(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.Integer, org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance, org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState, org.openmrs.Patient, java.lang.String, org.openmrs.module.atd.service.ATDService)

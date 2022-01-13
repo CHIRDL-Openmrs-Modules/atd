@@ -6,8 +6,8 @@ package org.openmrs.module.atd.action;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Form;
 import org.openmrs.Patient;
 import org.openmrs.api.FormService;
@@ -32,7 +32,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class WaitForScan implements ProcessStateAction {
 
-	private static Log log = LogFactory.getLog(WaitForScan.class);
+	private static final Logger log = LoggerFactory.getLogger(WaitForScan.class);
 
 	/*
 	 * (non-Javadoc)

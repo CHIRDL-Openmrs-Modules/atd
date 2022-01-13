@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.Field;
 import org.openmrs.FieldType;
@@ -47,7 +47,7 @@ import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
  */
 public class CreateFormUtil {
 	
-	private static Log log = LogFactory.getLog(CreateFormUtil.class);
+	private static final Logger log = LoggerFactory.getLogger(CreateFormUtil.class);
 	
 	public static Collection<Form> createFormsFromCSVFile(InputStream inputStream) {
 		HashMap<String, HashMap<String,FormDescriptor>> formNameFieldNameDescriptorMap = new HashMap<String, HashMap<String,FormDescriptor>> ();
@@ -128,8 +128,7 @@ public class CreateFormUtil {
 			}
 		}
 		catch (Exception e) {
-			log.error(e.getMessage());
-			log.error(e);
+			log.error(e.getMessage(), e);
 		}
 		
 		for(HashMap<String,FormDescriptor> fieldNameDescriptorMap:formNameFieldNameDescriptorMap.values()){
@@ -211,7 +210,7 @@ public class CreateFormUtil {
 		}
 		catch (Exception e) {
 			
-			log.error(e);
+			log.error("Error parsing csv file", e);
 		}
 		finally {
 			inputStream.close();

@@ -19,8 +19,8 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Patient;
@@ -54,7 +54,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
 
 public class TeleformFileMonitor extends AbstractTask
 {
-	private static Log log = LogFactory.getLog(TeleformFileMonitor.class);
+	private static final Logger log = LoggerFactory.getLogger(TeleformFileMonitor.class);
 
 	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithFilename = new ConcurrentHashMap<FormInstance, TeleformFileState>();
 	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithoutFilename = new ConcurrentHashMap<FormInstance, TeleformFileState>();

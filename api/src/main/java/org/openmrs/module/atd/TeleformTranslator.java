@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -72,7 +72,7 @@ public class TeleformTranslator
 {
 
 	private static final String RESULT_DELIM = "^^";
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(TeleformTranslator.class);
 	
 	/**
 	 * Converts teleform template xml into an OpenMRS database form

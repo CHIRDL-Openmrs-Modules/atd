@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Patient;
@@ -35,7 +35,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class ConsumeFormInstance implements ProcessStateAction
 {
-	private static Log log = LogFactory.getLog(ConsumeFormInstance.class);
+	private static final Logger log = LoggerFactory.getLogger(ConsumeFormInstance.class);
 	
 	/* (non-Javadoc)
 	 * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#processAction(org.openmrs.module.atd.hibernateBeans.StateAction, org.openmrs.Patient, org.openmrs.module.atd.hibernateBeans.PatientState, java.util.HashMap)

@@ -19,8 +19,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.Form;
 import org.openmrs.FormField;
@@ -56,7 +56,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  *
  */
 public class FormScoringUtil {
-	private static Log log = LogFactory.getLog(Util.class);
+	private static final Logger log = LoggerFactory.getLogger(FormScoringUtil.class);
 
 	public static void scoreJit(FormInstance formInstance, Integer locationTagId, Integer encounterId, 
 	                            Patient patient) {
@@ -161,7 +161,7 @@ public class FormScoringUtil {
 				}
 			}
 			catch (Exception e) {
-				log.error("", e);
+				log.error("Error scoring JIT for formInstance "+formInstance, e);
 			}
 		}
 		

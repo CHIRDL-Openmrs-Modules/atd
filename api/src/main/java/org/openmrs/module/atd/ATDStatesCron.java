@@ -7,8 +7,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.service.ATDService;
@@ -24,7 +24,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
 
 public class ATDStatesCron extends AbstractTask
 {
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(ATDStatesCron.class);
 
 	
 	private Date lastRunDate;

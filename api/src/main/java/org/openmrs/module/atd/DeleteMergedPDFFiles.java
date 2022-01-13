@@ -19,8 +19,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
 import org.openmrs.module.chirdlutil.util.FileAgeFilter;
@@ -37,7 +37,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
  */
 public class DeleteMergedPDFFiles extends AbstractTask {
 	
-	protected static Log log = LogFactory.getLog(TeleformFileMonitor.class);
+	private static final Logger log = LoggerFactory.getLogger(TeleformFileMonitor.class);
 	
 	/**
 	 * @see org.openmrs.scheduler.tasks.AbstractTask#execute()

@@ -10,8 +10,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Field;
 import org.openmrs.FieldType;
 import org.openmrs.Form;
@@ -46,7 +46,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class EnableLocationsFormController {
 
 	/** Logger for this class and subclasses */
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(EnableLocationsFormController.class);
 
 	@RequestMapping(method = RequestMethod.GET)
 	protected String initForm(HttpServletRequest request, ModelMap map) throws Exception {

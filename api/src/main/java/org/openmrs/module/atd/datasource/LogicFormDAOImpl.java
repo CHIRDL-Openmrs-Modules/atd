@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Cohort;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
@@ -36,7 +36,7 @@ import org.openmrs.module.dss.logic.op.OperandObject;
  */
 public class LogicFormDAOImpl implements LogicFormDAO
 {
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(LogicFormDAOImpl.class);
 
 	private HashMap<FormInstance, HashMap<String, Field>> forms = null;
 

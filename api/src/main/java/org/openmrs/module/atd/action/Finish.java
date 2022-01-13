@@ -6,8 +6,8 @@ package org.openmrs.module.atd.action;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
@@ -26,7 +26,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class Finish implements ProcessStateAction {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(Finish.class);
 	
 	/* (non-Javadoc)
 	 * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#processAction(org.openmrs.module.atd.hibernateBeans.StateAction, org.openmrs.Patient, org.openmrs.module.atd.hibernateBeans.PatientState, java.util.HashMap)
@@ -66,8 +66,7 @@ public class Finish implements ProcessStateAction {
 			}
 		}
 		catch (Exception e) {
-			log.error(e.getMessage());
-			log.error(e);
+			log.error("Error occurred in getting form data source", e);
 		} finally {
 			StateManager.endState(patientState);
 		}
