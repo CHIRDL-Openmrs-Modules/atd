@@ -524,7 +524,7 @@ public class Util {
 			csvWriter.close();
 			
 		} catch (IOException e) {
-			log.error("Error exporting form Attribute value to csv", e);
+			log.error("Error exporting form attribute value to csv", e);
 			throw e;
 		}
 

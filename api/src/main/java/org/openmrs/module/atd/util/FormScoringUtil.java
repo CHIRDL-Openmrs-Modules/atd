@@ -99,7 +99,7 @@ public class FormScoringUtil {
 			answersByLanguage = formConfig.getLanguageAnswers();
 		}
 		catch (IOException e1) {
-			log.error("", e1);
+			log.error("Error scoring JIT", e1);
 			return;
 		}
 		HashMap<String, Field> langFieldsToConsume = Util.getLanguageFieldsToConsume(fieldMap, formInstance,

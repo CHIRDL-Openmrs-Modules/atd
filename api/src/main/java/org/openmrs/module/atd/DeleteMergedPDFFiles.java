@@ -37,7 +37,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
  */
 public class DeleteMergedPDFFiles extends AbstractTask {
 	
-	private static final Logger log = LoggerFactory.getLogger(TeleformFileMonitor.class);
+	private static final Logger log = LoggerFactory.getLogger(DeleteMergedPDFFiles.class);
 	
 	/**
 	 * @see org.openmrs.scheduler.tasks.AbstractTask#execute()

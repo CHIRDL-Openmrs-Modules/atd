@@ -128,7 +128,7 @@ public class CreateFormUtil {
 			}
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			log.error("Error creating forms from csv", e);
 		}
 		
 		for(HashMap<String,FormDescriptor> fieldNameDescriptorMap:formNameFieldNameDescriptorMap.values()){

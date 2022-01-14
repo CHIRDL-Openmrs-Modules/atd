@@ -275,7 +275,7 @@ public class CheckIncompleteScoringJit implements Rule {
 				}
 			}
 			catch (Exception e) {
-				log.error("", e);
+				log.error("Error computing JIT scores", e);
 			}
 		}
 		
