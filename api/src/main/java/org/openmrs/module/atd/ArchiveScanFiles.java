@@ -19,6 +19,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.chirdlutil.util.FileAgeFilter;
 import org.openmrs.module.chirdlutil.util.Util;
@@ -31,6 +33,8 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class ArchiveScanFiles extends ArchiveMergeFiles {
 
+	private static final Logger log = LoggerFactory.getLogger(ArchiveScanFiles.class);
+	
 	/**
 	 * @see org.openmrs.scheduler.tasks.AbstractTask#execute()
 	 */

@@ -26,8 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
 import org.openmrs.ConceptClass;
@@ -58,7 +58,7 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 	
 	private static final String LOG_UPDATED_CONCEPT = "updated concept: ";
     private static final long serialVersionUID = 1L;
-    private static Log log = LogFactory.getLog(ImportConceptsUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportConceptsUtil.class);
 	private transient InputStream inputStream;
 	private boolean isImportComplete = false;
 	private boolean importStarted = false;

@@ -23,8 +23,8 @@ import java.util.StringTokenizer;
 
 import javax.cache.Cache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -84,7 +84,7 @@ import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
  */
 public class ATDServiceImpl implements ATDService
 {
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(ATDServiceImpl.class);
 	private ATDDAO dao;
 
 	/**

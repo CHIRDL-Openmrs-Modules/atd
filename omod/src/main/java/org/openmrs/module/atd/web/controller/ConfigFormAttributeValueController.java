@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ConfigFormAttributeValueController {
 
 	/** Logger for this class and subclasses */
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(ConfigFormAttributeValueController.class);
 	
 	/** Form view */
 	private static final String FORM_VIEW = "/module/atd/configFormAttributeValue";
