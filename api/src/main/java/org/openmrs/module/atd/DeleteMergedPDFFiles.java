@@ -47,12 +47,12 @@ public class DeleteMergedPDFFiles extends AbstractTask {
 		Context.openSession();
 		
 		try {
-			log.info("Starting Delete Merged PDF Files at " + new Timestamp(new Date().getTime()));
+			log.info("Starting Delete Merged PDF Files at {}", new Timestamp(new Date().getTime()));
 			deleteMergedPDFFiles();
-			log.info("Finished Delete Merged PDF Files at " + new Timestamp(new Date().getTime()));
+			log.info("Finished Delete Merged PDF Files at {}", new Timestamp(new Date().getTime()));
 		}
 		catch (Exception e) {
-			log.info("Delete Merged PDF Files errored out at " + new Timestamp(new Date().getTime()));
+			log.info("Delete Merged PDF Files errored out at {}", new Timestamp(new Date().getTime()));
 			log.error(e.getMessage());
 			log.error(Util.getStackTrace(e));
 		}
@@ -106,18 +106,18 @@ public class DeleteMergedPDFFiles extends AbstractTask {
 	 */
 	protected void deleteFiles(File[] files, File pdfDirectory) {
 		int filesDeleted = 0;
-		log.info("Deleting files in the following directory: " + pdfDirectory.getAbsolutePath());
+		log.info("Deleting files in the following directory: {}", pdfDirectory.getAbsolutePath());
         for (File file : files) {        	
         	try {
         		IOUtil.deleteFile(file.getAbsolutePath());
             } catch (Exception e) {
-                log.error("Error deleting file: " + file.getAbsolutePath(), e);
+                log.error("Error deleting file: {}", file.getAbsolutePath(), e);
                 continue;
             }
             
             filesDeleted++;
         }
         
-        log.info("Successfully deleted " + filesDeleted + " files from " + pdfDirectory.getAbsolutePath());
+        log.info("Successfully deleted {} files from {}", filesDeleted, pdfDirectory.getAbsolutePath());
 	}
 }

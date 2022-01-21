@@ -61,8 +61,8 @@ public class PopulateFormFieldsController{
 				
 			}
 			catch (Exception e) {
-				this.log.error(e.getMessage());
-				this.log.error(Util.getStackTrace(e));
+				log.error(e.getMessage());
+				log.error(Util.getStackTrace(e));
 			}
 		}
 		return FORM_VIEW;
@@ -111,8 +111,8 @@ public class PopulateFormFieldsController{
 					}
 				}
 				catch (Exception e1) {
-					this.log.error(e1.getMessage());
-					this.log.error(Util.getStackTrace(e1));
+					log.error(e1.getMessage());
+					log.error(Util.getStackTrace(e1));
 				}
 				try {
 					if (conceptName != null && conceptName.length() > 0) {
@@ -123,8 +123,8 @@ public class PopulateFormFieldsController{
 					}
 				}
 				catch (Exception e) {
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}
 				if (defaultValue != null && defaultValue.length() > 0) {
 					currField.setDefaultValue(defaultValue);
@@ -137,8 +137,8 @@ public class PopulateFormFieldsController{
 					}
 				}
 				catch (Exception e) {
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}
 				
 				try {
@@ -150,8 +150,8 @@ public class PopulateFormFieldsController{
 					}
 				}
 				catch (Exception e) {
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}		
 				formService.saveFormField(currFormField);
 				formService.saveField(currField);			
@@ -162,8 +162,8 @@ public class PopulateFormFieldsController{
 				"Form fields modified.  Class: " + PopulateFormFieldsController.class.getCanonicalName());
 		}
 		catch (Exception e) {
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 		}
 		
 		Map<String, Object> map = new HashMap<String, Object>();

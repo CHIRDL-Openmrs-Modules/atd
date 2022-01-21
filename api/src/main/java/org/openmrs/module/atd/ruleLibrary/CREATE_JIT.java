@@ -196,7 +196,7 @@ public class CREATE_JIT implements Rule
         	}
         }
         catch (Exception e) {
-            this.log.error("Error creating JIT",e);
+            log.error("Error creating JIT",e);
         }
 	
 		if (formInstTag != null) {
@@ -211,7 +211,7 @@ public class CREATE_JIT implements Rule
 		String stateName = ChirdlUtilConstants.STATE_JIT_CREATE;
 		Form form = Context.getFormService().getForm(formName);
 		if (form == null) {
-			this.log.error("No form found with name: " + formName);
+			log.error("No form found with name: {}", formName);
 			return null;
 		}
 		

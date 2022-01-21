@@ -72,7 +72,7 @@ public class ATDStatesCron extends AbstractTask
 			ss.scheduleTask(teleformTaskDefinition); //start the TeleformMonitor task after the states are retired
 			
 			
-			log.info("ATD States were retired last on: " + this.lastRunDate.toString());
+			log.info("ATD States were retired last on: {}", this.lastRunDate.toString());
 			
 		} catch (Exception e)
 		{
@@ -86,7 +86,7 @@ public class ATDStatesCron extends AbstractTask
 	
 	private void init()
 	{
-		this.log.info("Initializing Cron job for ATD states...");
+		log.info("Initializing Cron job for ATD states...");
 		
 		
 		try
@@ -100,7 +100,7 @@ public class ATDStatesCron extends AbstractTask
 			log.error(e.getMessage());
 			log.error(Util.getStackTrace(e));
 		}
-		this.log.info("Finished initializing Cron job for ATD states.");
+		log.info("Finished initializing Cron job for ATD states.");
 	}
 	
 	@Override

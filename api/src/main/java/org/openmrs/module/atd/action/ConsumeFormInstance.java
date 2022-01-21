@@ -88,7 +88,7 @@ public class ConsumeFormInstance implements ProcessStateAction
 			startTime = System.currentTimeMillis();
 		}
 		catch (Exception e) {
-			log.error("Error consuming file: " + exportFilename);
+			log.error("Error consuming file: {}" , exportFilename);
 			log.error(e.getMessage());
 			log.error(org.openmrs.module.chirdlutil.util.Util.getStackTrace(e));
 		}

@@ -252,7 +252,7 @@ public class Util {
 		Integer formId = formInstance.getFormId();
 		Form databaseForm = formService.getForm(formId);
 		if (databaseForm == null) {
-			log.error("Could not consume teleform export xml because form " + formId + " does not exist in the database");
+			log.error("Could not consume teleform export xml because form {} does not exist in the database", formId);
 			return null;
 		}
 		

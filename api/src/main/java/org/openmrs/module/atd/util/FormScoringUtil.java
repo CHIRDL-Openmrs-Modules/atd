@@ -85,8 +85,7 @@ public class FormScoringUtil {
 		}
 		
 		if (scorableFormConfigFile == null) {
-			log.error("Could not find scorableFormConfigFile for locationId: " + locationId + " and locationTagId: "
-			        + locationTagId);
+			log.error("Could not find scorableFormConfigFile for locationId: {} and locationTagId: {}", locationId, locationTagId);
 			return;
 		}
 		
@@ -161,7 +160,7 @@ public class FormScoringUtil {
 				}
 			}
 			catch (Exception e) {
-				log.error("Error scoring JIT for formInstance "+formInstance, e);
+				log.error("Error scoring JIT for formInstance {}", formInstance, e);
 			}
 		}
 		
@@ -399,13 +398,13 @@ public class FormScoringUtil {
 					obs.setValueNumeric(Double.parseDouble(value));
 				}
 				catch (NumberFormatException e) {
-					log.error("Could not save value: " + value + " to the database for concept "
-					        + concept.getName().getName());
+					log.error("Could not save value: {} to the database for concept {}"
+					        , value, concept.getName().getName());
 				}
 			} else if (datatypeName.equalsIgnoreCase("Coded")) {
 				Concept answer = conceptService.getConceptByName(value);
 				if (answer == null) {
-					log.error(value + " is not a valid concept name. " + value + " will be stored as text.");
+					log.error("{} is not a valid concept name. {} will be stored as text.", value, value);
 					obs.setValueText(value);
 				} else {
 					obs.setValueCoded(answer);
@@ -416,7 +415,7 @@ public class FormScoringUtil {
 			obs.setEncounter(encounter);
 			obsService.saveObs(obs, "");
 		} else {
-			log.error("Concept " + conceptName + " does not exist to save score");
+			log.error("Concept {} does not exist to save score", conceptName);
 		}
 		
 	}

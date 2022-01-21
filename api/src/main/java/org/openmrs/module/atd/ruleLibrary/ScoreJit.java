@@ -59,7 +59,7 @@ public class ScoreJit implements Rule {
 		for(PatientState patientState:patientStates){
 			//if there is an open JIT_incomplete state then don't score
 			if(patientState.getEndTime()==null){
-				log.error("Cannot score jit: "+formInstance+" because it is incomplete.");
+				log.error("Cannot score jit: {} because it is incomplete.", formInstance);
 				return Result.emptyResult();
 			}
 		}

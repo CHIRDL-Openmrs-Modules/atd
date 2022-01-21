@@ -347,9 +347,9 @@ public class LogicFormDAOImpl implements LogicFormDAO
 	
 	public void clearForms() {
 	    if(forms != null && !forms.isEmpty()) {
-	        log.info("Before clearing parsedFile, No. of elements" + forms.size());
+	        log.info("Before clearing parsedFile, No. of elements {}", forms.size());
 	        forms.clear();
-	        log.info("After clearing parsedFile, No. of elements" + forms.size());
+	        log.info("After clearing parsedFile, No. of elements {}", forms.size());
 	    }
 	}
 

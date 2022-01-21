@@ -103,8 +103,7 @@ public class CheckIncompleteScoringJit implements Rule {
 			scorableFormConfigFile = scorableFormConfigAttrVal.getValue();
 		}
 		if (scorableFormConfigFile == null) {
-			this.log.error("Could not find scorableFormConfigFile for locationId: " + locationId + " and locationTagId: "
-			        + locationTagId);
+			log.error("Could not find scorableFormConfigFile for locationId: {} and locationTagId: {}", locationId, locationTagId);
 			return Result.emptyResult();
 		}
 		LanguageAnswers answersByLanguage = null;
@@ -115,7 +114,7 @@ public class CheckIncompleteScoringJit implements Rule {
 			answersByLanguage = formConfig.getLanguageAnswers();
 		}
 		catch (IOException e1) {
-			this.log.error("Error loading scoring config file "+scorableFormConfigFile, e1);
+			log.error("Error loading scoring config file {}", scorableFormConfigFile, e1);
 			return Result.emptyResult();
 		}
 		HashMap<String, Field> langFieldsToConsume = org.openmrs.module.atd.util.Util.getLanguageFieldsToConsume(fieldMap, formInstance,

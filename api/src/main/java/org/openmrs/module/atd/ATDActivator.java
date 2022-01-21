@@ -29,7 +29,7 @@ public class ATDActivator extends BaseModuleActivator implements DaemonTokenAwar
 	public void started() {
 		try
 		{
-			this.log.info("Starting ATD Module");
+			log.info("Starting ATD Module");
 			// check that all global properties are set
 			AdministrationService adminService = Context
 					.getAdministrationService();
@@ -57,9 +57,9 @@ public class ATDActivator extends BaseModuleActivator implements DaemonTokenAwar
 			}
 		} catch (Exception e)
 		{
-			this.log.error("Error checking global properties for atd module");
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error("Error checking global properties for atd module");
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 
 		}
 	}
@@ -69,7 +69,7 @@ public class ATDActivator extends BaseModuleActivator implements DaemonTokenAwar
 	 */
 	@Override
 	public void stopped() {
-		this.log.info("Shutting down ATD Module");
+		log.info("Shutting down ATD Module");
 	}
 
 	/**

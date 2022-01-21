@@ -678,7 +678,7 @@ public class HibernateATDDAO implements ATDDAO
 			}
 		}
 		catch (Exception e) {
-			log.error("Error checking to see if form " + formId + " is enabled in clinic " + locationId, e);
+			log.error("Error checking to see if form {} is enabled in clinic {}", formId, locationId, e);
 			throw new DAOException(e);
 		}
 		
@@ -1381,7 +1381,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		catch(Exception e)
 		{
-			log.error("Error in method getFormAttributeValueLocationsAndTagsMap. Error loading location ids and location tag ids (form_id = " + formId + ").", e);
+			log.error("Error in method getFormAttributeValueLocationsAndTagsMap. Error loading location ids and location tag ids (form_id = {}).", formId, e);
 		}
 		
 		return new HashMap<Integer,List<Integer>>();
