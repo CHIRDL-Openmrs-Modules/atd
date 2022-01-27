@@ -59,7 +59,7 @@ public class storeObsWithAttributes implements Rule {
 		
 		Concept concept = Context.getConceptService().getConceptByName(conceptName);
 		if (concept == null) {
-			log.error("No concept found for name: " + conceptName);
+			log.error("No concept found for name: {}", conceptName);
 			return Result.emptyResult();
 		}
 		
@@ -97,7 +97,7 @@ public class storeObsWithAttributes implements Rule {
 			
 			ObsAttribute obsAttr = service.getObsAttributeByName(attrValue);
 			if (obsAttr == null) {
-				log.error("Observation attribute not found with name " + attrValue);
+				log.error("Observation attribute not found with name {}", attrValue);
 				continue;
 			}
 			

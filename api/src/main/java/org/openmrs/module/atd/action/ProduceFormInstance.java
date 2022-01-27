@@ -114,9 +114,8 @@ public class ProduceFormInstance implements ProcessStateAction
 			currState = chirdlutilbackportsService.getStateByName(ChirdlUtilConstants.STATE_ERROR_STATE);
 			chirdlutilbackportsService.addPatientState(patient,
 					currState, sessionId,locationTagId,locationId, null);
-			log.error(formName+
-					" locationTagAttribute does not exist for locationTagId: "+
-					locationTagId+" locationId: "+locationId);
+			log.error("{} locationTagAttribute does not exist for locationTagId: {} locationId: {}", 
+					formName, locationTagId, locationId);
 			return;
 		}
 		
@@ -250,7 +249,7 @@ public class ProduceFormInstance implements ProcessStateAction
 				
 			}
 			catch (IOException e) {
-				log.error("Could not produce merge xml for file: " + mergeFilename, e);
+				log.error("Could not produce merge xml for file: {}" , mergeFilename, e);
 			}
 		}
 		
@@ -288,8 +287,7 @@ public class ProduceFormInstance implements ProcessStateAction
 			FormAttributeValue printerVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
 				formId, ChirdlUtilConstants.FORM_ATTR_DEFAULT_PRINTER, locationTagId, locationId);
 			if (printerVal == null || printerVal.getValue() == null || printerVal.getValue().trim().length() == 0) {
-				log.error("Form was set to auto-print, but there is no default printer found.  Form ID: " + formId + 
-					" Location ID: " + locationId + " Location Tag ID: " + locationTagId);
+				log.error("Form was set to auto-print, but there is no default printer found. Form ID: {} Location ID: {} Location Tag ID: {}", formId, locationId, locationTagId);
 				return;
 			}
 			
@@ -298,8 +296,7 @@ public class ProduceFormInstance implements ProcessStateAction
 			FormAttributeValue printerVal = Context.getService(ChirdlUtilBackportsService.class).getFormAttributeValue(
 				formId, ChirdlUtilConstants.FORM_ATTR_ALTERNATE_PRINTER, locationTagId, locationId);
 			if (printerVal == null || printerVal.getValue() == null || printerVal.getValue().trim().length() == 0) {
-				log.error("Form was set to auto-print to the alternate printer, but there is no alternate printer found.  Form ID: " + formId + 
-					" Location ID: " + locationId + " Location Tag ID: " + locationTagId);
+				log.error("Form was set to auto-print to the alternate printer, but there is no alternate printer found.  Form ID: {} Location ID: {} Location Tag ID: {}", formId, locationId, locationTagId);
 				return;
 			}
 			
@@ -310,7 +307,7 @@ public class ProduceFormInstance implements ProcessStateAction
 	        PrintServices.printPDFFileAsynchronous(printerName, formToPrint);
         }
         catch (IllegalArgumentException e) {
-	        log.error("Error printing PDF: " + formToPrint.getAbsolutePath() + " to printer " + printerName, e);
+	        log.error("Error printing PDF: {} to printer {}", formToPrint.getAbsolutePath(), printerName, e);
         }
 	}
 }

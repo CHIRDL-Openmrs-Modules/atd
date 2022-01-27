@@ -81,9 +81,8 @@ public class Reprint implements ProcessStateAction
 			State currState = chirdlutilbackportsService.getStateByName("ErrorState");
 			chirdlutilbackportsService.addPatientState(patient,
 					currState, sessionId,locationTagId,locationId, null);
-			log.error(formName+
-					" locationTagAttribute does not exist for locationTagId: "+
-					locationTagId+" locationId: "+locationId);
+			log.error("{} locationTagAttribute does not exist for locationTagId: {} locationId: {}",
+					formName, locationTagId, locationId);
 			return;
 		}
 		
@@ -135,9 +134,7 @@ public class Reprint implements ProcessStateAction
 					}
 				} else
 				{
-					log.error("Reprint failed for patient: "
-							+ patient.getPatientId()
-							+ " because merge directory was null.");
+					log.error("Reprint failed for patient: {} because merge directory was null.", patient.getPatientId());
 				}
 			} else {
 				StateManager.endState(patientState);

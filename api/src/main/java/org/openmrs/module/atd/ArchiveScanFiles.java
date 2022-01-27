@@ -43,12 +43,12 @@ public class ArchiveScanFiles extends ArchiveMergeFiles {
 		Context.openSession();
 		
 		try {
-			log.info("Starting Archive Scan Files at " + new Timestamp(new Date().getTime()));
+			log.info("Starting Archive Scan Files at {}", new Timestamp(new Date().getTime()));
 			archiveScanFiles();
-			log.info("Finished Archive Scan Files at " + new Timestamp(new Date().getTime()));
+			log.info("Finished Archive Scan Files at {}", new Timestamp(new Date().getTime()));
 		}
 		catch (Exception e) {
-			log.info("Archive Merge Files Errored Out at " + new Timestamp(new Date().getTime()));
+			log.info("Archive Merge Files Errored Out at {}", new Timestamp(new Date().getTime()));
 			log.error(e.getMessage());
 			log.error(Util.getStackTrace(e));
 		}

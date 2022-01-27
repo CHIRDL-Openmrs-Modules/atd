@@ -9,7 +9,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jfree.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
@@ -34,6 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping(value = "module/atd/exportFormCSV.form")
 public class ExportFormCSVController {
     
+	private static final Logger log = LoggerFactory.getLogger(ExportFormCSVController.class);
     /** Form view */
     private static final String FORM_VIEW = "/module/atd/exportFormCSV";
     
@@ -86,7 +88,7 @@ public class ExportFormCSVController {
 				}
 				catch(NumberFormatException nfe)
 				{
-				    Log.error("Error formatting selected form ID: " + selectedFormId, nfe);
+				    log.error("Error formatting selected form ID: {}", selectedFormId, nfe);
 					reloadValues(map);
 					return new ModelAndView(FORM_VIEW, map);
 				}
@@ -109,7 +111,7 @@ public class ExportFormCSVController {
 				}
 				catch(IOException e)
 				{
-				    Log.error("Error exporting form attribute values", e);
+				    log.error("Error exporting form attribute values", e);
 					map.put(AtdConstants.PARAMETER_ERROR, AtdConstants.ERROR_TYPE_SERVER);
 					reloadValues(map);
 					return new ModelAndView(FORM_VIEW, map);

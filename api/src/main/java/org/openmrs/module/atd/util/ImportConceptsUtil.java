@@ -220,7 +220,7 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 				
 				if (concept != null) {
 					currTerm.setConceptId(concept.getConceptId());
-					log.error("Could not create concept: " + conceptName.getName() + ". It already exists.");
+					log.error("Could not create concept: {}. It already exists.", conceptName.getName());
 					
 					//update the description, units, or class if they have changed
 					String oldDescription = null;
@@ -238,17 +238,17 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 					
 					if (newDescription != null && newDescription.length() > 0 && !newDescription.equals(oldDescription)) {
 						concept.addDescription(new ConceptDescription(newDescription, new Locale("en")));
-						log.info(LOG_UPDATED_CONCEPT + conceptName.getName() + ". Changed description to "+newDescription);
+						log.info("{}{}. Changed description to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newDescription);
 					}
 					if (newConceptClass != null && newConceptClass.length() > 0 && !newConceptClass.equalsIgnoreCase(oldConceptClass)) {
 						ConceptClass conceptClassObject = conceptService.getConceptClassByName(newConceptClass);
 						concept.setConceptClass(conceptClassObject);
-						log.info(LOG_UPDATED_CONCEPT + conceptName.getName() + ". Changed concept class to "+newConceptClass);
+						log.info("{}{}. Changed concept class to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newConceptClass);
 
 					}
 					if (concept instanceof ConceptNumeric&&newUnits != null && newUnits.length() > 0 && !newUnits.equals(oldUnits)) {
 						((ConceptNumeric) concept).setUnits(newUnits); 
-						log.info(LOG_UPDATED_CONCEPT + conceptName.getName() + ". Changed units to "+newUnits);
+						log.info("{}{}. Changed units to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newUnits);
 					}
 					
 					conceptService.saveConcept(concept);
@@ -328,7 +328,7 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 				errorOccurred = true;
 			}
 		} 
-		log.info("Number concepts created: " + conceptsCreated);
+		log.info("Number concepts created: {}", conceptsCreated);
 		
 		}
 		catch(ContextAuthenticationException e)

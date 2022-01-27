@@ -71,8 +71,8 @@ public class EditFieldsController
 
 			} catch (Exception e)
 			{
-				this.log.error(e.getMessage());
-				this.log.error(Util.getStackTrace(e));
+				log.error(e.getMessage());
+				log.error(Util.getStackTrace(e));
 			}
 		}
 		return FORM_VIEW;
@@ -134,8 +134,8 @@ public class EditFieldsController
 					"Form fields modified.  Class: " + EditFieldsController.class.getCanonicalName());
 			} catch (Exception e)
 			{
-				this.log.error(e.getMessage());
-				this.log.error(Util.getStackTrace(e));
+				log.error(e.getMessage());
+				log.error(Util.getStackTrace(e));
 			}
 		}
 	
@@ -164,8 +164,8 @@ public class EditFieldsController
             }
         } catch (Exception e1)
         {
-            this.log.error(e1.getMessage());
-            this.log.error(Util.getStackTrace(e1));
+            log.error(e1.getMessage());
+            log.error(Util.getStackTrace(e1));
         }
     }
     
@@ -189,8 +189,8 @@ public class EditFieldsController
             }
         } catch (Exception e)
         {
-            this.log.error(e.getMessage());
-            this.log.error(Util.getStackTrace(e));
+            log.error(e.getMessage());
+            log.error(Util.getStackTrace(e));
         }
     }
     
@@ -209,8 +209,8 @@ public class EditFieldsController
             }
         } catch (Exception e)
         {
-            this.log.error(e.getMessage());
-            this.log.error(Util.getStackTrace(e));
+            log.error(e.getMessage());
+            log.error(Util.getStackTrace(e));
         }
     }
     
@@ -234,8 +234,8 @@ public class EditFieldsController
             }
         } catch (Exception e)
         {
-            this.log.error(e.getMessage());
-            this.log.error(Util.getStackTrace(e));
+            log.error(e.getMessage());
+            log.error(Util.getStackTrace(e));
         }
     }
 }

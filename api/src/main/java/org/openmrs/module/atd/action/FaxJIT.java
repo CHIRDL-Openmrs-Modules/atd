@@ -191,8 +191,8 @@ public class FaxJIT implements ProcessStateAction {
                     chirdlutilbackportsService.saveFormInstanceAttributeValue(formInstanceAttrValue);
                 }
                 
-                log.info("Form " + formName + " was submitted to the fax web service for patient_id: " 
-                        + patient.getPatientId() + " clinic: " + clinic + " recipient: " + recipient);
+                log.info("Form {} was submitted to the fax web service for patient_id: {} clinic: {} recipient: {}" 
+                        , formName, patient.getPatientId(), clinic, recipient);
                             
             }
         }

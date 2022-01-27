@@ -178,7 +178,7 @@ public class ConfigFormAttributeValueController {
 		StringWriter w = new StringWriter();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(w, formAttributesValueMap);
-		log.info("Edit form attribute values: " + w.toString());
+		log.info("Edit form attribute values: {}", w.toString());
 		}catch(Exception e){
 			log.error("Error logging form attribute values map.", e);
 		}

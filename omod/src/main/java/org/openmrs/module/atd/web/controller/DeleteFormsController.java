@@ -62,8 +62,8 @@ public class DeleteFormsController
 						"Form Deleted.  Class: " + DeleteFormsController.class.getCanonicalName());
 				} catch (Exception e)
 				{
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}
 			}
 		}
