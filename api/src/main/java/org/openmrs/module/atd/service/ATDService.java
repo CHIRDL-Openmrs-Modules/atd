@@ -36,8 +36,8 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
-import org.openmrs.util.PrivilegeConstants;
 import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
+import org.openmrs.util.PrivilegeConstants;
 
 /**
  * ATD related services
@@ -479,4 +479,13 @@ public interface ATDService
 	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sort,
 	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
 	        String accessionNumber, String statFormName) throws APIException;
+	
+	/**
+	 * @param encounterId The encounter id for the statistics
+	 * @param formName The form name for the statistics
+	 * @return
+	 * @should get statistics by encounter id and form name not limiting null observation id
+	 */
+	@Authorized()
+	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
 }

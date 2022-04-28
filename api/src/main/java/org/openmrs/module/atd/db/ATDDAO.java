@@ -226,4 +226,12 @@ public interface ATDDAO {
 	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sortList,
 	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
 	        String accessionNumber, String statFormName);
+    
+    /**
+     * Look up the Statistics record by encounter_id and form name including null value for obsv_id
+     * @param encounterId
+     * @param formName
+     * @return
+     */
+    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
 }

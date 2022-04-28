@@ -91,11 +91,13 @@ public class HibernateATDDAO implements ATDDAO
 		this.sessionFactory = sessionFactory;
 	}
 	
+	@Override
 	public PatientATD addPatientATD(PatientATD patientATD) {
 		this.sessionFactory.getCurrentSession().saveOrUpdate(patientATD);
 		return patientATD;
 	}
 
+	@Override
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId)
 	{
 		try
@@ -137,6 +139,7 @@ public class HibernateATDDAO implements ATDDAO
 	/**
 	 * @see org.openmrs.module.atd.db.ATDDAO#getPatientATDs(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance, java.util.List)
 	 */
+	@Override
 	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 		Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(PatientATD.class);
 		if (formInstance != null) {
@@ -152,6 +155,7 @@ public class HibernateATDDAO implements ATDDAO
 		return criteria.list();
 	}
 
+	@Override
 	public void updatePatientStates(Date thresholdDate){
 	try
 	{
@@ -191,7 +195,8 @@ public class HibernateATDDAO implements ATDDAO
 	
 	
 
-    public void prePopulateNewFormFields(Integer formId) throws DAOException {
+    @Override
+	public void prePopulateNewFormFields(Integer formId) throws DAOException {
     	// CHICA-1151 connection() method has been removed in new version of hibernate
     	// Work API is recommended
     	this.sessionFactory.getCurrentSession().doWork(connection -> executePrePopulateNewFormFields(connection, formId));
@@ -302,6 +307,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
     }
 	
+	@Override
 	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
 	                                   String installationDirectory, boolean faxableForm, boolean scannableForm, 
 	                                   boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields, 
@@ -434,6 +440,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 
+	@Override
 	public void purgeFormAttributeValues(Integer formId) throws DAOException {
 		// CHICA-1151 connection() method has been removed in new version of hibernate
 		// Work API is recommended
@@ -481,6 +488,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
+	@Override
 	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws DAOException {
 		FormPrinterConfig printerConfig = new FormPrinterConfig(formId);
 		try {
@@ -551,6 +559,7 @@ public class HibernateATDDAO implements ATDDAO
 		return printerConfig;
 	}
 	
+	@Override
 	public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws DAOException {
 		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 
@@ -571,6 +580,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
+	@Override
 	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws DAOException {
 		
 		// CHICA-1151 connection() method has been removed in new version of hibernate
@@ -623,6 +633,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
+	@Override
 	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws DAOException {
 		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		FormAttribute formAttribute = chirdlUtilBackportsService.getFormAttributeByName("useAlternatePrinter");
@@ -656,6 +667,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
+	@Override
 	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws DAOException {
 		Boolean enabled = Boolean.FALSE;
 		ChirdlUtilBackportsService chirdlUtilBackportsService = Context.getService(ChirdlUtilBackportsService.class);
@@ -1070,6 +1082,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 	}
 	
+	@Override
 	public List<Statistics> getStatByFormInstance(int formInstanceId,
 		String formName, Integer locationId)
 {
@@ -1091,6 +1104,7 @@ public class HibernateATDDAO implements ATDDAO
 	return null;
 }
 	
+	@Override
 	public List<Statistics> getStatByIdAndRule(int formInstanceId, int ruleId,
 		String formName, Integer locationId)
 {
@@ -1112,6 +1126,7 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	return null;
 }
+	@Override
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName)
 	{
 		try
@@ -1130,6 +1145,7 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 
+	@Override
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName)
 	{
 		try
@@ -1148,6 +1164,7 @@ public class HibernateATDDAO implements ATDDAO
 		return null;
 	}
 	
+	@Override
 	public Statistics addStatistics(Statistics statistics)
 	{
 		try
@@ -1160,6 +1177,7 @@ public class HibernateATDDAO implements ATDDAO
 		return statistics;
 	}
 
+	@Override
 	public void updateStatistics(Statistics statistics)
 	{
 		try
@@ -1178,6 +1196,7 @@ public class HibernateATDDAO implements ATDDAO
 	 * @param patientId
 	 * @return
 	 */
+	@Override
 	public PatientIdentifier getPatientMRN(Integer patientId)
 	{
 		try
@@ -1200,7 +1219,8 @@ public class HibernateATDDAO implements ATDDAO
 	/**
 	 * @see org.openmrs.module.atd.db.ATDDAO#getPatientFormQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.String)
 	 */
-    public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
+    @Override
+	public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
     	try
 		{
     		String sql = 
@@ -1214,8 +1234,7 @@ public class HibernateATDDAO implements ATDDAO
     			"          FROM atd_statistics a" +
     			"         WHERE     form_name = ?" +
     			"               AND form_instance_id = ?" +
-    			"               AND location_id = ?" +
-    			"               AND answer <> 'NoAnswer') a" +
+    			"               AND location_id = ?) a" +
     			"       INNER JOIN form c" +
     			"          ON a.form_name = c.name" +
     			"       INNER JOIN atd_patient_atd_element b" +
@@ -1263,6 +1282,7 @@ public class HibernateATDDAO implements ATDDAO
 	/**
 	 *  @see org.openmrs.module.atd.db.ATDDAO#getAllFormDefinitions()
 	 */
+	@Override
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
 		
@@ -1302,6 +1322,7 @@ public class HibernateATDDAO implements ATDDAO
 	/**
 	 * @see org.openmrs.module.atd.db.ATDDAO#getFormDefinition()
 	 */
+	@Override
 	public List<FormDefinitionDescriptor> getFormDefinition(int formId) throws SQLException{
 		List<FormDefinitionDescriptor> fddList = new ArrayList<FormDefinitionDescriptor>();
 		
@@ -1398,6 +1419,7 @@ public class HibernateATDDAO implements ATDDAO
 	 * @see org.openmrs.module.atd.db.ATDDAO#getConceptDescriptorList(int, int, String, boolean, int, String, String, boolean)
 	 * 
 	 */
+	@Override
 	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch) 
 	{
 		List<ConceptDescriptor> cdList = new ArrayList<ConceptDescriptor>();
@@ -1439,6 +1461,7 @@ public class HibernateATDDAO implements ATDDAO
 	 * 
 	 * @see org.openmrs.module.atd.db.ATDDAO#getCountConcepts(String, boolean, int, boolean)
 	 */
+	@Override
 	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch)
 	{
 		try
@@ -1595,7 +1618,8 @@ public class HibernateATDDAO implements ATDDAO
      * @param includeVoidedObs
      * @return
      */
-    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    @Override
+	public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
     {
     	String voidedString = "";
     	if(!includeVoidedObs)
@@ -1631,7 +1655,8 @@ public class HibernateATDDAO implements ATDDAO
      * @param ruleId
      * @return
      */
-    public boolean oneBoxChecked(Integer encounterId, Integer ruleId)
+    @Override
+	public boolean oneBoxChecked(Integer encounterId, Integer ruleId)
 	{
     	boolean oneBoxChecked = false;
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
@@ -1656,7 +1681,8 @@ public class HibernateATDDAO implements ATDDAO
     * @param ruleId
     * @return
     */
-    public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId)
+    @Override
+	public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId)
 	{
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
     	criteria.add(Restrictions.eq("encounterId", encounterId));
@@ -1673,7 +1699,8 @@ public class HibernateATDDAO implements ATDDAO
 	 * @param isRetired
      * @return
      */
-    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException {
+    @Override
+	public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException {
 		
 		String sql = "SELECT DISTINCT form.name FROM form "
 				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
@@ -1847,5 +1874,23 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		
 		return criteria;
+	}
+	
+	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName)
+	{
+		try
+		{
+			String sql = "select * from atd_statistics where encounter_id=? and form_name=?";
+			SQLQuery qry = this.sessionFactory.getCurrentSession()
+					.createSQLQuery(sql);
+			qry.setInteger(0, encounterId);
+			qry.setString(1, formName);
+			qry.addEntity(Statistics.class);
+			return qry.list();
+		} catch (Exception e)
+		{
+			this.log.error(Util.getStackTrace(e));
+		}
+		return null;
 	}
 }
