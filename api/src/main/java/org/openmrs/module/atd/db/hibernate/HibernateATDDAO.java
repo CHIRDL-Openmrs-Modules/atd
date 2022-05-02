@@ -69,6 +69,13 @@ public class HibernateATDDAO implements ATDDAO
 
 	protected final Log log = LogFactory.getLog(getClass());
 
+	private static final String LOCATION_ID = "locationId";
+	private static final String FORM_ID = "formId";
+	private static final String FORM_NAME = "formName";
+	private static final String FORM_INSTANCE_ID = "formInstanceId";
+	private static final String ENCOUNTER_ID = "encounterId";
+	private static final String PATIENT_ID = "patientId";
+
 	/**
 	 * Hibernate session factory
 	 */
@@ -196,7 +203,7 @@ public class HibernateATDDAO implements ATDDAO
 	
 
     @Override
-	public void prePopulateNewFormFields(Integer formId) throws DAOException {
+    public void prePopulateNewFormFields(Integer formId) throws DAOException {
     	// CHICA-1151 connection() method has been removed in new version of hibernate
     	// Work API is recommended
     	this.sessionFactory.getCurrentSession().doWork(connection -> executePrePopulateNewFormFields(connection, formId));
@@ -1126,23 +1133,15 @@ public class HibernateATDDAO implements ATDDAO
 	}
 	return null;
 }
+	
+	/**
+	 * @see org.openmrs.module.atd.db.ATDDAO#getStatsByEncounterForm(java.lang.Integer, java.lang.Integer)
+	 */
 	@Override
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName)
 	{
-		try
-		{
-			String sql = "select * from atd_statistics where obsv_id is not null and encounter_id=? and form_name=?";
-			SQLQuery qry = this.sessionFactory.getCurrentSession()
-					.createSQLQuery(sql);
-			qry.setInteger(0, encounterId);
-			qry.setString(1, formName);
-			qry.addEntity(Statistics.class);
-			return qry.list();
-		} catch (Exception e)
-		{
-			this.log.error(Util.getStackTrace(e));
-		}
-		return null;
+		boolean includeNullObs = false;
+		return getStatsByEncounterForm(encounterId, formName, includeNullObs);	
 	}
 
 	@Override
@@ -1220,7 +1219,7 @@ public class HibernateATDDAO implements ATDDAO
 	 * @see org.openmrs.module.atd.db.ATDDAO#getPatientFormQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.String)
 	 */
     @Override
-	public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
+    public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
     	try
 		{
     		String sql = 
@@ -1232,9 +1231,9 @@ public class HibernateATDDAO implements ATDDAO
     			"                a.encounter_id" +
     			"  FROM (SELECT *" +
     			"          FROM atd_statistics a" +
-    			"         WHERE     form_name = ?" +
-    			"               AND form_instance_id = ?" +
-    			"               AND location_id = ?) a" +
+    			"         WHERE     form_name = :formName" +
+    			"               AND form_instance_id = :formInstanceId" +
+    			"               AND location_id = :locationId) a" +
     			"       INNER JOIN form c" +
     			"          ON a.form_name = c.name" +
     			"       INNER JOIN atd_patient_atd_element b" +
@@ -1242,7 +1241,7 @@ public class HibernateATDDAO implements ATDDAO
     			"             AND a.form_instance_id = b.form_instance_id" +
     			"             AND a.location_Id = b.location_Id" +
     			"             AND a.rule_id = b.rule_id" +
-    			" WHERE b.patient_id = ?";
+    			" WHERE b.patient_id = :patientId";
 
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
@@ -1254,12 +1253,12 @@ public class HibernateATDDAO implements ATDDAO
 			qry.addScalar("b.form_id");
 			qry.addScalar("b.location_id");
 			qry.addScalar("a.encounter_id");
-			qry.setString(0, patientForm);
-			qry.setInteger(1, formInstanceId);
-			qry.setInteger(2, locationId);
-			qry.setInteger(3, patientId);
+			qry.setString(FORM_NAME, patientForm);
+			qry.setInteger(FORM_INSTANCE_ID, formInstanceId);
+			qry.setInteger(LOCATION_ID, locationId);
+			qry.setInteger(PATIENT_ID, patientId);
 			List<Object[]> list = qry.list();
-			List<PSFQuestionAnswer> returnList = new ArrayList<PSFQuestionAnswer>();
+			List<PSFQuestionAnswer> returnList = new ArrayList<>();
 			for (Object[] arry : list) {
 				PSFQuestionAnswer pair = new PSFQuestionAnswer();
 				pair.setQuestion((String)arry[0]);
@@ -1276,7 +1275,7 @@ public class HibernateATDDAO implements ATDDAO
 		{
 			this.log.error(Util.getStackTrace(e));
 		}
-		return new ArrayList<PSFQuestionAnswer>();
+		return new ArrayList<>();
     }
 	
 	/**
@@ -1619,7 +1618,7 @@ public class HibernateATDDAO implements ATDDAO
      * @return
      */
     @Override
-	public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
     {
     	String voidedString = "";
     	if(!includeVoidedObs)
@@ -1656,7 +1655,7 @@ public class HibernateATDDAO implements ATDDAO
      * @return
      */
     @Override
-	public boolean oneBoxChecked(Integer encounterId, Integer ruleId)
+    public boolean oneBoxChecked(Integer encounterId, Integer ruleId)
 	{
     	boolean oneBoxChecked = false;
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
@@ -1682,7 +1681,7 @@ public class HibernateATDDAO implements ATDDAO
     * @return
     */
     @Override
-	public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId)
+    public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId)
 	{
     	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Statistics.class);
     	criteria.add(Restrictions.eq("encounterId", encounterId));
@@ -1700,7 +1699,7 @@ public class HibernateATDDAO implements ATDDAO
      * @return
      */
     @Override
-	public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException {
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws DAOException {
 		
 		String sql = "SELECT DISTINCT form.name FROM form "
 				+ "INNER JOIN chirdlutilbackports_form_attribute_value AS fav ON fav.form_id = form.form_id "
@@ -1876,20 +1875,28 @@ public class HibernateATDDAO implements ATDDAO
 		return criteria;
 	}
 	
-	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName)
+	/**
+	 * @see org.openmrs.module.atd.db.ATDDAO#getStatsByEncounterForm(java.lang.Integer, java.lang.Integer, boolean)
+	 */
+	@Override
+	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName, boolean includeNullObs)
 	{
+		 String obsIsNotNull = "";
+		 if(!includeNullObs){
+			 obsIsNotNull =  " obsv_id is not null and";
+         }
+		 
 		try
 		{
-			String sql = "select * from atd_statistics where encounter_id=? and form_name=?";
-			SQLQuery qry = this.sessionFactory.getCurrentSession()
-					.createSQLQuery(sql);
-			qry.setInteger(0, encounterId);
-			qry.setString(1, formName);
+			String sql = "select * from atd_statistics where" + obsIsNotNull + " encounter_id=:encounterId and form_name=:formName";
+			SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
+			qry.setInteger(ENCOUNTER_ID, encounterId);
+			qry.setString(FORM_NAME, formName);
 			qry.addEntity(Statistics.class);
 			return qry.list();
 		} catch (Exception e)
 		{
-			this.log.error(Util.getStackTrace(e));
+			this.log.error("Exception getting statistics by encounter and form.",e);
 		}
 		return null;
 	}

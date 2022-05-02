@@ -696,7 +696,7 @@ public class ATDServiceImpl implements ATDService
 	}
 	
     @Override
-	public void cleanCache() {
+    public void cleanCache() {
         log.info("Clear the cache if any");
         // parsedFile belongs to ATD, deal in there
         ((FormDatasource) Context.getLogicService().getLogicDataSource("form")).clearForms();
@@ -704,12 +704,12 @@ public class ATDServiceImpl implements ATDService
     }
     
     @Override
-	public void prePopulateNewFormFields(Integer formId) {
+    public void prePopulateNewFormFields(Integer formId) {
 	    getATDDAO().prePopulateNewFormFields(formId);
     }
 
     @Override
-	public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
+    public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
                                        String installationDirectory, boolean faxableForm, boolean scannableForm, 
                                        boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields, 
                                        Integer copyPrinterConfigFormId) {
@@ -723,31 +723,31 @@ public class ATDServiceImpl implements ATDService
 	}
 
     @Override
-	public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws APIException {
+    public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws APIException {
 	    return getATDDAO().getPrinterConfigurations(formId, locationId);
     }
     
     @Override
-	public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws APIException {
+    public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws APIException {
     	getATDDAO().savePrinterConfigurations(printerConfig);
     }
 
     @Override
-	public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws APIException {
+    public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws APIException {
 	    getATDDAO().copyFormAttributeValues(fromFormId, toFormId);
     }
     
     @Override
-	public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws APIException {
+    public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws APIException {
     	getATDDAO().setClinicUseAlternatePrinters(locationIds, useAltPrinters);
     }
     
     @Override
-	public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException {
+    public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException {
     	return getATDDAO().isFormEnabledAtClinic(formId, locationId);
     }
     @Override
-	public void updateStatistics(Statistics statistics)
+    public void updateStatistics(Statistics statistics)
 	{
     	getATDDAO().updateStatistics(statistics);
 	}
@@ -873,7 +873,7 @@ public class ATDServiceImpl implements ATDService
 
     
     @Override
-	public List<URL> getBadScans(String locationName) {
+    public List<URL> getBadScans(String locationName) {
         AdministrationService adminService = Context.getAdministrationService();
         String imageDirStr = adminService.getGlobalProperty("atd.defaultTifImageDirectory");
         if (imageDirStr == null || imageDirStr.length() == 0) {
@@ -902,7 +902,7 @@ public class ATDServiceImpl implements ATDService
     }
     
     @Override
-	public void moveBadScan(String url, boolean formRescanned) throws Exception {
+    public void moveBadScan(String url, boolean formRescanned) throws Exception {
         try {
         	URL urlLoc = new URL(url);
             File fileLoc = new File(urlLoc.getFile());
@@ -994,7 +994,7 @@ public class ATDServiceImpl implements ATDService
 	 * @return
 	 */
     @Override
-	public PatientIdentifier getPatientMRN(Integer patientId){
+    public PatientIdentifier getPatientMRN(Integer patientId){
 		return getATDDAO().getPatientMRN(patientId);
 	}
 
@@ -1002,7 +1002,7 @@ public class ATDServiceImpl implements ATDService
 	 * @see org.openmrs.module.atd.service.ATDService#getPatientFormQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.String)
 	 */
     @Override
-	public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
+    public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
 	    return getATDDAO().getPatientFormQuestionAnswers(formInstanceId, locationId, patientId, patientForm);
     }
 
@@ -1010,7 +1010,7 @@ public class ATDServiceImpl implements ATDService
 	 * @see org.openmrs.module.atd.service.ATDService#updatePatientATD(org.openmrs.module.atd.hibernateBeans.PatientATD)
 	 */
     @Override
-	public PatientATD updatePatientATD(PatientATD patientATD) throws APIException {
+    public PatientATD updatePatientATD(PatientATD patientATD) throws APIException {
 	    return getATDDAO().addPatientATD(patientATD);
     }
 
@@ -1018,7 +1018,7 @@ public class ATDServiceImpl implements ATDService
 	 * @see org.openmrs.module.atd.service.ATDService#getPatientATDs(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance, java.util.List)
 	 */
     @Override
-	public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
+    public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
 
@@ -1070,7 +1070,7 @@ public class ATDServiceImpl implements ATDService
      * @see org.openmrs.module.atd.service.ATDService#getObsWithStatistics(Integer, Integer, Integer, boolean)
      */
     @Override
-	public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
+    public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
     {
     	return getATDDAO().getObsWithStatistics(encounterId, conceptId, formFieldId, includeVoidedObs);
     }
@@ -1084,7 +1084,7 @@ public class ATDServiceImpl implements ATDService
      * @return
      */
     @Override
-	public boolean oneBoxChecked(Integer encounterId, Integer ruleId){
+    public boolean oneBoxChecked(Integer encounterId, Integer ruleId){
     	return getATDDAO().oneBoxChecked(encounterId, ruleId);
     }
     
@@ -1098,12 +1098,12 @@ public class ATDServiceImpl implements ATDService
      * @return
      */
     @Override
-	public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId){
+    public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId){
     	return getATDDAO().getStatsByEncounterRule(encounterId, ruleId);
     }
     
     @Override
-	public boolean ruleFiredForEncounter(Integer encounterId, Integer ruleId){
+    public boolean ruleFiredForEncounter(Integer encounterId, Integer ruleId){
     	List<Statistics> stats = getStatsByEncounterRule(encounterId,ruleId);
     	if(stats != null && stats.size()>0){
     		return true;
@@ -1286,7 +1286,7 @@ public class ATDServiceImpl implements ATDService
      * @see org.openmrs.module.atd.service.ATDService#getFormNamesByFormAttribute(java.util.List, String, boolean)
      */
     @Override
-	public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException
+    public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException
     {
     	return getATDDAO().getFormNamesByFormAttribute(formAttrNames, formAttrValue, isRetired);
     }
@@ -1306,9 +1306,10 @@ public class ATDServiceImpl implements ATDService
 	}
 	
 	/**
-	 * @see org.openmrs.module.atd.service.ATDService#getAllStatsByEncounterForm(java.lang.Integer, java.lang.String) 
+	 * @see org.openmrs.module.atd.service.ATDService#getStatsByEncounterForm(java.lang.Integer, java.lang.String, boolean) 
 	 */
-	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName){
-		return getATDDAO().getAllStatsByEncounterForm(encounterId, formName);
+	@Override
+	public List<Statistics> getStatsByEncounterForm(Integer encounterId, String formName, boolean includeNullObs){
+		return getATDDAO().getStatsByEncounterForm(encounterId, formName, includeNullObs);
 	}
 }

@@ -186,6 +186,10 @@ public interface ATDService
 
 	
 	/**
+     * Look up the statistics record by encounter_id and form name.
+     * @param encounterId The encounter id of the visit
+     * @param formName The name of the form with statistics
+     * @return
      * @should get statistics by encounter id and form name
      * @should get statistics by encounter id and form name null
      */
@@ -481,11 +485,13 @@ public interface ATDService
 	        String accessionNumber, String statFormName) throws APIException;
 	
 	/**
-	 * @param encounterId The encounter id for the statistics
-	 * @param formName The form name for the statistics
-	 * @return
-	 * @should get statistics by encounter id and form name not limiting null observation id
+	 * Look up the statistics record by encounter id and form name with option to include null obs ids
+     * @param encounterId The encounter id of the visit
+     * @param formName The name of the form with statistics
+     * @param includeNullObs Option to include statistics with null observation ids
+     * @return
+	 * @should get statistics by encounter id and form name with option to include null observation ids
 	 */
 	@Authorized()
-	public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
+	public List<Statistics> getStatsByEncounterForm(Integer encounterId, String formName, boolean includeNullObs);
 }

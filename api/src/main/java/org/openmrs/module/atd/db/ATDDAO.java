@@ -83,6 +83,12 @@ public interface ATDDAO {
 
 	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName, Integer locationId);
 	
+	/**
+     * Look up the statistics record by encounter_id and form name.
+     * @param encounterId The encounter id of the visit
+     * @param formName Name of the form with statistics
+     * @return
+     */
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName);
 	
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName);
@@ -228,10 +234,11 @@ public interface ATDDAO {
 	        String accessionNumber, String statFormName);
     
     /**
-     * Look up the Statistics record by encounter_id and form name including null value for obsv_id
-     * @param encounterId
-     * @param formName
+     * Look up the statistics record by encounter id and form name with option to include null obs ids
+     * @param encounterId The encounter id of the visit
+     * @param formName The name of the form with statistics
+     * @param includeNullObs Option to include statistics with null observation ids
      * @return
      */
-    public List<Statistics> getAllStatsByEncounterForm(Integer encounterId,String formName);
+    public List<Statistics> getStatsByEncounterForm(Integer encounterId, String formName, boolean includeNullObs);
 }
