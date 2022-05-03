@@ -1140,8 +1140,8 @@ public class HibernateATDDAO implements ATDDAO
 	@Override
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName)
 	{
-		boolean includeNullObs = false;
-		return getStatsByEncounterForm(encounterId, formName, includeNullObs);	
+		//Only include statistics that have an associated observation.
+		return getStatsByEncounterForm(encounterId, formName, false);	
 	}
 
 	@Override
