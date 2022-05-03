@@ -820,7 +820,7 @@ public class ATDServiceImpl implements ATDService
 	                       Integer locationTagId, Integer locationId, String formName) {
 		HashMap<String, ArrayList<DssElement>> dssElementsByType = dssManager.getDssElementsByType();
 		EncounterService encounterService = Context.getService(EncounterService.class);
-		Encounter encounter = encounterService.getEncounter(encounterId);
+		Encounter encounter = (Encounter) encounterService.getEncounter(encounterId);
 		String type = null;
 		
 		if (dssElementsByType == null) {
