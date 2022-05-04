@@ -36,8 +36,8 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState;
 import org.openmrs.module.dss.DssElement;
 import org.openmrs.module.dss.DssManager;
-import org.openmrs.util.PrivilegeConstants;
 import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
+import org.openmrs.util.PrivilegeConstants;
 
 /**
  * ATD related services
@@ -186,6 +186,10 @@ public interface ATDService
 
 	
 	/**
+     * Look up the statistics record by encounter_id and form name.
+     * @param encounterId The encounter id of the visit
+     * @param formName The name of the form with statistics
+     * @return
      * @should get statistics by encounter id and form name
      * @should get statistics by encounter id and form name null
      */
@@ -479,4 +483,15 @@ public interface ATDService
 	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sort,
 	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
 	        String accessionNumber, String statFormName) throws APIException;
+	
+	/**
+	 * Look up the statistics record by encounter id and form name with option to include null obs ids
+     * @param encounterId The encounter id of the visit
+     * @param formName The name of the form with statistics
+     * @param includeNullObs Option to include statistics with null observation ids
+     * @return
+	 * @should get statistics by encounter id and form name with option to include null observation ids
+	 */
+	@Authorized()
+	public List<Statistics> getStatsByEncounterForm(Integer encounterId, String formName, boolean includeNullObs);
 }
