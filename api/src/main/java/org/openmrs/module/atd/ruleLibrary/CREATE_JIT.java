@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Form;
 import org.openmrs.Patient;
 import org.openmrs.api.FormService;
@@ -33,7 +33,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
 
 public class CREATE_JIT implements Rule
 {
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(CREATE_JIT.class);
 
 	/**
 	 * *
@@ -196,7 +196,7 @@ public class CREATE_JIT implements Rule
         	}
         }
         catch (Exception e) {
-            this.log.error("Error creating JIT",e);
+            log.error("Error creating JIT",e);
         }
 	
 		if (formInstTag != null) {
@@ -211,7 +211,7 @@ public class CREATE_JIT implements Rule
 		String stateName = ChirdlUtilConstants.STATE_JIT_CREATE;
 		Form form = Context.getFormService().getForm(formName);
 		if (form == null) {
-			this.log.error("No form found with name: " + formName);
+			log.error("No form found with name: {}", formName);
 			return null;
 		}
 		

@@ -19,8 +19,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.chirdlutil.util.FileAgeFilter;
 import org.openmrs.module.chirdlutil.util.IOUtil;
@@ -35,7 +35,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
  */
 public class ArchiveMergeFiles extends AbstractTask {
 	
-	protected static Log log = LogFactory.getLog(TeleformFileMonitor.class);
+	private static final Logger log = LoggerFactory.getLogger(ArchiveMergeFiles.class);
 	protected static String archiveDirectoryStr = "Archive";
 	protected static String pendingDirectoryStr = "Pending";
 	
@@ -47,12 +47,12 @@ public class ArchiveMergeFiles extends AbstractTask {
 		Context.openSession();
 		
 		try {
-			log.info("Starting Archive Merge Files at " + new Timestamp(new Date().getTime()));
+			log.info("Starting Archive Merge Files at {}", new Timestamp(new Date().getTime()));
 			archiveMergeFiles();
-			log.info("Finished Archive Merge Files at " + new Timestamp(new Date().getTime()));
+			log.info("Finished Archive Merge Files at {}", new Timestamp(new Date().getTime()));
 		}
 		catch (Exception e) {
-			log.info("Archive Merge Files Errored Out at " + new Timestamp(new Date().getTime()));
+			log.info("Archive Merge Files Errored Out at {}", new Timestamp(new Date().getTime()));
 			log.error(e.getMessage());
 			log.error(Util.getStackTrace(e));
 		}
@@ -118,7 +118,7 @@ public class ArchiveMergeFiles extends AbstractTask {
 	 */
 	protected void moveFiles(File[] files, File sourceDirectory, File targetDirectory) {
 		int filesMoved = 0;
-		log.info("Archiving files in the following directory: " + sourceDirectory.getAbsolutePath());
+		log.info("Archiving files in the following directory: {}", sourceDirectory.getAbsolutePath());
         for (File file : files) {        	
         	// Attempt to copy the file.
         	File archiveFile = new File(targetDirectory, file.getName());
@@ -132,16 +132,15 @@ public class ArchiveMergeFiles extends AbstractTask {
         			IOUtil.copyFile(file.getAbsolutePath(), archiveFile.getAbsolutePath(), true);
         		}
             } catch (Exception e) {
-                log.error("Error copying file from " + file.getAbsolutePath() + " to " + 
-                	archiveFile.getAbsolutePath(), e);
+                log.error("Error copying file from {} to {}", file.getAbsolutePath(), archiveFile.getAbsolutePath(), e);
                 if (archiveFile.exists()) {
                 	// Delete the archive file we created.
                 	try {
                 		if (!archiveFile.delete()) {
-                		    log.error("Unable to delete archive file: " + archiveFile.getAbsolutePath());
+                		    log.error("Unable to delete archive file: {}", archiveFile.getAbsolutePath());
                 		}
                 	} catch (Exception ex) {
-                		log.error("Error deleting archived file after failure from " + 
+                		log.error("Error deleting archived file after failure from {}", 
                 			archiveFile.getAbsolutePath(), ex);
                 	}
                 }
@@ -152,17 +151,17 @@ public class ArchiveMergeFiles extends AbstractTask {
             // Delete the original file.
             try {
             	if (!file.delete()) {
-            	    log.error("Unable to delete file: " + file.getAbsolutePath());
+            	    log.error("Unable to delete file: {}", file.getAbsolutePath());
             	}
             } catch (Exception e) {
-            	log.error("Error deleting file from " + file.getAbsolutePath(), e);
+            	log.error("Error deleting file from {}", file.getAbsolutePath(), e);
             	continue;
             }
             
             filesMoved++;
         }
         
-        log.info("Successfully archived " + filesMoved + " files from " + sourceDirectory.getAbsolutePath() + 
-        	" to " + targetDirectory.getAbsolutePath());
+        log.info("Successfully archived {} files from {} to {}", filesMoved, sourceDirectory.getAbsolutePath(), 
+        	 targetDirectory.getAbsolutePath());
 	}
 }

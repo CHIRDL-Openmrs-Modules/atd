@@ -1,9 +1,9 @@
 package org.openmrs.module.atd.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -13,9 +13,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.result.Result;
@@ -24,14 +23,14 @@ import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 import org.openmrs.module.dss.DssElement;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.openmrs.test.SkipBaseSetup;
 
 public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     private static final String DATA_SET_PATIENT_STATES = "dbunitFiles/patientStates.xml";
     
-    @Before
+    @BeforeEach
     public void runBeforeEachTest() throws Exception {
         initializeInMemoryDatabase();
         executeDataSet(DATA_SET_PATIENT_STATES);
@@ -49,14 +48,13 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
         for (Method method : allMethods) {
             if (Modifier.isPublic(method.getModifiers())) {
                 Authorized authorized = method.getAnnotation(Authorized.class);
-                Assert.assertNotNull("Authorized annotation not found on method " + method.getName(), authorized);
+                assertNotNull(authorized, "Authorized annotation not found on method " + method.getName());
             }
         }
     }
     
     /**
      * @see ATDService#addPatientATD(int,FormInstance,DssElement,Integer)
-     * @verifies add new PatientATD
      */
     @Test
     public void addPatientATD_shouldAddNewPatientATD() throws Exception {
@@ -90,7 +88,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#createStatistics(Statistics)
-     * @verifies create statistics
      */
     @Test
     public void createStatistics_shouldCreateStatistics() throws Exception {
@@ -139,7 +136,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getPatientATD(FormInstance,int)
-     * @verifies get PatientATD
      */
     @Test
     public void getPatientATD_shouldGetPatientATD() throws Exception {
@@ -174,7 +170,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getPatientATD(FormInstance,int)
-     * @verifies get PatientATD null
      */
     @Test
     public void getPatientATD_shouldGetPatientATDNull() throws Exception {
@@ -191,7 +186,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getPatientATDs(FormInstance,List)
-     * @verifies get patient ATDs by form instance and field ids
      */
     @Test
     public void getPatientATDs_shouldGetPatientATDsByFormInstanceAndFieldIds() throws Exception {
@@ -241,7 +235,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getPatientATDs(FormInstance,List)
-     * @verifies get patient ATDs by form instance and field ids null
      */
     @Test
     public void getPatientATDs_shouldGetPatientATDsByFormInstanceAndFieldIdsNull() throws Exception {
@@ -262,7 +255,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatByFormInstance(int,String,Integer)
-     * @verifies get statistics by form instance
      */
     @Test
     public void getStatByFormInstance_shouldGetStatisticsByFormInstance() throws Exception {
@@ -314,7 +306,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatByFormInstance(int,String,Integer)
-     * @verifies get statistics by form instance null
      */
     @Test
     public void getStatByFormInstance_shouldGetStatisticsByFormInstanceNull() throws Exception {
@@ -330,7 +321,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatsByEncounterForm(Integer,String)
-     * @verifies get statistics by encounter id and form name
      */
     @Test
     public void getStatsByEncounterForm_shouldGetStatisticsByEncounterIdAndFormName() throws Exception {
@@ -385,7 +375,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatsByEncounterForm(Integer,String)
-     * @verifies get statistics by encounter id and form name null
      */
     @Test
     public void getStatsByEncounterForm_shouldGetStatisticsByEncounterIdAndFormNameNull() throws Exception {
@@ -399,7 +388,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatsByEncounterFormNotPrioritized(Integer,String)
-     * @verifies get statistics for non-prioritized rules by encounter id and form name
      */
     @Test
     public void getStatsByEncounterFormNotPrioritized_shouldGetStatisticsForNonprioritizedRulesByEncounterIdAndFormName()
@@ -455,7 +443,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatsByEncounterFormNotPrioritized(Integer,String)
-     * @verifies get statistics for non-prioritized rules by encounter id and form name null
      */
     @Test
     public void getStatsByEncounterFormNotPrioritized_shouldGetStatisticsForNonprioritizedRulesByEncounterIdAndFormNameNull()
@@ -493,7 +480,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#updatePatientATD(PatientATD)
-     * @verifies update Patient ATD
      */
     @Test
     public void updatePatientATD_shouldUpdatePatientATD() throws Exception {
@@ -534,7 +520,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#updateStatistics(Statistics)
-     * @verifies update statistics
      */
     @Test
     public void updateStatistics_shouldUpdateStatistics() throws Exception {
@@ -603,7 +588,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatByIdAndRule(int,int,String,Integer)
-     * @verifies get statistics by id and rule
      */
     @Test
     public void getStatByIdAndRule_shouldGetStatisticsByIdAndRule() throws Exception {
@@ -655,7 +639,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatByIdAndRule(int,int,String,Integer)
-     * @verifies get statistics by id and rule null
      */
     @Test
     public void getStatByIdAndRule_shouldGetStatisticsByIdAndRuleNull() throws Exception {
@@ -671,7 +654,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatsByEncounterRule(Integer,Integer)
-     * @verifies get statistics by encounter id and rule id
      */
     @Test
     public void getStatsByEncounterRule_shouldGetStatisticsByEncounterIdAndRuleId() throws Exception {
@@ -723,7 +705,6 @@ public class ATDServiceTest extends BaseModuleContextSensitiveTest {
     
     /**
      * @see ATDService#getStatsByEncounterRule(Integer,Integer)
-     * @verifies get statistics by encounter id and rule id null
      */
     @Test
     public void getStatsByEncounterRule_shouldGetStatisticsByEncounterIdAndRuleIdNull() throws Exception {

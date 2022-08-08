@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -72,7 +72,7 @@ public class TeleformTranslator
 {
 
 	private static final String RESULT_DELIM = "^^";
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(TeleformTranslator.class);
 	
 	/**
 	 * Converts teleform template xml into an OpenMRS database form
@@ -90,8 +90,7 @@ public class TeleformTranslator
 		String xsltFilename = 
 			adminService.getGlobalProperty("atd.convertTeleformToMergeXMLFile");
 		if(xsltFilename == null){
-			this.log.error("No xsltFilename found to convert teleform design xml to teleform merge xml file"+
-					" for form name: "+formName+". You must set global property atd.convertTeleformToMergeXMLFile.");
+			log.error("No xsltFilename found to convert teleform design xml to teleform merge xml file for form name: {}. You must set global property atd.convertTeleformToMergeXMLFile.", formName);
 			return null;
 		}
 		
@@ -134,9 +133,9 @@ public class TeleformTranslator
 			XMLUtil.transformXML(transformInput, transformOutput, xslt,null);
 		} catch (Exception e)
 		{
-			this.log.error("Error transforming template xml to merge xml");
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error("Error transforming template xml to merge xml");
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 		}
 	}
 
@@ -181,10 +180,9 @@ public class TeleformTranslator
 					formName, formVersion);
 		} catch (Exception e)
 		{
-			this.log.error("Merge xml for file: "+inputFile+
-					" could not be converted to an openmrs form");
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error("Merge xml for file: {} could not be converted to an openmrs form", inputFile);
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 		}
 		return null;
 	}
@@ -237,8 +235,8 @@ public class TeleformTranslator
 			XMLUtil.serializeXML(records, output);
 		}
 		catch (Exception e) {
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 		}
 		finally {
 			try {
@@ -286,7 +284,7 @@ public class TeleformTranslator
 	        reader.close();
         }
         catch (Exception e) {
-	        log.error("Error generating PDF version of form: " + formInstance, e);
+	        log.error("Error generating PDF version of form: {}", formInstance, e);
         }
 	}
 	
@@ -354,7 +352,7 @@ public class TeleformTranslator
 				content.addImage(image);
 			}
 		} catch (Exception e) {
-			log.error("Error post-processing PDF form: " + form.getName(), e);
+			log.error("Error post-processing PDF form: {}", form.getName(), e);
 		}
 	}
 
@@ -381,9 +379,7 @@ public class TeleformTranslator
 		Form form = formService.getForm(formInstance.getFormId());
 		if(form == null) 
 		{
-			log.error("Could not convert database form "+formInstance.getFormId()+
-					" to teleform merge xml. The form does not exist in the database.");
-
+			log.error("Could not convert database form {} to teleform merge xml. The form does not exist in the database.", formInstance.getFormId());
 			return null;
 		}
 		String resultString = null;

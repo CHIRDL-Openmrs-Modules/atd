@@ -23,8 +23,8 @@ import java.util.StringTokenizer;
 
 import javax.cache.Cache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -84,7 +84,7 @@ import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
  */
 public class ATDServiceImpl implements ATDService
 {
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(ATDServiceImpl.class);
 	private ATDDAO dao;
 
 	/**
@@ -883,7 +883,7 @@ public class ATDServiceImpl implements ATDService
         
         File imageDirectory = new File(imageDirStr, locationName);
         if (!imageDirectory.exists()) {
-        	log.error("Cannot find directory: " + imageDirStr + File.separator + locationName);
+        	log.error("Cannot find directory: {}{}{}", imageDirStr, File.separator, locationName);
         	return new ArrayList<URL>();
         }
         
@@ -907,7 +907,7 @@ public class ATDServiceImpl implements ATDService
         	URL urlLoc = new URL(url);
             File fileLoc = new File(urlLoc.getFile());
             if (!fileLoc.exists()) {
-            	log.warn("Bad scan does not exist: " + fileLoc.getAbsolutePath());
+            	log.warn("Bad scan does not exist: {}", fileLoc.getAbsolutePath());
             	return;
             }
             
@@ -944,7 +944,7 @@ public class ATDServiceImpl implements ATDService
             
             IOUtil.copyFile(fileLoc.getAbsolutePath(), newLoc.getAbsolutePath());
             if (!fileLoc.delete()) {
-                log.error("Unable to delete file: " + fileLoc.getAbsolutePath());
+                log.error("Unable to delete file: {}", fileLoc.getAbsolutePath());
             }
             
             // log the event
@@ -1259,8 +1259,7 @@ public class ATDServiceImpl implements ATDService
 					output.close();
 				} catch (IOException e) {
 					// This isn't super important.  No need to push the exception up to the client.
-					log.error("Error flushing and closing output stream for form ID: " + formId + " form instance ID: " + formInstanceId + 
-						" location ID: " + locationId + " location tag ID: " + locationTagId, e);
+					log.error("Error flushing and closing output stream for form ID: {} form instance ID: {} location ID: {} location tag ID: {}", formId, formInstanceId, locationId, locationTagId, e);
 				}
 			}
 		}

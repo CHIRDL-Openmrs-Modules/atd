@@ -6,8 +6,8 @@ package org.openmrs.module.atd.action;
 import java.io.File;
 import java.util.HashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
@@ -31,7 +31,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class Reprint implements ProcessStateAction
 {
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(Reprint.class);
 
 	/* (non-Javadoc)
 	 * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#processAction(org.openmrs.module.atd.hibernateBeans.StateAction, org.openmrs.Patient, org.openmrs.module.atd.hibernateBeans.PatientState, java.util.HashMap)
@@ -81,9 +81,8 @@ public class Reprint implements ProcessStateAction
 			State currState = chirdlutilbackportsService.getStateByName("ErrorState");
 			chirdlutilbackportsService.addPatientState(patient,
 					currState, sessionId,locationTagId,locationId, null);
-			log.error(formName+
-					" locationTagAttribute does not exist for locationTagId: "+
-					locationTagId+" locationId: "+locationId);
+			log.error("{} locationTagAttribute does not exist for locationTagId: {} locationId: {}",
+					formName, locationTagId, locationId);
 			return;
 		}
 		
@@ -135,9 +134,7 @@ public class Reprint implements ProcessStateAction
 					}
 				} else
 				{
-					log.error("Reprint failed for patient: "
-							+ patient.getPatientId()
-							+ " because merge directory was null.");
+					log.error("Reprint failed for patient: {} because merge directory was null.", patient.getPatientId());
 				}
 			} else {
 				StateManager.endState(patientState);

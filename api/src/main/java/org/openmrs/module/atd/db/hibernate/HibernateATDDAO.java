@@ -11,8 +11,8 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
@@ -67,7 +67,7 @@ import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
 public class HibernateATDDAO implements ATDDAO
 {
 
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(HibernateATDDAO.class);
 
 	private static final String LOCATION_ID = "locationId";
 	private static final String FORM_ID = "formId";
@@ -111,13 +111,13 @@ public class HibernateATDDAO implements ATDDAO
 		{
 			DssService dssService = Context.getService(DssService.class);
 			String sql = "select * from atd_patient_atd_element "
-					+ "where form_id=? and field_id=? and form_instance_id=? and location_id=?";
+					+ "where form_id=:formId and field_id=:fieldId and form_instance_id=:formInstanceId and location_id=:locationId";
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
-			qry.setInteger(0, formInstance.getFormId());
-			qry.setInteger(1, fieldId);
-			qry.setInteger(2,formInstance.getFormInstanceId());
-			qry.setInteger(3, formInstance.getLocationId());
+			qry.setInteger("formId", formInstance.getFormId());
+			qry.setInteger("fieldId", fieldId);
+			qry.setInteger("formInstanceId",formInstance.getFormInstanceId());
+			qry.setInteger("locationId", formInstance.getLocationId());
 			qry.addEntity(PatientATD.class);
 
 			List<PatientATD> list = qry.list();
@@ -168,30 +168,25 @@ public class HibernateATDDAO implements ATDDAO
 	{
 		//retire all unretired states before threshold date
 		String sql = "update chirdlutilbackports_patient_state " +
-		"set retired=?,date_retired=NOW() " + 
-		"where start_time < ? and retired=?";		// To speed process of atd initialization we should retire any state (complete or incomplete)
+		"set retired=true,date_retired=NOW() " + 
+		"where start_time < :thresholdDate and retired=false";		// To speed process of atd initialization we should retire any state (complete or incomplete)
 		SQLQuery qry = this.sessionFactory.getCurrentSession()
 		.createSQLQuery(sql);
 
-		qry.setBoolean(0,true);
-		qry.setDate(1, thresholdDate);
-		qry.setBoolean(2,false);
+		qry.setDate("thresholdDate", thresholdDate);
 		qry.executeUpdate();
 		
 		//retire all the other states for the encounters of the retired states
 		sql = "UPDATE chirdlutilbackports_patient_state a,"+
 				"       (SELECT session_id"+
 				"          FROM chirdlutilbackports_patient_state"+
-				"         WHERE retired = ?) b"+
-				"   SET a.retired = ?, date_retired = NOW()"+
-				" WHERE a.session_id = b.session_id AND retired = ?";
+				"         WHERE retired = true) b"+
+				"   SET a.retired = true, date_retired = NOW()"+
+				" WHERE a.session_id = b.session_id AND retired = false";
 		
 		qry = this.sessionFactory.getCurrentSession()
 		.createSQLQuery(sql);
 
-		qry.setBoolean(0,true);
-		qry.setBoolean(1,true);
-		qry.setBoolean(2,false);
 		qry.executeUpdate();
 
 	} catch (Exception e)
@@ -650,11 +645,11 @@ public class HibernateATDDAO implements ATDDAO
 					Integer formAttributeId = formAttribute.getFormAttributeId();
 					
 					String sql = "select * from chirdlutilbackports_form_attribute_value where "
-					        + "form_attribute_id=? and location_id=?";
+					        + "form_attribute_id=:formAttributeId and location_id=:locationId";
 					SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
 					
-					qry.setInteger(0, formAttributeId);
-					qry.setInteger(1, locationId);
+					qry.setInteger("formAttributeId", formAttributeId);
+					qry.setInteger("locationId", locationId);
 					qry.addEntity(FormAttributeValue.class);
 					
 					List<FormAttributeValue> list = qry.list();
@@ -684,13 +679,13 @@ public class HibernateATDDAO implements ATDDAO
 			if (formAttribute != null) {
 				Integer formAttributeId = formAttribute.getFormAttributeId();
 				
-				String sql = "select * from chirdlutilbackports_form_attribute_value where form_id=? "
-				        + "and form_attribute_id=? and location_id=?";
+				String sql = "select * from chirdlutilbackports_form_attribute_value where form_id=:formId "
+				        + "and form_attribute_id=:formAttributeId and location_id=:locationId";
 				SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
 				
-				qry.setInteger(0, formId);
-				qry.setInteger(1, formAttributeId);
-				qry.setInteger(2, locationId);
+				qry.setInteger("formId", formId);
+				qry.setInteger("formAttributeId", formAttributeId);
+				qry.setInteger("locationId", locationId);
 				qry.addEntity(FormAttributeValue.class);
 				
 				List<FormAttributeValue> list = qry.list();
@@ -702,7 +697,7 @@ public class HibernateATDDAO implements ATDDAO
 			}
 		}
 		catch (Exception e) {
-			log.error("Error checking to see if form " + formId + " is enabled in clinic " + locationId, e);
+			log.error("Error checking to see if form {} is enabled in clinic {}", formId, locationId, e);
 			throw new DAOException(e);
 		}
 		
@@ -1095,13 +1090,13 @@ public class HibernateATDDAO implements ATDDAO
 {
 	try
 	{
-		String sql = "select * from atd_statistics where form_instance_id=? and form_name=? "+
-		"and location_id=?";
+		String sql = "select * from atd_statistics where form_instance_id=:formInstanceId and form_name=:formName "+
+		"and location_id=:locationId";
 		SQLQuery qry = this.sessionFactory.getCurrentSession()
 				.createSQLQuery(sql);
-		qry.setInteger(0, formInstanceId);
-		qry.setString(1, formName);
-		qry.setInteger(2,locationId);
+		qry.setInteger("formInstanceId", formInstanceId);
+		qry.setString("formName", formName);
+		qry.setInteger("locationId",locationId);
 		qry.addEntity(Statistics.class);
 		return qry.list();
 	} catch (Exception e)
@@ -1117,14 +1112,14 @@ public class HibernateATDDAO implements ATDDAO
 {
 	try
 	{
-		String sql = "select * from atd_statistics where form_instance_id=? "+
-		"and rule_id=? and form_name=? and location_id=?";
+		String sql = "select * from atd_statistics where form_instance_id=:formInstanceId "+
+		"and rule_id=:ruleId and form_name=:formName and location_id=:locationId";
 		SQLQuery qry = this.sessionFactory.getCurrentSession()
 				.createSQLQuery(sql);
-		qry.setInteger(0, formInstanceId);
-		qry.setInteger(1, ruleId);
-		qry.setString(2, formName);
-		qry.setInteger(3,locationId);
+		qry.setInteger("formInstanceId", formInstanceId);
+		qry.setInteger("ruleId", ruleId);
+		qry.setString("formName", formName);
+		qry.setInteger("locationId",locationId);
 		qry.addEntity(Statistics.class);
 		return qry.list();
 	} catch (Exception e)
@@ -1140,7 +1135,6 @@ public class HibernateATDDAO implements ATDDAO
 	@Override
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName)
 	{
-		//Only include statistics that have an associated observation.
 		return getStatsByEncounterForm(encounterId, formName, false);	
 	}
 
@@ -1149,11 +1143,11 @@ public class HibernateATDDAO implements ATDDAO
 	{
 		try
 		{
-			String sql = "select * from atd_statistics where rule_id is null and obsv_id is not null and encounter_id=? and form_name=?";
+			String sql = "select * from atd_statistics where rule_id is null and obsv_id is not null and encounter_id=:encounterId and form_name=:formName";
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
-			qry.setInteger(0, encounterId);
-			qry.setString(1, formName);
+			qry.setInteger("encounterId", encounterId);
+			qry.setString("formName", formName);
 			qry.addEntity(Statistics.class);
 			return qry.list();
 		} catch (Exception e)
@@ -1202,10 +1196,10 @@ public class HibernateATDDAO implements ATDDAO
 		{
 			String sql = "select a.* from patient_identifier a "+
 				"inner join patient_identifier_type b on a.identifier_type=b.patient_identifier_type_id "+
-				"where patient_id=? and b.name='MRN_OTHER' and preferred=1";
+				"where patient_id=:patientId and b.name='MRN_OTHER' and preferred=1";
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
-			qry.setInteger(0, patientId);
+			qry.setInteger("patientId", patientId);
 			qry.addEntity(PatientIdentifier.class);
 			return (PatientIdentifier) qry.uniqueResult();
 		} catch (Exception e)
@@ -1328,12 +1322,12 @@ public class HibernateATDDAO implements ATDDAO
 		// CHICA-1151 Code in this section was pre-existing, but modified so that the connection() method is no longer used
 		String sql = "SELECT a.name AS form_name, a.description AS form_description, b.name AS field_name, c.name AS field_type, d.name AS concept_name, b.default_value, ff.field_number, e.name AS parent_field_name "
 				   + "FROM form a INNER JOIN form_field ff ON ff.form_id = a.form_id INNER JOIN field b ON ff.field_id = b.field_id INNER JOIN field_type c ON b.field_type = c.field_type_id LEFT JOIN concept_name d ON b.concept_id = d.concept_id "
-				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id = ?";
+				   + "LEFT JOIN (SELECT b.*, a.name FROM field a INNER JOIN form_field b ON a.field_id = b.field_id) e ON ff.parent_form_field = e.form_field_id AND a.form_id = e.form_id  WHERE a.retired = 0 AND a.form_id = :formId";
 		
 		SQLQuery qry = this.sessionFactory.getCurrentSession()
 				.createSQLQuery(sql);
 		
-		qry.setInteger(0, formId);
+		qry.setInteger("formId", formId);
 
 		List<Object[]> list = qry.list();
 		
@@ -1377,11 +1371,11 @@ public class HibernateATDDAO implements ATDDAO
 			String sql = "SELECT DISTINCT b.location_tag_id, b.location_id " + 
 						 "FROM chirdlutilbackports_form_attribute_value b " +
 						 "INNER JOIN (SELECT form_attribute_id FROM chirdlutilbackports_form_attribute WHERE name NOT IN('defaultMergeDirectory','defaultExportDirectory','formInstanceIdTag','formInstanceIdTag2','medRecNumberTag','medRecNumberTag2','imageDirectory','numQuestions')) av ON b.form_attribute_id = av.form_attribute_id " +
-			             "WHERE b.form_id = ? " +
+			             "WHERE b.form_id = :formId " +
 			             "ORDER BY b.location_tag_id, b.location_id";
 			
 			SQLQuery qry = this.sessionFactory.getCurrentSession().createSQLQuery(sql);
-			qry.setInteger(0, formId);
+			qry.setInteger("formId", formId);
 			
 			List<Object[]> list = qry.list();
 			
@@ -1406,7 +1400,7 @@ public class HibernateATDDAO implements ATDDAO
 		}
 		catch(Exception e)
 		{
-			log.error("Error in method getFormAttributeValueLocationsAndTagsMap. Error loading location ids and location tag ids (form_id = " + formId + ").", e);
+			log.error("Error in method getFormAttributeValueLocationsAndTagsMap. Error loading location ids and location tag ids (form_id = {}).", formId, e);
 		}
 		
 		return new HashMap<Integer,List<Integer>>();
@@ -1630,12 +1624,12 @@ public class HibernateATDDAO implements ATDDAO
 		{
 			String sql = "select a.* from obs a "+
 				"inner join atd_statistics b on a.obs_id=b.obsv_id "+
-				"where a.encounter_id=? and a.concept_id=? and b.form_field_id=?" + voidedString;
+				"where a.encounter_id=:encounterId and a.concept_id=:conceptId and b.form_field_id=:formFieldId" + voidedString;
 			SQLQuery qry = this.sessionFactory.getCurrentSession()
 					.createSQLQuery(sql);
-			qry.setInteger(0, encounterId);
-			qry.setInteger(1, conceptId);
-			qry.setInteger(2, formFieldId);
+			qry.setInteger("encounterId", encounterId);
+			qry.setInteger("conceptId", conceptId);
+			qry.setInteger("formFieldId", formFieldId);
 			qry.addEntity(Obs.class);
 			return qry.list();
 		} 

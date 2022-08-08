@@ -25,8 +25,8 @@ import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DWE CHICA-426
@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 public class ImportConceptsFromFileServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(ImportConceptsFromFileServlet.class);
 	
 	private static final String BEGIN_IMPORT_PARAM = "beginImport";
 	private static final String CHECK_PROGRESS_PARAM = "checkProgress";
