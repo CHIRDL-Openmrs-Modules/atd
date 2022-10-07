@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
 import org.openmrs.ConceptClass;
@@ -235,12 +237,23 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 					String newDescription = currTerm.getDescription();
 					String newUnits = currTerm.getUnits();
 					String newConceptClass = currTerm.getConceptClass();
+					ConceptDatatype oldDatatype = concept.getDatatype();
 					
-					if (newDescription != null && newDescription.length() > 0 && !newDescription.equals(oldDescription)) {
+					if (StringUtils.isNotBlank(newDescription) && !newDescription.equals(oldDescription)) {
+						//remove all existing descriptions and add new one
+						Collection<ConceptDescription> existingDescriptions = concept.getDescriptions();
+						
+						Iterator<ConceptDescription> it = existingDescriptions.iterator();
+						
+						while (it.hasNext()) {
+							it.next();
+						    it.remove();
+						}
+						
 						concept.addDescription(new ConceptDescription(newDescription, new Locale("en")));
 						log.info("{}{}. Changed description to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newDescription);
 					}
-					if (newConceptClass != null && newConceptClass.length() > 0 && !newConceptClass.equalsIgnoreCase(oldConceptClass)) {
+					if (StringUtils.isNotBlank(newConceptClass) && !newConceptClass.equalsIgnoreCase(oldConceptClass)) {
 						ConceptClass conceptClassObject = conceptService.getConceptClassByName(newConceptClass);
 						concept.setConceptClass(conceptClassObject);
 						log.info("{}{}. Changed concept class to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newConceptClass);
@@ -249,6 +262,11 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 					if (concept instanceof ConceptNumeric&&newUnits != null && newUnits.length() > 0 && !newUnits.equals(oldUnits)) {
 						((ConceptNumeric) concept).setUnits(newUnits); 
 						log.info("{}{}. Changed units to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newUnits);
+					}
+					
+					//Updating the datatype if changed
+					if(!oldDatatype.equals(conceptDatatype)) {
+						concept.setDatatype(conceptDatatype);
 					}
 					
 					conceptService.saveConcept(concept);
