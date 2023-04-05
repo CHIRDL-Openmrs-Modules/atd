@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.FieldType;
@@ -44,6 +44,7 @@ import org.openmrs.api.FormService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.DaemonToken;
 import org.openmrs.module.atd.TeleformTranslator;
 import org.openmrs.module.atd.hibernateBeans.PatientATD;
 import org.openmrs.module.atd.hibernateBeans.Statistics;
@@ -54,6 +55,7 @@ import org.openmrs.module.atd.xmlBeans.LanguageAnswers;
 import org.openmrs.module.atd.xmlBeans.Record;
 import org.openmrs.module.atd.xmlBeans.Records;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
+import org.openmrs.module.chirdlutil.util.ConceptDescriptor;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttribute;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormAttributeValue;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
@@ -73,9 +75,10 @@ import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
  */
 public class Util {
 	
-	private static Log log = LogFactory.getLog(Util.class);
+	private static final Logger log = LoggerFactory.getLogger(Util.class);
 	protected static final String ESCAPE_BACKSLASH = "&#092";
 	protected static final String ESCAPE_BACKSLASH_EXPORT = "\\\\";
+	private static DaemonToken daemonToken;
 	
 	public static int getMaxDssElements(Integer formId, Integer locationTagId, Integer locationId) {
 		String propertyValue = null;
@@ -249,7 +252,7 @@ public class Util {
 		Integer formId = formInstance.getFormId();
 		Form databaseForm = formService.getForm(formId);
 		if (databaseForm == null) {
-			log.error("Could not consume teleform export xml because form " + formId + " does not exist in the database");
+			log.error("Could not consume teleform export xml because form {} does not exist in the database", formId);
 			return null;
 		}
 		
@@ -521,7 +524,7 @@ public class Util {
 			csvWriter.close();
 			
 		} catch (IOException e) {
-			log.error(e);
+			log.error("Error exporting form attribute value to csv", e);
 			throw e;
 		}
 
@@ -565,7 +568,7 @@ public class Util {
 			csvWriter.close();
 			
 		} catch (IOException e) {
-			log.error(e);
+			log.error("Error exporting concepts to csv", e);
 			throw e;
 		}
 	}
@@ -607,7 +610,7 @@ public class Util {
 		}
 		csvWriter.close();
 		}catch(IOException e){
-			log.error(e);
+			log.error("Error exporting form definiton to csv", e);
 			throw e;
 		}
 	}
@@ -645,7 +648,7 @@ public class Util {
 			}
 		}
 		catch (Exception e) {
-			log.error(e);
+			log.error("Error getting form attributes from csv", e);
 			throw e;
 		}
 		return favList;
@@ -790,4 +793,18 @@ public class Util {
         }
         return primaryFormList;
     }
+	
+	/**
+	 * @return the daemonToken
+	 */
+	public static DaemonToken getDaemonToken() {
+		return daemonToken;
+	}
+	
+	/**
+	 * @param daemonToken the daemonToken to set
+	 */
+	public static void setDaemonToken(DaemonToken daemonToken) {
+		Util.daemonToken = daemonToken;
+	}
 }

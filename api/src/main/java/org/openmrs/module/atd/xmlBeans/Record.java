@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class Record implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-	private ArrayList<Field> fields = null;
+	private ArrayList<Field> fields = new ArrayList<>();
 	
 	/**
 	 * Empty constructor
@@ -30,10 +30,6 @@ public class Record implements Serializable
 	 */
 	public void addField(Field field)
 	{
-		if(this.fields == null)
-		{
-			this.fields = new ArrayList<Field>();
-		}
 		this.fields.add(field);
 	}
 	

@@ -19,8 +19,8 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Patient;
@@ -54,7 +54,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
 
 public class TeleformFileMonitor extends AbstractTask
 {
-	private static Log log = LogFactory.getLog(TeleformFileMonitor.class);
+	private static final Logger log = LoggerFactory.getLogger(TeleformFileMonitor.class);
 
 	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithFilename = new ConcurrentHashMap<FormInstance, TeleformFileState>();
 	private static ConcurrentHashMap<FormInstance, TeleformFileState> pendingStatesWithoutFilename = new ConcurrentHashMap<FormInstance, TeleformFileState>();
@@ -179,14 +179,14 @@ public class TeleformFileMonitor extends AbstractTask
 				}
 			}
 			if(processedStates%100==0){
-				log.info("State initialization is: "+(int)((processedStates/numUnfinishedStates)*100)+"% complete. "+
-						processedStates+" out of "+numUnfinishedStates+" processed.");
+				log.info("State initialization is: {}% complete. {} out of {} processed.", (int)((processedStates/numUnfinishedStates)*100),
+						processedStates, numUnfinishedStates);
 			}
 			processedStates++;
 		}
 		
 		if(numUnfinishedStates>0){
-		    log.info("Today's state initialization is: "+(int)((processedStates/numUnfinishedStates)*100)+"% complete.");
+		    log.info("Today's state initialization is: {}% complete.", (int)((processedStates/numUnfinishedStates)*100));
 		}
 		}}}
 		
@@ -263,7 +263,7 @@ public class TeleformFileMonitor extends AbstractTask
 			log.error(Util.getStackTrace(e));
 		}
 		
-		//log.info("Added: " + directoryName + ": " + filename);
+		//log.info("Added: {}: {}", directoryName, filename);
 	}
 	
 	private static void processPendingStatesWithoutFilename(ATDService atdService)
@@ -370,8 +370,8 @@ public class TeleformFileMonitor extends AbstractTask
                                     IOUtil.deleteFile(filename);
                                 }
                                 catch (Exception e) {
-                                    log.error("Could not copy " + filename + " to " + currExportDirectory + "\\bad scans\\"
-                                            + IOUtil.getFilenameWithoutExtension(filename) + ".xml");
+                                    log.error("Could not copy {} to {}\\bad scans\\{}.xml", filename, currExportDirectory 
+                                            , IOUtil.getFilenameWithoutExtension(filename));
                                 }
                                 continue;
                             }
@@ -525,7 +525,7 @@ public class TeleformFileMonitor extends AbstractTask
                                     }
                                     catch (Exception e) {
                                         log.error(
-                                            "RESCAN for formInstanceId: " + formInstance.getFormInstanceId() + " failed.");
+                                            "RESCAN for formInstanceId: {} failed.", formInstance.getFormInstanceId());
                                         log.error(Util.getStackTrace(e));
                                     }
                                 }
@@ -535,7 +535,7 @@ public class TeleformFileMonitor extends AbstractTask
                     }
                 } catch (Exception e) 
                 {
-                    log.error("Error processing filename: " + filename);
+                    log.error("Error processing filename: {}", filename);
                     log.error(e.getMessage());
                     log.error(Util.getStackTrace(e));
                     //unparseableFiles.add(filename);
@@ -562,7 +562,7 @@ public class TeleformFileMonitor extends AbstractTask
 			}
 			//filename will be null for scanned files
 			if(filename == null){
-				log.error("Filename name for formInstanceId: "+instance.getFormInstanceId()+" and formId: "+instance.getFormId()+" is null.");
+				log.error("Filename name for formInstanceId: {} and formId: {} is null.", instance.getFormInstanceId(), instance.getFormId());
 				continue;
 			}
 			
@@ -601,7 +601,7 @@ public class TeleformFileMonitor extends AbstractTask
 			while (iterator.hasNext())
 			{
 				String directory = iterator.next();
-				log.info("----------" + directory + "-----------------");
+				log.info("----------{}-----------------", directory);
 				LinkedList<String> filenames = tifFileQueue.get(directory);
 				
 				modifyFilenames(directory, ".tif", filenames);
@@ -695,7 +695,7 @@ public class TeleformFileMonitor extends AbstractTask
 					thisFile = files[i];
 					IOUtil.renameFile(thisFile.getPath(), tifFilename);
 					iterator.remove();
-					log.info("Renamed file:" + thisFile.getName() + "---->" + tifFilename);
+					log.info("Renamed file:{}---->{}", thisFile.getName(), tifFilename);
 					i++;
 				}
 			}
@@ -722,8 +722,7 @@ public class TeleformFileMonitor extends AbstractTask
 		ChirdlUtilBackportsService chirdlutilbackportsService = Context.getService(ChirdlUtilBackportsService.class);
 		FormInstanceAttribute fia = chirdlutilbackportsService.getFormInstanceAttributeByName("medium");
 		if (fia == null) {
-			log.error("Form Instance Attribute 'medium' does not exist.  The form instance medium will not be " +
-					"recorded");
+			log.error("Form Instance Attribute 'medium' does not exist. The form instance medium will not be recorded");
 			return;
 		}
 		

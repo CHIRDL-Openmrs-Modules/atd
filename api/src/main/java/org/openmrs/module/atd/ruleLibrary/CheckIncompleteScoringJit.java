@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Patient;
@@ -62,7 +62,7 @@ import org.openmrs.module.chirdlutil.util.XMLUtil;
  */
 public class CheckIncompleteScoringJit implements Rule {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(CheckIncompleteScoringJit.class);
 	
 	/**
 	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, org.openmrs.Patient,
@@ -103,8 +103,7 @@ public class CheckIncompleteScoringJit implements Rule {
 			scorableFormConfigFile = scorableFormConfigAttrVal.getValue();
 		}
 		if (scorableFormConfigFile == null) {
-			this.log.error("Could not find scorableFormConfigFile for locationId: " + locationId + " and locationTagId: "
-			        + locationTagId);
+			log.error("Could not find scorableFormConfigFile for locationId: {} and locationTagId: {}", locationId, locationTagId);
 			return Result.emptyResult();
 		}
 		LanguageAnswers answersByLanguage = null;
@@ -115,7 +114,7 @@ public class CheckIncompleteScoringJit implements Rule {
 			answersByLanguage = formConfig.getLanguageAnswers();
 		}
 		catch (IOException e1) {
-			this.log.error("", e1);
+			log.error("Error loading scoring config file {}", scorableFormConfigFile, e1);
 			return Result.emptyResult();
 		}
 		HashMap<String, Field> langFieldsToConsume = org.openmrs.module.atd.util.Util.getLanguageFieldsToConsume(fieldMap, formInstance,
@@ -275,7 +274,7 @@ public class CheckIncompleteScoringJit implements Rule {
 				}
 			}
 			catch (Exception e) {
-				this.log.error("", e);
+				log.error("Error computing JIT scores", e);
 			}
 		}
 		

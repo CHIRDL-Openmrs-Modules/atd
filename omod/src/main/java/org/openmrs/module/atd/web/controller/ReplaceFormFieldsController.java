@@ -10,8 +10,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.Field;
 import org.openmrs.FieldType;
@@ -39,7 +39,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class ReplaceFormFieldsController{
 	
 	/** Logger for this class and subclasses */
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(ReplaceFormFieldsController.class);
 	
 	/** Form view name */
 	private static final String FORM_VIEW = "/module/atd/replaceFormFields";
@@ -67,8 +67,8 @@ public class ReplaceFormFieldsController{
 				map.put("newFieldIndicators", newFieldIndicators);
 			}
 			catch (Exception e) {
-				this.log.error(e.getMessage());
-				this.log.error(Util.getStackTrace(e));
+				log.error(e.getMessage());
+				log.error(Util.getStackTrace(e));
 			}
 		}
 		return FORM_VIEW;
@@ -115,8 +115,8 @@ public class ReplaceFormFieldsController{
 					}
 				}
 				catch (Exception e1) {
-					this.log.error(e1.getMessage());
-					this.log.error(Util.getStackTrace(e1));
+					log.error(e1.getMessage());
+					log.error(Util.getStackTrace(e1));
 				}
 				try {
 					if (conceptName != null && conceptName.length() > 0) {
@@ -127,8 +127,8 @@ public class ReplaceFormFieldsController{
 					}
 				}
 				catch (Exception e) {
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}
 				if (defaultValue != null && defaultValue.length() > 0) {
 					currField.setDefaultValue(defaultValue);
@@ -141,8 +141,8 @@ public class ReplaceFormFieldsController{
 					}
 				}
 				catch (Exception e) {
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}
 				
 				try {
@@ -154,8 +154,8 @@ public class ReplaceFormFieldsController{
 					}
 				}
 				catch (Exception e) {
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}
 				formService.saveFormField(currFormField);
 				formService.saveField(currField);
@@ -165,8 +165,8 @@ public class ReplaceFormFieldsController{
 				"Form fields modified.  Class: " + ReplaceFormFieldsController.class.getCanonicalName());
 		}
 		catch (Exception e) {
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 		}
 		
 		// DWE CHICA-332 4/16/15 

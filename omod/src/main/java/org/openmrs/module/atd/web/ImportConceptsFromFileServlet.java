@@ -12,17 +12,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import org.openmrs.api.context.Daemon;
 import org.openmrs.module.atd.util.AtdConstants;
-import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.ImportConceptsUtil;
+import org.openmrs.module.atd.util.Util;
+import org.openmrs.module.chirdlutil.util.ConceptDescriptor;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DWE CHICA-426
@@ -31,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 public class ImportConceptsFromFileServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(ImportConceptsFromFileServlet.class);
 	
 	private static final String BEGIN_IMPORT_PARAM = "beginImport";
 	private static final String CHECK_PROGRESS_PARAM = "checkProgress";
@@ -105,8 +109,7 @@ public class ImportConceptsFromFileServlet extends HttpServlet
 							if(list != null && list.size() > 0)
 							{
 								importConcepts = new ImportConceptsUtil(file.getInputStream());
-								Thread thread = new Thread(importConcepts);
-								thread.start();
+								Daemon.runInDaemonThread(importConcepts, Util.getDaemonToken());
 
 								session.setAttribute(IMPORT_CONCEPTS_ATTRIB, importConcepts);
 								returnMap.put(IMPORT_STARTED, true);

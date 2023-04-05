@@ -23,8 +23,8 @@ import java.util.StringTokenizer;
 
 import javax.cache.Cache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
@@ -35,6 +35,7 @@ import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.Person;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
@@ -55,11 +56,11 @@ import org.openmrs.module.atd.hibernateBeans.Statistics;
 import org.openmrs.module.atd.service.ATDService;
 import org.openmrs.module.atd.util.AtdConstants;
 import org.openmrs.module.atd.util.BadScansFileFilter;
-import org.openmrs.module.atd.util.ConceptDescriptor;
 import org.openmrs.module.atd.util.FormDefinitionDescriptor;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.Records;
 import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
+import org.openmrs.module.chirdlutil.util.ConceptDescriptor;
 import org.openmrs.module.chirdlutil.util.IOUtil;
 import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
@@ -74,6 +75,7 @@ import org.openmrs.module.dss.DssManager;
 import org.openmrs.module.dss.hibernateBeans.Rule;
 import org.openmrs.module.dss.hibernateBeans.RuleEntry;
 import org.openmrs.module.dss.service.DssService;
+import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
 
 /**
  * ATD related service implementations
@@ -82,7 +84,7 @@ import org.openmrs.module.dss.service.DssService;
  */
 public class ATDServiceImpl implements ATDService
 {
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(ATDServiceImpl.class);
 	private ATDDAO dao;
 
 	/**
@@ -92,11 +94,13 @@ public class ATDServiceImpl implements ATDService
 	{
 	}
 
+	@Override
 	public ArrayList<TeleformFileState> fileProcessed(ArrayList<TeleformFileState> tfstates)
 	{
 		return tfstates;
 	}
 	
+	@Override
 	public TeleformFileState fileProcessed(TeleformFileState tfstate)
 	{
 		return tfstate;
@@ -122,6 +126,7 @@ public class ATDServiceImpl implements ATDService
 		this.dao = dao;
 	}
 	
+	@Override
 	public boolean consume(InputStream customInput, 
 			FormInstance formInstance,
 			Patient patient, int encounterId,
@@ -455,6 +460,7 @@ public class ATDServiceImpl implements ATDService
 				locationTagId,sessionId);
 	}
 	
+	@Override
 	public boolean produce(Patient patient,
 			FormInstance formInstance, OutputStream customOutput, 
 			Integer encounterId,
@@ -468,6 +474,7 @@ public class ATDServiceImpl implements ATDService
             encounterId, baseParameters, locationTagId,sessionId);
 	}
 	
+	@Override
 	public boolean produce(Patient patient, FormInstance formInstance, Map<String, OutputStream> outputs,
 	                       Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId, Integer sessionId) {
 		DssManager dssManager = new DssManager(patient);
@@ -476,6 +483,7 @@ public class ATDServiceImpl implements ATDService
 		    sessionId);
 	}        	
 	
+	@Override
 	public boolean produce(Patient patient, FormInstance formInstance, Map<String,OutputStream> outputs, DssManager dssManager,
 	                       Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId, Integer sessionId) {
 		
@@ -494,6 +502,7 @@ public class ATDServiceImpl implements ATDService
 		return true;
 	}
 	
+	@Override
 	public boolean produce(Patient patient, FormInstance formInstance, OutputStream customOutput, DssManager dssManager,
 	                       Integer encounterId, Map<String, Object> baseParameters, Integer locationTagId, Integer sessionId) {
 		HashMap<String, OutputStream> outputs = new HashMap<String,OutputStream>();
@@ -567,12 +576,14 @@ public class ATDServiceImpl implements ATDService
 		return formInstance.getFormId();
 	}
 
+	@Override
 	public Form teleformXMLToDatabaseForm(String formName, String templateXMLFilename)
 	{
 		TeleformTranslator translator = new TeleformTranslator();
 		return translator.templateXMLToDatabaseForm(formName, templateXMLFilename);
 	}
 
+	@Override
 	public Result evaluateRule(String ruleEvalString,Patient patient,
 			Map<String, Object> baseParameters)
 	{
@@ -673,15 +684,18 @@ public class ATDServiceImpl implements ATDService
 		return getATDDAO().addPatientATD(patientATD);
 	}
 	
+	@Override
 	public PatientATD getPatientATD(FormInstance formInstance, int fieldId)
 	{
 		return getATDDAO().getPatientATD(formInstance,fieldId);
 	}
 		
+	@Override
 	public void updatePatientStates(Date thresholdDate){
 		getATDDAO().updatePatientStates(thresholdDate);
 	}
 	
+    @Override
     public void cleanCache() {
         log.info("Clear the cache if any");
         // parsedFile belongs to ATD, deal in there
@@ -689,10 +703,12 @@ public class ATDServiceImpl implements ATDService
         
     }
     
+    @Override
     public void prePopulateNewFormFields(Integer formId) {
 	    getATDDAO().prePopulateNewFormFields(formId);
     }
 
+    @Override
     public void setupInitialFormValues(Integer formId, String formName, List<String> locationNames, 
                                        String installationDirectory, boolean faxableForm, boolean scannableForm, 
                                        boolean scorableForm, String scoreConfigLoc, Integer numPrioritizedFields, 
@@ -701,53 +717,65 @@ public class ATDServiceImpl implements ATDService
 	    	scannableForm, scorableForm, scoreConfigLoc, numPrioritizedFields, copyPrinterConfigFormId);
     }
 
+	@Override
 	public void purgeFormAttributeValues(Integer formId) throws APIException {
 		getATDDAO().purgeFormAttributeValues(formId);
 	}
 
+    @Override
     public FormPrinterConfig getPrinterConfigurations(Integer formId, Integer locationId) throws APIException {
 	    return getATDDAO().getPrinterConfigurations(formId, locationId);
     }
     
+    @Override
     public void savePrinterConfigurations(FormPrinterConfig printerConfig) throws APIException {
     	getATDDAO().savePrinterConfigurations(printerConfig);
     }
 
+    @Override
     public void copyFormAttributeValues(Integer fromFormId, Integer toFormId) throws APIException {
 	    getATDDAO().copyFormAttributeValues(fromFormId, toFormId);
     }
     
+    @Override
     public void setClinicUseAlternatePrinters(List<Integer> locationIds, Boolean useAltPrinters) throws APIException {
     	getATDDAO().setClinicUseAlternatePrinters(locationIds, useAltPrinters);
     }
     
+    @Override
     public Boolean isFormEnabledAtClinic(Integer formId, Integer locationId) throws APIException {
     	return getATDDAO().isFormEnabledAtClinic(formId, locationId);
     }
+    @Override
     public void updateStatistics(Statistics statistics)
 	{
     	getATDDAO().updateStatistics(statistics);
 	}
 
+	@Override
 	public Statistics createStatistics(Statistics statistics)
 	{
 		return getATDDAO().addStatistics(statistics);
 	}
 	
+	@Override
 	public List<Statistics> getStatByIdAndRule(int formInstanceId,int ruleId,String formName, 
 		Integer locationId)	{
 		return getATDDAO().getStatByIdAndRule(formInstanceId,ruleId,formName,locationId);
 	}
 	
+	@Override
 	public List<Statistics> getStatByFormInstance(int formInstanceId,String formName, 
 		Integer locationId){
 		return getATDDAO().getStatByFormInstance(formInstanceId,formName, locationId);
 	}
 	
+	@Override
 	public List<Statistics> getStatsByEncounterForm(Integer encounterId,String formName){
 		return getATDDAO().getStatsByEncounterForm(encounterId, formName);
 	}
 
+	@Override
 	public List<Statistics> getStatsByEncounterFormNotPrioritized(Integer encounterId,String formName){
 		return getATDDAO().getStatsByEncounterFormNotPrioritized(encounterId, formName);
 	}
@@ -756,12 +784,14 @@ public class ATDServiceImpl implements ATDService
 	 * @should testPSFProduce
 	 * @should testPWSProduce
 	 */
+	@Override
 	public void produce(OutputStream output, PatientState state, Patient patient, Integer encounterId, String dssType,
 	                    int maxDssElements, Integer sessionId) {
 		HashMap<String, OutputStream> outputs = new HashMap<String, OutputStream>();
 		outputs.put("teleformXML", output);
 		produce(outputs, state, patient, encounterId, dssType, maxDssElements, sessionId);
 	}
+	@Override
 	public void produce(Map<String,OutputStream> outputs, PatientState state,
 	        			Patient patient, Integer encounterId, String dssType,
 	        			int maxDssElements,Integer sessionId)
@@ -842,6 +872,7 @@ public class ATDServiceImpl implements ATDService
 	}
 
     
+    @Override
     public List<URL> getBadScans(String locationName) {
         AdministrationService adminService = Context.getAdministrationService();
         String imageDirStr = adminService.getGlobalProperty("atd.defaultTifImageDirectory");
@@ -852,7 +883,7 @@ public class ATDServiceImpl implements ATDService
         
         File imageDirectory = new File(imageDirStr, locationName);
         if (!imageDirectory.exists()) {
-        	log.error("Cannot find directory: " + imageDirStr + File.separator + locationName);
+        	log.error("Cannot find directory: {}{}{}", imageDirStr, File.separator, locationName);
         	return new ArrayList<URL>();
         }
         
@@ -870,12 +901,13 @@ public class ATDServiceImpl implements ATDService
         return getBadScans(imageDirectory, badScans, fileFilter);
     }
     
+    @Override
     public void moveBadScan(String url, boolean formRescanned) throws Exception {
         try {
         	URL urlLoc = new URL(url);
             File fileLoc = new File(urlLoc.getFile());
             if (!fileLoc.exists()) {
-            	log.warn("Bad scan does not exist: " + fileLoc.getAbsolutePath());
+            	log.warn("Bad scan does not exist: {}", fileLoc.getAbsolutePath());
             	return;
             }
             
@@ -912,7 +944,7 @@ public class ATDServiceImpl implements ATDService
             
             IOUtil.copyFile(fileLoc.getAbsolutePath(), newLoc.getAbsolutePath());
             if (!fileLoc.delete()) {
-                log.error("Unable to delete file: " + fileLoc.getAbsolutePath());
+                log.error("Unable to delete file: {}", fileLoc.getAbsolutePath());
             }
             
             // log the event
@@ -961,6 +993,7 @@ public class ATDServiceImpl implements ATDService
 	 * @param patientId
 	 * @return
 	 */
+    @Override
     public PatientIdentifier getPatientMRN(Integer patientId){
 		return getATDDAO().getPatientMRN(patientId);
 	}
@@ -968,6 +1001,7 @@ public class ATDServiceImpl implements ATDService
 	/**
 	 * @see org.openmrs.module.atd.service.ATDService#getPatientFormQuestionAnswers(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.String)
 	 */
+    @Override
     public List<PSFQuestionAnswer> getPatientFormQuestionAnswers(Integer formInstanceId, Integer locationId, Integer patientId, String patientForm) {
 	    return getATDDAO().getPatientFormQuestionAnswers(formInstanceId, locationId, patientId, patientForm);
     }
@@ -975,6 +1009,7 @@ public class ATDServiceImpl implements ATDService
 	/**
 	 * @see org.openmrs.module.atd.service.ATDService#updatePatientATD(org.openmrs.module.atd.hibernateBeans.PatientATD)
 	 */
+    @Override
     public PatientATD updatePatientATD(PatientATD patientATD) throws APIException {
 	    return getATDDAO().addPatientATD(patientATD);
     }
@@ -982,14 +1017,17 @@ public class ATDServiceImpl implements ATDService
 	/**
 	 * @see org.openmrs.module.atd.service.ATDService#getPatientATDs(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance, java.util.List)
 	 */
+    @Override
     public List<PatientATD> getPatientATDs(FormInstance formInstance, List<Integer> fieldIds) {
 	    return getATDDAO().getPatientATDs(formInstance, fieldIds);
     }
 
+	@Override
 	public List<FormDefinitionDescriptor> getAllFormDefinitions() throws SQLException {
 		return this.dao.getAllFormDefinitions();
 	}
 
+	@Override
 	public List<FormDefinitionDescriptor> getFormDefinition(Integer formId) throws SQLException {
 		return this.dao.getFormDefinition(formId);
 	}
@@ -1010,6 +1048,7 @@ public class ATDServiceImpl implements ATDService
 	 * 
 	 * @see org.openmrs.module.atd.service.ATDService#getConceptDescriptorList(int, int, String, boolean, int, String, String, boolean)
 	 */
+	@Override
 	public List<ConceptDescriptor> getConceptDescriptorList(int start, int length, String searchValue, boolean includeRetired, int conceptClassId, String orderByColumn, String ascDesc, boolean exactMatchSearch)
 	{
 		return this.dao.getConceptDescriptorList(start, length, searchValue, includeRetired, conceptClassId, orderByColumn, ascDesc, exactMatchSearch);
@@ -1020,6 +1059,7 @@ public class ATDServiceImpl implements ATDService
 	 * 
 	 * @see org.openmrs.module.atd.service.ATDService#getCountConcepts(String, boolean, int, boolean)
 	 */
+	@Override
 	public int getCountConcepts(String searchValue, boolean includeRetired, int conceptClassId, boolean exactMatchSearch)
 	{
 		return this.dao.getCountConcepts(searchValue, includeRetired, conceptClassId, exactMatchSearch);
@@ -1029,6 +1069,7 @@ public class ATDServiceImpl implements ATDService
      * DWE CHICA-437
      * @see org.openmrs.module.atd.service.ATDService#getObsWithStatistics(Integer, Integer, Integer, boolean)
      */
+    @Override
     public List<Obs> getObsWithStatistics(Integer encounterId, Integer conceptId, Integer formFieldId, boolean includeVoidedObs)
     {
     	return getATDDAO().getObsWithStatistics(encounterId, conceptId, formFieldId, includeVoidedObs);
@@ -1042,6 +1083,7 @@ public class ATDServiceImpl implements ATDService
      * @param ruleId
      * @return
      */
+    @Override
     public boolean oneBoxChecked(Integer encounterId, Integer ruleId){
     	return getATDDAO().oneBoxChecked(encounterId, ruleId);
     }
@@ -1055,10 +1097,12 @@ public class ATDServiceImpl implements ATDService
      * @param ruleId
      * @return
      */
+    @Override
     public List<Statistics> getStatsByEncounterRule(Integer encounterId, Integer ruleId){
     	return getATDDAO().getStatsByEncounterRule(encounterId, ruleId);
     }
     
+    @Override
     public boolean ruleFiredForEncounter(Integer encounterId, Integer ruleId){
     	List<Statistics> stats = getStatsByEncounterRule(encounterId,ruleId);
     	if(stats != null && stats.size()>0){
@@ -1070,6 +1114,7 @@ public class ATDServiceImpl implements ATDService
 	/**
 	 * @see org.openmrs.module.atd.service.ATDService#getFormRecords(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag)
 	 */
+	@Override
 	public Records getFormRecords(FormInstanceTag formInstanceTag) throws APIException {
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
@@ -1124,6 +1169,7 @@ public class ATDServiceImpl implements ATDService
 	/**
 	 * @see org.openmrs.module.atd.service.ATDService#saveFormRecordsDraft(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag, org.openmrs.module.atd.xmlBeans.Records)
 	 */
+	@Override
 	public void saveFormRecordsDraft(FormInstanceTag formInstanceTag, Records records) throws APIException {
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
@@ -1150,6 +1196,7 @@ public class ATDServiceImpl implements ATDService
 	/**
 	 * @see org.openmrs.module.atd.service.ATDService#saveFormRecords(org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstanceTag, org.openmrs.module.atd.xmlBeans.Records)
 	 */
+	@Override
 	public void saveFormRecords(FormInstanceTag formInstanceTag, Records records) throws APIException {
 		if (formInstanceTag == null || formInstanceTag.getFormId() == null || formInstanceTag.getFormInstanceId() == null || 
 				formInstanceTag.getLocationId() == null || formInstanceTag.getLocationTagId() == null) {
@@ -1212,8 +1259,7 @@ public class ATDServiceImpl implements ATDService
 					output.close();
 				} catch (IOException e) {
 					// This isn't super important.  No need to push the exception up to the client.
-					log.error("Error flushing and closing output stream for form ID: " + formId + " form instance ID: " + formInstanceId + 
-						" location ID: " + locationId + " location tag ID: " + locationTagId, e);
+					log.error("Error flushing and closing output stream for form ID: {} form instance ID: {} location ID: {} location tag ID: {}", formId, formInstanceId, locationId, locationTagId, e);
 				}
 			}
 		}
@@ -1238,8 +1284,31 @@ public class ATDServiceImpl implements ATDService
 	/**
      * @see org.openmrs.module.atd.service.ATDService#getFormNamesByFormAttribute(java.util.List, String, boolean)
      */
+    @Override
     public List<String> getFormNamesByFormAttribute(List<String> formAttrNames, String formAttrValue, boolean isRetired) throws APIException
     {
     	return getATDDAO().getFormNamesByFormAttribute(formAttrNames, formAttrValue, isRetired);
     }
+
+    /**
+     * @see org.openmrs.module.atd.service.ATDService#getObservations(java.util.List, java.util.List, java.util.List, 
+     * java.util.List, java.util.List, java.util.List, java.util.List, java.lang.Integer, java.lang.Integer, 
+     * java.util.Date, java.util.Date, boolean, java.lang.String, java.lang.String)
+     */
+	@Override
+	public List<Obs> getObservations(List<Person> whom, List<Encounter> encounters, List<Concept> questions,
+	        List<Concept> answers, List<PERSON_TYPE> personTypes, List<Location> locations, List<String> sort,
+	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+	        String accessionNumber, String statFormName) throws APIException {
+		return getATDDAO().getObservations(whom, encounters, questions, answers, personTypes, locations, sort, 
+			mostRecentN, obsGroupId, fromDate, toDate, includeVoidedObs, accessionNumber, statFormName);
+	}
+	
+	/**
+	 * @see org.openmrs.module.atd.service.ATDService#getStatsByEncounterForm(java.lang.Integer, java.lang.String, boolean) 
+	 */
+	@Override
+	public List<Statistics> getStatsByEncounterForm(Integer encounterId, String formName, boolean includeNullObs){
+		return getATDDAO().getStatsByEncounterForm(encounterId, formName, includeNullObs);
+	}
 }

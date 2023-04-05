@@ -2,12 +2,14 @@ package org.openmrs.module.atd;
 
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
+import org.openmrs.module.DaemonToken;
+import org.openmrs.module.DaemonTokenAware;
 import org.openmrs.module.chirdlutil.util.Util;
 
 /**
@@ -16,17 +18,18 @@ import org.openmrs.module.chirdlutil.util.Util;
  * 
  * @author Tammy Dugan
  */
-public class ATDActivator extends BaseModuleActivator {
+public class ATDActivator extends BaseModuleActivator implements DaemonTokenAware {
 
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(ATDActivator.class);
 	
 	/**
 	 * @see org.openmrs.module.BaseModuleActivator#started()
 	 */
+	@Override
 	public void started() {
 		try
 		{
-			this.log.info("Starting ATD Module");
+			log.info("Starting ATD Module");
 			// check that all global properties are set
 			AdministrationService adminService = Context
 					.getAdministrationService();
@@ -54,9 +57,9 @@ public class ATDActivator extends BaseModuleActivator {
 			}
 		} catch (Exception e)
 		{
-			this.log.error("Error checking global properties for atd module");
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error("Error checking global properties for atd module");
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 
 		}
 	}
@@ -64,8 +67,17 @@ public class ATDActivator extends BaseModuleActivator {
 	/**
 	 * @see org.openmrs.module.BaseModuleActivator#stopped()
 	 */
+	@Override
 	public void stopped() {
-		this.log.info("Shutting down ATD Module");
+		log.info("Shutting down ATD Module");
+	}
+
+	/**
+	 * @see org.openmrs.module.DaemonTokenAware#setDaemonToken(org.openmrs.module.DaemonToken)
+	 */
+	@Override
+	public void setDaemonToken(DaemonToken token) {
+		org.openmrs.module.atd.util.Util.setDaemonToken(token);
 	}
 	
 }

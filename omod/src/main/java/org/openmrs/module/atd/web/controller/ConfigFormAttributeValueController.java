@@ -10,9 +10,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
@@ -30,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * 
  * @author wang417
@@ -40,7 +41,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class ConfigFormAttributeValueController {
 
 	/** Logger for this class and subclasses */
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(ConfigFormAttributeValueController.class);
 	
 	/** Form view */
 	private static final String FORM_VIEW = "/module/atd/configFormAttributeValue";
@@ -177,7 +178,7 @@ public class ConfigFormAttributeValueController {
 		StringWriter w = new StringWriter();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(w, formAttributesValueMap);
-		log.info("Edit form attribute values: " + w.toString());
+		log.info("Edit form attribute values: {}", w.toString());
 		}catch(Exception e){
 			log.error("Error logging form attribute values map.", e);
 		}

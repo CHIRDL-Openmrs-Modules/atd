@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.FormService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atd.util.AtdConstants;
@@ -28,7 +28,7 @@ public class DeleteFormsController
 {
 
 	/** Logger for this class and subclasses */
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(DeleteFormsController.class);
 
 	/** Form view name */
 	private static final String FORM_VIEW = "/module/atd/deleteForms";
@@ -62,8 +62,8 @@ public class DeleteFormsController
 						"Form Deleted.  Class: " + DeleteFormsController.class.getCanonicalName());
 				} catch (Exception e)
 				{
-					this.log.error(e.getMessage());
-					this.log.error(Util.getStackTrace(e));
+					log.error(e.getMessage());
+					log.error(Util.getStackTrace(e));
 				}
 			}
 		}

@@ -14,8 +14,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.chirdlutil.util.IOUtil;
@@ -33,7 +33,7 @@ import com.google.zxing.DecodeHintType;
 
 public class MoveMergeFiles extends AbstractTask {
 	
-	private static Log log = LogFactory.getLog(TeleformFileMonitor.class);
+	private static final Logger log = LoggerFactory.getLogger(MoveMergeFiles.class);
 	
 	private static boolean isInitialized = false;
 	
@@ -211,7 +211,7 @@ public class MoveMergeFiles extends AbstractTask {
 							// don't rename the pendingMergeDirectory file so
 							// that it will get picked up on the next time
 							// around
-							log.error("merge file: " + tgtFile.getPath() + " is truncated. File will be deleted.");
+							log.error("merge file: {} is truncated. File will be deleted.", tgtFile.getPath());
 							//delete the truncated xml so it won't break the
 							//Teleform merger
 							IOUtil.deleteFile(targetFilename);
@@ -227,7 +227,7 @@ public class MoveMergeFiles extends AbstractTask {
 					}
 				}
 				catch (Exception e) {
-					log.error("File copy exception in TF monitor task:" + e.toString());
+					log.error("File copy exception in TF monitor task: {}", e.toString());
 					continue;
 				}
 				
@@ -265,9 +265,9 @@ public class MoveMergeFiles extends AbstractTask {
 			}
 		}
 		catch (IOException e) {
-			log.error(" IO error determining PDF filename from " + pdfFile.getAbsolutePath() + ".", e);
+			log.error(" IO error determining PDF filename from {}.", pdfFile.getAbsolutePath(), e);
 		} catch (Exception e) {
-			log.error("Error determining PDF filename from " + pdfFile.getAbsolutePath() + ".", e);
+			log.error("Error determining PDF filename from {}.", pdfFile.getAbsolutePath(), e);
 		}
 		
 		return targetFilename;

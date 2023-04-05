@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
@@ -38,7 +38,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class ScoreJit implements Rule {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(ScoreJit.class);
 	
 	/**
 	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, org.openmrs.Patient,
@@ -59,7 +59,7 @@ public class ScoreJit implements Rule {
 		for(PatientState patientState:patientStates){
 			//if there is an open JIT_incomplete state then don't score
 			if(patientState.getEndTime()==null){
-				log.error("Cannot score jit: "+formInstance+" because it is incomplete.");
+				log.error("Cannot score jit: {} because it is incomplete.", formInstance);
 				return Result.emptyResult();
 			}
 		}

@@ -23,10 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.atd.xmlBeans.Field;
 import org.openmrs.module.atd.xmlBeans.Record;
@@ -37,6 +35,7 @@ import org.openmrs.module.chirdlutil.util.Util;
 import org.openmrs.module.chirdlutil.util.XMLUtil;
 import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
 
+
 /**
  * Create a form XML if one does not exist in the scan directory and add the field
  * information to it. If fields already exist, the results will be overwritten by the new data
@@ -46,7 +45,7 @@ import org.openmrs.module.chirdlutilbackports.hibernateBeans.FormInstance;
  */
 public class FormWriter implements ChirdlRunnable {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(FormWriter.class);
 	private FormInstance formInstance;
 	private Integer locationTagId;
 	private List<Field> fieldsToAdd;
@@ -70,61 +69,55 @@ public class FormWriter implements ChirdlRunnable {
 	/**
 	 * @see java.lang.Runnable#run()
 	 */
+	@Override
 	public void run() {
-		log.info("Started execution of " + getName() + "(" + Thread.currentThread().getName() + ", "
-		        + new Timestamp(new Date().getTime()) + ")");
-		Context.openSession();
-		try {
-			AdministrationService adminService = Context.getAdministrationService();
-			Context.authenticate(adminService.getGlobalProperty("scheduler.username"),
-			    adminService.getGlobalProperty("scheduler.password"));
-			Integer locationId = formInstance.getLocationId();
-			Integer formId = formInstance.getFormId();
-			String scanDirectory = IOUtil.formatDirectoryName(
-				org.openmrs.module.chirdlutilbackports.util.Util.getFormAttributeValue(formId, "defaultExportDirectory", 
-					locationTagId, locationId));
-			if (scanDirectory == null) {
-				log.info("No defaultExportDirectory found for Form: " + formId + " Location ID: " + locationId + 
-					" Location Tag ID: " + locationTagId + ".  No scan XML file will be created.");
-				return;
-			}
-			
-			File file = new File(scanDirectory, formInstance.toString() + ".20");
-			Records records = null;
-			if (file.exists()) {
-				records = parseTeleformXmlFormat(file);
-				records = addFields(records, fieldsToAdd, fieldsToRemove); // DWE CHICA-430 Added fieldsToRemove
-			} else {
-				Record record = new Record();
-				records = new Records(record);
-				for (Field field : fieldsToAdd) {
-					record.addField(field);
-				}
-			}
-			
-			serializeTeleformXmlFormat(records, file);
-		}
-		catch (ContextAuthenticationException e) {
-			log.error("Error authenticating user", e);
-		}
-		finally {
-			Context.closeSession();
-			log.info("Finished execution of " + getName() + "(" + Thread.currentThread().getName() + ", "
-			        + new Timestamp(new Date().getTime()) + ")");
-		}
+		log.info("Started execution of {}({}, {})", getName(), Thread.currentThread().getName(), new Timestamp(new Date().getTime()));
+        try {
+            Integer locationId = this.formInstance.getLocationId();
+            Integer formId = this.formInstance.getFormId();
+            String scanDirectory = IOUtil.formatDirectoryName(org.openmrs.module.chirdlutilbackports.util.Util
+                    .getFormAttributeValue(formId, "defaultExportDirectory", this.locationTagId, locationId));
+            if (scanDirectory == null) {
+                log.info("No defaultExportDirectory found for Form: {} Location ID: {} Location Tag ID: {}. No scan XML file will be created.", formId, locationId,
+                        this.locationTagId);
+                return;
+            }
+
+            File file = new File(scanDirectory, this.formInstance.toString() + ".20");
+            Records records = null;
+            if (file.exists()) {
+                records = parseTeleformXmlFormat(file);
+                records = addFields(records, this.fieldsToAdd, this.fieldsToRemove); // DWE CHICA-430 Added fieldsToRemove
+            } else {
+                Record record = new Record();
+                records = new Records(record);
+                for (Field field : this.fieldsToAdd) {
+                    record.addField(field);
+                }
+            }
+
+            serializeTeleformXmlFormat(records, file);
+        } catch (ContextAuthenticationException e) {
+            log.error("Error authenticating user", e);
+        } finally {
+            log.info("Finished execution of {}({}, {})", getName(), Thread.currentThread().getName(),
+                    new Timestamp(new Date().getTime()));
+        }
 	}
 	
 	/**
 	 * @see org.openmrs.module.chirdlutil.threadmgmt.ChirdlRunnable#getName()
 	 */
+	@Override
 	public String getName() {
-		return "Form Writer (Form: " + formInstance.getFormId() + " Location ID: " + formInstance.getLocationId() + 
-				" Location Tag ID: " + locationTagId + ")";
+		return "Form Writer (Form: " + this.formInstance.getFormId() + " Location ID: " + this.formInstance.getLocationId() + 
+				" Location Tag ID: " + this.locationTagId + ")";
 	}
 	
 	/**
 	 * @see org.openmrs.module.chirdlutil.threadmgmt.ChirdlRunnable#getPriority()
 	 */
+	@Override
 	public int getPriority() {
 		return ChirdlRunnable.PRIORITY_FIVE;
 	}
@@ -138,7 +131,7 @@ public class FormWriter implements ChirdlRunnable {
 	 * @return A new Records object with the added/updated fields.
 	 */
 	private Records addFields(Records records, List<Field> fields, List<String> fieldsToRemove) {
-		Map<String, Field> fieldIdToFieldMap = new HashMap<String, Field>();
+		Map<String, Field> fieldIdToFieldMap = new HashMap<>();
 		Record record = records.getRecord();
 		if (record == null) {
 			return records;
@@ -194,8 +187,8 @@ public class FormWriter implements ChirdlRunnable {
 			records = (Records) XMLUtil.deserializeXML(Records.class, new FileInputStream(input));
 		}
 		catch (IOException e) {
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 		}
 		return records;
 	}
@@ -211,8 +204,8 @@ public class FormWriter implements ChirdlRunnable {
 			XMLUtil.serializeXML(records, new FileOutputStream(output));
 		}
 		catch (IOException e) {
-			this.log.error(e.getMessage());
-			this.log.error(Util.getStackTrace(e));
+			log.error(e.getMessage());
+			log.error(Util.getStackTrace(e));
 		}
 	}
 	

@@ -7,8 +7,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Location;
 import org.openmrs.User;
 import org.openmrs.api.LocationService;
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class CreateClinicFormController {
 	
     /** Logger for this class and subclasses */
-	protected final Log log = LogFactory.getLog(getClass());
+	private static final Logger log = LoggerFactory.getLogger(CreateClinicFormController.class);
 	
 	/** Form view */
     private static final String FORM_VIEW = "/module/atd/createClinicForm";

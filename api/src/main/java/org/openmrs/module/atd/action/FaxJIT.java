@@ -8,9 +8,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Form;
 import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
@@ -49,7 +49,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class FaxJIT implements ProcessStateAction {
     
-    private static Log log = LogFactory.getLog(FaxJIT.class);
+	private static final Logger log = LoggerFactory.getLogger(FaxJIT.class);
     
     /**
      * @see org.openmrs.module.chirdlutilbackports.action.ProcessStateAction#processAction(org.openmrs.module.chirdlutilbackports.hibernateBeans.StateAction, org.openmrs.Patient, org.openmrs.module.chirdlutilbackports.hibernateBeans.PatientState, java.util.HashMap)
@@ -191,8 +191,8 @@ public class FaxJIT implements ProcessStateAction {
                     chirdlutilbackportsService.saveFormInstanceAttributeValue(formInstanceAttrValue);
                 }
                 
-                log.info("Form " + formName + " was submitted to the fax web service for patient_id: " 
-                        + patient.getPatientId() + " clinic: " + clinic + " recipient: " + recipient);
+                log.info("Form {} was submitted to the fax web service for patient_id: {} clinic: {} recipient: {}" 
+                        , formName, patient.getPatientId(), clinic, recipient);
                             
             }
         }

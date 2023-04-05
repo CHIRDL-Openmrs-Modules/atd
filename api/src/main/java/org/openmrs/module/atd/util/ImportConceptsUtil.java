@@ -21,13 +21,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
 import org.openmrs.ConceptClass;
@@ -35,13 +37,12 @@ import org.openmrs.ConceptDatatype;
 import org.openmrs.ConceptDescription;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptNumeric;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.UserContext;
-import org.openmrs.module.atd.util.ConceptDescriptor;
-import org.openmrs.module.atd.util.Util;
+import org.openmrs.module.chirdlutil.util.ChirdlUtilConstants;
+import org.openmrs.module.chirdlutil.util.ConceptDescriptor;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.bean.CsvToBean;
@@ -57,9 +58,10 @@ import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
  */
 public class ImportConceptsUtil implements Runnable, Serializable{
 	
-	private static final long serialVersionUID = 1L;
-    private static Log log = LogFactory.getLog(ImportConceptsUtil.class);
-	private InputStream inputStream;
+	private static final String LOG_UPDATED_CONCEPT = "updated concept: ";
+    private static final long serialVersionUID = 1L;
+    private static final Logger log = LoggerFactory.getLogger(ImportConceptsUtil.class);
+	private transient InputStream inputStream;
 	private boolean isImportComplete = false;
 	private boolean importStarted = false;
 	private boolean errorOccurred = false;
@@ -169,17 +171,13 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 	 * and allow the user to cancel the import 
 	 */ 
 	private void createConceptsFromFile() {
-		Context.openSession();
 		try
 		{
-		List<ConceptDescriptor> conceptDescriptorsToLink = new ArrayList<ConceptDescriptor>();
+		List<ConceptDescriptor> conceptDescriptorsToLink = new ArrayList<>();
 		ConceptService conceptService = Context.getConceptService();
-		AdministrationService adminService = Context.getAdministrationService();
-		Context.authenticate(adminService.getGlobalProperty("scheduler.username"), // NOTE: There are now constants for these, but this branch hasn't been updated yet
-				adminService.getGlobalProperty("scheduler.password"));
 		
 		try {
-			
+		    
 			List<ConceptDescriptor> conceptDescriptors = getConcepts(inputStream);
 			
 			totalRowsFound = conceptDescriptors.size();
@@ -192,13 +190,13 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 				currentRow++;
 				Concept newConcept = null;
 				
-				if (currTerm.getDatatype().equalsIgnoreCase("Numeric")) {
+				if (currTerm.getDatatype().equalsIgnoreCase(ChirdlUtilConstants.CONCEPT_DATATYPE_NUMERIC)) {
 					newConcept = new ConceptNumeric();
 				} else {
 					newConcept = new Concept();
 				}
 				ConceptName conceptName = new ConceptName();
-				conceptName.setLocale(new Locale("en"));
+				conceptName.setLocale(Context.getLocale());
 				conceptName.setName(currTerm.getName().trim());
 				conceptName.setDateCreated(new java.util.Date());
 				
@@ -217,14 +215,14 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 				newConcept.setDateCreated(new java.util.Date());
 				ConceptDescription conceptDescription = new ConceptDescription();
 				conceptDescription.setDescription(currTerm.getDescription().replace(Util.ESCAPE_BACKSLASH, "\\")); // DWE CHICA-330 Replace special character that was escaped during the export
-				conceptDescription.setLocale(new Locale("en"));
+				conceptDescription.setLocale(Context.getLocale()); 
 				newConcept.addDescription(conceptDescription);
 				conceptDescriptorsToLink.add(currTerm);
 				Concept concept = conceptService.getConceptByName(conceptName.getName());
 				
 				if (concept != null) {
 					currTerm.setConceptId(concept.getConceptId());
-					log.error("Could not create concept: " + conceptName.getName() + ". It already exists.");
+					log.error("Could not create concept: {}. It already exists.", conceptName.getName());
 					
 					//update the description, units, or class if they have changed
 					String oldDescription = null;
@@ -239,20 +237,36 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 					String newDescription = currTerm.getDescription();
 					String newUnits = currTerm.getUnits();
 					String newConceptClass = currTerm.getConceptClass();
+					ConceptDatatype oldDatatype = concept.getDatatype();
 					
-					if (newDescription != null && newDescription.length() > 0 && !newDescription.equals(oldDescription)) {
+					if (StringUtils.isNotBlank(newDescription) && !newDescription.equals(oldDescription)) {
+						//remove all existing descriptions and add new one
+						Collection<ConceptDescription> existingDescriptions = concept.getDescriptions();
+						
+						Iterator<ConceptDescription> it = existingDescriptions.iterator();
+						
+						while (it.hasNext()) {
+							it.next();
+						    it.remove();
+						}
+						
 						concept.addDescription(new ConceptDescription(newDescription, new Locale("en")));
-						log.info("updated concept: " + conceptName.getName() + ". Changed description to "+newDescription);
+						log.info("{}{}. Changed description to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newDescription);
 					}
-					if (newConceptClass != null && newConceptClass.length() > 0 && !newConceptClass.equalsIgnoreCase(oldConceptClass)) {
+					if (StringUtils.isNotBlank(newConceptClass) && !newConceptClass.equalsIgnoreCase(oldConceptClass)) {
 						ConceptClass conceptClassObject = conceptService.getConceptClassByName(newConceptClass);
 						concept.setConceptClass(conceptClassObject);
-						log.info("updated concept: " + conceptName.getName() + ". Changed concept class to "+newConceptClass);
+						log.info("{}{}. Changed concept class to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newConceptClass);
 
 					}
 					if (concept instanceof ConceptNumeric&&newUnits != null && newUnits.length() > 0 && !newUnits.equals(oldUnits)) {
 						((ConceptNumeric) concept).setUnits(newUnits); 
-						log.info("updated concept: " + conceptName.getName() + ". Changed units to "+newUnits);
+						log.info("{}{}. Changed units to {}", LOG_UPDATED_CONCEPT, conceptName.getName(), newUnits);
+					}
+					
+					//Updating the datatype if changed
+					if(!oldDatatype.equals(conceptDatatype)) {
+						concept.setDatatype(conceptDatatype);
 					}
 					
 					conceptService.saveConcept(concept);
@@ -332,17 +346,13 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 				errorOccurred = true;
 			}
 		} 
-		log.info("Number concepts created: " + conceptsCreated);
+		log.info("Number concepts created: {}", conceptsCreated);
 		
 		}
 		catch(ContextAuthenticationException e)
 		{
 			errorOccurred = true;
 			log.error("Error authenticating context.", e);
-		}
-		finally
-		{
-			Context.closeSession();
 		}
 		
 	}
@@ -362,9 +372,9 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 		try {
 			InputStreamReader inStreamReader = new InputStreamReader(inputStream);
 			CSVReader reader = new CSVReader(inStreamReader, ',');
-			HeaderColumnNameTranslateMappingStrategy<ConceptDescriptor> strat = new HeaderColumnNameTranslateMappingStrategy<ConceptDescriptor>();
+			HeaderColumnNameTranslateMappingStrategy<ConceptDescriptor> strat = new HeaderColumnNameTranslateMappingStrategy<>();
 			
-			Map<String, String> map = new HashMap<String, String>();
+			Map<String, String> map = new HashMap<>();
 			
 			map.put("name", "name");
 			map.put("concept class", "conceptClass");
@@ -376,15 +386,16 @@ public class ImportConceptsUtil implements Runnable, Serializable{
 			strat.setType(ConceptDescriptor.class);
 			strat.setColumnMapping(map);
 			
-			CsvToBean<ConceptDescriptor> csv = new CsvToBean<ConceptDescriptor>();
+			CsvToBean<ConceptDescriptor> csv = new CsvToBean<>();
 			list = csv.parse(strat, reader);
 			
 			if (list == null) {
-				return new ArrayList<ConceptDescriptor>();
+				return new ArrayList<>();
 			}
 		}
 		catch (Exception e) {
 			log.error("Error parsing concept file", e);
+			return new ArrayList<>();
 		}
 		finally {
 			inputStream.close();

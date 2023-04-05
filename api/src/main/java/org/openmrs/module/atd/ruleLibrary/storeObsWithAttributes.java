@@ -17,8 +17,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
@@ -41,7 +41,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  */
 public class storeObsWithAttributes implements Rule {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(storeObsWithAttributes.class);
 	
 	/**
 	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, java.lang.Integer, java.util.Map)
@@ -59,7 +59,7 @@ public class storeObsWithAttributes implements Rule {
 		
 		Concept concept = Context.getConceptService().getConceptByName(conceptName);
 		if (concept == null) {
-			log.error("No concept found for name: " + conceptName);
+			log.error("No concept found for name: {}", conceptName);
 			return Result.emptyResult();
 		}
 		
@@ -97,7 +97,7 @@ public class storeObsWithAttributes implements Rule {
 			
 			ObsAttribute obsAttr = service.getObsAttributeByName(attrValue);
 			if (obsAttr == null) {
-				log.error("Observation attribute not found with name " + attrValue);
+				log.error("Observation attribute not found with name {}", attrValue);
 				continue;
 			}
 			

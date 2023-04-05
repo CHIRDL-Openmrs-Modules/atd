@@ -19,8 +19,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.Concept;
 import org.openmrs.Form;
 import org.openmrs.FormField;
@@ -56,7 +56,7 @@ import org.openmrs.module.chirdlutilbackports.service.ChirdlUtilBackportsService
  *
  */
 public class FormScoringUtil {
-	private static Log log = LogFactory.getLog(Util.class);
+	private static final Logger log = LoggerFactory.getLogger(FormScoringUtil.class);
 
 	public static void scoreJit(FormInstance formInstance, Integer locationTagId, Integer encounterId, 
 	                            Patient patient) {
@@ -85,8 +85,7 @@ public class FormScoringUtil {
 		}
 		
 		if (scorableFormConfigFile == null) {
-			log.error("Could not find scorableFormConfigFile for locationId: " + locationId + " and locationTagId: "
-			        + locationTagId);
+			log.error("Could not find scorableFormConfigFile for locationId: {} and locationTagId: {}", locationId, locationTagId);
 			return;
 		}
 		
@@ -99,7 +98,7 @@ public class FormScoringUtil {
 			answersByLanguage = formConfig.getLanguageAnswers();
 		}
 		catch (IOException e1) {
-			log.error("", e1);
+			log.error("Error scoring JIT", e1);
 			return;
 		}
 		HashMap<String, Field> langFieldsToConsume = Util.getLanguageFieldsToConsume(fieldMap, formInstance,
@@ -161,7 +160,7 @@ public class FormScoringUtil {
 				}
 			}
 			catch (Exception e) {
-				log.error("", e);
+				log.error("Error scoring JIT for formInstance {}", formInstance, e);
 			}
 		}
 		
@@ -399,13 +398,13 @@ public class FormScoringUtil {
 					obs.setValueNumeric(Double.parseDouble(value));
 				}
 				catch (NumberFormatException e) {
-					log.error("Could not save value: " + value + " to the database for concept "
-					        + concept.getName().getName());
+					log.error("Could not save value: {} to the database for concept {}"
+					        , value, concept.getName().getName());
 				}
 			} else if (datatypeName.equalsIgnoreCase("Coded")) {
 				Concept answer = conceptService.getConceptByName(value);
 				if (answer == null) {
-					log.error(value + " is not a valid concept name. " + value + " will be stored as text.");
+					log.error("{} is not a valid concept name. {} will be stored as text.", value, value);
 					obs.setValueText(value);
 				} else {
 					obs.setValueCoded(answer);
@@ -416,7 +415,7 @@ public class FormScoringUtil {
 			obs.setEncounter(encounter);
 			obsService.saveObs(obs, "");
 		} else {
-			log.error("Concept " + conceptName + " does not exist to save score");
+			log.error("Concept {} does not exist to save score", conceptName);
 		}
 		
 	}
