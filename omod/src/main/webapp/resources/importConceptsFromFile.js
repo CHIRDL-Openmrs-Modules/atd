@@ -1,6 +1,9 @@
 /**
  * DWE CHICA-426
  */    
+ 
+ var $ = jQuery.noConflict();
+ 
 var progressbar = $( "#progressbar" );
 var progressLabel = $( ".progress-label" );
 var checkProgressTimer;

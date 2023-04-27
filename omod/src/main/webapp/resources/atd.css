@@ -1,8 +1,12 @@
-td{
+tdtd{
 	vertical-align: top;
 }
 
 .atdBackground {
 text-align:left; 
 background-color:#8FABC7;
+}
+
+td#barcell {
+  vertical-align: middle;
 }

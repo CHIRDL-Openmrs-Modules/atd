@@ -82,12 +82,14 @@
 </body>
 
 <!-- DWE CHICA-330 4/23/15 Updated datatables version in the ATD module -->
-<script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery-1.11.1.min.js"></script>
+<openmrs:htmlInclude file="/scripts/jquery/jquery.min.js" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/jquery-ui.min.js" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/jquery-ui.min.css" />
+
+
 <script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.js"></script>
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.css">
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables_themeroller-1.10.6.css">
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery-ui-1.11.4.min.css">
-
 
 <script type="text/javascript">
 	var attributesTable;

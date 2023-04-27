@@ -1,5 +1,6 @@
 var selectedIds = [];
 var dtable;
+var $ = jQuery.noConflict();
 
 function updateAndSubmit()
 {
@@ -11,9 +12,9 @@ function updateAndSubmit()
 //the page in the datatable that is currently displayed 
 function toggleSelectedConcepts()
 {
-	var $cbs = $j(".conceptCheckbox:checkbox:enabled");
+	var $cbs = $(".conceptCheckbox:checkbox:enabled");
 	var checked = $cbs.filter(":first").prop('checked');
-	$j('.conceptCheckbox').each(function(){ 
+	$('.conceptCheckbox').each(function(){ 
 		this.checked = !checked; 
 		toggleSelectedObject(this.id);
 	});
