@@ -99,8 +99,6 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.css">
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables_themeroller-1.10.6.css">
 
-<
-
 <script type="text/javascript">
 	var definitionsTable;
 	
