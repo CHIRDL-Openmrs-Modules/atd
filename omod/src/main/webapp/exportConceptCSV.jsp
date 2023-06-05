@@ -17,10 +17,10 @@
 <script src="${pageContext.request.contextPath}/moduleResources/atd/exportConceptCSV.js"></script>
 
 <openmrs:htmlInclude file="/scripts/jquery/jquery.min.js" />
-<openmrs:htmlInclude file="/scripts/jquery-ui/jquery-ui.min.js" />
-<openmrs:htmlInclude file="/scripts/jquery-ui/jquery-ui.min.css" />
-<openmrs:htmlInclude file="/scripts/jquery-ui/jquery-ui.structure.min.css" />
-<openmrs:htmlInclude file="/scripts/jquery-ui/jquery-ui.theme.min.css" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/js/jquery-ui.min.js" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/css/jquery-ui.min.css" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/css/jquery-ui.structure.min.css" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/css/jquery-ui.theme.min.css" />
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.css">
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables_themeroller-1.10.6.css">

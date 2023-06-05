@@ -6,7 +6,7 @@
     type="text/css" rel="stylesheet" />
 
 <openmrs:htmlInclude file="/scripts/jquery/jquery.min.js" />
-<openmrs:htmlInclude file="/scripts/jquery-ui/jquery-ui.min.js" />
+<openmrs:htmlInclude file="/scripts/jquery-ui/js/jquery-ui.min.js" />
 <script>var ctx = "${pageContext.request.contextPath}";</script>
 
 <style>
