@@ -200,9 +200,9 @@ function showHideValues(divFormAttributeId)
 	}
 	else
 	{
-		$( "#div_formAttribute_"+divFormAttributeId).slideToggle("fast", function(){});
+		$j( "#div_formAttribute_"+divFormAttributeId).slideToggle("fast", function(){});
 		 
-		 $( "#div_locationsAndTags_"+divFormAttributeId ).slideToggle("fast", function(){});
+		 $j( "#div_locationsAndTags_"+divFormAttributeId ).slideToggle("fast", function(){});
 	}	 
 }
 

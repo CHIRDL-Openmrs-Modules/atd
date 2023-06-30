@@ -9,7 +9,6 @@
  
 <openmrs:htmlInclude file="/scripts/jquery/jquery.min.js" />
 <openmrs:htmlInclude file="/scripts/jquery-ui/js/jquery-ui.min.js" />
-
 <script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.js"></script>
 <script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery.throttle-debounce.js"></script>
 <script>var ctx = "${pageContext.request.contextPath}";</script>

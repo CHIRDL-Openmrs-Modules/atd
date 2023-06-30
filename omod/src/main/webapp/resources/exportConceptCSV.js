@@ -1,6 +1,5 @@
 var selectedIds = [];
 var dtable;
-var $ = jQuery.noConflict();
 
 function updateAndSubmit()
 {
@@ -12,9 +11,9 @@ function updateAndSubmit()
 //the page in the datatable that is currently displayed 
 function toggleSelectedConcepts()
 {
-	var $cbs = $(".conceptCheckbox:checkbox:enabled");
+	var $cbs = $j(".conceptCheckbox:checkbox:enabled");
 	var checked = $cbs.filter(":first").prop('checked');
-	$('.conceptCheckbox').each(function(){ 
+	$j('.conceptCheckbox').each(function(){ 
 		this.checked = !checked; 
 		toggleSelectedObject(this.id);
 	});
@@ -24,7 +23,7 @@ function toggleSelectedConcepts()
 //and concept class drop-down
 function submitFilter()
 {
-	dtable.ajax.url(ctx + "/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $("#inclRetired").is(':checked') + "&conceptClassSelect=" + $("#conceptClassSelect").val()).load();
+	dtable.ajax.url(ctx + "/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $j("#inclRetired").is(':checked') + "&conceptClassSelect=" + $j("#conceptClassSelect").val()).load();
 }
 
 // Create the checkbox column
@@ -35,7 +34,7 @@ function renderCheckbox(data, type, full, meta)
 	// full is the full data source for this row
 	var parentConceptId = full.parentConceptId; // Use the parentConceptId in the data-* attribute
 	var combinedId = data + "_" + parentConceptId;
-	var checked = $.inArray(combinedId, selectedIds) > -1 ? "checked" : "";
+	var checked = $j.inArray(combinedId, selectedIds) > -1 ? "checked" : "";
 	
 	return "<input class='conceptCheckbox' " + checked + " value='" + data + "' onclick='toggleSelectedObject(this.id);' data-parentconceptid='" + parentConceptId + "' type='checkbox' id='" + combinedId + "' name='" + combinedId + "'/>";
 }
@@ -43,19 +42,19 @@ function renderCheckbox(data, type, full, meta)
 // Add/remove the selected Id
 function toggleSelectedObject(id)
 {
-	if($("#" + id).is(':checked'))
+	if($j("#" + id).is(':checked'))
 	{
 		selectedIds.push(id);
 	}
 	else
 	{
-		selectedIds.splice($.inArray(id, selectedIds), 1);
+		selectedIds.splice($j.inArray(id, selectedIds), 1);
 	}
 }
 
-$(document).ready(function() {
+$j(document).ready(function() {
 	
-	dtable = $('#conceptDefinitionTable').dataTable(
+	dtable = $j('#conceptDefinitionTable').dataTable(
 				{
 					// Table options have been updated for DataTables version 1.10
 					"jQueryUI": true,
@@ -64,7 +63,7 @@ $(document).ready(function() {
 					"serverSide": true,
 					"stateSave": false,
 					"pagingType": "full_numbers",
-					"ajax": ctx + "/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $("#inclRetired").is(":checked") + "&conceptClassSelect=" + $("#conceptClassSelect").val(),
+					"ajax": ctx + "/moduleServlet/atd/exportConceptServlet?loadTable=true&includeRetired=" + $j("#inclRetired").is(":checked") + "&conceptClassSelect=" + $j("#conceptClassSelect").val(),
 					"columns": [
 									{"mData": "conceptId", "bSortable": false, "searchable": false, "mRender": renderCheckbox},
 									{"mData": "name", "bSortable": true, "searchable": true},
@@ -80,8 +79,8 @@ $(document).ready(function() {
 	
 	// Unbind the default behavior and bind debounce functionality so that the 
 	// search is performed only after the user has stopped typing for 500ms
-	$('.dataTables_filter input').unbind().bind('keyup', $.debounce(function(event){
-		var searchValue = $('.dataTables_filter input').val();
+	$j('.dataTables_filter input').unbind().bind('keyup', $j.debounce(function(event){
+		var searchValue = $j('.dataTables_filter input').val();
 		
 		// Only perform the search on the server-side if
 		// the enter key was pressed, there has been >= 3 characters entered, or
@@ -92,6 +91,6 @@ $(document).ready(function() {
 		}
 	}, 500, false));
 	
-	$("#selectAllConcepts").click(function(){toggleSelectedConcepts();return false});
+	$j("#selectAllConcepts").click(function(){toggleSelectedConcepts();return false});
 	
 } );

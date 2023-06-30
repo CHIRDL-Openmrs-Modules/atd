@@ -1,11 +1,8 @@
 /**
  * DWE CHICA-426
  */    
- 
- var $ = jQuery.noConflict();
- 
-var progressbar = $( "#progressbar" );
-var progressLabel = $( ".progress-label" );
+var progressbar = $j( "#progressbar" );
+var progressLabel = $j( ".progress-label" );
 var checkProgressTimer;
 var ajaxURL = ctx + '/moduleServlet/atd/importConceptsFromFile';
 var changeEventText = 'Import Progress: ';
@@ -40,7 +37,7 @@ var changeEventText = 'Import Progress: ';
     
     function confirmCancel()
     {
-		if ($("#progressbar").hasClass('ui-widget-content')) { // Make sure the progress bar has been initialized
+		if ($j("#progressbar").hasClass('ui-widget-content')) { // Make sure the progress bar has been initialized
 			$j('<div id="cancelImport" title="Cancel Import?">Are you sure you want to cancel the import?</div>').dialog({
 				modal: true,
 				height: "auto",
@@ -67,7 +64,7 @@ var changeEventText = 'Import Progress: ';
     
     function cancelImport()
     {
-	    	$.ajax({type: 'GET', cache: false, dataType: 'json', url: ajaxURL+'?cancelImport=true', success: function(data){
+	    	$j.ajax({type: 'GET', cache: false, dataType: 'json', url: ajaxURL+'?cancelImport=true', success: function(data){
 				progressbar.progressbar("value", data.currentRow)
 				checkProgressTimer = setTimeout( checkImportProgress, 5000 );
 	    }});
@@ -75,10 +72,10 @@ var changeEventText = 'Import Progress: ';
    
     function checkImportProgress()
     {
-    	$.ajax({type: 'GET', cache: false, dataType: 'json', url: ajaxURL+'?checkProgress=true', success: function(data){
+    	$j.ajax({type: 'GET', cache: false, dataType: 'json', url: ajaxURL+'?checkProgress=true', success: function(data){
 			if(data.importStarted)
 			{
-				if(!($("#progressbar").hasClass('ui-widget-content')))
+				if(!($j("#progressbar").hasClass('ui-widget-content')))
 				{
 					if(!(data.isComplete))
 					{
@@ -146,7 +143,7 @@ var changeEventText = 'Import Progress: ';
 			}
 			else
 			{
-				if ($("#progressbar").hasClass('ui-widget-content')) {
+				if ($j("#progressbar").hasClass('ui-widget-content')) {
 					progressbar.progressbar("value", 0);
 				}
 			}
@@ -155,8 +152,8 @@ var changeEventText = 'Import Progress: ';
    
     function startImport()
     {
-    	$(".errorMsg").hide();
-    	var dataFile = $("#dataFile");
+    	$j(".errorMsg").hide();
+    	var dataFile = $j("#dataFile");
     	var formdata = false;
     	
     	if(window.FormData)
@@ -164,7 +161,7 @@ var changeEventText = 'Import Progress: ';
     		formdata = new FormData();
     		formdata.append('file', dataFile[0].files[0]);
     		    		
-    		$.ajax({
+    		$j.ajax({
     			type: 'POST', 
     			dataType: 'json',
     			processData: false, 
@@ -191,11 +188,11 @@ var changeEventText = 'Import Progress: ';
     				{
     					if(data.incorrectExtension)
     					{
-    						$("#incorrectExtension").show();
+    						$j("#incorrectExtension").show();
     					}
     					else if(data.invalidUploadRequest || data.serverError)
     					{
-    						$("#uploadError").show();
+    						$j("#uploadError").show();
     					}
     					else if(data.fileParseError)
     					{

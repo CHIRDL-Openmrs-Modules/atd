@@ -85,16 +85,18 @@
 <openmrs:htmlInclude file="/scripts/jquery/jquery.min.js" />
 <openmrs:htmlInclude file="/scripts/jquery-ui/js/jquery-ui.min.js" />
 <script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.js"></script>
+
+<openmrs:htmlInclude file="/scripts/jquery-ui/css/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables-1.10.6.min.css">
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/moduleResources/atd/jquery.dataTables_themeroller-1.10.6.css">
-<openmrs:htmlInclude file="/scripts/jquery-ui/css/jquery-ui.min.css" />
+
 
 
 <script type="text/javascript">
 	var attributesTable;
-	var $ = jQuery.noConflict();
-	$(document).ready(function() {
-		attributesTable = $('#formAttributeValueTable').dataTable(
+	
+	$j(document).ready(function() {
+		attributesTable = $j('#formAttributeValueTable').dataTable(
 				{
 					// Table options have been updated for DataTables version 1.10
 					"columns": [  { "sName": "formName", "bSortable": false},
@@ -110,7 +112,7 @@
 	
 	function backToConfigManager()
 	{
-		window.location = '${pageContext.request.contextPath}/module/atd/configurationManager.form';
+		window.location = '$j{pageContext.request.contextPath}/module/atd/configurationManager.form';
 	}
 </script>
 
