@@ -40,14 +40,14 @@ function assignValueAll(inpt_id) {
 	var idContent = inpt_id.split("_");
 	var attributeId = idContent[1];
 	var locationId = idContent[2];
-	var value = $("#" + inpt_id).val();
+	var value = $j("#" + inpt_id).val();
 	if (value != null && value != "") {
 		if (locationId != "ALL") {
 			var inputBoxes = document.getElementsByClassName(attributeId + "_"
 					+ locationId);
 			for (var i = 0; i < inputBoxes.length; i++) {
 				if (inputBoxes[i].id != null) {
-					var subInput = $("#" + inputBoxes[i].id);
+					var subInput = $j("#" + inputBoxes[i].id);
 					if (subInput != null) {
 						subInput.val(value);
 					}
@@ -66,8 +66,8 @@ function removeValueSuper(inpt_id) {
 	var idContent = inpt_id.split("_");
 	var attributeId = idContent[1];
 	var locationId = idContent[2];
-	var superClass = $("#inpt_" + attributeId + "_" + locationId + "_ALL");
-	var superSuperClass = $("#inpt_" + attributeId + "_" + "ALL_ALL");
+	var superClass = $j("#inpt_" + attributeId + "_" + locationId + "_ALL");
+	var superSuperClass = $j("#inpt_" + attributeId + "_" + "ALL_ALL");
 	superClass.val("");
 	superSuperClass.val("");
 }
@@ -77,13 +77,13 @@ function assignValueSubClass(inpt_id) {
 	var idContent = inpt_id.split("_");
 	var attributeId = idContent[1];
 	var locationId = idContent[2];
-	var value = $("#" + inpt_id).val();
+	var value = $j("#" + inpt_id).val();
 	if (value != null && value != "") {
 		var subBoxes = document.getElementsByClassName("tags_" + attributeId);
 		for (var i = 0; i < subBoxes.length; i++) {
 			if (subBoxes[i].id != null) {
 				var subBoxAsComboBoxId = subBoxes[i].id
-				$("#" + subBoxAsComboBoxId).val(value);
+				$j("#" + subBoxAsComboBoxId).val(value);
 			}
 		}
 	}
@@ -95,9 +95,9 @@ function removeValueSuperClass(inpt_id) {
 	var attributeId = idContent[1];
 	var locationId = idContent[2];
 	var value = document.getElementById(inpt_id).value;
-	var superClass = $("#inpt_" + attributeId + "_" + locationId + "_ALL")
+	var superClass = $j("#inpt_" + attributeId + "_" + locationId + "_ALL")
 			.data("kendoComboBox");
-	var superSuperClass = $("#inpt_" + attributeId + "_" + "ALL_ALL").data(
+	var superSuperClass = $j("#inpt_" + attributeId + "_" + "ALL_ALL").data(
 			"kendoComboBox");
 	superClass.text("");
 	superSuperClass.text("");
@@ -108,11 +108,11 @@ function restore(div_id, faId, originalValues){
 	for (var i = 0; i < allTexts.length; i++) {
 		allTexts[i].value = "";
 	}
-	var allPositionText = $("#"+"inpt_"+faId+"_ALL_ALL").data("kendoComboBox");
+	var allPositionText = $j("#"+"inpt_"+faId+"_ALL_ALL").data("kendoComboBox");
 	allPositionText.text("");
 	for(var id in originalValues[faId]){
 		if(originalValues[faId].hasOwnProperty(id)){
-			var textbox = $("#"+id).data("kendoComboBox");
+			var textbox = $j("#"+id).data("kendoComboBox");
 			textbox.text(originalValues[faId][id]);
 		}
 	}

@@ -17,7 +17,7 @@
 	<link href="${pageContext.request.contextPath}/moduleResources/atd/atd.css"  type="text/css" rel="stylesheet"/>
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/moduleResources/atd/configForm.css" />
 	<script src="${pageContext.request.contextPath}/moduleResources/atd/configForm.js"></script>
-	<script src="${pageContext.request.contextPath}/moduleResources/atd/jquery.min.js"></script>
+    <openmrs:htmlInclude file="/scripts/jquery/jquery.min.js" />
 	<title>Configure Form</title>
 	<script type="text/javascript">
 		var originalValues = {};
@@ -200,9 +200,9 @@ function showHideValues(divFormAttributeId)
 	}
 	else
 	{
-		$( "#div_formAttribute_"+divFormAttributeId).slideToggle("fast", function(){});
+		$j( "#div_formAttribute_"+divFormAttributeId).slideToggle("fast", function(){});
 		 
-		 $( "#div_locationsAndTags_"+divFormAttributeId ).slideToggle("fast", function(){});
+		 $j( "#div_locationsAndTags_"+divFormAttributeId ).slideToggle("fast", function(){});
 	}	 
 }
 
