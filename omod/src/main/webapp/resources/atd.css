@@ -6,3 +6,7 @@ td{
 text-align:left; 
 background-color:#8FABC7;
 }
+
+td#barcell {
+  vertical-align: middle;
+}
